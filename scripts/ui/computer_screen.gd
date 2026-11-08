@@ -20,8 +20,10 @@ extends Control
 # Shop components
 @onready var buy_monitor_btn: Button = $Windows/ShopWindow/Margin/VBox/Grid/MonitorCard/BuyButton
 @onready var buy_chair_btn: Button = $Windows/ShopWindow/Margin/VBox/Grid/ChairCard/BuyButton
+@onready var buy_plant_btn: Button = $Windows/ShopWindow/Margin/VBox/Grid/PlantCard/BuyButton
 @onready var monitor_status: Label = $Windows/ShopWindow/Margin/VBox/Grid/MonitorCard/StatusLabel
 @onready var chair_status: Label = $Windows/ShopWindow/Margin/VBox/Grid/ChairCard/StatusLabel
+@onready var plant_status: Label = $Windows/ShopWindow/Margin/VBox/Grid/PlantCard/StatusLabel
 
 # Freelance components
 @onready var freelance_text: RichTextLabel = $Windows/FreelanceWindow/Margin/VBox/DetailsLabel
@@ -59,6 +61,7 @@ func _ready() -> void:
 	open_webforge_btn.pressed.connect(_launch_webforge)
 	buy_monitor_btn.pressed.connect(_buy_monitor)
 	buy_chair_btn.pressed.connect(_buy_chair)
+	buy_plant_btn.pressed.connect(_buy_plant)
 	
 	_setup_emails()
 	_update_shop_buttons()
@@ -112,21 +115,21 @@ func _setup_emails() -> void:
 	emails.append({
 		"from": "Mario Esposito <mario@pizzeriadamario-to.it>",
 		"subject": "Richiesta Realizzazione Sito Web - Pizzeria Da Mario (Via Po)",
-		"body": "Gentile Dottore,\n\nHo visto il suo annuncio su Freelance Hub. Cerchiamo qualcuno che crei il nostro sito web ufficiale per attirare turisti e clienti a Torino.\n\nBudget fissato: € 650,00.\n\nPassi a trovarmi direttamente in bottega in Via Po 18 per conoscerci!",
+		"body": "Gentile Dottore,\n\nHo visto il suo annuncio su Freelance Hub Torino. Cerchiamo qualcuno che crei il nostro sito web ufficiale per attirare turisti e clienti a Torino.\n\nBudget concordato: € 650,00 netti.\n\nIMPORTANTE:\nPer definire i requisiti e stringerci la mano, passi a trovarmi direttamente di persona in bottega in Via Po 18 (esca dal suo garage e segua la via fino all'insegna luminosa della pizzeria).\n\nLa aspetto!\nMario Esposito - Titolare",
 		"is_tutorial": true
 	})
 	
 	emails.append({
 		"from": "Risorse Umane <recruiting@megacorp-consulting.it>",
 		"subject": "Esito candidatura Posizione Junior Software Engineer",
-		"body": "Gentile Candidato,\n\nLa ringraziamo per aver inviato il suo CV. Pur apprezzando il suo brillante percorso di laurea con 110 e lode, cerchiamo per questo stage (rimborso mensile: buoni pasto da 4€) un profilo con almeno 8 anni di esperienza pregressa in cloud computing e intelligenza artificiale quantistica.\n\nLe auguriamo il meglio per il suo futuro.",
+		"body": "Gentile Candidato,\n\nLa ringraziamo per aver inviato il suo CV. Pur apprezzando il suo brillante percorso di laurea con 110 e lode al Politecnico, cerchiamo per questo stage (rimborso mensile: 400€ lordi) un profilo con almeno 8 anni di esperienza pregressa in cloud computing e intelligenza artificiale quantistica.\n\nLe auguriamo il meglio per il suo futuro.",
 		"is_tutorial": false
 	})
 	
 	emails.append({
-		"from": "Segreteria Studenti <laurea@polito.it>",
+		"from": "Segreteria Studenti <laurea@unito.it>",
 		"subject": "Certificato Ufficiale di Laurea in Informatica",
-		"body": "Gentile Studente,\n\nIl suo certificato di Laurea in Informatica è ora disponibile. Congratulazioni per il traguardo raggiunto!",
+		"body": "Gentile Dottore,\n\nIl suo certificato ufficiale di Laurea Magistrale in Informatica (110 e Lode) è pronto. Può ammirarlo appeso alla parete del suo studio.\n\nCongratulazioni per il traguardo raggiunto!",
 		"is_tutorial": false
 	})
 	
@@ -166,18 +169,30 @@ func _update_freelance_display() -> void:
 	var status_text = ""
 	match status:
 		"available":
-			status_text = "[color=#ffbb33]DA ACCETTARE (Visita la Pizzeria in Via Po)[/color]"
+			status_text = "[color=#ffbb33]DA ACCETTARE DI PERSONA IN VIA PO[/color]"
 			open_webforge_btn.visible = false
 		"in_progress":
 			status_text = "[color=#33ccff]IN SVILUPPO (Usa WebForge sul laptop)[/color]"
 			open_webforge_btn.visible = true
+			open_webforge_btn.text = "⚡ Apri WebForge IDE (Sviluppa Sito Pizzeria)"
 		"built":
 			status_text = "[color=#33ff77]COMPLETATO (Pronto per la consegna via email)[/color]"
 			open_webforge_btn.visible = true
+			open_webforge_btn.text = "⚡ Apri WebForge IDE (Revisiona Sito)"
 		"completed":
 			status_text = "[color=#88ff88]CONSEGNATO & LIQUIDATO (€ 650,00)[/color]"
+			open_webforge_btn.visible = false
+
 	var t = "[b]COMMISSIONE ATTIVA:[/b]\n"
-	t += "[b]Cliente:[/b] Mario Esposito (Pizzeria Da Mario)\n[b]Budget:[/b] € 650.00\n[b]Stato:[/b] %s\n\n[b]Requisiti:[/b]\n• Logo con la Mole Antonelliana\n• Menu Pizze Napoletane\n• Orari & Indirizzo Via Po\n• Modulo Prenotazione Tavoli\n\n" % status_text
+	t += "[b]Cliente:[/b] Mario Esposito (Pizzeria Da Mario)\n[b]Budget:[/b] € 650.00\n[b]Stato:[/b] %s\n\n" % status_text
+	
+	if status == "available":
+		t += "[b][color=#ffbb33]ISTRUZIONI PER L'ACCETTAZIONE:[/color][/b]\n"
+		t += "• Esci dal tuo garage studio e incamminati lungo Via Po.\n"
+		t += "• Raggiungi la bottega della Pizzeria Da Mario (insegna luminosa).\n"
+		t += "• Premi [E] per parlare di persona con Mario e accettare l'incarico!\n\n"
+	else:
+		t += "[b]Requisiti Concordati:[/b]\n• Logo con la Mole Antonelliana\n• Menu Pizze Napoletane\n• Orari & Indirizzo Via Po\n• Modulo Prenotazione Tavoli\n\n"
 	
 	t += "[b]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/b]\n"
 	t += "[b][color=#ffcc44]MARKETPLACE FREELANCE DI TORINO (OPPORTUNITÀ B2B):[/color][/b]\n\n"
@@ -193,12 +208,24 @@ func _update_freelance_display() -> void:
 	freelance_text.text = t
 
 func _launch_webforge() -> void:
+	var tut = ContractManager.get_tutorial_contract()
+	var status = tut.get("status", "available")
+	if status == "available":
+		SoundManager.play_ui_click()
+		EventBus.notification_posted.emit(
+			"WebForge Bloccato",
+			"Nessuna commissione accettata! Devi prima recarti di persona da Mario alla Pizzeria in Via Po per accettare il lavoro.",
+			"warning"
+		)
+		return
+		
 	SoundManager.play_ui_click()
 	EventBus.minigame_started.emit("web_forge")
 
 func _update_shop_buttons() -> void:
 	var has_monitor = "monitor_upgrade" in GameManager.studio_upgrades_installed
 	var has_chair = "chair_gaming_upgrade" in GameManager.studio_upgrades_installed
+	var has_plant = "plant_aloe" in GameManager.studio_upgrades_installed
 	
 	if has_monitor:
 		buy_monitor_btn.disabled = true
@@ -218,6 +245,15 @@ func _update_shop_buttons() -> void:
 		buy_chair_btn.text = "Acquista (€ 220,00)"
 		chair_status.text = "Disponibile per l'ordine"
 
+	if has_plant:
+		buy_plant_btn.disabled = true
+		buy_plant_btn.text = "GIA' POSIZIONATA"
+		plant_status.text = "[color=#44ff88]Posizionata in studio[/color]"
+	else:
+		buy_plant_btn.disabled = not EconomyManager.can_afford(35.0)
+		buy_plant_btn.text = "Acquista (€ 35,00)"
+		plant_status.text = "Disponibile per l'ordine"
+
 func _buy_monitor() -> void:
 	if EconomyManager.spend(350.0, "Acquisto Monitor 27\" Ultrawide"):
 		EventBus.item_purchased.emit("monitor_upgrade", 350.0)
@@ -228,6 +264,12 @@ func _buy_chair() -> void:
 	if EconomyManager.spend(220.0, "Acquisto Sedia Ergonomica Pro"):
 		EventBus.item_purchased.emit("chair_gaming_upgrade", 220.0)
 		EventBus.notification_posted.emit("Upgrade Installato", "La nuova sedia ergonomica è stata posizionata!", "success")
+		_update_shop_buttons()
+
+func _buy_plant() -> void:
+	if EconomyManager.spend(35.0, "Acquisto Pianta Succulenta d'Arredo"):
+		EventBus.item_purchased.emit("plant_aloe", 35.0)
+		EventBus.notification_posted.emit("Arredo Posizionato", "La pianta d'arredo è stata collocata nel tuo studio!", "success")
 		_update_shop_buttons()
 
 func _update_bank_display() -> void:

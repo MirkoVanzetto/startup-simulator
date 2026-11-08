@@ -377,6 +377,43 @@ layout_mode = 2
 size_flags_vertical = 8
 text = "Acquista (€ 220,00)"
 
+[node name="PlantCard" type="PanelContainer" parent="Windows/ShopWindow/Margin/VBox/Grid"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="VBox" type="VBoxContainer" parent="Windows/ShopWindow/Margin/VBox/Grid/PlantCard"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ItemName" type="Label" parent="Windows/ShopWindow/Margin/VBox/Grid/PlantCard/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 1, 0.5, 1)
+theme_override_font_sizes/font_size = 16
+text = "Pianta Succulenta d'Arredo"
+
+[node name="Price" type="Label" parent="Windows/ShopWindow/Margin/VBox/Grid/PlantCard/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
+theme_override_font_sizes/font_size = 15
+text = "€ 35,00"
+
+[node name="Desc" type="Label" parent="Windows/ShopWindow/Margin/VBox/Grid/PlantCard/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Vaso in ceramica con pianta d'arredo. Aumenta la vivibilità dello studio e riduce lo stress da debugging."
+autowrap_mode = 2
+
+[node name="StatusLabel" type="Label" parent="Windows/ShopWindow/Margin/VBox/Grid/PlantCard"]
+layout_mode = 2
+size_flags_vertical = 8
+text = "Disponibile"
+
+[node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/Grid/PlantCard"]
+layout_mode = 2
+size_flags_vertical = 8
+text = "Acquista (€ 35,00)"
+
 [node name="BankWindow" type="PanelContainer" parent="Windows"]
 visible = false
 layout_mode = 1

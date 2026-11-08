@@ -1,16 +1,17 @@
 [gd_scene load_steps=3 format=3 uid="uid://bchairgaming01"]
 
-[ext_resource type="PackedScene" path="res://assets/props/chair_gaming_upgrade.glb" id="1_chg"]
+[ext_resource type="PackedScene" path="res://assets/models/furniture/armchair.gltf" id="1_arm"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_chairg"]
-size = Vector3(0.65, 1.25, 0.65)
+size = Vector3(0.8, 1.1, 0.8)
 
 [node name="ChairGamingUpgradeProp" type="StaticBody3D"]
 collision_layer = 1
 collision_mask = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.62, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
 shape = SubResource("BoxShape3D_chairg")
 
-[node name="Model" parent="." instance=ExtResource("1_chg")]
+[node name="Model" parent="." instance=ExtResource("1_arm")]
+transform = Transform3D(0.85, 0, 0, 0, 0.85, 0, 0, 0, 0.85, 0, 0, 0)

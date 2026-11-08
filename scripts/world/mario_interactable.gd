@@ -2,11 +2,23 @@ class_name MarioInteractable
 extends Interactable3D
 ## MarioInteractable - Dialogue initiator for Mario (Pizzeria owner)
 
+var anim_player: AnimationPlayer = null
+
 func _ready() -> void:
 	super._ready()
 	prompt_message = "[E] Parla con Mario (Pizzaiolo)"
+	_find_anim_player()
+	if anim_player and anim_player.has_animation("Idle"):
+		anim_player.play("Idle")
+
+func _find_anim_player() -> void:
+	if has_node("Model"):
+		anim_player = $Model.find_child("AnimationPlayer", true, false)
 
 func _on_interact(_player: Node) -> void:
+	if anim_player and anim_player.has_animation("Interact"):
+		anim_player.play("Interact")
+		
 	var tut = ContractManager.get_tutorial_contract()
 	var status = tut.get("status", "available")
 	
@@ -17,9 +29,9 @@ func _on_interact(_player: Node) -> void:
 		"available":
 			lines = [
 				"Ciao ragazzo! Ti manda l'annuncio su Freelance Hub? Finalmente un giovane in gamba!",
-				"Vedi, qui alla Pizzeria Da Mario sforniamo la vera pizza napoletana a Torino da trent'anni, ma sul web siamo invisibili. I clienti cercano su smartphone e finiscono nei fast food!",
-				"Ho bisogno di un sito web chiaro e moderno: il nostro logo con la Mole, il menu delle nostre pizze speciali, orari, indirizzo e un pulsante per prenotare un tavolo.",
-				"Il mio budget per questo lavoro è di € 650,00 netti. Ci stai?"
+				"Vedi, qui alla Pizzeria Da Mario sforniamo la vera pizza a Torino da trent'anni, ma sul web siamo invisibili. I clienti cercano su Google Maps e finiscono nei fast food!",
+				"Ho bisogno di un sito web chiaro e moderno: il nostro logo, il menu delle nostre pizze speciali, orari e un sistema per ordinare.",
+				"Il mio budget per questo lavoro è di € 350,00 netti. Ci stai?"
 			]
 			choices = [
 				{"text": "Affare fatto Mario! Torno al mio studio e inizio subito lo sviluppo.", "action": "accept"},
@@ -28,7 +40,7 @@ func _on_interact(_player: Node) -> void:
 		"in_progress":
 			lines = [
 				"Bentornato! Come procede lo sviluppo del sito?",
-				"Ricordati di inserire il logo, il menu, gli orari e la prenotazione.",
+				"Ricordati di inserire il logo, il menu, gli orari e il carrello asporto.",
 				"Torna al tuo studio e usa l'app WebForge sul tuo laptop!"
 			]
 			choices = [
@@ -53,3 +65,7 @@ func _on_interact(_player: Node) -> void:
 			]
 			
 	EventBus.dialogue_started.emit("Mario Esposito (Pizzaiolo)", lines, choices)
+
+func play_cheer() -> void:
+	if anim_player and anim_player.has_animation("Cheer"):
+		anim_player.play("Cheer")

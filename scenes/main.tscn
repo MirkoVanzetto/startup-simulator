@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://mn8mainmaster01"]
+[gd_scene load_steps=10 format=3 uid="uid://mn8mainmaster01"]
 
 [ext_resource type="Script" path="res://scripts/core/main_controller.gd" id="1_mnc"]
 [ext_resource type="PackedScene" path="res://scenes/world/game_world.tscn" id="2_gwd"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/minigames/web_forge.tscn" id="6_wbf"]
 [ext_resource type="PackedScene" path="res://scenes/ui/main_menu.tscn" id="7_mnu"]
 [ext_resource type="PackedScene" path="res://scenes/ui/pause_menu.tscn" id="8_pau"]
+[ext_resource type="PackedScene" path="res://scenes/ui/intro_monologue.tscn" id="9_int"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_mnc")
@@ -28,6 +29,9 @@ visible = false
 visible = false
 
 [node name="PauseMenu" parent="UILayer" instance=ExtResource("8_pau")]
+visible = false
+
+[node name="IntroMonologue" parent="UILayer" instance=ExtResource("9_int")]
 visible = false
 
 [node name="MainMenu" parent="UILayer" instance=ExtResource("7_mnu")]

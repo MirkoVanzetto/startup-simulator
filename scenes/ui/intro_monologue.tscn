@@ -1,0 +1,188 @@
+[gd_scene load_steps=5 format=3 uid="uid://intro8mono01"]
+
+[ext_resource type="Script" path="res://scripts/ui/intro_monologue.gd" id="1_inm"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
+bg_color = Color(0.05, 0.06, 0.09, 0.96)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card"]
+bg_color = Color(0.12, 0.14, 0.19, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.25, 0.35, 0.55, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+content_margin_left = 32.0
+content_margin_top = 28.0
+content_margin_right = 32.0
+content_margin_bottom = 28.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_diploma"]
+bg_color = Color(0.96, 0.94, 0.88, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.7, 0.55, 0.2, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 20.0
+content_margin_top = 16.0
+content_margin_right = 20.0
+content_margin_bottom = 16.0
+
+[node name="IntroMonologue" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_inm")
+
+[node name="Background" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="Center"]
+custom_minimum_size = Vector2(760, 480)
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Step1" type="PanelContainer" parent="Center/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="VBox" type="VBoxContainer" parent="Center/VBox/Step1"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Header" type="Label" parent="Center/VBox/Step1/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 22
+text = "TORINO, AUTUNNO 2026 — IL TRAGUARDO"
+
+[node name="DiplomaCard" type="PanelContainer" parent="Center/VBox/Step1/VBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_diploma")
+
+[node name="DiplomaText" type="Label" parent="Center/VBox/Step1/VBox/DiplomaCard"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.15, 0.12, 0.1, 1)
+theme_override_font_sizes/font_size = 17
+text = "UNIVERSITÀ DEGLI STUDI DI TORINO
+FACOLTÀ DI SCIENZE E TECNOLOGIE INFORMATICHE
+Si conferisce la Laurea Magistrale in Informatica con votazione:
+★ 110 / 110 E LODE ★"
+horizontal_alignment = 1
+
+[node name="Story" type="RichTextLabel" parent="Center/VBox/Step1/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+text = "Hai appena concluso il tuo percorso accademico con il massimo dei voti.
+Anni passati tra algoritmi, complessità computazionale, architetture distribuite e nottate sui libri.
+
+Pensavi che il mondo del lavoro ti stesse aspettando a braccia aperte.
+Hai aperto LinkedIn e inviato il tuo curriculum a decine di aziende del territorio sabaudo e nazionale..."
+
+[node name="Step2" type="PanelContainer" parent="Center/VBox"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="VBox" type="VBoxContainer" parent="Center/VBox/Step2"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Header" type="Label" parent="Center/VBox/Step2/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.4, 0.4, 1)
+theme_override_font_sizes/font_size = 22
+text = "LA DURA REALTÀ DEL MERCATO"
+
+[node name="Offers" type="RichTextLabel" parent="Center/VBox/Step2/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+text = "[b]Le risposte che hai ricevuto:[/b]
+
+❌ [b]Megacorp Consulting SpA:[/b]
+«Gentile candidato, le offriamo uno stage di 6 mesi (rimborso spese: 400€/mese lordi).
+Requisiti: 8 anni di esperienza con Rust, Docker, Kubernetes e intelligenza artificiale.
+Disponibilità totale nei weekend e reperibilità notturna.»
+
+❌ [b]StartupDisrupt Srl:[/b]
+«Cerchiamo un giovane sviluppatore 'appassionato' che costruisca da zero tutta la piattaforma web e cloud in cambio di grande visibilità nel team e una pizza ogni tanto.»
+
+❌ [b]Global Systems Ltd:[/b]
+«Gentile candidato, abbiamo selezionato un profilo con dottorato per la posizione Junior.»"
+
+[node name="Step3" type="PanelContainer" parent="Center/VBox"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="VBox" type="VBoxContainer" parent="Center/VBox/Step3"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Header" type="Label" parent="Center/VBox/Step3/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
+theme_override_font_sizes/font_size = 22
+text = "LA DECISIONE: METTERSI IN PROPRIO"
+
+[node name="Story" type="RichTextLabel" parent="Center/VBox/Step3/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+text = "Guardi la pergamena della tua laurea appesa alla parete del modesto garage di casa a Torino.
+Poi guardi la tua scrivania con il tuo fedele laptop e la connessione ad alta velocità.
+
+[font_size=18][color=#ffcc44]«Col cavolo che passo i prossimi anni a fare fotocopie o codice sottopagato per 400 euro al mese.
+Costruirò la mia azienda informatica con le mie sole forze. Da freelance nel garage a impero tecnologico.»[/color][/font_size]
+
+Nasce così la tua impresa.
+Fai un respiro profondo. È ora di iniziare."
+
+[node name="Buttons" type="HBoxContainer" parent="Center/VBox"]
+layout_mode = 2
+alignment = 2
+
+[node name="NextButton" type="Button" parent="Center/VBox/Buttons"]
+custom_minimum_size = Vector2(180, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Avanti ➔"
+
+[node name="StartButton" type="Button" parent="Center/VBox/Buttons"]
+visible = false
+custom_minimum_size = Vector2(260, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 1, 0.5, 1)
+theme_override_font_sizes/font_size = 16
+text = "★ INIZIA L'AVVENTURA ★"

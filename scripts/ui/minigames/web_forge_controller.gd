@@ -1,6 +1,7 @@
 extends Control
 ## WebForgeController - Interactive visual website builder minigame
 
+@onready var ide_label: Label = $Main/Header/HBox/IDELabel
 @onready var quality_progress: ProgressBar = $Main/Header/HBox/QualityProgress
 @onready var quality_label: Label = $Main/Header/HBox/QualityLabel
 @onready var preview_scroll: ScrollContainer = $Main/Body/PreviewArea/Scroll
@@ -39,7 +40,19 @@ func _ready() -> void:
 
 func _on_minigame_started(type: String) -> void:
 	if type == "web_forge":
+		var tut = ContractManager.get_tutorial_contract()
+		var status = tut.get("status", "available")
+		if status == "available":
+			visible = false
+			EventBus.notification_posted.emit(
+				"WebForge Bloccato",
+				"Nessun progetto attivo! Raggiungi prima Mario alla Pizzeria in Via Po per accettare la commissione.",
+				"warning"
+			)
+			return
+			
 		visible = true
+		ide_label.text = "⚡ WebForge IDE — Progetto: %s (Budget: € %0.2f)" % [tut.get("title", "Sito Web"), tut.get("budget", 650.0)]
 		_update_website_preview()
 
 func _on_exit_pressed() -> void:
@@ -63,6 +76,20 @@ func _update_website_preview() -> void:
 	for child in preview_vbox.get_children():
 		child.queue_free()
 		
+	# 0. Browser Bar URL simulation
+	var url_bar = PanelContainer.new()
+	var url_style = StyleBoxFlat.new()
+	url_style.bg_color = Color(0.18, 0.2, 0.26, 1)
+	url_style.set_content_margin_all(8)
+	url_style.set_corner_radius_all(4)
+	url_bar.add_theme_stylebox_override("panel", url_style)
+	var url_lbl = Label.new()
+	url_lbl.text = "🔒 https://www.pizzeriadamario-torino.it [Local Preview]"
+	url_lbl.add_theme_color_override("font_color", Color(0.4, 0.9, 0.5, 1))
+	url_lbl.add_theme_font_size_override("font_size", 12)
+	url_bar.add_child(url_lbl)
+	preview_vbox.add_child(url_bar)
+
 	var active_count = 0
 	
 	# 1. Header / Logo

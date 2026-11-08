@@ -1,11 +1,14 @@
-[gd_scene load_steps=4 format=3 uid="uid://bmario01"]
+[gd_scene load_steps=5 format=3 uid="uid://bmario01"]
 
 [ext_resource type="Script" path="res://scripts/world/mario_interactable.gd" id="1_mri"]
-[ext_resource type="PackedScene" path="res://assets/characters/character_mario.glb" id="2_mrg"]
+[ext_resource type="PackedScene" path="res://assets/models/characters/Rogue.glb" id="2_chr"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_mario"]
 radius = 0.45
 height = 1.95
+
+[sub_resource type="StandardMaterial3D" id="Mat_chef_hat"]
+albedo_color = Color(0.95, 0.95, 0.95, 1)
 
 [node name="MarioNPC" type="StaticBody3D"]
 collision_layer = 3
@@ -16,4 +19,15 @@ script = ExtResource("1_mri")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.98, 0)
 shape = SubResource("CapsuleShape3D_mario")
 
-[node name="Model" parent="." instance=ExtResource("2_mrg")]
+[node name="Model" parent="." instance=ExtResource("2_chr")]
+transform = Transform3D(0.85, 0, 0, 0, 0.85, 0, 0, 0, 0.85, 0, 0, 0)
+
+[node name="NameTag" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.1, 0)
+billboard = 1
+text = "Mario Esposito
+★ Pizzeria Da Mario ★"
+font_size = 20
+modulate = Color(1, 0.9, 0.3, 1)
+outline_size = 6
+outline_color = Color(0.1, 0.1, 0.1, 1)

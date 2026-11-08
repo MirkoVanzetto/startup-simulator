@@ -13,6 +13,7 @@ func _ready() -> void:
 	all_passed = run_calendar_tests() and all_passed
 	all_passed = run_marketplace_tests() and all_passed
 	all_passed = run_vertical_slice_integration() and all_passed
+	all_passed = run_world_navigation_tests() and all_passed
 	
 	print("\n==================================================")
 	if all_passed:
@@ -177,8 +178,51 @@ func run_vertical_slice_integration() -> bool:
 	EventBus.item_purchased.emit("monitor_upgrade", 350.0)
 	passed = assert_true("monitor_upgrade" in GameManager.studio_upgrades_installed, "8. Monitor upgrade registered in studio") and passed
 	
-	# Step 7: Final Save Verification
-	SaveManager.save_game()
-	passed = assert_true(SaveManager.has_save_file(), "9. Vertical slice progress saved successfully") and passed
+	# Step 7: Plant Upgrade Purchase (€ 35.00)
+	var buy_plant = EconomyManager.spend(35.0, "Acquisto Pianta Succulenta d'Arredo")
+	passed = assert_true(buy_plant and EconomyManager.balance == 515.0, "9. Plant purchased for € 35.00") and passed
+	EventBus.item_purchased.emit("plant_aloe", 35.0)
+	passed = assert_true("plant_aloe" in GameManager.studio_upgrades_installed, "10. Plant upgrade registered in studio") and passed
 	
+	# Step 8: Final Save Verification
+	SaveManager.save_game()
+	passed = assert_true(SaveManager.has_save_file(), "11. Vertical slice progress saved successfully") and passed
+	
+	return passed
+
+func run_world_navigation_tests() -> bool:
+	print("\n--- Running 3D World Navigation & Doorway Clearance Tests ---")
+	var passed = true
+	
+	var world_scene = load("res://scenes/world/game_world.tscn")
+	passed = assert_true(world_scene != null, "game_world.tscn loads properly") and passed
+	
+	var world_inst = world_scene.instantiate()
+	add_child(world_inst)
+	
+	var player = world_inst.get_node_or_null("PlayerCharacter")
+	passed = assert_true(player != null, "PlayerCharacter exists in game world") and passed
+	
+	var studio = world_inst.get_node_or_null("Studio")
+	passed = assert_true(studio != null, "Studio exists in game world") and passed
+	
+	var street = world_inst.get_node_or_null("Street")
+	passed = assert_true(street != null, "Street district exists in game world") and passed
+	
+	var pizzeria = world_inst.get_node_or_null("Pizzeria")
+	passed = assert_true(pizzeria != null, "Pizzeria exists in game world") and passed
+	
+	# Verify doorway collision has clear passage:
+	# Raycast from Studio interior (0, 1.0, 1.0) through doorway to street (0, 1.0, 4.0)
+	var space_state = player.get_world_3d().direct_space_state
+	var query = PhysicsRayQueryParameters3D.create(Vector3(0, 1.0, 1.0), Vector3(0, 1.0, 4.0))
+	var result = space_state.intersect_ray(query)
+	passed = assert_true(result.is_empty(), "Doorway at Z=2.6 to 3.4 is completely clear! Player can walk outside!") and passed
+	
+	# Verify street passage from doorway (0, 1.0, 4.0) to Pizzeria entrance (0, 1.0, 16.0)
+	var street_query = PhysicsRayQueryParameters3D.create(Vector3(0, 1.0, 4.0), Vector3(0, 1.0, 16.0))
+	var street_result = space_state.intersect_ray(street_query)
+	passed = assert_true(street_result.is_empty(), "Street corridor is unobstructed all the way to Pizzeria!") and passed
+	
+	world_inst.queue_free()
 	return passed

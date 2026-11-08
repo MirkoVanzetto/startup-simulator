@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://std8studio01"]
+[gd_scene load_steps=18 format=3 uid="uid://std8studio01"]
 
 [ext_resource type="Script" path="res://scripts/world/studio_manager.gd" id="1_stm"]
 [ext_resource type="PackedScene" path="res://assets/environments/studio_room.glb" id="2_stg"]
@@ -7,6 +7,13 @@
 [ext_resource type="PackedScene" path="res://scenes/props/laptop_prop.tscn" id="5_lpt"]
 [ext_resource type="PackedScene" path="res://scenes/props/monitor_upgrade_prop.tscn" id="6_mon"]
 [ext_resource type="PackedScene" path="res://scenes/props/chair_gaming_upgrade_prop.tscn" id="7_ch2"]
+[ext_resource type="PackedScene" path="res://assets/models/furniture/shelf_B_large_decorated.gltf" id="8_shf"]
+[ext_resource type="PackedScene" path="res://assets/models/furniture/cabinet_medium_decorated.gltf" id="9_cab"]
+[ext_resource type="PackedScene" path="res://assets/models/furniture/rug_rectangle_A.gltf" id="10_rug"]
+[ext_resource type="PackedScene" path="res://assets/models/furniture/lamp_table.gltf" id="11_lmp"]
+[ext_resource type="PackedScene" path="res://assets/models/furniture/cactus_small_A.gltf" id="12_pls"]
+[ext_resource type="PackedScene" path="res://assets/models/furniture/cactus_medium_A.gltf" id="13_plm"]
+[ext_resource type="PackedScene" path="res://assets/models/furniture/pictureframe_large_A.gltf" id="14_pic"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
 size = Vector3(6.2, 0.2, 5.2)
@@ -77,14 +84,46 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.5)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.85)
 
 [node name="LaptopProp" parent="Furniture" instance=ExtResource("5_lpt")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.76, -1.45)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.74, -1.45)
+
+[node name="Bookshelf" parent="Furniture" instance=ExtResource("8_shf")]
+transform = Transform3D(-3.93403e-08, 0, 0.9, 0, 0.9, 0, -0.9, 0, -3.93403e-08, 2.3, 0, -1.1)
+
+[node name="Cabinet" parent="Furniture" instance=ExtResource("9_cab")]
+transform = Transform3D(-3.93403e-08, 0, -0.9, 0, 0.9, 0, 0.9, 0, -3.93403e-08, -2.3, 0, -1.1)
+
+[node name="Rug" parent="Furniture" instance=ExtResource("10_rug")]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 0, 0.01, -1.1)
+
+[node name="DeskLamp" parent="Furniture" instance=ExtResource("11_lmp")]
+transform = Transform3D(0.65, 0, 0, 0, 0.65, 0, 0, 0, 0.65, -0.55, 0.74, -1.55)
+
+[node name="DeskPlant" parent="Furniture" instance=ExtResource("12_pls")]
+transform = Transform3D(0.65, 0, 0, 0, 0.65, 0, 0, 0, 0.65, 0.55, 0.74, -1.55)
+
+[node name="DiplomaFrame" parent="Furniture" instance=ExtResource("14_pic")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9, -2.48)
+
+[node name="DiplomaLabel" type="Label3D" parent="Furniture"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9, -2.44)
+text = "UNIVERSITÀ DI TORINO
+LAUREA IN INFORMATICA
+★ 110 / 110 E LODE ★"
+font_size = 14
+modulate = Color(0.1, 0.1, 0.2, 1)
+outline_size = 2
+outline_color = Color(0.9, 0.85, 0.7, 1)
 
 [node name="Upgrades" type="Node3D" parent="."]
 
 [node name="MonitorUpgradeProp" parent="Upgrades" instance=ExtResource("6_mon")]
-transform = Transform3D(0.965926, 0, 0.258819, 0, 1, 0, -0.258819, 0, 0.965926, 0.48, 0.76, -1.45)
+transform = Transform3D(0.965926, 0, 0.258819, 0, 1, 0, -0.258819, 0, 0.965926, 0.48, 0.74, -1.45)
 visible = false
 
 [node name="ChairGamingUpgradeProp" parent="Upgrades" instance=ExtResource("7_ch2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.85)
+visible = false
+
+[node name="PlantAloeUpgrade" parent="Upgrades" instance=ExtResource("13_plm")]
+transform = Transform3D(0.9, 0, 0, 0, 0.9, 0, 0, 0, 0.9, -2.2, 0, 0.5)
 visible = false

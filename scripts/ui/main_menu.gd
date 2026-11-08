@@ -43,7 +43,11 @@ func _ready() -> void:
 func _on_new_game_pressed() -> void:
 	SoundManager.play_ui_click()
 	visible = false
-	GameManager.start_new_game()
+	var intro = get_parent().get_node_or_null("IntroMonologue")
+	if intro and intro.has_method("start_intro"):
+		intro.start_intro()
+	else:
+		GameManager.start_new_game()
 
 func _on_continue_pressed() -> void:
 	SoundManager.play_ui_click()

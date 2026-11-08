@@ -1,23 +1,30 @@
 extends Node
-## ContractManager - Handles active client commissions, tutorial flow, and rewards
+## ContractManager - Handles active client commissions, tutorial flow, and procedural marketplace
+
+const ContractGenerator = preload("res://scripts/contracts/contract_generator.gd")
 
 var active_contracts: Dictionary = {}
 var completed_contracts: Array[String] = []
+var marketplace_contracts: Array[Dictionary] = []
 
 func _ready() -> void:
-	pass
+	EventBus.day_passed.connect(_on_day_passed)
 
 func init_tutorial_contract() -> void:
 	active_contracts.clear()
 	completed_contracts.clear()
+	marketplace_contracts.clear()
 	
 	active_contracts["pizzeria_da_mario"] = {
 		"id": "pizzeria_da_mario",
 		"title": "Sito Web Ufficiale per Pizzeria Da Mario",
 		"client": "Mario Esposito",
+		"category": "Web Development",
 		"location": "Via Po 18, Torino",
 		"budget": 650.00,
 		"reputation_reward": 15,
+		"difficulty": 1,
+		"deadline_days": 2,
 		"status": "available", # "available" -> "in_progress" -> "built" -> "completed"
 		"objective_text": "Raggiungi la pizzeria in Via Po e parla con Mario per definire i requisiti.",
 		"requirements": [
@@ -28,7 +35,20 @@ func init_tutorial_contract() -> void:
 		],
 		"website_build_data": {}
 	}
+	
+	# Generate first batch of marketplace opportunities
+	refresh_marketplace()
 	EventBus.contract_updated.emit("pizzeria_da_mario", "available")
+
+func refresh_marketplace() -> void:
+	marketplace_contracts = ContractGenerator.generate_initial_marketplace_pool(4)
+	EventBus.contract_marketplace_refreshed.emit()
+
+func _on_day_passed(_new_day: int) -> void:
+	# Add new fresh contracts every day
+	if marketplace_contracts.size() < 6:
+		marketplace_contracts.append(ContractGenerator.generate_random_contract())
+		EventBus.contract_marketplace_refreshed.emit()
 
 func get_tutorial_contract() -> Dictionary:
 	return active_contracts.get("pizzeria_da_mario", {})
@@ -65,8 +85,39 @@ func complete_tutorial_contract() -> void:
 		EventBus.contract_updated.emit("pizzeria_da_mario", "completed")
 		EventBus.notification_posted.emit(
 			"Progetto Consegnato!",
-			"Mario è entusiasta! Hai guadagnato €%0.2f e +%d Reputazione. Ora puoi acquistare upgrade per lo studio!" % [reward, rep],
+			"Mario è entusiasta! Hai guadagnato €%0.2f e +%d Reputazione. Ora puoi accedere al Marketplace aperto nel Freelance Hub!" % [reward, rep],
 			"success"
 		)
 		SoundManager.play_ui_success()
 		SaveManager.request_auto_save()
+
+func accept_marketplace_contract(contract_id: String) -> bool:
+	for i in range(marketplace_contracts.size()):
+		var c = marketplace_contracts[i]
+		if c["id"] == contract_id:
+			c["status"] = "in_progress"
+			active_contracts[contract_id] = c
+			marketplace_contracts.remove_at(i)
+			EventBus.contract_updated.emit(contract_id, "in_progress")
+			EventBus.notification_posted.emit("Nuovo Contratto B2B", "Hai accettato il contratto per: " + c["title"], "info")
+			EventBus.contract_marketplace_refreshed.emit()
+			return true
+	return false
+
+func complete_marketplace_contract(contract_id: String) -> bool:
+	if active_contracts.has(contract_id):
+		var c = active_contracts[contract_id]
+		c["status"] = "completed"
+		var reward = float(c["budget"])
+		var rep = int(c["reputation_reward"])
+		completed_contracts.append(contract_id)
+		
+		EconomyManager.earn(reward, "Liquidazione Progetto: " + c["title"])
+		GameManager.reputation_points += rep
+		
+		EventBus.contract_completed.emit(contract_id, reward, rep)
+		EventBus.contract_updated.emit(contract_id, "completed")
+		EventBus.notification_posted.emit("Lavoro Liquidato!", "Incassati € %0.2f e +%d Reputazione!" % [reward, rep], "success")
+		SaveManager.request_auto_save()
+		return true
+	return false

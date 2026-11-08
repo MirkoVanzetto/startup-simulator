@@ -27,3 +27,11 @@ signal dialogue_ended()
 
 # Notification signals
 signal notification_posted(title: String, message: String, icon_type: String)
+
+# Milestone 3 - Calendar & Simulation signals
+signal time_tick(hour: int, minute: int, day: int)
+signal day_passed(new_day: int)
+signal daily_expenses_billed(total_amount: float, details: Dictionary)
+signal random_event_triggered(event_data: Dictionary)
+signal random_event_resolved(choice_index: int)
+signal contract_marketplace_refreshed()

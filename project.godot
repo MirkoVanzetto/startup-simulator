@@ -21,6 +21,8 @@ EconomyManager="*res://scripts/economy/economy_manager.gd"
 ContractManager="*res://scripts/contracts/contract_manager.gd"
 SaveManager="*res://scripts/core/save_manager.gd"
 SoundManager="*res://scripts/core/sound_manager.gd"
+CalendarSystem="*res://scripts/core/calendar_system.gd"
+EventSystem="*res://scripts/core/event_system.gd"
 
 [display]
 

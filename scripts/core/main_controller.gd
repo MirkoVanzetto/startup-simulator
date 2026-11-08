@@ -7,6 +7,7 @@ extends Node
 @onready var computer_screen: Control = $UILayer/ComputerScreen
 @onready var dialogue_overlay: Control = $UILayer/DialogueOverlay
 @onready var web_forge: Control = $UILayer/WebForge
+@onready var pause_menu: Control = $UILayer/PauseMenu
 
 func _ready() -> void:
 	EventBus.game_state_changed.connect(_on_game_state_changed)
@@ -22,9 +23,13 @@ func _unhandled_input(event: InputEvent) -> void:
 func _handle_pause_toggle() -> void:
 	match GameManager.current_state:
 		GameManager.GameState.FIRST_PERSON:
-			# If at first person, ESC can return to menu or pause
-			main_menu.visible = true
-			GameManager.change_state(GameManager.GameState.MAIN_MENU)
+			# Pressing ESC in first person opens the in-game Pause / Settings Menu!
+			pause_menu.open_pause_menu()
+			GameManager.change_state(GameManager.GameState.PAUSED)
+		GameManager.GameState.PAUSED:
+			# Pressing ESC again resumes gameplay
+			pause_menu.close_pause_menu()
+			GameManager.change_state(GameManager.GameState.FIRST_PERSON)
 		GameManager.GameState.COMPUTER:
 			# ESC while at computer closes the computer
 			EventBus.computer_closed.emit()
@@ -35,9 +40,8 @@ func _handle_pause_toggle() -> void:
 		GameManager.GameState.DIALOGUE:
 			pass
 		GameManager.GameState.MAIN_MENU:
-			# If a game is active, ESC resumes
-			if GameManager.player_node != null:
-				main_menu.visible = false
+			# If game was in progress, ESC resumes
+			if GameManager.player_node != null and not main_menu.visible:
 				GameManager.change_state(GameManager.GameState.FIRST_PERSON)
 
 func _on_game_state_changed(new_state: int, _old_state: int) -> void:
@@ -48,27 +52,39 @@ func _on_game_state_changed(new_state: int, _old_state: int) -> void:
 			computer_screen.visible = false
 			dialogue_overlay.visible = false
 			web_forge.visible = false
+			pause_menu.visible = false
 		GameManager.GameState.FIRST_PERSON:
 			main_menu.visible = false
 			hud.visible = true
 			computer_screen.visible = false
 			dialogue_overlay.visible = false
 			web_forge.visible = false
+			pause_menu.visible = false
+		GameManager.GameState.PAUSED:
+			main_menu.visible = false
+			hud.visible = false
+			computer_screen.visible = false
+			dialogue_overlay.visible = false
+			web_forge.visible = false
+			pause_menu.visible = true
 		GameManager.GameState.COMPUTER:
 			main_menu.visible = false
 			hud.visible = false
 			computer_screen.visible = true
 			dialogue_overlay.visible = false
 			web_forge.visible = false
+			pause_menu.visible = false
 		GameManager.GameState.DIALOGUE:
 			main_menu.visible = false
 			hud.visible = false
 			computer_screen.visible = false
 			dialogue_overlay.visible = true
 			web_forge.visible = false
+			pause_menu.visible = false
 		GameManager.GameState.MINIGAME:
 			main_menu.visible = false
 			hud.visible = false
 			computer_screen.visible = false
 			dialogue_overlay.visible = false
 			web_forge.visible = true
+			pause_menu.visible = false

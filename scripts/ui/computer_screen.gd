@@ -62,6 +62,8 @@ func _ready() -> void:
 	
 	_setup_emails()
 	_update_shop_buttons()
+	EventBus.time_tick.connect(func(_h, _m, _d): _update_top_bar())
+	EventBus.contract_marketplace_refreshed.connect(_update_freelance_display)
 
 func _on_computer_opened() -> void:
 	visible = true
@@ -81,7 +83,7 @@ func _on_exit_pressed() -> void:
 
 func _update_top_bar() -> void:
 	top_balance_label.text = "Fondi: € %0.2f" % EconomyManager.balance
-	clock_label.text = "14:28 - Lunedì"
+	clock_label.text = "%s - Giorno %d (%s)" % [CalendarSystem.get_formatted_time(), CalendarSystem.current_day, CalendarSystem.get_day_name()]
 
 func _on_funds_changed(new_balance: float, _delta: float, _reason: String) -> void:
 	top_balance_label.text = "Fondi: € %0.2f" % new_balance
@@ -174,9 +176,21 @@ func _update_freelance_display() -> void:
 			open_webforge_btn.visible = true
 		"completed":
 			status_text = "[color=#88ff88]CONSEGNATO & LIQUIDATO (€ 650,00)[/color]"
-			open_webforge_btn.visible = false
+	var t = "[b]COMMISSIONE ATTIVA:[/b]\n"
+	t += "[b]Cliente:[/b] Mario Esposito (Pizzeria Da Mario)\n[b]Budget:[/b] € 650.00\n[b]Stato:[/b] %s\n\n[b]Requisiti:[/b]\n• Logo con la Mole Antonelliana\n• Menu Pizze Napoletane\n• Orari & Indirizzo Via Po\n• Modulo Prenotazione Tavoli\n\n" % status_text
+	
+	t += "[b]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/b]\n"
+	t += "[b][color=#ffcc44]MARKETPLACE FREELANCE DI TORINO (OPPORTUNITÀ B2B):[/color][/b]\n\n"
+	
+	if ContractManager.marketplace_contracts.is_empty():
+		t += "Nessun bando aperto al momento. Nuove offerte disponibili domani mattina alle 08:00.\n"
+	else:
+		for c in ContractManager.marketplace_contracts:
+			t += "• [b]%s[/b] — %s\n" % [c["title"], c["client"]]
+			t += "  Settore: %s | Compenso: [color=#44ff88]€ %0.2f[/color] | Scadenza: %d gg | Difficoltà: %s\n" % [c["category"], c["budget"], c["deadline_days"], "★".repeat(c["difficulty"])]
+			t += "  Requisiti: %s\n\n" % ", ".join(c["requirements"])
 			
-	freelance_text.text = "[b]Cliente:[/b] Mario Esposito (Pizzeria Da Mario)\n[b]Budget:[/b] € 650.00\n[b]Stato:[/b] %s\n\n[b]Requisiti:[/b]\n• Logo con la Mole Antonelliana\n• Menu Pizze Napoletane\n• Orari & Indirizzo Via Po\n• Modulo Prenotazione Tavoli" % status_text
+	freelance_text.text = t
 
 func _launch_webforge() -> void:
 	SoundManager.play_ui_click()

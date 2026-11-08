@@ -10,6 +10,8 @@ func _ready() -> void:
 	all_passed = run_economy_tests() and all_passed
 	all_passed = run_contract_tests() and all_passed
 	all_passed = run_save_tests() and all_passed
+	all_passed = run_calendar_tests() and all_passed
+	all_passed = run_marketplace_tests() and all_passed
 	all_passed = run_vertical_slice_integration() and all_passed
 	
 	print("\n==================================================")
@@ -97,6 +99,45 @@ func run_save_tests() -> bool:
 	passed = assert_true(EconomyManager.balance == 850.0, "Balance restored correctly from save") and passed
 	passed = assert_true(GameManager.reputation_points == 25, "Reputation restored correctly") and passed
 	passed = assert_true("monitor_upgrade" in GameManager.studio_upgrades_installed, "Installed upgrades restored") and passed
+	
+	return passed
+
+func run_calendar_tests() -> bool:
+	print("\n--- Running CalendarSystem & Daily Expenses Unit Tests ---")
+	var passed = true
+	
+	CalendarSystem.current_hour = 23
+	CalendarSystem.current_minute = 59
+	CalendarSystem.current_day = 1
+	var bal_before = EconomyManager.balance
+	
+	# Simulate midnight rollover
+	CalendarSystem._advance_minute()
+	passed = assert_true(CalendarSystem.current_hour == 0, "Hour reset to 00:00 at midnight") and passed
+	passed = assert_true(CalendarSystem.current_day == 2, "Day advanced to Day 2") and passed
+	passed = assert_true(EconomyManager.balance == bal_before - 38.0, "Daily overhead expenses (€ 38.00) deducted") and passed
+	
+	return passed
+
+func run_marketplace_tests() -> bool:
+	print("\n--- Running Procedural Marketplace Unit Tests ---")
+	var passed = true
+	
+	ContractManager.refresh_marketplace()
+	passed = assert_true(ContractManager.marketplace_contracts.size() >= 4, "Marketplace generated at least 4 tech commissions") and passed
+	
+	var first_c = ContractManager.marketplace_contracts[0]
+	var c_id = str(first_c["id"])
+	var c_budget = float(first_c["budget"])
+	var bal_before = EconomyManager.balance
+	
+	var accepted = ContractManager.accept_marketplace_contract(c_id)
+	passed = assert_true(accepted, "Accepted marketplace contract: " + first_c["title"]) and passed
+	passed = assert_true(ContractManager.active_contracts.has(c_id), "Contract moved into active_contracts") and passed
+	
+	var completed = ContractManager.complete_marketplace_contract(c_id)
+	passed = assert_true(completed, "Marketplace contract completed and delivered") and passed
+	passed = assert_true(EconomyManager.balance == bal_before + c_budget, "Commissions reward (€ %0.2f) credited" % c_budget) and passed
 	
 	return passed
 

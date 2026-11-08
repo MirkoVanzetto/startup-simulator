@@ -1,0 +1,29 @@
+[gd_scene load_steps=8 format=3 uid="uid://mn8mainmaster01"]
+
+[ext_resource type="Script" path="res://scripts/core/main_controller.gd" id="1_mnc"]
+[ext_resource type="PackedScene" path="res://scenes/world/game_world.tscn" id="2_gwd"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud.tscn" id="3_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/computer_screen.tscn" id="4_cmp"]
+[ext_resource type="PackedScene" path="res://scenes/ui/dialogue_overlay.tscn" id="5_dlg"]
+[ext_resource type="PackedScene" path="res://scenes/ui/minigames/web_forge.tscn" id="6_wbf"]
+[ext_resource type="PackedScene" path="res://scenes/ui/main_menu.tscn" id="7_mnu"]
+
+[node name="Main" type="Node"]
+script = ExtResource("1_mnc")
+
+[node name="GameWorld" parent="." instance=ExtResource("2_gwd")]
+
+[node name="UILayer" type="CanvasLayer" parent="."]
+
+[node name="HUD" parent="UILayer" instance=ExtResource("3_hud")]
+
+[node name="ComputerScreen" parent="UILayer" instance=ExtResource("4_cmp")]
+visible = false
+
+[node name="DialogueOverlay" parent="UILayer" instance=ExtResource("5_dlg")]
+visible = false
+
+[node name="WebForge" parent="UILayer" instance=ExtResource("6_wbf")]
+visible = false
+
+[node name="MainMenu" parent="UILayer" instance=ExtResource("7_mnu")]

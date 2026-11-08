@@ -1,0 +1,180 @@
+[gd_scene load_steps=5 format=3 uid="uid://wbf8webforge01"]
+
+[ext_resource type="Script" path="res://scripts/ui/minigames/web_forge_controller.gd" id="1_wfc"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_header"]
+bg_color = Color(0.1, 0.12, 0.16, 0.98)
+border_width_bottom = 2
+border_color = Color(0.2, 0.5, 0.8, 0.8)
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_palette"]
+bg_color = Color(0.14, 0.16, 0.22, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 14.0
+content_margin_top = 14.0
+content_margin_right = 14.0
+content_margin_bottom = 14.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_preview"]
+bg_color = Color(0.08, 0.09, 0.12, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.25, 0.3, 0.4, 0.8)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 20.0
+content_margin_top = 20.0
+content_margin_right = 20.0
+content_margin_bottom = 20.0
+
+[node name="WebForge" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_wfc")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.06, 0.07, 0.09, 1)
+
+[node name="Main" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="PanelContainer" parent="Main"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_header")
+
+[node name="HBox" type="HBoxContainer" parent="Main/Header"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="IDELabel" type="Label" parent="Main/Header/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 17
+text = "⚡ WebForge IDE v1.0 — Progetto: Pizzeria Da Mario (Torino)"
+
+[node name="Spacer" type="Control" parent="Main/Header/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="QualityLabel" type="Label" parent="Main/Header/HBox"]
+layout_mode = 2
+text = "Completezza Requisiti: 0%"
+
+[node name="QualityProgress" type="ProgressBar" parent="Main/Header/HBox"]
+custom_minimum_size = Vector2(180, 20)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="ExitButton" type="Button" parent="Main/Header/HBox"]
+layout_mode = 2
+text = " ✕ Chiudi IDE "
+
+[node name="Body" type="HSplitContainer" parent="Main"]
+layout_mode = 2
+size_flags_vertical = 3
+split_offset = 360
+
+[node name="Palette" type="PanelContainer" parent="Main/Body"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_palette")
+
+[node name="VBox" type="VBoxContainer" parent="Main/Body/Palette"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="PaletteTitle" type="Label" parent="Main/Body/Palette/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.3, 1)
+theme_override_font_sizes/font_size = 15
+text = "COMPONENTI RICHIESTI DA MARIO"
+
+[node name="ChkHeader" type="CheckButton" parent="Main/Body/Palette/VBox"]
+layout_mode = 2
+text = "1. Logo Mole & Insegna"
+
+[node name="ChkHero" type="CheckButton" parent="Main/Body/Palette/VBox"]
+layout_mode = 2
+text = "2. Hero Banner & Slogan"
+
+[node name="ChkMenu" type="CheckButton" parent="Main/Body/Palette/VBox"]
+layout_mode = 2
+text = "3. Menu Pizze Speciali"
+
+[node name="ChkHours" type="CheckButton" parent="Main/Body/Palette/VBox"]
+layout_mode = 2
+text = "4. Orari & Mappa Via Po"
+
+[node name="ChkBooking" type="CheckButton" parent="Main/Body/Palette/VBox"]
+layout_mode = 2
+text = "5. Modulo Prenotazione"
+
+[node name="Sep" type="HSeparator" parent="Main/Body/Palette/VBox"]
+layout_mode = 2
+
+[node name="ThemeLabel" type="Label" parent="Main/Body/Palette/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.85, 0.9, 1)
+text = "Tema & Stile Grafico:"
+
+[node name="ThemePicker" type="OptionButton" parent="Main/Body/Palette/VBox"]
+layout_mode = 2
+selected = 0
+item_count = 3
+popup/item_0/text = "Rosso Tradizionale Napoletano"
+popup/item_0/id = 0
+popup/item_1/text = "Verde Basilico Fresco"
+popup/item_1/id = 1
+popup/item_2/text = "Antracite Moderno Gourmet"
+popup/item_2/id = 2
+
+[node name="PreviewArea" type="PanelContainer" parent="Main/Body"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_preview")
+
+[node name="Scroll" type="ScrollContainer" parent="Main/Body/PreviewArea"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="Main/Body/PreviewArea/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="Footer" type="MarginContainer" parent="Main"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 14
+
+[node name="CompileButton" type="Button" parent="Main/Footer"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+disabled = true
+text = "Inserisci tutti i 5 requisiti richiesti da Mario (0/5)"

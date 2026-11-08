@@ -1,0 +1,39 @@
+[gd_scene load_steps=5 format=3 uid="uid://str8street01"]
+
+[ext_resource type="PackedScene" path="res://assets/environments/street_district.glb" id="1_sdg"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_road"]
+size = Vector3(18.5, 0.3, 13.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_facade"]
+size = Vector3(18.5, 7.0, 0.5)
+
+[node name="Street" type="Node3D"]
+
+[node name="StreetDistrictModel" parent="." instance=ExtResource("1_sdg")]
+
+[node name="Collisions" type="StaticBody3D" parent="."]
+collision_layer = 1
+collision_mask = 0
+
+[node name="RoadFloor" type="CollisionShape3D" parent="Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 7.5)
+shape = SubResource("BoxShape3D_road")
+
+[node name="FacadeCol" type="CollisionShape3D" parent="Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.5, 3.4)
+shape = SubResource("BoxShape3D_facade")
+
+[node name="Lighting" type="Node3D" parent="."]
+
+[node name="StreetLamp1" type="OmniLight3D" parent="Lighting"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.5, 3.5, 4.2)
+light_color = Color(1, 0.9, 0.65, 1)
+light_energy = 1.6
+omni_range = 9.0
+
+[node name="StreetLamp2" type="OmniLight3D" parent="Lighting"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 3.5, 4.2)
+light_color = Color(1, 0.9, 0.65, 1)
+light_energy = 1.6
+omni_range = 9.0

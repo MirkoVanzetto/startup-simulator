@@ -1,0 +1,19 @@
+[gd_scene load_steps=4 format=3 uid="uid://bmario01"]
+
+[ext_resource type="Script" path="res://scripts/world/mario_interactable.gd" id="1_mri"]
+[ext_resource type="PackedScene" path="res://assets/characters/character_mario.glb" id="2_mrg"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_mario"]
+radius = 0.45
+height = 1.95
+
+[node name="MarioNPC" type="StaticBody3D"]
+collision_layer = 3
+collision_mask = 0
+script = ExtResource("1_mri")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.98, 0)
+shape = SubResource("CapsuleShape3D_mario")
+
+[node name="Model" parent="." instance=ExtResource("2_mrg")]

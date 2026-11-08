@@ -1,0 +1,10 @@
+# Godot 4 3D Project .gitignore
+.godot/
+*.translation
+*.tmp
+.DS_Store
+Thumbs.db
+*.pyc
+__pycache__/
+.venv/
+bin/godot

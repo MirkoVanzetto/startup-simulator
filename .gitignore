@@ -8,7 +8,4 @@ Thumbs.db
 __pycache__/
 .venv/
 bin/godot
-build/*.exe
-build/*.pck
-build/*.zip
 

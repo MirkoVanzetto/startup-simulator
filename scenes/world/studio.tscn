@@ -15,7 +15,7 @@
 [ext_resource type="PackedScene" path="res://assets/models/furniture/cactus_medium_A.gltf" id="13_plm"]
 [ext_resource type="PackedScene" path="res://assets/models/furniture/pictureframe_large_A.gltf" id="14_pic"]
 [ext_resource type="PackedScene" path="res://assets/models/hardware/server_rack.glb" id="15_srv"]
-[ext_resource type="PackedScene" path="res://assets/characters/character_employee.glb" id="16_emp"]
+[ext_resource type="PackedScene" path="res://assets/models/characters/character-male-c.glb" id="16_emp"]
 [ext_resource type="Script" path="res://scripts/world/server_rack_interactable.gd" id="17_sri"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
@@ -167,7 +167,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.6)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.74, -0.1)
 
 [node name="EmployeeModel" parent="EmployeeWorkstation" instance=ExtResource("16_emp")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
+transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, 0, 0, 0.45)
+
 
 [node name="EmployeeNameTag" type="Label3D" parent="EmployeeWorkstation"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0.1)

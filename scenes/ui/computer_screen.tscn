@@ -147,6 +147,12 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.75, 1, 1)
 text = "👥 Talent Hub HR"
 
+[node name="FirewallIcon" type="Button" parent="DesktopIcons/VBox"]
+custom_minimum_size = Vector2(140, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.55, 0.2, 1)
+text = "🛡 NetShield Cyber"
+
 [node name="Windows" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 15
@@ -310,155 +316,167 @@ size_flags_horizontal = 3
 layout_mode = 2
 text = " ✕ "
 
-[node name="Grid" type="HBoxContainer" parent="Windows/ShopWindow/Margin/VBox"]
+[node name="ShopScroll" type="ScrollContainer" parent="Windows/ShopWindow/Margin/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_constants/separation = 16
+horizontal_scroll_mode = 0
 
-[node name="MonitorCard" type="PanelContainer" parent="Windows/ShopWindow/Margin/VBox/Grid"]
+[node name="Grid" type="GridContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+columns = 2
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 16
+
+[node name="MonitorCard" type="PanelContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid"]
+custom_minimum_size = Vector2(460, 220)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="VBox" type="VBoxContainer" parent="Windows/ShopWindow/Margin/VBox/Grid/MonitorCard"]
+[node name="VBox" type="VBoxContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/MonitorCard"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="ItemName" type="Label" parent="Windows/ShopWindow/Margin/VBox/Grid/MonitorCard/VBox"]
+[node name="ItemName" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/MonitorCard/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
 theme_override_font_sizes/font_size = 16
 text = "Monitor Secondario 27\" Ultrawide"
 
-[node name="Price" type="Label" parent="Windows/ShopWindow/Margin/VBox/Grid/MonitorCard/VBox"]
+[node name="Price" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/MonitorCard/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
 theme_override_font_sizes/font_size = 15
 text = "€ 350,00"
 
-[node name="Desc" type="Label" parent="Windows/ShopWindow/Margin/VBox/Grid/MonitorCard/VBox"]
+[node name="Desc" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/MonitorCard/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
 text = "Braccio orientabile in alluminio, risoluzione 2K IPS. Si posiziona fisicamente sulla scrivania nel tuo studio per mostrare il codice e le metriche."
 autowrap_mode = 2
 
-[node name="StatusLabel" type="Label" parent="Windows/ShopWindow/Margin/VBox/Grid/MonitorCard"]
+[node name="StatusLabel" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/MonitorCard"]
 layout_mode = 2
 size_flags_vertical = 8
 text = "Disponibile"
 
-[node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/Grid/MonitorCard"]
+[node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/MonitorCard"]
 layout_mode = 2
 size_flags_vertical = 8
 text = "Acquista (€ 350,00)"
 
-[node name="ChairCard" type="PanelContainer" parent="Windows/ShopWindow/Margin/VBox/Grid"]
+[node name="ChairCard" type="PanelContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid"]
+custom_minimum_size = Vector2(460, 220)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="VBox" type="VBoxContainer" parent="Windows/ShopWindow/Margin/VBox/Grid/ChairCard"]
+[node name="VBox" type="VBoxContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ChairCard"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="ItemName" type="Label" parent="Windows/ShopWindow/Margin/VBox/Grid/ChairCard/VBox"]
+[node name="ItemName" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ChairCard/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.4, 0.4, 1)
 theme_override_font_sizes/font_size = 16
 text = "Sedia Ergonomica Racing / Pro"
 
-[node name="Price" type="Label" parent="Windows/ShopWindow/Margin/VBox/Grid/ChairCard/VBox"]
+[node name="Price" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ChairCard/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
 theme_override_font_sizes/font_size = 15
 text = "€ 220,00"
 
-[node name="Desc" type="Label" parent="Windows/ShopWindow/Margin/VBox/Grid/ChairCard/VBox"]
+[node name="Desc" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ChairCard/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
 text = "Schienale alto con supporto lombare e finiture rosso fuoco. Sostituisce la sedia base del tuo studio migliorando il comfort e l'efficienza."
 autowrap_mode = 2
 
-[node name="StatusLabel" type="Label" parent="Windows/ShopWindow/Margin/VBox/Grid/ChairCard"]
+[node name="StatusLabel" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ChairCard"]
 layout_mode = 2
 size_flags_vertical = 8
 text = "Disponibile"
 
-[node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/Grid/ChairCard"]
+[node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ChairCard"]
 layout_mode = 2
 size_flags_vertical = 8
 text = "Acquista (€ 220,00)"
 
-[node name="PlantCard" type="PanelContainer" parent="Windows/ShopWindow/Margin/VBox/Grid"]
+[node name="PlantCard" type="PanelContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid"]
+custom_minimum_size = Vector2(460, 220)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="VBox" type="VBoxContainer" parent="Windows/ShopWindow/Margin/VBox/Grid/PlantCard"]
+[node name="VBox" type="VBoxContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/PlantCard"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="ItemName" type="Label" parent="Windows/ShopWindow/Margin/VBox/Grid/PlantCard/VBox"]
+[node name="ItemName" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/PlantCard/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 1, 0.5, 1)
 theme_override_font_sizes/font_size = 16
 text = "Pianta Succulenta d'Arredo"
 
-[node name="Price" type="Label" parent="Windows/ShopWindow/Margin/VBox/Grid/PlantCard/VBox"]
+[node name="Price" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/PlantCard/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
 theme_override_font_sizes/font_size = 15
 text = "€ 35,00"
 
-[node name="Desc" type="Label" parent="Windows/ShopWindow/Margin/VBox/Grid/PlantCard/VBox"]
+[node name="Desc" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/PlantCard/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
 text = "Vaso in ceramica con pianta d'arredo. Aumenta la vivibilità dello studio e riduce lo stress da debugging."
 autowrap_mode = 2
 
-[node name="StatusLabel" type="Label" parent="Windows/ShopWindow/Margin/VBox/Grid/PlantCard"]
+[node name="StatusLabel" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/PlantCard"]
 layout_mode = 2
 size_flags_vertical = 8
 text = "Disponibile"
 
-[node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/Grid/PlantCard"]
+[node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/PlantCard"]
 layout_mode = 2
 size_flags_vertical = 8
 text = "Acquista (€ 35,00)"
 
-[node name="ServerCard" type="PanelContainer" parent="Windows/ShopWindow/Margin/VBox/Grid"]
+[node name="ServerCard" type="PanelContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid"]
+custom_minimum_size = Vector2(460, 220)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="VBox" type="VBoxContainer" parent="Windows/ShopWindow/Margin/VBox/Grid/ServerCard"]
+[node name="VBox" type="VBoxContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ServerCard"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="ItemName" type="Label" parent="Windows/ShopWindow/Margin/VBox/Grid/ServerCard/VBox"]
+[node name="ItemName" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ServerCard/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.8, 0.3, 1)
 theme_override_font_sizes/font_size = 16
 text = "Mini Server Rack 4U & NAS"
 
-[node name="Price" type="Label" parent="Windows/ShopWindow/Margin/VBox/Grid/ServerCard/VBox"]
+[node name="Price" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ServerCard/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
 theme_override_font_sizes/font_size = 15
 text = "€ 450,00"
 
-[node name="Desc" type="Label" parent="Windows/ShopWindow/Margin/VBox/Grid/ServerCard/VBox"]
+[node name="Desc" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ServerCard/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
 text = "Armadio server compatto con NAS RAID-10 e switch di rete. Installato nell'angolo dello studio per ospitare siti e generare rendita ricorrente."
 autowrap_mode = 2
 
-[node name="StatusLabel" type="Label" parent="Windows/ShopWindow/Margin/VBox/Grid/ServerCard"]
+[node name="StatusLabel" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ServerCard"]
 layout_mode = 2
 size_flags_vertical = 8
 text = "Disponibile"
 
-[node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/Grid/ServerCard"]
+[node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ServerCard"]
 layout_mode = 2
 size_flags_vertical = 8
 text = "Acquista (€ 450,00)"
@@ -650,6 +668,16 @@ text = "+ Installa Raffreddamento a Liquido AIO (€ 320,00)"
 [node name="BuySanBtn" type="Button" parent="Windows/RackWindow/Margin/VBox/Split/ModulesPanel/VBox"]
 layout_mode = 2
 text = "+ Installa Array Storage SAN Raid-10 (€ 680,00)"
+
+[node name="UpgradeTier2Btn" type="Button" parent="Windows/RackWindow/Margin/VBox/Split/ModulesPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
+text = "▲ Upgrade: Blade 12U Enterprise (€ 750,00) [Capacità: 8 Domini]"
+
+[node name="UpgradeTier3Btn" type="Button" parent="Windows/RackWindow/Margin/VBox/Split/ModulesPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
+text = "▲ Upgrade: Full Cabinet 42U Data Center (€ 1.600,00) [Capacità: 20 Domini]"
 
 [node name="TalentWindow" type="PanelContainer" parent="Windows"]
 visible = false

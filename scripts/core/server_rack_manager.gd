@@ -10,6 +10,9 @@ signal module_installed(module_id: String, module_name: String)
 var is_rack_unlocked: bool = false
 var installed_modules: Array[String] = []
 
+# Rack Progression Tiers (Tier 1: Mini 4U, Tier 2: Blade 12U, Tier 3: Cabinet 42U)
+var rack_tier: int = 1
+
 # Telemetry
 var temperature_celsius: float = 46.5
 var fan_speed_rpm: int = 2400
@@ -22,7 +25,49 @@ var status_health: String = "normal" # "normal", "warning", "critical"
 var hosted_domains: Array[Dictionary] = []
 
 # Maintenance & Incidents
-var active_incident: String = "" # "", "filter_dusty", "drive_degraded", "thermal_throttle"
+var active_incident: String = "" # "", "filter_dusty", "drive_degraded", "thermal_throttle", "overload_cacoso"
+
+func get_tier_name() -> String:
+	match rack_tier:
+		1: return "Mini Rack 4U Casalingo (Starter)"
+		2: return "Server Blade 12U Enterprise"
+		3: return "Full Cabinet 42U Data Center"
+		_: return "Rack Custom"
+
+func get_max_safe_domains() -> int:
+	match rack_tier:
+		1: return 3
+		2: return 8
+		3: return 20
+		_: return 3
+
+func can_upgrade_tier(target_tier: int) -> bool:
+	return is_rack_unlocked and target_tier == rack_tier + 1
+
+func get_tier_upgrade_cost(target_tier: int) -> float:
+	match target_tier:
+		2: return 750.00
+		3: return 1600.00
+		_: return 9999.00
+
+func upgrade_rack_tier(target_tier: int) -> bool:
+	if not can_upgrade_tier(target_tier):
+		return false
+	var cost = get_tier_upgrade_cost(target_tier)
+	if not EconomyManager.can_afford(cost):
+		EventBus.notification_posted.emit("Fondi Insufficienti", "Ti servono € %0.2f per il potenziamento rack." % cost, "error")
+		return false
+		
+	EconomyManager.spend(cost, "Potenziamento Rack Server -> " + get_tier_name())
+	rack_tier = target_tier
+	if active_incident == "overload_cacoso" or active_incident == "thermal_throttle":
+		active_incident = ""
+	temperature_celsius = 44.0
+	status_health = "normal"
+	EventBus.notification_posted.emit("Potenziamento Rack Completato!", "Il rack è ora a livello %d (%s). Capacità estesa a %d domini!" % [rack_tier, get_tier_name(), get_max_safe_domains()], "success")
+	SoundManager.play_ui_success()
+	_recalculate_telemetry()
+	return true
 
 func _ready() -> void:
 	# Check if server rack was already installed in GameManager
@@ -95,8 +140,25 @@ func _on_time_tick(_h: int, _m: int, _d: int) -> void:
 	if not is_rack_unlocked:
 		return
 		
+	var max_safe = get_max_safe_domains()
+	var is_overloaded = hosted_domains.size() > max_safe
+	
 	# Dynamic temperature fluctuation based on hosted sites load
-	var base_temp = 44.0 + (hosted_domains.size() * 3.2)
+	var base_temp = 42.0 + (hosted_domains.size() * 3.5)
+	if rack_tier == 2:
+		base_temp -= 6.0 # Better passive blade cooling
+	elif rack_tier == 3:
+		base_temp -= 12.0 # Enterprise chilled datacenter airflow
+		
+	if is_overloaded:
+		base_temp += 26.0 # Extreme heat from overloaded CPU/bus
+		if active_incident == "":
+			trigger_incident(
+				"overload_cacoso",
+				"Sovraccarico Hardware Server Rack",
+				"Il rack casalingo non regge oltre %d siti! Attivi: %d. CPU >92%% e surriscaldamento. Esegui l'upgrade a Blade 12U Enterprise (€ 750)!" % [max_safe, hosted_domains.size()]
+			)
+			
 	if cooling_mode == "boost":
 		base_temp -= 8.0
 	elif cooling_mode == "silent":
@@ -107,13 +169,13 @@ func _on_time_tick(_h: int, _m: int, _d: int) -> void:
 	elif active_incident == "thermal_throttle":
 		base_temp += 22.0
 		
-	temperature_celsius = lerp(temperature_celsius, base_temp, 0.15)
+	temperature_celsius = lerp(temperature_celsius, base_temp, 0.18)
 	
 	# Update bandwidth
 	bandwidth_mbps = 180.0 + (hosted_domains.size() * 85.0) + randf_range(-15.0, 25.0)
 	
 	# Check health status
-	if temperature_celsius > 75.0:
+	if is_overloaded or temperature_celsius > 75.0:
 		status_health = "critical"
 		if active_incident == "":
 			trigger_incident("thermal_throttle", "Surriscaldamento Rack Server", "Temperatura a %0.1f°C! Intervieni fisicamente sul rack o attiva la modalità Boost!" % temperature_celsius)
@@ -140,7 +202,7 @@ func resolve_physical_maintenance() -> void:
 		EventBus.notification_posted.emit("Manutenzione Completata", "Filtri puliti, ventole calibrate e dischi sincronizzati. Rack in perfetto stato!", "success")
 		SoundManager.play_ui_success()
 	else:
-		EventBus.notification_posted.emit("Ispezione Server Rack", "Il rack funziona a regime ottimale (%0.1f°C, %d RPM, %d siti attivi)." % [temperature_celsius, fan_speed_rpm, hosted_domains.size()], "info")
+		EventBus.notification_posted.emit("Ispezione Server Rack", "Il rack %s funziona a regime (%0.1f°C, %d RPM, %d/%d domini)." % [get_tier_name(), temperature_celsius, fan_speed_rpm, hosted_domains.size(), get_max_safe_domains()], "info")
 		SoundManager.play_ui_click()
 
 func calculate_daily_hosting_revenue() -> float:
@@ -151,6 +213,10 @@ func calculate_daily_hosting_revenue() -> float:
 	for c in hosted_domains:
 		if c.get("status") == "online":
 			total += float(c.get("daily_rate", 20.0))
+			
+	# Penalty if rack is overloaded or throttling
+	if hosted_domains.size() > get_max_safe_domains() or active_incident == "thermal_throttle":
+		total *= 0.50 # -50% penalty for SLA breach and degraded response times
 			
 	# Bonus if SAN Storage installed
 	if "server_storage_san" in installed_modules:

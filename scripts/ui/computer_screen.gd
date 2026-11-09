@@ -21,14 +21,14 @@ extends Control
 @onready var deliver_project_btn: Button = $Windows/MailWindow/Margin/VBox/Split/MailBody/DeliverButton
 
 # Shop components
-@onready var buy_monitor_btn: Button = $Windows/ShopWindow/Margin/VBox/Grid/MonitorCard/BuyButton
-@onready var buy_chair_btn: Button = $Windows/ShopWindow/Margin/VBox/Grid/ChairCard/BuyButton
-@onready var buy_plant_btn: Button = $Windows/ShopWindow/Margin/VBox/Grid/PlantCard/BuyButton
-@onready var buy_server_btn: Button = $Windows/ShopWindow/Margin/VBox/Grid/ServerCard/BuyButton
-@onready var monitor_status: Label = $Windows/ShopWindow/Margin/VBox/Grid/MonitorCard/StatusLabel
-@onready var chair_status: Label = $Windows/ShopWindow/Margin/VBox/Grid/ChairCard/StatusLabel
-@onready var plant_status: Label = $Windows/ShopWindow/Margin/VBox/Grid/PlantCard/StatusLabel
-@onready var server_status: Label = $Windows/ShopWindow/Margin/VBox/Grid/ServerCard/StatusLabel
+@onready var buy_monitor_btn: Button = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/MonitorCard/BuyButton
+@onready var buy_chair_btn: Button = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ChairCard/BuyButton
+@onready var buy_plant_btn: Button = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/PlantCard/BuyButton
+@onready var buy_server_btn: Button = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ServerCard/BuyButton
+@onready var monitor_status: Label = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/MonitorCard/StatusLabel
+@onready var chair_status: Label = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ChairCard/StatusLabel
+@onready var plant_status: Label = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/PlantCard/StatusLabel
+@onready var server_status: Label = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ServerCard/StatusLabel
 
 # Freelance components
 @onready var freelance_text: RichTextLabel = $Windows/FreelanceWindow/Margin/VBox/DetailsLabel
@@ -50,10 +50,13 @@ extends Control
 @onready var buy_blade_btn: Button = $Windows/RackWindow/Margin/VBox/Split/ModulesPanel/VBox/BuyBladeBtn
 @onready var buy_liquid_btn: Button = $Windows/RackWindow/Margin/VBox/Split/ModulesPanel/VBox/BuyLiquidBtn
 @onready var buy_san_btn: Button = $Windows/RackWindow/Margin/VBox/Split/ModulesPanel/VBox/BuySanBtn
+@onready var upgrade_tier2_btn: Button = $Windows/RackWindow/Margin/VBox/Split/ModulesPanel/VBox/UpgradeTier2Btn
+@onready var upgrade_tier3_btn: Button = $Windows/RackWindow/Margin/VBox/Split/ModulesPanel/VBox/UpgradeTier3Btn
 
 # Talent Hub components
 @onready var talent_stats_label: Label = $Windows/TalentWindow/Margin/VBox/StatsBanner/StatsLabel
 @onready var candidates_list: VBoxContainer = $Windows/TalentWindow/Margin/VBox/CandidatesScroll/CandidatesList
+@onready var firewall_icon: Button = $DesktopIcons/VBox/FirewallIcon
 
 var emails: Array[Dictionary] = []
 
@@ -74,6 +77,7 @@ func _ready() -> void:
 	$DesktopIcons/VBox/BankIcon.pressed.connect(func(): _open_window(bank_window))
 	$DesktopIcons/VBox/RackIcon.pressed.connect(func(): _open_window(rack_window))
 	$DesktopIcons/VBox/TalentIcon.pressed.connect(func(): _open_window(talent_window))
+	firewall_icon.pressed.connect(_launch_firewall)
 	
 	# Close buttons for windows
 	$Windows/MailWindow/Margin/VBox/Header/CloseBtn.pressed.connect(func(): mail_window.visible = false)
@@ -99,6 +103,8 @@ func _ready() -> void:
 	buy_blade_btn.pressed.connect(_buy_blade)
 	buy_liquid_btn.pressed.connect(_buy_liquid)
 	buy_san_btn.pressed.connect(_buy_san)
+	upgrade_tier2_btn.pressed.connect(func(): ServerRackManager.upgrade_rack_tier(2); _update_rack_display())
+	upgrade_tier3_btn.pressed.connect(func(): ServerRackManager.upgrade_rack_tier(3); _update_rack_display())
 	
 	ServerRackManager.telemetry_updated.connect(_on_rack_telemetry)
 	EventBus.employee_hired.connect(func(_id, _n): _update_talent_display())
@@ -371,6 +377,10 @@ func _update_bank_display() -> void:
 # -------------------------------------------------------------
 # RACK MANAGER UI
 # -------------------------------------------------------------
+func _launch_firewall() -> void:
+	SoundManager.play_ui_click()
+	EventBus.minigame_started.emit("firewall_router")
+
 func _update_rack_display() -> void:
 	if not rack_window:
 		return
@@ -383,8 +393,17 @@ func _update_rack_display() -> void:
 	
 	_on_rack_telemetry(temp, fans, bw, status)
 	
-	# Domains
-	var dt = "[b]CLIENTI & DOMINI CONTRATTUALIZZATI:[/b]\n\n"
+	# Domains & Tier Info
+	var max_safe = ServerRackManager.get_max_safe_domains()
+	var current_domains = ServerRackManager.hosted_domains.size()
+	var dt = "[b]HARDWARE:[/b] [color=#00ccff]%s[/color]\n" % ServerRackManager.get_tier_name()
+	dt += "[b]CAPACITÀ ATTUALE:[/b] %d / %d Domini Massimi\n\n" % [current_domains, max_safe]
+	
+	if current_domains > max_safe:
+		dt += "[color=#ff4444][b]⚠ ATTENZIONE: SERVER IN SOVRACCARICO (OVERLOAD)![/b]\nIl mini-rack casalingo è sovraccarico (limite: %d clienti). CPU al 95%%, thermal throttling attivo e rendite dimezzate (-50%%)! Aggiorna a Blade 12U Enterprise![/color]\n\n" % max_safe
+	elif current_domains == max_safe:
+		dt += "[color=#ffbb33]Capacità massima del rack raggiunta (%d/%d). Nuovi contratti richiederanno un upgrade hardware![/color]\n\n" % [current_domains, max_safe]
+		
 	if ServerRackManager.hosted_domains.is_empty():
 		dt += "Nessun dominio ospitato. Acquista il server rack e completa contratti per vendere servizi di hosting!\n"
 	else:
@@ -412,6 +431,25 @@ func _update_rack_display() -> void:
 	
 	buy_san_btn.disabled = has_san or not is_unlocked or not EconomyManager.can_afford(680.0)
 	buy_san_btn.text = "✔ Storage SAN Raid-10 Operativo (+25% fee)" if has_san else "+ Installa Array Storage SAN Raid-10 (€ 680,00)"
+	
+	# Tier Upgrade Buttons
+	var tier = ServerRackManager.rack_tier
+	if tier >= 2:
+		upgrade_tier2_btn.disabled = true
+		upgrade_tier2_btn.text = "✔ Tier 2: Blade 12U Enterprise Attivo"
+	else:
+		upgrade_tier2_btn.disabled = not is_unlocked or not EconomyManager.can_afford(750.0)
+		upgrade_tier2_btn.text = "▲ Upgrade a Server Blade 12U Enterprise (€ 750,00) [Capacità: 8 domini]"
+		
+	if tier >= 3:
+		upgrade_tier3_btn.disabled = true
+		upgrade_tier3_btn.text = "✔ Tier 3: Full Cabinet 42U Data Center Attivo"
+	elif tier == 2:
+		upgrade_tier3_btn.disabled = not EconomyManager.can_afford(1600.0)
+		upgrade_tier3_btn.text = "▲ Upgrade a Full Cabinet 42U Data Center (€ 1.600,00) [Capacità: 20 domini]"
+	else:
+		upgrade_tier3_btn.disabled = true
+		upgrade_tier3_btn.text = "▲ Upgrade Cabinet 42U (Richiede Tier 2)"
 
 func _on_rack_telemetry(temp: float, fans: int, bw: float, status: String) -> void:
 	var color_tag = "#44ff88"

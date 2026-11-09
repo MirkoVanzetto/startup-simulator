@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://wbf8webforge01"]
+[gd_scene load_steps=6 format=3 uid="uid://wbf8webforge01"]
 
 [ext_resource type="Script" path="res://scripts/ui/minigames/web_forge_controller.gd" id="1_wfc"]
 
@@ -11,8 +11,8 @@ content_margin_top = 8.0
 content_margin_right = 16.0
 content_margin_bottom = 8.0
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_palette"]
-bg_color = Color(0.14, 0.16, 0.22, 1)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.13, 0.15, 0.20, 1)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
@@ -33,10 +33,26 @@ corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
-content_margin_left = 20.0
-content_margin_top = 20.0
-content_margin_right = 20.0
-content_margin_bottom = 20.0
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_terminal"]
+bg_color = Color(0.05, 0.06, 0.08, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.2, 0.7, 0.4, 0.8)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
 
 [node name="WebForge" type="Control"]
 layout_mode = 3
@@ -61,13 +77,13 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 24.0
-offset_top = 16.0
-offset_right = -24.0
-offset_bottom = -16.0
+offset_left = 20.0
+offset_top = 14.0
+offset_right = -20.0
+offset_bottom = -14.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
 
 [node name="Header" type="PanelContainer" parent="Main"]
 layout_mode = 2
@@ -81,7 +97,7 @@ theme_override_constants/separation = 16
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
 theme_override_font_sizes/font_size = 15
-text = "⚡ WebForge IDE v1.0 — Progetto: Pizzeria Da Mario (Torino)"
+text = "⚡ WebForge IDE v2.0 — Architettura & Compilazione Software"
 
 [node name="Spacer" type="Control" parent="Main/Header/HBox"]
 layout_mode = 2
@@ -105,51 +121,50 @@ text = " ✕ Chiudi IDE "
 [node name="Body" type="HSplitContainer" parent="Main"]
 layout_mode = 2
 size_flags_vertical = 3
-split_offset = 320
+split_offset = 380
 
 [node name="Palette" type="PanelContainer" parent="Main/Body"]
+custom_minimum_size = Vector2(360, 0)
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_palette")
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
-[node name="VBox" type="VBoxContainer" parent="Main/Body/Palette"]
+[node name="PaletteScroll" type="ScrollContainer" parent="Main/Body/Palette"]
 layout_mode = 2
-theme_override_constants/separation = 14
+horizontal_scroll_mode = 0
 
-[node name="PaletteTitle" type="Label" parent="Main/Body/Palette/VBox"]
+[node name="VBox" type="VBoxContainer" parent="Main/Body/Palette/PaletteScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="PaletteTitle" type="Label" parent="Main/Body/Palette/PaletteScroll/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.8, 0.3, 1)
-theme_override_font_sizes/font_size = 15
-text = "COMPONENTI RICHIESTI DA MARIO"
+theme_override_font_sizes/font_size = 14
+text = "1. ARCHITETTURA & REQUISITI"
 
-[node name="ChkHeader" type="CheckButton" parent="Main/Body/Palette/VBox"]
+[node name="FrameworkLabel" type="Label" parent="Main/Body/Palette/PaletteScroll/VBox"]
 layout_mode = 2
-text = "1. Logo Mole & Insegna"
+theme_override_font_sizes/font_size = 12
+text = "Framework & Motore Rendering:"
 
-[node name="ChkHero" type="CheckButton" parent="Main/Body/Palette/VBox"]
+[node name="FrameworkPicker" type="OptionButton" parent="Main/Body/Palette/PaletteScroll/VBox"]
 layout_mode = 2
-text = "2. Hero Banner & Slogan"
+selected = 0
+item_count = 3
+popup/item_0/text = "Vanilla HTML5 + Modern CSS"
+popup/item_0/id = 0
+popup/item_1/text = "Vue 3 + Vite Bundler"
+popup/item_1/id = 1
+popup/item_2/text = "React 19 + Next.js SSR"
+popup/item_2/id = 2
 
-[node name="ChkMenu" type="CheckButton" parent="Main/Body/Palette/VBox"]
+[node name="ThemeLabel" type="Label" parent="Main/Body/Palette/PaletteScroll/VBox"]
 layout_mode = 2
-text = "3. Menu Pizze Speciali"
+theme_override_font_sizes/font_size = 12
+text = "Identità Visiva & Stile:"
 
-[node name="ChkHours" type="CheckButton" parent="Main/Body/Palette/VBox"]
-layout_mode = 2
-text = "4. Orari & Mappa Via Po"
-
-[node name="ChkBooking" type="CheckButton" parent="Main/Body/Palette/VBox"]
-layout_mode = 2
-text = "5. Modulo Prenotazione"
-
-[node name="Sep" type="HSeparator" parent="Main/Body/Palette/VBox"]
-layout_mode = 2
-
-[node name="ThemeLabel" type="Label" parent="Main/Body/Palette/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.85, 0.9, 1)
-text = "Tema & Stile Grafico:"
-
-[node name="ThemePicker" type="OptionButton" parent="Main/Body/Palette/VBox"]
+[node name="ThemePicker" type="OptionButton" parent="Main/Body/Palette/PaletteScroll/VBox"]
 layout_mode = 2
 selected = 0
 item_count = 3
@@ -157,30 +172,143 @@ popup/item_0/text = "Rosso Tradizionale Napoletano"
 popup/item_0/id = 0
 popup/item_1/text = "Verde Basilico Fresco"
 popup/item_1/id = 1
-popup/item_2/text = "Antracite Moderno Gourmet"
+popup/item_2/text = "Blu Tech Sabaudo"
 popup/item_2/id = 2
 
-[node name="PreviewArea" type="PanelContainer" parent="Main/Body"]
+[node name="Sep1" type="HSeparator" parent="Main/Body/Palette/PaletteScroll/VBox"]
 layout_mode = 2
+
+[node name="ModulesTitle" type="Label" parent="Main/Body/Palette/PaletteScroll/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "2. MODULI FUNZIONALI CLIENTE"
+
+[node name="ChkHeader" type="CheckButton" parent="Main/Body/Palette/PaletteScroll/VBox"]
+layout_mode = 2
+text = "1. Logo Mole & Insegna"
+
+[node name="ChkHero" type="CheckButton" parent="Main/Body/Palette/PaletteScroll/VBox"]
+layout_mode = 2
+text = "2. Hero Banner Tradizione"
+
+[node name="ChkMenu" type="CheckButton" parent="Main/Body/Palette/PaletteScroll/VBox"]
+layout_mode = 2
+text = "3. Menu Pizze Veraci"
+
+[node name="ChkHours" type="CheckButton" parent="Main/Body/Palette/PaletteScroll/VBox"]
+layout_mode = 2
+text = "4. Orari & Sede Via Po"
+
+[node name="ChkBooking" type="CheckButton" parent="Main/Body/Palette/PaletteScroll/VBox"]
+layout_mode = 2
+text = "5. Prenotazione Tavoli Online"
+
+[node name="Sep2" type="HSeparator" parent="Main/Body/Palette/PaletteScroll/VBox"]
+layout_mode = 2
+
+[node name="ChkOpt" type="CheckButton" parent="Main/Body/Palette/PaletteScroll/VBox"]
+layout_mode = 2
+text = "Ottimizzazione WebP & Tree-shaking"
+
+[node name="CompileButton" type="Button" parent="Main/Body/Palette/PaletteScroll/VBox"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
+theme_override_font_sizes/font_size = 14
+disabled = true
+text = "⚡ Avvia Compilazione (0/5)"
+
+[node name="RightWorkspace" type="VBoxContainer" parent="Main/Body"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="WorkspaceTabBar" type="HBoxContainer" parent="Main/Body/RightWorkspace"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TabPreviewBtn" type="Button" parent="Main/Body/RightWorkspace/WorkspaceTabBar"]
+layout_mode = 2
+text = "🌐 Live Preview Sito"
+
+[node name="TabTerminalBtn" type="Button" parent="Main/Body/RightWorkspace/WorkspaceTabBar"]
+layout_mode = 2
+text = "📟 Terminale di Compilazione"
+
+[node name="BuildSpeedInfo" type="Label" parent="Main/Body/RightWorkspace/WorkspaceTabBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.3, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 2
+text = "Velocità build: Base (Laptop)"
+
+[node name="PreviewArea" type="PanelContainer" parent="Main/Body/RightWorkspace"]
+layout_mode = 2
+size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_preview")
 
-[node name="Scroll" type="ScrollContainer" parent="Main/Body/PreviewArea"]
+[node name="Scroll" type="ScrollContainer" parent="Main/Body/RightWorkspace/PreviewArea"]
 layout_mode = 2
+horizontal_scroll_mode = 0
 
-[node name="VBox" type="VBoxContainer" parent="Main/Body/PreviewArea/Scroll"]
+[node name="VBox" type="VBoxContainer" parent="Main/Body/RightWorkspace/PreviewArea/Scroll"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 12
 
+[node name="TerminalArea" type="PanelContainer" parent="Main/Body/RightWorkspace"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_terminal")
+
+[node name="VBox" type="VBoxContainer" parent="Main/Body/RightWorkspace/TerminalArea"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TerminalHeader" type="HBoxContainer" parent="Main/Body/RightWorkspace/TerminalArea/VBox"]
+layout_mode = 2
+
+[node name="TermTitle" type="Label" parent="Main/Body/RightWorkspace/TerminalArea/VBox/TerminalHeader"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 1, 0.6, 1)
+theme_override_font_sizes/font_size = 13
+text = "root@turin-laptop:~/workspace$ vite build --mode production"
+
+[node name="TerminalProgress" type="ProgressBar" parent="Main/Body/RightWorkspace/TerminalArea/VBox"]
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+
+[node name="TerminalLogs" type="RichTextLabel" parent="Main/Body/RightWorkspace/TerminalArea/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+scroll_following = true
+text = "[color=#00ccff]WebForge Toolchain v2.0 pronta per il bundling.[/color]\n"
+
 [node name="Footer" type="MarginContainer" parent="Main"]
 layout_mode = 2
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 14
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 6
 
-[node name="CompileButton" type="Button" parent="Main/Footer"]
-custom_minimum_size = Vector2(0, 44)
+[node name="HBox" type="HBoxContainer" parent="Main/Footer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_constants/separation = 16
+
+[node name="StatusLabel" type="Label" parent="Main/Footer/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.8, 0.85, 0.9, 1)
+theme_override_font_sizes/font_size = 13
+text = "Seleziona i moduli funzionali richiesti per avviare il compilatore."
+
+[node name="DeliverButton" type="Button" parent="Main/Footer/HBox"]
+custom_minimum_size = Vector2(260, 40)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
+theme_override_font_sizes/font_size = 14
 disabled = true
-text = "Inserisci tutti i 5 requisiti richiesti da Mario (0/5)"
+text = "★ Consegna Release Finale"

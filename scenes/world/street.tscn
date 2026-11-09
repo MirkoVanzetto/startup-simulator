@@ -25,6 +25,12 @@
 [ext_resource type="PackedScene" path="res://assets/models/restaurant/chair_A.gltf" id="23_chr"]
 [ext_resource type="PackedScene" path="res://scenes/world/tech_shop.tscn" id="24_tsh"]
 [ext_resource type="PackedScene" path="res://scenes/world/cafe.tscn" id="25_caf"]
+[ext_resource type="PackedScene" path="res://assets/models/city/road-crossing.glb" id="26_rcr"]
+[ext_resource type="PackedScene" path="res://assets/models/city/light-curved.glb" id="27_lcr"]
+[ext_resource type="PackedScene" path="res://assets/models/city/construction-cone.glb" id="28_cne"]
+[ext_resource type="PackedScene" path="res://assets/models/city/construction-barrier.glb" id="29_cbr"]
+[ext_resource type="PackedScene" path="res://assets/models/city/building-type-b.glb" id="30_twn_b"]
+[ext_resource type="PackedScene" path="res://assets/models/city/building-type-c.glb" id="31_twn_c"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_road"]
 size = Vector3(16.0, 0.4, 30.0)
@@ -42,12 +48,15 @@ size = Vector3(20.0, 8.0, 1.0)
 
 [node name="RoadwayDistrict" parent="." instance=ExtResource("1_str_dist")]
 
+[node name="RoadCrossing" parent="." instance=ExtResource("26_rcr")]
+transform = Transform3D(2.5, 0, 0, 0, 1, 0, 0, 0, 2.5, 0.0, 0.02, 8.4)
+
 [node name="Buildings" type="Node3D" parent="."]
 
 [node name="BuildingA" parent="Buildings" instance=ExtResource("2_bld_a")]
 transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -6.2, 0, 2.0)
 
-[node name="BuildingB_Upper" parent="Buildings" instance=ExtResource("3_bld_b")]
+[node name="BuildingB_Upper" parent="Buildings" instance=ExtResource("30_twn_b")]
 transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -6.2, 3.2, 8.4)
 
 [node name="BuildingC" parent="Buildings" instance=ExtResource("4_bld_c")]
@@ -59,7 +68,7 @@ transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -6.2, 0, 21.2)
 [node name="BuildingD" parent="Buildings" instance=ExtResource("5_bld_d")]
 transform = Transform3D(-3.2, 0, 0, 0, 3.2, 0, 0, 0, -3.2, 6.2, 0, 2.0)
 
-[node name="BuildingE_Upper" parent="Buildings" instance=ExtResource("6_bld_e")]
+[node name="BuildingE_Upper" parent="Buildings" instance=ExtResource("31_twn_c")]
 transform = Transform3D(-3.2, 0, 0, 0, 3.2, 0, 0, 0, -3.2, 6.2, 3.2, 8.4)
 
 [node name="BuildingF" parent="Buildings" instance=ExtResource("7_bld_f")]
@@ -189,6 +198,27 @@ font_size = 24
 modulate = Color(1, 0.85, 0.35, 1)
 outline_size = 8
 outline_color = Color(0.25, 0.12, 0.05, 1)
+
+[node name="StreetLightCurvedWest" parent="StreetProps" instance=ExtResource("27_lcr")]
+transform = Transform3D(1.8, 0, 0, 0, 1.8, 0, 0, 0, 1.8, -3.5, 0.16, 7.8)
+
+[node name="StreetLightCurvedEast" parent="StreetProps" instance=ExtResource("27_lcr")]
+transform = Transform3D(-1.8, 0, 0, 0, 1.8, 0, 0, 0, -1.8, 3.5, 0.16, 9.0)
+
+[node name="WorkBarrier1" parent="StreetProps" instance=ExtResource("29_cbr")]
+transform = Transform3D(1.8, 0, 0, 0, 1.8, 0, 0, 0, 1.8, -1.2, 0.05, 23.2)
+
+[node name="WorkBarrier2" parent="StreetProps" instance=ExtResource("29_cbr")]
+transform = Transform3D(1.8, 0, 0, 0, 1.8, 0, 0, 0, 1.8, 1.2, 0.05, 23.2)
+
+[node name="WorkCone1" parent="StreetProps" instance=ExtResource("28_cne")]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, -2.2, 0.05, 22.5)
+
+[node name="WorkCone2" parent="StreetProps" instance=ExtResource("28_cne")]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 2.2, 0.05, 22.5)
+
+[node name="WorkCone3" parent="StreetProps" instance=ExtResource("28_cne")]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0.0, 0.05, 22.5)
 
 [node name="PizzeriaSign" type="Label3D" parent="StreetProps"]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 3.6, 14.9)

@@ -106,12 +106,55 @@ func _process(_delta: float) -> void:
 			
 		var comp = get_tree().root.find_child("ComputerScreen", true, false)
 		if comp:
-			comp._open_window(comp.talent_window)
-		print("State: TO-OS Desktop - TalentHub Window.")
+			comp._open_window(comp.shop_window)
+		print("State: TO-OS Desktop - Shop Window.")
 		
 	if frame_count == 95:
 		var image = get_viewport().get_texture().get_image()
 		if image:
+			image.save_png("/home/antigravity/startup_simulator_shop.png")
+			print("✔ TorinoHardware 2-Column Shop Screen Captured.")
+			
+		var comp = get_tree().root.find_child("ComputerScreen", true, false)
+		if comp:
+			comp._open_window(comp.talent_window)
+		print("State: TO-OS Desktop - TalentHub Window.")
+		
+	if frame_count == 110:
+		var image = get_viewport().get_texture().get_image()
+		if image:
 			image.save_png("/home/antigravity/startup_simulator_talent_hub.png")
 			print("✔ Talent Hub Screen Captured.")
+			
+		# Open WebForge IDE
+		ContractManager.init_tutorial_contract()
+		ContractManager.advance_tutorial_to_in_progress()
+		EventBus.minigame_started.emit("web_forge")
+		print("State: WebForge IDE v2.0.")
+		
+	if frame_count == 125:
+		var image = get_viewport().get_texture().get_image()
+		if image:
+			image.save_png("/home/antigravity/startup_simulator_webforge.png")
+			print("✔ WebForge IDE v2.0 Screen Captured.")
+			
+		# Open Firewall Router
+		EventBus.minigame_started.emit("firewall_router")
+		print("State: NetShield Firewall Router.")
+		
+	if frame_count == 140:
+		var image = get_viewport().get_texture().get_image()
+		if image:
+			image.save_png("/home/antigravity/startup_simulator_firewall.png")
+			print("✔ NetShield Firewall Routing Screen Captured.")
+			
+		# Return to Desktop
+		EventBus.computer_opened.emit()
+		print("State: TO-OS Desktop.")
+		
+	if frame_count == 155:
+		var image = get_viewport().get_texture().get_image()
+		if image:
+			image.save_png("/home/antigravity/startup_simulator_to_os.png")
+			print("✔ TO-OS Desktop Screen Captured.")
 		get_tree().quit(0)

@@ -14,8 +14,12 @@ func _ready() -> void:
 	all_passed = run_calendar_tests() and all_passed
 	all_passed = run_marketplace_tests() and all_passed
 	all_passed = run_server_rack_tests() and all_passed
+	all_passed = run_server_tier_and_overload_tests() and all_passed
 	all_passed = run_employee_recruitment_tests() and all_passed
 	all_passed = run_story_progression_tests() and all_passed
+	all_passed = run_ui_screen_containment_tests() and all_passed
+	all_passed = run_firewall_routing_tests() and all_passed
+	all_passed = run_timed_compilation_tests() and all_passed
 	all_passed = run_vertical_slice_integration() and all_passed
 	all_passed = run_world_navigation_tests() and all_passed
 	
@@ -321,4 +325,148 @@ func run_world_navigation_tests() -> bool:
 	passed = assert_true(street_result.is_empty(), "Street corridor is unobstructed all the way to Pizzeria!") and passed
 	
 	world_inst.queue_free()
+	return passed
+
+func run_server_tier_and_overload_tests() -> bool:
+	print("\n--- Running Server Rack Tiers & 3-Domain Overload Tests ---")
+	var passed = true
+	
+	ServerRackManager.unlock_server_rack()
+	ServerRackManager.rack_tier = 1
+	ServerRackManager.active_incident = ""
+	ServerRackManager.hosted_domains.clear()
+	
+	passed = assert_true(ServerRackManager.get_max_safe_domains() == 3, "Tier 1 starter rack has max 3 safe domains") and passed
+	
+	# Add exactly 3 domains
+	ServerRackManager.add_hosted_client("client1.it", "Client 1", 30.0)
+	ServerRackManager.add_hosted_client("client2.it", "Client 2", 30.0)
+	ServerRackManager.add_hosted_client("client3.it", "Client 3", 30.0)
+	
+	ServerRackManager._on_time_tick(12, 0, 1)
+	passed = assert_true(ServerRackManager.active_incident == "", "3 domains run safely on Tier 1 without overload") and passed
+	
+	# Add 4th domain -> triggers overload
+	ServerRackManager.add_hosted_client("client4.it", "Client 4", 30.0)
+	ServerRackManager._on_time_tick(12, 1, 1)
+	passed = assert_true(ServerRackManager.active_incident == "overload_cacoso", "4th domain triggers 'overload_cacoso' on Tier 1 mini-rack") and passed
+	passed = assert_true(ServerRackManager.status_health == "critical", "Status health critical when overloaded") and passed
+	
+	# Upgrade to Tier 2 (Blade 12U Enterprise)
+	EconomyManager.balance = 1000.0
+	var upgraded = ServerRackManager.upgrade_rack_tier(2)
+	passed = assert_true(upgraded, "Successfully upgraded to Tier 2: Blade 12U Enterprise (€ 750)") and passed
+	passed = assert_true(ServerRackManager.rack_tier == 2, "Rack Tier updated to 2") and passed
+	passed = assert_true(ServerRackManager.get_max_safe_domains() == 8, "Tier 2 capacity increased to 8 safe domains") and passed
+	passed = assert_true(ServerRackManager.active_incident == "", "Overload incident resolved by upgrading to Tier 2") and passed
+	
+	return passed
+
+func run_ui_screen_containment_tests() -> bool:
+	print("\n--- Running UI Screen Containment & Overflow Tests ---")
+	var passed = true
+	
+	var cs_scene = load("res://scenes/ui/computer_screen.tscn")
+	passed = assert_true(cs_scene != null, "computer_screen.tscn loads properly") and passed
+	
+	var cs = cs_scene.instantiate()
+	add_child(cs)
+	
+	# Check Shop layout containment
+	var shop_scroll = cs.get_node_or_null("Windows/ShopWindow/Margin/VBox/ShopScroll")
+	passed = assert_true(shop_scroll != null, "ShopWindow contains ShopScroll (ScrollContainer)") and passed
+	if shop_scroll:
+		passed = assert_true(shop_scroll.horizontal_scroll_mode == 0, "Horizontal scroll is disabled (NO lateral overflow)") and passed
+		var grid = shop_scroll.get_node_or_null("Grid")
+		passed = assert_true(grid != null and grid.columns == 2, "Shop grid arranges cards in 2 columns") and passed
+		
+	# Check Rack upgrade buttons exist
+	var tier2_btn = cs.get_node_or_null("Windows/RackWindow/Margin/VBox/Split/ModulesPanel/VBox/UpgradeTier2Btn")
+	var tier3_btn = cs.get_node_or_null("Windows/RackWindow/Margin/VBox/Split/ModulesPanel/VBox/UpgradeTier3Btn")
+	passed = assert_true(tier2_btn != null and tier3_btn != null, "RackWindow has Tier 2 and Tier 3 upgrade buttons") and passed
+	
+	# Check Firewall desktop icon exists
+	var fw_icon = cs.get_node_or_null("DesktopIcons/VBox/FirewallIcon")
+	passed = assert_true(fw_icon != null, "DesktopIcons contains NetShield Cyber Firewall button") and passed
+	
+	cs.queue_free()
+	return passed
+
+func run_firewall_routing_tests() -> bool:
+	print("\n--- Running NetShield Firewall Circuit Routing Puzzle Tests ---")
+	var passed = true
+	
+	var fw_scene = load("res://scenes/ui/minigames/firewall_router.tscn")
+	passed = assert_true(fw_scene != null, "firewall_router.tscn loads properly") and passed
+	
+	var fw = fw_scene.instantiate()
+	add_child(fw)
+	
+	passed = assert_true(fw.levels.size() == 3, "Firewall router has 3 client contracts (Studio Cavour, AutoTorino, TechLab)") and passed
+	
+	# Test Level 1: Studio Notarile Cavour
+	fw._load_level(0)
+	passed = assert_true(fw.active_path.size() == 1, "Level starts with Checkpoint 1 in path") and passed
+	passed = assert_true(fw.next_required_checkpoint == 2, "Next required checkpoint is 2") and passed
+	
+	# Trace path: (0,0)->(0,1)->(0,2)->(0,3) [hits 2] -> (1,3)->(2,3)->(3,3) [hits 3] -> (3,2)->(3,1)->(3,0) [hits 4]
+	var steps = [
+		Vector2i(0, 1), Vector2i(0, 2), Vector2i(0, 3), # hits Checkpoint 2
+		Vector2i(1, 3), Vector2i(2, 3), Vector2i(3, 3), # hits Checkpoint 3
+		Vector2i(3, 2), Vector2i(3, 1), Vector2i(3, 0)  # hits Checkpoint 4
+	]
+	
+	for s in steps:
+		fw._on_cell_clicked(s)
+		
+	passed = assert_true(fw.is_level_completed, "Level 1 circuit completed successfully connecting 1->2->3->4 without crossing!") and passed
+	passed = assert_true(not fw.deploy_btn.disabled, "Deploy button enabled upon circuit verification") and passed
+	
+	# Test non-crossing prevention: try clicking an already visited cell
+	var prev_path_len = fw.active_path.size()
+	fw.is_level_completed = false
+	fw._on_cell_clicked(Vector2i(0, 1))
+	passed = assert_true(fw.active_path.size() == prev_path_len, "Non-crossing rule prevents re-visiting already traversed cells") and passed
+	
+	fw.queue_free()
+	return passed
+
+func run_timed_compilation_tests() -> bool:
+	print("\n--- Running WebForge Timed Compilation & Speed Boost Tests ---")
+	var passed = true
+	
+	var wf_scene = load("res://scenes/ui/minigames/web_forge.tscn")
+	passed = assert_true(wf_scene != null, "web_forge.tscn loads properly") and passed
+	
+	var wf = wf_scene.instantiate()
+	add_child(wf)
+	
+	# Ensure story contract is accepted
+	ContractManager.init_tutorial_contract()
+	ContractManager.advance_tutorial_to_in_progress()
+	
+	wf._on_minigame_started("web_forge")
+	
+	# Verify checkboxes start UNCHECKED (not pre-selected)
+	passed = assert_true(not wf.chk_header.button_pressed, "Header checkbox starts unchecked") and passed
+	passed = assert_true(not wf.chk_hero.button_pressed, "Hero checkbox starts unchecked") and passed
+	passed = assert_true(not wf.chk_menu.button_pressed, "Menu checkbox starts unchecked") and passed
+	passed = assert_true(not wf.chk_hours.button_pressed, "Hours checkbox starts unchecked") and passed
+	passed = assert_true(not wf.chk_booking.button_pressed, "Booking checkbox starts unchecked") and passed
+	passed = assert_true(wf.compile_btn.disabled, "Compile button disabled when nothing is selected (0/5)") and passed
+	
+	# Check speed calculation on starter laptop
+	GameManager.studio_upgrades_installed.clear()
+	wf._calculate_compilation_speed()
+	passed = assert_true(wf.compile_target_duration == 6.5, "Base compilation duration is 6.5s on starter laptop") and passed
+	
+	# Add monitor and employee boosts
+	GameManager.studio_upgrades_installed.append("monitor_upgrade")
+	EmployeeManager.hire_employee("emp_luca")
+	wf._calculate_compilation_speed()
+	passed = assert_true(wf.compile_target_duration < 3.0, "Compilation duration reduced to %0.1fs with Dual Monitor (-1.5s) and Luca Dev (-2.2s)" % wf.compile_target_duration) and passed
+	
+	# Clean up employee
+	EmployeeManager.fire_employee("emp_luca")
+	wf.queue_free()
 	return passed

@@ -391,12 +391,6 @@ func _commit_placement() -> void:
 
 	var success = FurniturePlacementManager.place_furniture(current_item_id, current_ghost_pos, current_rotation_y)
 	if success:
-		spawn_placed_item_node({
-			"id": current_item_id,
-			"model_path": FurniturePlacementManager.get_model_path_for_item(current_item_id),
-			"position": [current_ghost_pos.x, current_ghost_pos.y, current_ghost_pos.z],
-			"rotation_y": current_rotation_y
-		})
 		SoundManager.play_ui_click()
 		SaveManager.save_game()
 		EventBus.notification_posted.emit("Arredo Posizionato", "Elemento d'arredo posizionato nello studio con successo!", "success")

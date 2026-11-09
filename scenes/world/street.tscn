@@ -1,308 +1,79 @@
-[gd_scene load_steps=45 format=3 uid="uid://str8street01"]
+[gd_scene load_steps=28 format=3 uid="uid://str8street01"]
 
-[ext_resource type="PackedScene" path="res://assets/environments/street_district.glb" id="1_str_dist"]
-[ext_resource type="PackedScene" path="res://assets/models/city/building_A.gltf" id="2_bld_a"]
-[ext_resource type="PackedScene" path="res://assets/models/city/building_B.gltf" id="3_bld_b"]
-[ext_resource type="PackedScene" path="res://assets/models/city/building_C.gltf" id="4_bld_c"]
-[ext_resource type="PackedScene" path="res://assets/models/city/building_D.gltf" id="5_bld_d"]
-[ext_resource type="PackedScene" path="res://assets/models/city/building_E.gltf" id="6_bld_e"]
-[ext_resource type="PackedScene" path="res://assets/models/city/building_F.gltf" id="7_bld_f"]
-[ext_resource type="PackedScene" path="res://assets/models/city/building_G.gltf" id="8_bld_g"]
-[ext_resource type="PackedScene" path="res://assets/models/city/building_H.gltf" id="9_bld_h"]
-[ext_resource type="PackedScene" path="res://assets/models/city/car_sedan.gltf" id="10_car_s"]
-[ext_resource type="PackedScene" path="res://assets/models/city/car_taxi.gltf" id="11_car_t"]
-[ext_resource type="PackedScene" path="res://assets/models/city/car_stationwagon.gltf" id="12_car_w"]
-[ext_resource type="PackedScene" path="res://assets/models/city/car_hatchback.gltf" id="13_car_h"]
-[ext_resource type="PackedScene" path="res://assets/models/urban/tree-large.glb" id="14_tree"]
-[ext_resource type="PackedScene" path="res://assets/models/city/streetlight.gltf" id="15_stl"]
+[ext_resource type="PackedScene" path="res://assets/models/turin/turin_roadway_boulevard.glb" id="1_boulevard"]
+[ext_resource type="PackedScene" path="res://assets/models/turin/turin_portico_module.glb" id="2_portico"]
+[ext_resource type="PackedScene" path="res://assets/models/turin/turin_palazzo_facades.glb" id="3_palazzi"]
+[ext_resource type="PackedScene" path="res://assets/models/turin/turin_cross_street.glb" id="4_cross_street"]
+[ext_resource type="PackedScene" path="res://assets/models/turin/turin_piazza_san_carlo.glb" id="5_piazza"]
+[ext_resource type="PackedScene" path="res://assets/models/turin/turin_lantern_classic.glb" id="6_lantern"]
+[ext_resource type="PackedScene" path="res://scenes/world/tech_shop.tscn" id="7_tech_shop"]
+[ext_resource type="PackedScene" path="res://scenes/world/cafe.tscn" id="8_cafe"]
+[ext_resource type="PackedScene" path="res://assets/models/city/car_sedan.gltf" id="9_car_s"]
+[ext_resource type="PackedScene" path="res://assets/models/city/car_taxi.gltf" id="10_car_t"]
+[ext_resource type="PackedScene" path="res://assets/models/city/car_stationwagon.gltf" id="11_car_w"]
+[ext_resource type="PackedScene" path="res://assets/models/city/car_hatchback.gltf" id="12_car_h"]
+[ext_resource type="PackedScene" path="res://assets/models/restaurant/table_round_A.gltf" id="13_tbl"]
+[ext_resource type="PackedScene" path="res://assets/models/restaurant/chair_A.gltf" id="14_chr"]
+[ext_resource type="PackedScene" path="res://assets/models/furniture/pottedPlant.glb" id="15_plt"]
 [ext_resource type="PackedScene" path="res://assets/models/city/bench.gltf" id="16_bnc"]
-[ext_resource type="PackedScene" path="res://assets/models/city/bush.gltf" id="17_bsh"]
-[ext_resource type="PackedScene" path="res://assets/models/city/firehydrant.gltf" id="18_hyd"]
-[ext_resource type="PackedScene" path="res://assets/models/city/dumpster.gltf" id="19_dmp"]
-[ext_resource type="PackedScene" path="res://assets/models/city/trash_A.gltf" id="20_tsh"]
-[ext_resource type="PackedScene" path="res://assets/models/urban/detail-awning-wide.glb" id="21_awn"]
-[ext_resource type="PackedScene" path="res://assets/models/restaurant/table_round_A.gltf" id="22_tbl"]
-[ext_resource type="PackedScene" path="res://assets/models/restaurant/chair_A.gltf" id="23_chr"]
-[ext_resource type="PackedScene" path="res://scenes/world/tech_shop.tscn" id="24_tsh"]
-[ext_resource type="PackedScene" path="res://scenes/world/cafe.tscn" id="25_caf"]
-[ext_resource type="PackedScene" path="res://assets/models/city/road-crossing.glb" id="26_rcr"]
-[ext_resource type="PackedScene" path="res://assets/models/city/light-curved.glb" id="27_lcr"]
-[ext_resource type="PackedScene" path="res://assets/models/restaurant/pillar_A.gltf" id="28_pil"]
-[ext_resource type="PackedScene" path="res://assets/models/urban/wall-a-open.glb" id="29_wop"]
-[ext_resource type="PackedScene" path="res://assets/models/urban/wall-a-roof-detailed.glb" id="30_wrf"]
-[ext_resource type="PackedScene" path="res://assets/models/urban/detail-bench.glb" id="31_ubn"]
-[ext_resource type="PackedScene" path="res://assets/models/urban/detail-light-single.glb" id="32_usl"]
-[ext_resource type="PackedScene" path="res://assets/models/furniture/pottedPlant.glb" id="33_plt"]
-[ext_resource type="PackedScene" path="res://assets/models/restaurant/table_round_A_decorated.gltf" id="34_tbd"]
-[ext_resource type="PackedScene" path="res://assets/models/city/road_junction.gltf" id="35_rjn"]
-[ext_resource type="PackedScene" path="res://assets/models/city/road_straight.gltf" id="36_rst"]
-[ext_resource type="PackedScene" path="res://assets/models/city/trafficlight_A.gltf" id="37_tfl"]
-[ext_resource type="PackedScene" path="res://assets/models/urban/balcony-type-a.glb" id="38_bal"]
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_road"]
-size = Vector3(26.0, 0.4, 34.0)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_wall_north"]
-size = Vector3(1.0, 8.0, 10.0)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_wall_south"]
-size = Vector3(1.0, 8.0, 10.0)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_wall_cross"]
-size = Vector3(1.0, 8.0, 8.0)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_wall_cap"]
-size = Vector3(26.0, 8.0, 1.0)
+[ext_resource type="PackedScene" path="res://assets/models/urban/detail-awning-wide.glb" id="17_awn"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_car_body"]
 size = Vector3(1.4, 1.2, 2.6)
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_road"]
+size = Vector3(10.0, 0.4, 25.0)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_portico_floor"]
+size = Vector3(4.6, 0.4, 22.0)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_piazza_floor"]
+size = Vector3(32.0, 0.4, 25.0)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_cross_floor"]
+size = Vector3(15.0, 0.4, 8.0)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_lateral_north"]
+size = Vector3(1.0, 8.0, 7.0)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_lateral_south"]
+size = Vector3(1.0, 8.0, 4.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_cross_cap"]
+size = Vector3(1.0, 8.0, 8.0)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_piazza_side"]
+size = Vector3(1.0, 8.0, 23.0)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_south_cap"]
+size = Vector3(34.0, 8.0, 1.0)
+
 [node name="Street" type="Node3D"]
 
-[node name="RoadwayDistrict" parent="." instance=ExtResource("1_str_dist")]
-
-[node name="RoadCrossing" parent="." instance=ExtResource("26_rcr")]
-transform = Transform3D(2.5, 0, 0, 0, 1, 0, 0, 0, 2.5, 0.0, 0.02, 8.4)
-
-[node name="RoadJunctionBogino" parent="." instance=ExtResource("35_rjn")]
-transform = Transform3D(3.2, 0, 0, 0, 1, 0, 0, 0, 3.2, 0.0, 0.02, 21.0)
-
-[node name="RoadBoginoWest" parent="." instance=ExtResource("36_rst")]
-transform = Transform3D(0, 0, 3.2, 0, 1, 0, -3.2, 0, 0, -6.4, 0.02, 21.0)
-
-[node name="RoadBoginoEast" parent="." instance=ExtResource("36_rst")]
-transform = Transform3D(0, 0, -3.2, 0, 1, 0, 3.2, 0, 0, 6.4, 0.02, 21.0)
-
-[node name="RoadCrossingBogino" parent="." instance=ExtResource("26_rcr")]
-transform = Transform3D(2.5, 0, 0, 0, 1, 0, 0, 0, 2.5, 0.0, 0.02, 24.2)
-
-[node name="Buildings" type="Node3D" parent="."]
-
-[node name="BuildingA" parent="Buildings" instance=ExtResource("2_bld_a")]
-transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -6.2, 0, 2.0)
-
-[node name="BuildingC" parent="Buildings" instance=ExtResource("4_bld_c")]
-transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -6.2, 0, 14.8)
-
-[node name="BuildingG" parent="Buildings" instance=ExtResource("8_bld_g")]
-transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -6.2, 0, 21.2)
-
-[node name="PalazzoTechShop" parent="Buildings" instance=ExtResource("4_bld_c")]
-transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -9.5, 0.0, 8.4)
-
-[node name="BuildingBoginoNW" parent="Buildings" instance=ExtResource("7_bld_f")]
-transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -10.5, 0.0, 17.5)
-
-[node name="BuildingBoginoSW" parent="Buildings" instance=ExtResource("8_bld_g")]
-transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -10.5, 0.0, 24.5)
-
-[node name="BuildingD" parent="Buildings" instance=ExtResource("5_bld_d")]
-transform = Transform3D(-3.2, 0, 0, 0, 3.2, 0, 0, 0, -3.2, 6.2, 0, 2.0)
-
-[node name="BuildingF" parent="Buildings" instance=ExtResource("7_bld_f")]
-transform = Transform3D(-3.2, 0, 0, 0, 3.2, 0, 0, 0, -3.2, 6.2, 0, 14.8)
-
-[node name="BuildingH" parent="Buildings" instance=ExtResource("9_bld_h")]
-transform = Transform3D(-3.2, 0, 0, 0, 3.2, 0, 0, 0, -3.2, 6.2, 0, 21.2)
-
-[node name="PalazzoCafe" parent="Buildings" instance=ExtResource("5_bld_d")]
-transform = Transform3D(-3.2, 0, 0, 0, 3.2, 0, 0, 0, -3.2, 9.5, 0.0, 8.4)
-
-[node name="BuildingBoginoNE" parent="Buildings" instance=ExtResource("5_bld_d")]
-transform = Transform3D(-3.2, 0, 0, 0, 3.2, 0, 0, 0, -3.2, 10.5, 0.0, 17.5)
-
-[node name="BuildingBoginoSE" parent="Buildings" instance=ExtResource("9_bld_h")]
-transform = Transform3D(-3.2, 0, 0, 0, 3.2, 0, 0, 0, -3.2, 10.5, 0.0, 24.5)
-
-[node name="NorthCapLeft" parent="Buildings" instance=ExtResource("2_bld_a")]
-transform = Transform3D(3.5, 0, 0, 0, 3.5, 0, 0, 0, 3.5, -11.0, 0, 0.5)
-
-[node name="NorthCapRight" parent="Buildings" instance=ExtResource("5_bld_d")]
-transform = Transform3D(-3.5, 0, 0, 0, 3.5, 0, 0, 0, -3.5, 11.0, 0, 0.5)
-
-[node name="SouthPiazzaLeft" parent="Buildings" instance=ExtResource("3_bld_b")]
-transform = Transform3D(0, 0, 3.5, 0, 3.5, 0, -3.5, 0, 0, -6.5, 0, 27.5)
-
-[node name="SouthPiazzaRight" parent="Buildings" instance=ExtResource("6_bld_e")]
-transform = Transform3D(0, 0, -3.5, 0, 3.5, 0, 3.5, 0, 0, 6.5, 0, 27.5)
-
-[node name="TechShopVenue" parent="." instance=ExtResource("24_tsh")]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -6.2, 0.0, 8.4)
-
-[node name="TechShopRoofCornice1" parent="TechShopVenue" instance=ExtResource("30_wrf")]
-transform = Transform3D(2.5, 0, 0, 0, 1.2, 0, 0, 0, 2.5, -1.6, 3.25, 2.5)
-
-[node name="TechShopRoofCornice2" parent="TechShopVenue" instance=ExtResource("30_wrf")]
-transform = Transform3D(2.5, 0, 0, 0, 1.2, 0, 0, 0, 2.5, 1.6, 3.25, 2.5)
-
-[node name="TechShopBalcony" parent="TechShopVenue" instance=ExtResource("38_bal")]
-transform = Transform3D(1.8, 0, 0, 0, 1.8, 0, 0, 0, 1.8, 0.0, 3.3, 2.6)
-
-[node name="CafeVenue" parent="." instance=ExtResource("25_caf")]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 6.2, 0.0, 8.4)
-
-[node name="CafeRoofCornice1" parent="CafeVenue" instance=ExtResource("30_wrf")]
-transform = Transform3D(2.5, 0, 0, 0, 1.2, 0, 0, 0, 2.5, -1.6, 3.25, 2.5)
-
-[node name="CafeRoofCornice2" parent="CafeVenue" instance=ExtResource("30_wrf")]
-transform = Transform3D(2.5, 0, 0, 0, 1.2, 0, 0, 0, 2.5, 1.6, 3.25, 2.5)
-
-[node name="CafeBalcony" parent="CafeVenue" instance=ExtResource("38_bal")]
-transform = Transform3D(1.8, 0, 0, 0, 1.8, 0, 0, 0, 1.8, 0.0, 3.3, 2.6)
+[node name="BoulevardRoadway" parent="." instance=ExtResource("1_boulevard")]
 
 [node name="Portici" type="Node3D" parent="."]
 
-[node name="PorticoWestCol1" parent="Portici" instance=ExtResource("28_pil")]
-transform = Transform3D(0.9, 0, 0, 0, 0.85, 0, 0, 0, 0.9, -2.7, 0.08, 1.8)
+[node name="PorticoModule" parent="Portici" instance=ExtResource("2_portico")]
 
-[node name="PorticoWestCol2" parent="Portici" instance=ExtResource("28_pil")]
-transform = Transform3D(0.9, 0, 0, 0, 0.85, 0, 0, 0, 0.9, -2.7, 0.08, 4.4)
+[node name="Buildings" type="Node3D" parent="."]
 
-[node name="PorticoWestCol3" parent="Portici" instance=ExtResource("28_pil")]
-transform = Transform3D(0.9, 0, 0, 0, 0.85, 0, 0, 0, 0.9, -2.7, 0.08, 6.8)
+[node name="PalazzoFacades" parent="Buildings" instance=ExtResource("3_palazzi")]
 
-[node name="PorticoWestCol4" parent="Portici" instance=ExtResource("28_pil")]
-transform = Transform3D(0.9, 0, 0, 0, 0.85, 0, 0, 0, 0.9, -2.7, 0.08, 10.0)
+[node name="CrossStreetBogino" parent="Buildings" instance=ExtResource("4_cross_street")]
 
-[node name="PorticoWestCol5" parent="Portici" instance=ExtResource("28_pil")]
-transform = Transform3D(0.9, 0, 0, 0, 0.85, 0, 0, 0, 0.9, -2.7, 0.08, 12.6)
+[node name="PiazzaSanCarlo" parent="." instance=ExtResource("5_piazza")]
 
-[node name="PorticoWestCol6" parent="Portici" instance=ExtResource("28_pil")]
-transform = Transform3D(0.9, 0, 0, 0, 0.85, 0, 0, 0, 0.9, -2.7, 0.08, 15.2)
+[node name="TechShopVenue" parent="." instance=ExtResource("7_tech_shop")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -6.2, 0, 8.4)
 
-[node name="PorticoWestArch1" parent="Portici" instance=ExtResource("29_wop")]
-transform = Transform3D(1, 0, 0, 0, 1.2, 0, 0, 0, 2.6, -2.7, 2.4, 3.1)
-
-[node name="PorticoWestArch2" parent="Portici" instance=ExtResource("29_wop")]
-transform = Transform3D(1, 0, 0, 0, 1.2, 0, 0, 0, 2.4, -2.7, 2.4, 5.6)
-
-[node name="PorticoWestArch3" parent="Portici" instance=ExtResource("29_wop")]
-transform = Transform3D(1, 0, 0, 0, 1.2, 0, 0, 0, 2.6, -2.7, 2.4, 11.3)
-
-[node name="PorticoWestArch4" parent="Portici" instance=ExtResource("29_wop")]
-transform = Transform3D(1, 0, 0, 0, 1.2, 0, 0, 0, 2.6, -2.7, 2.4, 13.9)
-
-[node name="PorticoEastCol1" parent="Portici" instance=ExtResource("28_pil")]
-transform = Transform3D(0.9, 0, 0, 0, 0.85, 0, 0, 0, 0.9, 2.7, 0.08, 1.8)
-
-[node name="PorticoEastCol2" parent="Portici" instance=ExtResource("28_pil")]
-transform = Transform3D(0.9, 0, 0, 0, 0.85, 0, 0, 0, 0.9, 2.7, 0.08, 4.4)
-
-[node name="PorticoEastCol3" parent="Portici" instance=ExtResource("28_pil")]
-transform = Transform3D(0.9, 0, 0, 0, 0.85, 0, 0, 0, 0.9, 2.7, 0.08, 7.2)
-
-[node name="PorticoEastCol4" parent="Portici" instance=ExtResource("28_pil")]
-transform = Transform3D(0.9, 0, 0, 0, 0.85, 0, 0, 0, 0.9, 2.7, 0.08, 10.8)
-
-[node name="PorticoEastCol5" parent="Portici" instance=ExtResource("28_pil")]
-transform = Transform3D(0.9, 0, 0, 0, 0.85, 0, 0, 0, 0.9, 2.7, 0.08, 13.2)
-
-[node name="PorticoEastCol6" parent="Portici" instance=ExtResource("28_pil")]
-transform = Transform3D(0.9, 0, 0, 0, 0.85, 0, 0, 0, 0.9, 2.7, 0.08, 15.2)
-
-[node name="PorticoEastArch1" parent="Portici" instance=ExtResource("29_wop")]
-transform = Transform3D(1, 0, 0, 0, 1.2, 0, 0, 0, 2.6, 2.7, 2.4, 3.1)
-
-[node name="PorticoEastArch2" parent="Portici" instance=ExtResource("29_wop")]
-transform = Transform3D(1, 0, 0, 0, 1.2, 0, 0, 0, 2.8, 2.7, 2.4, 5.8)
-
-[node name="PorticoEastArch3" parent="Portici" instance=ExtResource("29_wop")]
-transform = Transform3D(1, 0, 0, 0, 1.2, 0, 0, 0, 2.4, 2.7, 2.4, 12.0)
-
-[node name="PorticoEastArch4" parent="Portici" instance=ExtResource("29_wop")]
-transform = Transform3D(1, 0, 0, 0, 1.2, 0, 0, 0, 2.0, 2.7, 2.4, 14.2)
+[node name="CafeVenue" parent="." instance=ExtResource("8_cafe")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 6.2, 0, 8.4)
 
 [node name="StreetProps" type="Node3D" parent="."]
 
-[node name="TreeWest1" parent="StreetProps" instance=ExtResource("14_tree")]
-transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, -3.6, 0.16, 5.0)
-
-[node name="TreeWest2" parent="StreetProps" instance=ExtResource("14_tree")]
-transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, -3.6, 0.16, 12.0)
-
-[node name="TreeEast1" parent="StreetProps" instance=ExtResource("14_tree")]
-transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, 3.6, 0.16, 5.0)
-
-[node name="TreeEast2" parent="StreetProps" instance=ExtResource("14_tree")]
-transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, 3.6, 0.16, 12.0)
-
-[node name="TreePiazzaWest" parent="StreetProps" instance=ExtResource("14_tree")]
-transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, -4.5, 0.16, 18.5)
-
-[node name="TreePiazzaEast" parent="StreetProps" instance=ExtResource("14_tree")]
-transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, 4.5, 0.16, 18.5)
-
-[node name="StreetLightWest1" parent="StreetProps" instance=ExtResource("15_stl")]
-transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -3.5, 0.16, 3.2)
-
-[node name="StreetLightWest2" parent="StreetProps" instance=ExtResource("15_stl")]
-transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -3.5, 0.16, 11.2)
-
-[node name="StreetLightWest3" parent="StreetProps" instance=ExtResource("15_stl")]
-transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -3.5, 0.16, 15.5)
-
-[node name="StreetLightEast1" parent="StreetProps" instance=ExtResource("15_stl")]
-transform = Transform3D(-3.2, 0, 0, 0, 3.2, 0, 0, 0, -3.2, 3.5, 0.16, 4.5)
-
-[node name="StreetLightEast2" parent="StreetProps" instance=ExtResource("15_stl")]
-transform = Transform3D(-3.2, 0, 0, 0, 3.2, 0, 0, 0, -3.2, 3.5, 0.16, 12.5)
-
-[node name="StreetLightEast3" parent="StreetProps" instance=ExtResource("15_stl")]
-transform = Transform3D(-3.2, 0, 0, 0, 3.2, 0, 0, 0, -3.2, 3.5, 0.16, 19.5)
-
-[node name="StreetLightTurinWest" parent="StreetProps" instance=ExtResource("32_usl")]
-transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -2.8, 0.16, 2.2)
-
-[node name="StreetLightTurinEast" parent="StreetProps" instance=ExtResource("32_usl")]
-transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, 2.8, 0.16, 2.2)
-
-[node name="StreetLightBoginoNW" parent="StreetProps" instance=ExtResource("32_usl")]
-transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -3.2, 0.16, 21.0)
-
-[node name="StreetLightBoginoNE" parent="StreetProps" instance=ExtResource("32_usl")]
-transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, 3.2, 0.16, 21.0)
-
-[node name="TrafficLightNW" parent="StreetProps" instance=ExtResource("37_tfl")]
-transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, -2.8, 0.16, 19.6)
-
-[node name="TrafficLightNE" parent="StreetProps" instance=ExtResource("37_tfl")]
-transform = Transform3D(-2.5, 0, 0, 0, 2.5, 0, 0, 0, -2.5, 2.8, 0.16, 19.6)
-
-[node name="TrafficLightSW" parent="StreetProps" instance=ExtResource("37_tfl")]
-transform = Transform3D(2.5, 0, 0, 0, 2.5, 0, 0, 0, 2.5, -2.8, 0.16, 22.8)
-
-[node name="TrafficLightSE" parent="StreetProps" instance=ExtResource("37_tfl")]
-transform = Transform3D(-2.5, 0, 0, 0, 2.5, 0, 0, 0, -2.5, 2.8, 0.16, 22.8)
-
-[node name="BenchWest" parent="StreetProps" instance=ExtResource("16_bnc")]
-transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -3.6, 0.16, 6.0)
-
-[node name="BenchEast" parent="StreetProps" instance=ExtResource("16_bnc")]
-transform = Transform3D(-3.2, 0, 0, 0, 3.2, 0, 0, 0, -3.2, 3.6, 0.16, 10.8)
-
-[node name="BenchPiazzaEast" parent="StreetProps" instance=ExtResource("31_ubn")]
-transform = Transform3D(-2.4, 0, 0, 0, 2.4, 0, 0, 0, -2.4, 4.2, 0.16, 19.8)
-
-[node name="BenchPiazzaWest" parent="StreetProps" instance=ExtResource("31_ubn")]
-transform = Transform3D(2.4, 0, 0, 0, 2.4, 0, 0, 0, 2.4, -4.2, 0.16, 19.8)
-
-[node name="Bush1" parent="StreetProps" instance=ExtResource("17_bsh")]
-transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, -3.6, 0.16, 10.8)
-
-[node name="Bush2" parent="StreetProps" instance=ExtResource("17_bsh")]
-transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, 3.6, 0.16, 6.0)
-
-[node name="FireHydrant" parent="StreetProps" instance=ExtResource("18_hyd")]
-transform = Transform3D(2.0, 0, 0, 0, 2.0, 0, 0, 0, 2.0, -2.8, 0.16, 4.0)
-
-[node name="Dumpster" parent="StreetProps" instance=ExtResource("19_dmp")]
-transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, -3.8, 0.16, 17.5)
-
-[node name="TrashA" parent="StreetProps" instance=ExtResource("20_tsh")]
-transform = Transform3D(2.0, 0, 0, 0, 2.0, 0, 0, 0, 2.0, 3.6, 0.16, 4.0)
-
-[node name="CarSedan" parent="StreetProps" instance=ExtResource("10_car_s")]
-transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -1.6, 0.08, 4.8)
+[node name="CarSedan" parent="StreetProps" instance=ExtResource("9_car_s")]
+transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -3.65, 0.08, 4.8)
 
 [node name="StaticBody3D" type="StaticBody3D" parent="StreetProps/CarSedan"]
 transform = Transform3D(0.3125, 0, 0, 0, 0.3125, 0, 0, 0, 0.3125, 0, 0, 0)
@@ -313,8 +84,8 @@ collision_mask = 0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 shape = SubResource("BoxShape3D_car_body")
 
-[node name="CarTaxi" parent="StreetProps" instance=ExtResource("11_car_t")]
-transform = Transform3D(-3.2, 0, 0, 0, 3.2, 0, 0, 0, -3.2, 1.6, 0.08, 8.2)
+[node name="CarTaxi" parent="StreetProps" instance=ExtResource("10_car_t")]
+transform = Transform3D(-3.2, 0, 0, 0, 3.2, 0, 0, 0, -3.2, 3.65, 0.08, 7.5)
 
 [node name="StaticBody3D" type="StaticBody3D" parent="StreetProps/CarTaxi"]
 transform = Transform3D(-0.3125, 0, 0, 0, 0.3125, 0, 0, 0, -0.3125, 0, 0, 0)
@@ -325,8 +96,8 @@ collision_mask = 0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 shape = SubResource("BoxShape3D_car_body")
 
-[node name="CarStationWagon" parent="StreetProps" instance=ExtResource("12_car_w")]
-transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -1.6, 0.08, 11.5)
+[node name="CarStationWagon" parent="StreetProps" instance=ExtResource("11_car_w")]
+transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -3.65, 0.08, 11.5)
 
 [node name="StaticBody3D" type="StaticBody3D" parent="StreetProps/CarStationWagon"]
 transform = Transform3D(0.3125, 0, 0, 0, 0.3125, 0, 0, 0, 0.3125, 0, 0, 0)
@@ -337,8 +108,8 @@ collision_mask = 0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 shape = SubResource("BoxShape3D_car_body")
 
-[node name="CarHatchback" parent="StreetProps" instance=ExtResource("13_car_h")]
-transform = Transform3D(-3.2, 0, 0, 0, 3.2, 0, 0, 0, -3.2, 1.6, 0.08, 11.5)
+[node name="CarHatchback" parent="StreetProps" instance=ExtResource("12_car_h")]
+transform = Transform3D(-3.2, 0, 0, 0, 3.2, 0, 0, 0, -3.2, 3.65, 0.08, 11.5)
 
 [node name="StaticBody3D" type="StaticBody3D" parent="StreetProps/CarHatchback"]
 transform = Transform3D(-0.3125, 0, 0, 0, 0.3125, 0, 0, 0, -0.3125, 0, 0, 0)
@@ -349,62 +120,53 @@ collision_mask = 0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 shape = SubResource("BoxShape3D_car_body")
 
-[node name="PizzeriaAwning" parent="StreetProps" instance=ExtResource("21_awn")]
-transform = Transform3D(-2.8, 0, -2.44784e-07, 0, 2.8, 0, 2.44784e-07, 0, -2.8, 0.0, 2.7, 14.9)
+[node name="StreetLightWest1" parent="StreetProps" instance=ExtResource("6_lantern")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.8, 0.16, 3.5)
 
-[node name="OutdoorTable" parent="StreetProps" instance=ExtResource("22_tbl")]
-transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, 2.5, 0.16, 16.5)
+[node name="StreetLightWest2" parent="StreetProps" instance=ExtResource("6_lantern")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.8, 0.16, 12.5)
 
-[node name="OutdoorChair1" parent="StreetProps" instance=ExtResource("23_chr")]
-transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, 2.5, 0.16, 15.9)
+[node name="StreetLightEast1" parent="StreetProps" instance=ExtResource("6_lantern")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 4.8, 0.16, 3.5)
 
-[node name="OutdoorChair2" parent="StreetProps" instance=ExtResource("23_chr")]
-transform = Transform3D(-0.7, 0, 0, 0, 0.7, 0, 0, 0, -0.7, 2.5, 0.16, 17.1)
+[node name="StreetLightEast2" parent="StreetProps" instance=ExtResource("6_lantern")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 4.8, 0.16, 12.5)
 
-[node name="OutdoorTable2" parent="StreetProps" instance=ExtResource("34_tbd")]
+[node name="BenchWest" parent="StreetProps" instance=ExtResource("16_bnc")]
+transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -6.8, 0.16, 5.0)
+
+[node name="BenchEast" parent="StreetProps" instance=ExtResource("16_bnc")]
+transform = Transform3D(-3.2, 0, 0, 0, 3.2, 0, 0, 0, -3.2, 6.8, 0.16, 5.0)
+
+[node name="OutdoorTable1" parent="StreetProps" instance=ExtResource("13_tbl")]
+transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, 2.8, 0.16, 16.5)
+
+[node name="OutdoorChair1A" parent="StreetProps" instance=ExtResource("14_chr")]
+transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, 2.8, 0.16, 15.9)
+
+[node name="OutdoorChair1B" parent="StreetProps" instance=ExtResource("14_chr")]
+transform = Transform3D(-0.7, 0, 0, 0, 0.7, 0, 0, 0, -0.7, 2.8, 0.16, 17.1)
+
+[node name="OutdoorTable2" parent="StreetProps" instance=ExtResource("13_tbl")]
 transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, 3.8, 0.16, 16.5)
 
-[node name="OutdoorChair2A" parent="StreetProps" instance=ExtResource("23_chr")]
+[node name="OutdoorChair2A" parent="StreetProps" instance=ExtResource("14_chr")]
 transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, 3.8, 0.16, 15.9)
 
-[node name="OutdoorChair2B" parent="StreetProps" instance=ExtResource("23_chr")]
+[node name="OutdoorChair2B" parent="StreetProps" instance=ExtResource("14_chr")]
 transform = Transform3D(-0.7, 0, 0, 0, 0.7, 0, 0, 0, -0.7, 3.8, 0.16, 17.1)
 
-[node name="OutdoorTable3" parent="StreetProps" instance=ExtResource("22_tbl")]
-transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, 2.5, 0.16, 18.0)
+[node name="PizzeriaAwning" parent="StreetProps" instance=ExtResource("17_awn")]
+transform = Transform3D(-2.8, 0, -2.44784e-07, 0, 2.8, 0, 2.44784e-07, 0, -2.8, 0, 2.7, 14.9)
 
-[node name="OutdoorChair3A" parent="StreetProps" instance=ExtResource("23_chr")]
-transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, 2.5, 0.16, 17.4)
+[node name="DehorsPlant1" parent="StreetProps" instance=ExtResource("15_plt")]
+transform = Transform3D(1.8, 0, 0, 0, 1.8, 0, 0, 0, 1.8, 2.0, 0.16, 15.6)
 
-[node name="OutdoorChair3B" parent="StreetProps" instance=ExtResource("23_chr")]
-transform = Transform3D(-0.7, 0, 0, 0, 0.7, 0, 0, 0, -0.7, 2.5, 0.16, 18.6)
-
-[node name="OutdoorTable4" parent="StreetProps" instance=ExtResource("34_tbd")]
-transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, 3.8, 0.16, 18.0)
-
-[node name="OutdoorChair4A" parent="StreetProps" instance=ExtResource("23_chr")]
-transform = Transform3D(0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, 3.8, 0.16, 17.4)
-
-[node name="OutdoorChair4B" parent="StreetProps" instance=ExtResource("23_chr")]
-transform = Transform3D(-0.7, 0, 0, 0, 0.7, 0, 0, 0, -0.7, 3.8, 0.16, 18.6)
-
-[node name="DehorsAwningEast" parent="StreetProps" instance=ExtResource("21_awn")]
-transform = Transform3D(0, 0, 2.4, 0, 2.4, 0, -2.4, 0, 0, 3.2, 2.6, 16.5)
-
-[node name="DehorsPlant1" parent="StreetProps" instance=ExtResource("33_plt")]
-transform = Transform3D(1.8, 0, 0, 0, 1.8, 0, 0, 0, 1.8, 1.7, 0.16, 15.6)
-
-[node name="DehorsPlant2" parent="StreetProps" instance=ExtResource("33_plt")]
-transform = Transform3D(1.8, 0, 0, 0, 1.8, 0, 0, 0, 1.8, 1.7, 0.16, 17.2)
-
-[node name="DehorsPlant3" parent="StreetProps" instance=ExtResource("33_plt")]
-transform = Transform3D(1.8, 0, 0, 0, 1.8, 0, 0, 0, 1.8, 1.7, 0.16, 18.8)
-
-[node name="DehorsPlant4" parent="StreetProps" instance=ExtResource("33_plt")]
-transform = Transform3D(1.8, 0, 0, 0, 1.8, 0, 0, 0, 1.8, 4.6, 0.16, 15.6)
+[node name="DehorsPlant2" parent="StreetProps" instance=ExtResource("15_plt")]
+transform = Transform3D(1.8, 0, 0, 0, 1.8, 0, 0, 0, 1.8, 2.0, 0.16, 17.4)
 
 [node name="StreetSign" type="Label3D" parent="StreetProps"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.1, 2.6, 2.8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.6, 2.8, 2.0)
 text = "VIA PO - TORINO (CENTRO)"
 font_size = 26
 modulate = Color(0.9, 0.95, 1, 1)
@@ -412,7 +174,7 @@ outline_size = 8
 outline_color = Color(0.08, 0.1, 0.18, 1)
 
 [node name="StreetSignZTL" type="Label3D" parent="StreetProps"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.1, 2.2, 3.8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.6, 2.3, 2.8)
 text = "Z.T.L. - CENTRO STORICO\nTelecamere Attive"
 font_size = 18
 modulate = Color(1, 0.9, 0.8, 1)
@@ -420,7 +182,7 @@ outline_size = 6
 outline_color = Color(0.4, 0.1, 0.1, 1)
 
 [node name="TechShopSign" type="Label3D" parent="StreetProps"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -3.6, 3.4, 8.4)
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -4.8, 3.4, 8.4)
 text = "★ ELETTRONICA TO ★\nHardware, Server & Cloud"
 font_size = 24
 modulate = Color(0.3, 0.85, 1, 1)
@@ -428,18 +190,12 @@ outline_size = 8
 outline_color = Color(0.05, 0.15, 0.3, 1)
 
 [node name="CafeSign" type="Label3D" parent="StreetProps"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 3.6, 3.4, 8.4)
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 4.8, 3.4, 8.4)
 text = "★ CAFFÈ SAN CARLO ★\nTorrefazione & Bistrot dal 1822"
 font_size = 24
 modulate = Color(1, 0.85, 0.35, 1)
 outline_size = 8
 outline_color = Color(0.25, 0.12, 0.05, 1)
-
-[node name="StreetLightCurvedWest" parent="StreetProps" instance=ExtResource("27_lcr")]
-transform = Transform3D(1.8, 0, 0, 0, 1.8, 0, 0, 0, 1.8, -3.5, 0.16, 7.8)
-
-[node name="StreetLightCurvedEast" parent="StreetProps" instance=ExtResource("27_lcr")]
-transform = Transform3D(-1.8, 0, 0, 0, 1.8, 0, 0, 0, -1.8, 3.5, 0.16, 9.0)
 
 [node name="PizzeriaSign" type="Label3D" parent="StreetProps"]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 3.6, 14.9)
@@ -466,7 +222,7 @@ outline_size = 6
 outline_color = Color(0.3, 0.15, 0.05, 1)
 
 [node name="SignViaBoginoWest" type="Label3D" parent="StreetProps"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -3.5, 2.6, 21.0)
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -5.0, 2.6, 20.0)
 text = "VIA BOGINO"
 font_size = 24
 modulate = Color(0.9, 0.95, 1, 1)
@@ -474,15 +230,15 @@ outline_size = 8
 outline_color = Color(0.08, 0.1, 0.18, 1)
 
 [node name="SignViaBoginoEast" type="Label3D" parent="StreetProps"]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 3.5, 2.6, 21.0)
-text = "VIA BOGINO"
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 5.0, 2.6, 20.0)
+text = "VIA MARIA VITTORIA"
 font_size = 24
 modulate = Color(0.9, 0.95, 1, 1)
 outline_size = 8
 outline_color = Color(0.08, 0.1, 0.18, 1)
 
 [node name="SignPiazzaSanCarlo" type="Label3D" parent="StreetProps"]
-transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0.0, 2.8, 25.0)
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 3.0, 23.5)
 text = "PIAZZA SAN CARLO - IL SALOTTO DI TORINO"
 font_size = 26
 modulate = Color(1, 0.9, 0.5, 1)
@@ -494,95 +250,171 @@ collision_layer = 1
 collision_mask = 0
 
 [node name="RoadFloor" type="CollisionShape3D" parent="Collisions"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 14.0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 10.5)
 shape = SubResource("BoxShape3D_road")
 
+[node name="PorticoFloorWest" type="CollisionShape3D" parent="Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.3, -0.04, 10.0)
+shape = SubResource("BoxShape3D_portico_floor")
+
+[node name="PorticoFloorEast" type="CollisionShape3D" parent="Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.3, -0.04, 10.0)
+shape = SubResource("BoxShape3D_portico_floor")
+
+[node name="PiazzaFloor" type="CollisionShape3D" parent="Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.04, 34.5)
+shape = SubResource("BoxShape3D_piazza_floor")
+
+[node name="CrossStreetFloorWest" type="CollisionShape3D" parent="Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, -0.2, 20.0)
+shape = SubResource("BoxShape3D_cross_floor")
+
+[node name="CrossStreetFloorEast" type="CollisionShape3D" parent="Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.5, -0.2, 20.0)
+shape = SubResource("BoxShape3D_cross_floor")
+
 [node name="WallLateralWestNorth" type="CollisionShape3D" parent="Collisions"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.0, 4.0, 4.0)
-shape = SubResource("BoxShape3D_wall_north")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.5, 4, 1.5)
+shape = SubResource("BoxShape3D_wall_lateral_north")
 
 [node name="WallLateralWestSouth" type="CollisionShape3D" parent="Collisions"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.0, 4.0, 15.0)
-shape = SubResource("BoxShape3D_wall_south")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11.5, 4, 14.0)
+shape = SubResource("BoxShape3D_wall_lateral_south")
 
 [node name="WallLateralEastNorth" type="CollisionShape3D" parent="Collisions"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.0, 4.0, 4.0)
-shape = SubResource("BoxShape3D_wall_north")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.5, 4, 1.5)
+shape = SubResource("BoxShape3D_wall_lateral_north")
 
 [node name="WallLateralEastSouth" type="CollisionShape3D" parent="Collisions"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.0, 4.0, 15.0)
-shape = SubResource("BoxShape3D_wall_south")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11.5, 4, 14.0)
+shape = SubResource("BoxShape3D_wall_lateral_south")
 
 [node name="WallCrossBoginoWest" type="CollisionShape3D" parent="Collisions"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.5, 4.0, 21.0)
-shape = SubResource("BoxShape3D_wall_cross")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.5, 4, 20.0)
+shape = SubResource("BoxShape3D_wall_cross_cap")
 
 [node name="WallCrossBoginoEast" type="CollisionShape3D" parent="Collisions"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.5, 4.0, 21.0)
-shape = SubResource("BoxShape3D_wall_cross")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20.5, 4, 20.0)
+shape = SubResource("BoxShape3D_wall_cross_cap")
+
+[node name="WallPiazzaWest" type="CollisionShape3D" parent="Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16.5, 4, 34.5)
+shape = SubResource("BoxShape3D_wall_piazza_side")
+
+[node name="WallPiazzaEast" type="CollisionShape3D" parent="Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.5, 4, 34.5)
+shape = SubResource("BoxShape3D_wall_piazza_side")
 
 [node name="WallSouthCap" type="CollisionShape3D" parent="Collisions"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.0, 28.5)
-shape = SubResource("BoxShape3D_wall_cap")
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 45.5)
+shape = SubResource("BoxShape3D_wall_south_cap")
 
 [node name="Lighting" type="Node3D" parent="."]
 
 [node name="StreetLamp1" type="OmniLight3D" parent="Lighting"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 3.8, 3.2)
-light_color = Color(1, 0.92, 0.75, 1)
-light_energy = 0.85
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.8, 3.8, 3.5)
+light_color = Color(1, 0.9, 0.7, 1)
+light_energy = 1.2
 omni_range = 8.0
 
 [node name="StreetLamp2" type="OmniLight3D" parent="Lighting"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 3.8, 4.5)
-light_color = Color(1, 0.92, 0.75, 1)
-light_energy = 0.85
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.8, 3.8, 3.5)
+light_color = Color(1, 0.9, 0.7, 1)
+light_energy = 1.2
 omni_range = 8.0
 
 [node name="StreetLamp3" type="OmniLight3D" parent="Lighting"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 3.8, 11.2)
-light_color = Color(1, 0.92, 0.75, 1)
-light_energy = 0.85
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.8, 3.8, 12.5)
+light_color = Color(1, 0.9, 0.7, 1)
+light_energy = 1.2
 omni_range = 8.0
 
 [node name="StreetLamp4" type="OmniLight3D" parent="Lighting"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 3.8, 12.5)
-light_color = Color(1, 0.92, 0.75, 1)
-light_energy = 0.85
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.8, 3.8, 12.5)
+light_color = Color(1, 0.9, 0.7, 1)
+light_energy = 1.2
 omni_range = 8.0
 
+[node name="PorticoLanternWest1" type="OmniLight3D" parent="Lighting"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.3, 4.4, 2.6)
+light_color = Color(1, 0.88, 0.65, 1)
+light_energy = 1.1
+omni_range = 6.5
+
+[node name="PorticoLanternWest2" type="OmniLight3D" parent="Lighting"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.3, 4.4, 6.8)
+light_color = Color(1, 0.88, 0.65, 1)
+light_energy = 1.1
+omni_range = 6.5
+
+[node name="PorticoLanternWest3" type="OmniLight3D" parent="Lighting"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.3, 4.4, 11.0)
+light_color = Color(1, 0.88, 0.65, 1)
+light_energy = 1.1
+omni_range = 6.5
+
+[node name="PorticoLanternWest4" type="OmniLight3D" parent="Lighting"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.3, 4.4, 15.2)
+light_color = Color(1, 0.88, 0.65, 1)
+light_energy = 1.1
+omni_range = 6.5
+
+[node name="PorticoLanternEast1" type="OmniLight3D" parent="Lighting"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.3, 4.4, 2.6)
+light_color = Color(1, 0.88, 0.65, 1)
+light_energy = 1.1
+omni_range = 6.5
+
+[node name="PorticoLanternEast2" type="OmniLight3D" parent="Lighting"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.3, 4.4, 6.8)
+light_color = Color(1, 0.88, 0.65, 1)
+light_energy = 1.1
+omni_range = 6.5
+
+[node name="PorticoLanternEast3" type="OmniLight3D" parent="Lighting"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.3, 4.4, 11.0)
+light_color = Color(1, 0.88, 0.65, 1)
+light_energy = 1.1
+omni_range = 6.5
+
+[node name="PorticoLanternEast4" type="OmniLight3D" parent="Lighting"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.3, 4.4, 15.2)
+light_color = Color(1, 0.88, 0.65, 1)
+light_energy = 1.1
+omni_range = 6.5
+
 [node name="PizzeriaNeonGlow" type="OmniLight3D" parent="Lighting"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.4, 15.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.6, 15.5)
 light_color = Color(1, 0.72, 0.25, 1)
-light_energy = 1.2
-omni_range = 6.0
+light_energy = 1.3
+omni_range = 7.0
 
 [node name="DehorsWarmGlow" type="OmniLight3D" parent="Lighting"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 2.5, 17.2)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.2, 2.5, 16.8)
 light_color = Color(1, 0.85, 0.5, 1)
 light_energy = 1.1
 omni_range = 7.0
 
 [node name="BoginoIntersectionGlow" type="OmniLight3D" parent="Lighting"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.0, 21.0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.0, 20.0)
 light_color = Color(1, 0.92, 0.8, 1)
-light_energy = 1.0
+light_energy = 1.1
 omni_range = 9.0
 
 [node name="PiazzaSanCarloGlow" type="OmniLight3D" parent="Lighting"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.0, 25.5)
-light_color = Color(1, 0.88, 0.65, 1)
-light_energy = 1.2
-omni_range = 9.0
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.0, 32.0)
+light_color = Color(1, 0.9, 0.75, 1)
+light_energy = 1.4
+omni_range = 16.0
 
 [node name="TechShopGlow" type="OmniLight3D" parent="Lighting"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.8, 3.4, 8.4)
-light_color = Color(0.3, 0.8, 1, 1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5, 3.4, 8.4)
+light_color = Color(0.38, 0.82, 1, 1)
 light_energy = 1.2
 omni_range = 7.0
 
 [node name="CafeGlow" type="OmniLight3D" parent="Lighting"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.8, 3.4, 8.4)
-light_color = Color(1, 0.85, 0.4, 1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 3.4, 8.4)
+light_color = Color(1, 0.85, 0.45, 1)
 light_energy = 1.2
 omni_range = 7.0

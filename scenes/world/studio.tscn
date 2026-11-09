@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3 uid="uid://std8studio01"]
+[gd_scene load_steps=27 format=3 uid="uid://std8studio01"]
 
 [ext_resource type="Script" path="res://scripts/world/studio_manager.gd" id="1_stm"]
 [ext_resource type="PackedScene" path="res://assets/environments/studio_room.glb" id="2_stg"]
@@ -17,6 +17,11 @@
 [ext_resource type="PackedScene" path="res://assets/models/hardware/server_rack.glb" id="15_srv"]
 [ext_resource type="PackedScene" path="res://assets/models/characters/Rogue.glb" id="16_emp"]
 [ext_resource type="Script" path="res://scripts/world/server_rack_interactable.gd" id="17_sri"]
+[ext_resource type="PackedScene" path="res://assets/models/hardware/pc_tower_rgb.glb" id="18_pct"]
+[ext_resource type="PackedScene" path="res://assets/models/furniture/mechanical_keyboard.glb" id="19_kbd"]
+[ext_resource type="PackedScene" path="res://assets/models/furniture/cable_spine.glb" id="20_csp"]
+[ext_resource type="PackedScene" path="res://assets/models/furniture/whiteboard_tech.glb" id="21_whb"]
+[ext_resource type="PackedScene" path="res://assets/models/furniture/task_lamp_arm.glb" id="22_tla"]
 
 [sub_resource type="GDScript" id="GDScript_luca_anim"]
 script/source = "extends Node
@@ -58,7 +63,7 @@ size = Vector3(0.2, 3.2, 5.2)
 size = Vector3(2.5, 3.2, 0.2)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_rack"]
-size = Vector3(0.9, 1.8, 0.9)
+size = Vector3(0.9, 2.05, 0.95)
 
 [node name="Studio" type="Node3D"]
 script = ExtResource("1_stm")
@@ -114,6 +119,24 @@ light_color = Color(1, 0.9, 0.75, 1)
 light_energy = 0.75
 omni_range = 5.0
 
+[node name="ScreenGlow" type="OmniLight3D" parent="Lighting"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.15, -1.45)
+light_color = Color(0.35, 0.75, 1, 1)
+light_energy = 0.65
+omni_range = 3.2
+
+[node name="PCTowerGlow" type="OmniLight3D" parent="Lighting"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.68, 0.35, -1.45)
+light_color = Color(0, 0.9, 1, 1)
+light_energy = 0.4
+omni_range = 1.8
+
+[node name="ServerRackGlow" type="OmniLight3D" parent="Lighting"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 1.2, 1.4)
+light_color = Color(0.2, 0.9, 0.5, 1)
+light_energy = 0.7
+omni_range = 3.5
+
 [node name="Furniture" type="Node3D" parent="."]
 
 [node name="DeskProp" parent="Furniture" instance=ExtResource("3_dsk")]
@@ -124,6 +147,21 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.15)
 
 [node name="LaptopProp" parent="Furniture" instance=ExtResource("5_lpt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.74, -1.45)
+
+[node name="PCTowerProp" parent="Furniture" instance=ExtResource("18_pct")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.68, 0, -1.45)
+
+[node name="KeyboardProp" parent="Furniture" instance=ExtResource("19_kbd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.742, -1.35)
+
+[node name="CableSpineProp" parent="Furniture" instance=ExtResource("20_csp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.48, 0, -1.65)
+
+[node name="WhiteboardProp" parent="Furniture" instance=ExtResource("21_whb")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 2.94, 1.6, 0.4)
+
+[node name="TaskLampArmProp" parent="Furniture" instance=ExtResource("22_tla")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.62, 0.74, -1.6)
 
 [node name="Bookshelf" parent="Furniture" instance=ExtResource("8_shf")]
 transform = Transform3D(-3.93403e-08, 0, 0.9, 0, 0.9, 0, -0.9, 0, -3.93403e-08, 2.3, 0, -1.1)
@@ -168,7 +206,7 @@ transform = Transform3D(0.9, 0, 0, 0, 0.9, 0, 0, 0, 0.9, -2.2, 0, 0.5)
 visible = false
 
 [node name="ServerRackUpgradeProp" parent="Upgrades" instance=ExtResource("15_srv")]
-transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 2.2, 0, 1.4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 0, 1.4)
 visible = false
 
 [node name="RackInteractable" type="StaticBody3D" parent="Upgrades/ServerRackUpgradeProp"]
@@ -177,7 +215,7 @@ collision_mask = 0
 script = ExtResource("17_sri")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Upgrades/ServerRackUpgradeProp/RackInteractable"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.025, 0)
 shape = SubResource("BoxShape3D_rack")
 
 [node name="EmployeeWorkstation" type="Node3D" parent="."]

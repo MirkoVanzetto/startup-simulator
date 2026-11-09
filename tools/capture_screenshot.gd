@@ -42,25 +42,55 @@ func _process(_delta: float) -> void:
 		var image = get_viewport().get_texture().get_image()
 		if image:
 			image.save_png("/home/antigravity/startup_simulator_studio_3d.png")
-			print("✔ Studio 3D with Employee Screen Captured.")
+			print("✔ Studio 3D with High-Tech Staging Screen Captured.")
 			
-		# Teleport player into street looking toward Elettronica TO and Caffè San Carlo at Z=8.4
+		# Teleport player into street looking south down the wide Via Po Boulevard & Porticoes
 		if player:
-			player.global_position = Vector3(0.0, 0.1, 4.5)
+			player.global_position = Vector3(0.0, 0.16, 5.0)
 			player.rotation_degrees = Vector3(0, 180, 0)
 			var neck = player.get_node_or_null("Neck")
 			if neck:
-				neck.rotation_degrees = Vector3(0, 0, 0)
-		print("State: In Street 3D facing TechShop & Cafe.")
+				neck.rotation_degrees = Vector3(-4, 0, 0)
+		print("State: On Via Po Boulevard facing South towards Cross Street & Piazza.")
 		
 	if frame_count == 35:
 		var image = get_viewport().get_texture().get_image()
 		if image:
 			image.save_png("/home/antigravity/startup_simulator_street_3d.png")
-			print("✔ Street 3D with New Venues Screen Captured.")
+			print("✔ Via Po Boulevard & Porticoes Screen Captured.")
+			
+		# Teleport player into Piazza San Carlo facing the civic square and equestrian monument
+		if player:
+			player.global_position = Vector3(0.0, 0.16, 26.0)
+			player.rotation_degrees = Vector3(0, 180, 0)
+			var neck = player.get_node_or_null("Neck")
+			if neck:
+				neck.rotation_degrees = Vector3(-5, 0, 0)
+		print("State: In Piazza San Carlo facing Monument & Dehors.")
+		
+	if frame_count == 50:
+		var image = get_viewport().get_texture().get_image()
+		if image:
+			image.save_png("/home/antigravity/startup_simulator_piazza_san_carlo.png")
+			print("✔ Piazza San Carlo Screen Captured.")
+			
+		# Teleport player inside Pizzeria Da Mario facing Mario NPC upright at Y=0.0
+		# Pizzeria is at (0, 0, 18) rotated 180 deg
+		if player:
+			player.global_position = Vector3(0.0, 0.1, 16.5)
+			player.rotation_degrees = Vector3(0, 180, 0)
+			var neck = player.get_node_or_null("Neck")
+			if neck:
+				neck.rotation_degrees = Vector3(-8, 0, 0)
+		print("State: Inside Pizzeria Da Mario facing Mario NPC.")
+
+	if frame_count == 65:
+		var image = get_viewport().get_texture().get_image()
+		if image:
+			image.save_png("/home/antigravity/startup_simulator_pizzeria_3d.png")
+			print("✔ Pizzeria Da Mario Screen Captured.")
 			
 		# Teleport player inside Elettronica TO facing Davide behind counter
-		# Shop is at (-6.2, 0, 8.4) rotated -90 deg. Counter is at world X=-5.4, Z=9.0. Davide is at X=-4.75, Z=9.0
 		if player:
 			player.global_position = Vector3(-5.0, 0.1, 8.4)
 			player.rotation_degrees = Vector3(0, -90, 0)
@@ -69,14 +99,13 @@ func _process(_delta: float) -> void:
 				neck.rotation_degrees = Vector3(-5, 0, 0)
 		print("State: Inside Elettronica TO facing Davide.")
 		
-	if frame_count == 50:
+	if frame_count == 80:
 		var image = get_viewport().get_texture().get_image()
 		if image:
 			image.save_png("/home/antigravity/startup_simulator_tech_shop_3d.png")
 			print("✔ Elettronica TO Tech Shop Screen Captured.")
 			
 		# Teleport player inside Caffè San Carlo facing Elena behind bar
-		# Cafe is at (+6.2, 0, 8.4) rotated +90 deg.
 		if player:
 			player.global_position = Vector3(5.0, 0.1, 8.4)
 			player.rotation_degrees = Vector3(0, 90, 0)
@@ -85,7 +114,7 @@ func _process(_delta: float) -> void:
 				neck.rotation_degrees = Vector3(-5, 0, 0)
 		print("State: Inside Caffè San Carlo facing Elena.")
 		
-	if frame_count == 65:
+	if frame_count == 95:
 		var image = get_viewport().get_texture().get_image()
 		if image:
 			image.save_png("/home/antigravity/startup_simulator_cafe_3d.png")
@@ -98,7 +127,7 @@ func _process(_delta: float) -> void:
 			comp._open_window(comp.rack_window)
 		print("State: TO-OS Desktop - RackManager Window.")
 		
-	if frame_count == 80:
+	if frame_count == 110:
 		var image = get_viewport().get_texture().get_image()
 		if image:
 			image.save_png("/home/antigravity/startup_simulator_rack_manager.png")
@@ -109,7 +138,7 @@ func _process(_delta: float) -> void:
 			comp._open_window(comp.shop_window)
 		print("State: TO-OS Desktop - Shop Window.")
 		
-	if frame_count == 95:
+	if frame_count == 125:
 		var image = get_viewport().get_texture().get_image()
 		if image:
 			image.save_png("/home/antigravity/startup_simulator_shop.png")
@@ -120,7 +149,7 @@ func _process(_delta: float) -> void:
 			comp._open_window(comp.talent_window)
 		print("State: TO-OS Desktop - TalentHub Window.")
 		
-	if frame_count == 110:
+	if frame_count == 140:
 		var image = get_viewport().get_texture().get_image()
 		if image:
 			image.save_png("/home/antigravity/startup_simulator_talent_hub.png")
@@ -132,7 +161,7 @@ func _process(_delta: float) -> void:
 		EventBus.minigame_started.emit("web_forge")
 		print("State: WebForge IDE v2.0.")
 		
-	if frame_count == 125:
+	if frame_count == 155:
 		var image = get_viewport().get_texture().get_image()
 		if image:
 			image.save_png("/home/antigravity/startup_simulator_webforge.png")
@@ -142,7 +171,7 @@ func _process(_delta: float) -> void:
 		EventBus.minigame_started.emit("firewall_router")
 		print("State: NetShield Firewall Router.")
 		
-	if frame_count == 140:
+	if frame_count == 170:
 		var image = get_viewport().get_texture().get_image()
 		if image:
 			image.save_png("/home/antigravity/startup_simulator_firewall.png")
@@ -152,7 +181,7 @@ func _process(_delta: float) -> void:
 		EventBus.computer_opened.emit()
 		print("State: TO-OS Desktop.")
 		
-	if frame_count == 155:
+	if frame_count == 185:
 		var image = get_viewport().get_texture().get_image()
 		if image:
 			image.save_png("/home/antigravity/startup_simulator_to_os.png")

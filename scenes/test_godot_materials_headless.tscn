@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://tgm01headless"]
+
+[ext_resource type="Script" path="res://tests/test_godot_materials_headless.gd" id="1_scr"]
+
+[node name="TestGodotMaterials" type="Node3D"]
+script = ExtResource("1_scr")

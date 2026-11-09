@@ -157,18 +157,46 @@ static func _on_item_purchased_static(item_id: String, _cost: float) -> void:
 	queue_furniture_placement(item_id)
 
 ## Returns true if the position is within room bounds and doesn't overlap restricted obstacles
-static func validate_placement_position(pos: Vector3, _item_id: String = "") -> bool:
+static func validate_placement_position(pos: Vector3, item_id: String = "") -> bool:
+	var half_w: float = 0.0
+	var half_d: float = 0.0
+	if item_id != "" and CATALOG.has(item_id):
+		var c_size: Vector3 = CATALOG[item_id].get("collision_size", Vector3(0.5, 0.8, 0.5))
+		half_w = c_size.x * 0.5
+		half_d = c_size.z * 0.5
+
 	# 1. Bounds check with epsilon tolerance for corner points
-	if pos.x < (ROOM_MIN_X - EPSILON) or pos.x > (ROOM_MAX_X + EPSILON):
+	if (pos.x - half_w) < (ROOM_MIN_X - EPSILON) or (pos.x + half_w) > (ROOM_MAX_X + EPSILON):
 		return false
-	if pos.z < (ROOM_MIN_Z - EPSILON) or pos.z > (ROOM_MAX_Z + EPSILON):
+	if (pos.z - half_d) < (ROOM_MIN_Z - EPSILON) or (pos.z + half_d) > (ROOM_MAX_Z + EPSILON):
 		return false
 
 	# 2. Rejection of player primary desk overlap at (0, 0, -1.5)
 	var dx = abs(pos.x - DESK_CENTER.x)
 	var dz = abs(pos.z - DESK_CENTER.z)
-	if dx < DESK_HALF_WIDTH and dz < DESK_HALF_DEPTH:
+	var desk_margin_x = DESK_HALF_WIDTH + (half_w * 0.5)
+	var desk_margin_z = DESK_HALF_DEPTH + (half_d * 0.5)
+	if dx < desk_margin_x and dz < desk_margin_z:
 		return false
+
+	# 3. Dynamic AABB overlap check against already placed furniture items
+	if half_w > 0.0 and half_d > 0.0:
+		for placed in _placed_furniture:
+			if placed is Dictionary and placed.has("position"):
+				var p_pos = placed["position"]
+				var px = float(p_pos[0])
+				var pz = float(p_pos[2])
+				var p_id = placed.get("id", "")
+				var p_hw = 0.3
+				var p_hd = 0.3
+				if CATALOG.has(p_id):
+					var p_col: Vector3 = CATALOG[p_id].get("collision_size", Vector3(0.6, 0.8, 0.6))
+					p_hw = p_col.x * 0.5
+					p_hd = p_col.z * 0.5
+				var min_dist_x = (half_w + p_hw) * 0.85
+				var min_dist_z = (half_d + p_hd) * 0.85
+				if abs(pos.x - px) < min_dist_x and abs(pos.z - pz) < min_dist_z:
+					return false
 
 	return true
 

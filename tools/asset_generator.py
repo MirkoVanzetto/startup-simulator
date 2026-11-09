@@ -40,33 +40,8 @@ def combine_meshes(mesh_list):
     valid = [m for m in mesh_list if m is not None and len(m.vertices) > 0]
     if not valid:
         return trimesh.Trimesh()
-    
-    total_vertices = sum(len(m.vertices) for m in valid)
-    total_faces = sum(len(m.faces) for m in valid)
-    
-    all_verts = np.zeros((total_vertices, 3), dtype=np.float64)
-    all_faces = np.zeros((total_faces, 3), dtype=np.int64)
-    all_colors = np.zeros((total_vertices, 4), dtype=np.uint8)
-    
-    v_offset = 0
-    f_offset = 0
-    for m in valid:
-        v_count = len(m.vertices)
-        f_count = len(m.faces)
-        all_verts[v_offset : v_offset + v_count] = m.vertices
-        all_faces[f_offset : f_offset + f_count] = m.faces + v_offset
-        
-        if hasattr(m.visual, 'vertex_colors') and len(m.visual.vertex_colors) == v_count:
-            all_colors[v_offset : v_offset + v_count] = m.visual.vertex_colors
-        else:
-            all_colors[v_offset : v_offset + v_count] = [200, 200, 200, 255]
-            
-        v_offset += v_count
-        f_offset += f_count
-        
-    combined = trimesh.Trimesh(vertices=all_verts, faces=all_faces)
-    combined.visual = ColorVisuals(mesh=combined, vertex_colors=all_colors)
-    return combined
+    return trimesh.util.concatenate(valid)
+
 
 # -------------------------------------------------------------
 # 1. LAPTOP PROP
@@ -297,16 +272,89 @@ def build_studio_room():
     parts.append(create_box([0.12, 3.0, 5.0], [ 3.0, 1.5, 0], [225, 223, 218, 255]))
     # Tech Poster on right wall
     parts.append(create_box([0.02, 0.9, 0.6], [2.93, 1.7, 0.5], [230, 70, 60, 255]))
-    # Front Wall with Door Opening (Z = +2.5)
-    # Left of door
+    
+    # ---------------------------------------------------------
+    # FRONT WALL & GRAND TURIN PALAZZINA EXTERIOR FACADE (Z = +2.5)
+    # ---------------------------------------------------------
+    # Interior front wall sections
     parts.append(create_box([2.4, 3.0, 0.12], [-1.8, 1.5, 2.5], [230, 228, 222, 255]))
-    # Right of door
     parts.append(create_box([2.4, 3.0, 0.12], [ 1.8, 1.5, 2.5], [230, 228, 222, 255]))
-    # Above door
-    parts.append(create_box([1.2, 0.8, 0.12], [ 0.0, 2.6, 2.5], [230, 228, 222, 255]))
-    # Door Frame (wooden)
-    parts.append(create_box([1.24, 2.22, 0.14], [0, 1.11, 2.5], [110, 70, 45, 255]))
-    # Ceiling
+    parts.append(create_box([1.2, 0.7, 0.14], [ 0.0, 2.65, 2.5], [210, 208, 202, 255]))
+    
+    # Garage Roll-up Shutter: Left Metal Rail Guide
+    parts.append(create_box([0.10, 2.3, 0.22], [-0.58, 1.15, 2.52], [65, 70, 80, 255]))
+    # Garage Roll-up Shutter: Right Metal Rail Guide
+    parts.append(create_box([0.10, 2.3, 0.22], [ 0.58, 1.15, 2.52], [65, 70, 80, 255]))
+    # Garage Roll-up Shutter: Top Roller Drum Casing (Industrial Steel)
+    parts.append(create_box([1.36, 0.36, 0.32], [0, 2.36, 2.52], [55, 60, 70, 255]))
+    # Garage Roll-up Shutter: Coiled Slats (Rolled Up)
+    parts.append(create_box([1.16, 0.22, 0.18], [0, 2.12, 2.52], [115, 120, 130, 255]))
+    # Garage Floor Threshold Plate (Industrial Ribbed Metal)
+    parts.append(create_box([1.26, 0.03, 0.24], [0, 0.015, 2.52], [180, 150, 45, 255]))
+    
+    # EXTERIOR FACADE: Ground Floor Rusticated Stone Base (Bugnato Sabaudo)
+    # Spans X = -8.0 to +8.0, Y = 0 to 3.2, Z = 2.58
+    parts.append(create_box([6.8, 3.2, 0.18], [-4.6, 1.6, 2.58], [155, 150, 140, 255]))
+    parts.append(create_box([6.8, 3.2, 0.18], [ 4.6, 1.6, 2.58], [155, 150, 140, 255]))
+    # Architrave beam above garage door
+    parts.append(create_box([1.5, 0.55, 0.22], [0, 2.72, 2.58], [140, 135, 125, 255]))
+    # Signboard "GARAGE TECH - STARTUP STUDIO"
+    parts.append(create_box([2.6, 0.38, 0.06], [0, 2.92, 2.68], [30, 50, 65, 255])) # Enamel plaque
+    # House number plaque "12"
+    parts.append(create_box([0.35, 0.25, 0.03], [-0.95, 2.1, 2.68], [240, 240, 245, 255]))
+    parts.append(create_box([0.31, 0.21, 0.04], [-0.95, 2.1, 2.69], [25, 55, 120, 255]))
+    # Condominium arched wooden door at X = -4.0
+    parts.append(create_box([1.5, 2.5, 0.12], [-4.0, 1.25, 2.62], [75, 45, 30, 255]))
+    parts.append(create_box([1.6, 0.15, 0.16], [-4.0, 2.55, 2.63], [130, 125, 115, 255]))
+    # Ground floor display window at X = +4.0
+    parts.append(create_box([1.8, 2.1, 0.12], [4.0, 1.45, 2.62], [35, 45, 55, 255]))
+    parts.append(create_box([1.6, 1.9, 0.04], [4.0, 1.45, 2.64], [160, 205, 240, 200]))
+    
+    # EXTERIOR UPPER FLOORS: Floors 1, 2, 3 (Y = 3.2 to 12.0)
+    # Warm Piedmontese ochre facade (X = -8.0 to +8.0, Y = 7.6, Z = 2.56)
+    parts.append(create_box([16.0, 8.8, 0.16], [0, 7.6, 2.56], [215, 172, 122, 255]))
+    # Horizontal stone stringcourses / moldings
+    parts.append(create_box([16.4, 0.22, 0.28], [0, 3.25, 2.60], [185, 180, 170, 255]))
+    parts.append(create_box([16.4, 0.18, 0.24], [0, 6.20, 2.58], [185, 180, 170, 255]))
+    parts.append(create_box([16.4, 0.18, 0.24], [0, 9.15, 2.58], [185, 180, 170, 255]))
+    
+    # Windows & Shutters on upper floors
+    win_x = [-5.5, -2.0, 2.0, 5.5]
+    win_y = [4.7, 7.6, 10.5]
+    for wy in win_y:
+        for wx in win_x:
+            # Window opening / dark glass
+            parts.append(create_box([1.1, 1.7, 0.08], [wx, wy, 2.62], [30, 38, 48, 255]))
+            # Stone frame sill
+            parts.append(create_box([1.3, 0.14, 0.16], [wx, wy - 0.9, 2.64], [205, 200, 190, 255]))
+            # Stone frame lintel
+            parts.append(create_box([1.3, 0.14, 0.16], [wx, wy + 0.9, 2.64], [205, 200, 190, 255]))
+            # Green Turin Shutters (Persiane Sabaude)
+            parts.append(create_box([0.48, 1.65, 0.06], [wx - 0.72, wy, 2.63], [42, 75, 48, 255]))
+            parts.append(create_box([0.48, 1.65, 0.06], [wx + 0.72, wy, 2.63], [42, 75, 48, 255]))
+            
+    # Classic Turin Wrought-Iron Balconies at Floors 1 & 2
+    for by in [3.4, 6.35]:
+        for bx in [-2.0, 2.0]:
+            # Stone slab base
+            parts.append(create_box([1.7, 0.14, 0.65], [bx, by, 2.85], [190, 185, 175, 255]))
+            # Wrought-iron railing (front)
+            parts.append(create_box([1.7, 0.75, 0.04], [bx, by + 0.42, 3.16], [35, 38, 42, 255]))
+            # Wrought-iron railing (sides)
+            parts.append(create_box([0.04, 0.75, 0.62], [bx - 0.83, by + 0.42, 2.85], [35, 38, 42, 255]))
+            parts.append(create_box([0.04, 0.75, 0.62], [bx + 0.83, by + 0.42, 2.85], [35, 38, 42, 255]))
+            
+    # Stately Cornice & Mansard Roof at Top (Y = 12.0 to 13.8)
+    parts.append(create_box([16.8, 0.45, 0.65], [0, 12.1, 2.70], [175, 170, 160, 255]))
+    parts.append(create_box([16.8, 0.30, 0.85], [0, 12.4, 2.80], [160, 155, 145, 255]))
+    # Slate Mansard Roof
+    parts.append(create_box([16.6, 1.30, 1.40], [0, 13.1, 2.20], [60, 65, 75, 255]))
+    
+    # Exterior Side Returns (wings) to connect seamlessly to adjacent street buildings
+    parts.append(create_box([0.3, 13.5, 3.5], [-8.0, 6.75, 3.8], [210, 168, 118, 255]))
+    parts.append(create_box([0.3, 13.5, 3.5], [ 8.0, 6.75, 3.8], [210, 168, 118, 255]))
+    
+    # Studio Interior Ceiling
     parts.append(create_box([6.0, 0.10, 5.0], [0, 3.05, 0], [240, 240, 242, 255]))
     # Ceiling modern pendant lamp
     parts.append(create_cylinder(0.01, 0.60, 8, [0, 2.75, 0], color=[40, 40, 40, 255]))
@@ -314,40 +362,58 @@ def build_studio_room():
     return combine_meshes(parts)
 
 # -------------------------------------------------------------
-# 9. TURIN STREET DISTRICT (OUTDOOR)
+# 9. TURIN STREET DISTRICT ROADWAY & SIDEWALKS
 # -------------------------------------------------------------
-def build_street_district():
+def build_street_roadway():
     parts = []
-    # Cobblestone Street Roadway (18m long x 8m wide)
-    parts.append(create_box([18.0, 0.15, 8.0], [0, -0.08, 7.5], [75, 78, 85, 255]))
-    # Sidewalk curbs (granite grey)
-    parts.append(create_box([18.0, 0.22, 2.5], [0, 0.01, 2.25], [165, 168, 175, 255]))
-    parts.append(create_box([18.0, 0.22, 2.5], [0, 0.01, 12.75], [165, 168, 175, 255]))
-    # Historic Turin Portico / Building Facade along north sidewalk
-    # 4 Stone Arches & Pillars (stile sabaudo / via Po)
-    pillar_x = [-7.0, -2.5, 2.5, 7.0]
-    for px in pillar_x:
-        # Pillar
-        parts.append(create_box([0.55, 3.6, 0.55], [px, 1.8, 3.2], [215, 210, 195, 255]))
-        # Capital / Base
-        parts.append(create_box([0.70, 0.25, 0.70], [px, 0.12, 3.2], [195, 190, 175, 255]))
-        parts.append(create_box([0.70, 0.25, 0.70], [px, 3.50, 3.2], [195, 190, 175, 255]))
-    # Arch lintel across pillars
-    parts.append(create_box([18.0, 0.6, 0.65], [0, 3.8, 3.2], [210, 205, 190, 255]))
-    # Upper facade with windows and shutters
-    parts.append(create_box([18.0, 4.0, 0.3], [0, 6.0, 3.2], [225, 195, 160, 255])) # Warm Turin ocher facade
-    # Windows on upper facade
-    for wx in [-5.0, 0.0, 5.0]:
-        parts.append(create_box([1.1, 1.6, 0.1], [wx, 5.8, 3.35], [40, 50, 65, 255])) # Window
-        parts.append(create_box([0.45, 1.6, 0.06], [wx - 0.7, 5.8, 3.36], [60, 95, 65, 255])) # Green Shutter Left
-        parts.append(create_box([0.45, 1.6, 0.06], [wx + 0.7, 5.8, 3.36], [60, 95, 65, 255])) # Green Shutter Right
-    # Street Lampposts (Turin classic cast-iron lantern)
-    for lx in [-5.5, 4.5]:
-        parts.append(create_cylinder(0.06, 3.4, 10, [lx, 1.7, 4.2], color=[35, 42, 45, 255]))
-        parts.append(create_box([0.35, 0.50, 0.35], [lx, 3.5, 4.2], [255, 230, 130, 255])) # Glowing lantern
-    # Street Sign "Via Po"
-    parts.append(create_box([0.8, 0.22, 0.03], [-6.8, 2.6, 3.5], [30, 65, 130, 255])) # Blue Turin street sign
+    # Main Roadway Asphalt (5.2m wide, spans X = -2.6 to +2.6, Z = -3.0 to 25.0)
+    parts.append(create_box([5.2, 0.15, 28.0], [0, -0.075, 11.0], [52, 55, 60, 255]))
+    
+    # Painted Dashed White Center Line (Z = -2.0 to 24.0)
+    for z in range(-1, 24, 3):
+        # Skip pedestrian crossing zone (Z = 15 to 18)
+        if 14 <= z <= 18:
+            continue
+        parts.append(create_box([0.18, 0.005, 1.8], [0, 0.003, z], [245, 245, 250, 255]))
+        
+    # Pedestrian Zebra Crossing (Strisce Pedonali) in front of Pizzeria Da Mario (Z = 16.5)
+    for x in [-2.0, -1.2, -0.4, 0.4, 1.2, 2.0]:
+        parts.append(create_box([0.5, 0.006, 2.2], [x, 0.003, 16.5], [245, 245, 250, 255]))
+        
+    # Yellow Parking Markings along Curb
+    for z in range(3, 14, 4):
+        parts.append(create_box([0.12, 0.005, 3.6], [-2.35, 0.003, z], [235, 195, 45, 255]))
+        parts.append(create_box([0.12, 0.005, 3.6], [ 2.35, 0.003, z + 2], [235, 195, 45, 255]))
+        
+    # Cast Iron Manhole Covers (Tombini Torino)
+    parts.append(create_cylinder(0.42, 0.01, 16, [0.8, 0.003, 5.0], color=[40, 42, 45, 255]))
+    parts.append(create_cylinder(0.42, 0.01, 16, [-0.6, 0.003, 12.0], color=[40, 42, 45, 255]))
+    
+    # Storm Drain Grates (Caditoie Stradali) along curbs
+    parts.append(create_box([0.35, 0.01, 0.6], [-2.35, 0.003, 7.5], [35, 38, 42, 255]))
+    parts.append(create_box([0.35, 0.01, 0.6], [ 2.35, 0.003, 14.5], [35, 38, 42, 255]))
+    
+    # LEFT SIDEWALK (West, X from -2.6 to -6.8, width 4.2m, height 0.16m)
+    # Sidewalk granite pavement
+    parts.append(create_box([4.2, 0.16, 28.0], [-4.7, 0.08, 11.0], [195, 192, 185, 255]))
+    # Raised granite curb stone along road edge
+    parts.append(create_box([0.22, 0.18, 28.0], [-2.6, 0.09, 11.0], [165, 162, 155, 255]))
+    
+    # RIGHT SIDEWALK (East, X from +2.6 to +6.8, width 4.2m, height 0.16m)
+    # Sidewalk granite pavement
+    parts.append(create_box([4.2, 0.16, 28.0], [ 4.7, 0.08, 11.0], [195, 192, 185, 255]))
+    # Raised granite curb stone along road edge
+    parts.append(create_box([0.22, 0.18, 28.0], [ 2.6, 0.09, 11.0], [165, 162, 155, 255]))
+    
+    # SOUTH PIAZZA PAVING (Capping past Z = 24.0, from Z = 24.0 to 30.0, width 14.0m)
+    parts.append(create_box([14.0, 0.16, 6.0], [0, 0.08, 27.0], [185, 180, 172, 255]))
+    
     return combine_meshes(parts)
+
+def build_street_district():
+    # Retain old signature for backward compatibility
+    return build_street_roadway()
+
 
 # -------------------------------------------------------------
 # 10. PIZZERIA INTERIOR & WOOD-FIRED OVEN
@@ -356,18 +422,67 @@ def build_pizzeria_interior():
     parts = []
     # Terracotta Floor (7m x 6m)
     parts.append(create_box([7.0, 0.10, 6.0], [0, -0.05, 0], [195, 105, 65, 255]))
-    # Walls (warm rustic Tuscan/Piedmont plaster)
-    parts.append(create_box([7.0, 3.2, 0.15], [0, 1.6, -3.0], [240, 230, 210, 255])) # Back
-    parts.append(create_box([0.15, 3.2, 6.0], [-3.5, 1.6, 0], [240, 230, 210, 255])) # Left
-    parts.append(create_box([0.15, 3.2, 6.0], [ 3.5, 1.6, 0], [240, 230, 210, 255])) # Right
+    # Walls (rustic brick and warm plaster)
+    parts.append(create_box([7.0, 3.2, 0.15], [0, 1.6, -3.0], [152, 58, 40, 255])) # Back
+    parts.append(create_box([0.15, 3.2, 6.0], [-3.5, 1.6, 0], [152, 58, 40, 255])) # Left
+    parts.append(create_box([0.15, 3.2, 6.0], [ 3.5, 1.6, 0], [152, 58, 40, 255])) # Right
     parts.append(create_box([7.0, 0.10, 6.0], [0, 3.25, 0], [235, 225, 205, 255])) # Ceiling
     
-    # Entrance wall with door (Z = +3.0)
-    parts.append(create_box([2.8, 3.2, 0.15], [-2.1, 1.6, 3.0], [240, 230, 210, 255]))
-    parts.append(create_box([2.8, 3.2, 0.15], [ 2.1, 1.6, 3.0], [240, 230, 210, 255]))
-    parts.append(create_box([1.4, 0.9, 0.15], [ 0.0, 2.75, 3.0], [240, 230, 210, 255]))
-    # Sign above entrance "PIZZERIA DA MARIO"
-    parts.append(create_box([2.4, 0.45, 0.08], [0, 2.45, 2.9], [175, 45, 35, 255]))
+    # ---------------------------------------------------------
+    # PIZZERIA EXTERIOR FACADE & ENTRANCE (Z = +3.0)
+    # ---------------------------------------------------------
+    # Rustic Terracotta Brick Base Wall (Left & Right of entrance)
+    parts.append(create_box([2.8, 3.2, 0.18], [-2.1, 1.6, 3.0], [152, 58, 40, 255]))
+    parts.append(create_box([2.8, 3.2, 0.18], [ 2.1, 1.6, 3.0], [152, 58, 40, 255]))
+    parts.append(create_box([1.4, 0.9, 0.18], [ 0.0, 2.75, 3.0], [152, 58, 40, 255]))
+    
+    # Ground floor facade extensions to seamlessly join street buildings (width 14.0, X = -7.0 to +7.0)
+    parts.append(create_box([3.5, 3.2, 0.20], [-5.25, 1.6, 3.0], [152, 58, 40, 255]))
+    parts.append(create_box([3.5, 3.2, 0.20], [ 5.25, 1.6, 3.0], [152, 58, 40, 255]))
+    # Ground floor display windows on flanking palazzo extensions
+    parts.append(create_box([1.8, 1.8, 0.08], [-5.25, 1.5, 3.08], [65, 42, 28, 255]))
+    parts.append(create_box([1.6, 1.6, 0.02], [-5.25, 1.5, 3.09], [170, 215, 245, 190]))
+    parts.append(create_box([1.8, 1.8, 0.08], [ 5.25, 1.5, 3.08], [65, 42, 28, 255]))
+    parts.append(create_box([1.6, 1.6, 0.02], [ 5.25, 1.5, 3.09], [170, 215, 245, 190]))
+    
+    # Large Traditional Italian Pizzeria Windows (Vetrina Saletta)
+    # Left display window (X = -2.1)
+    parts.append(create_box([1.8, 1.8, 0.08], [-2.1, 1.5, 3.08], [65, 42, 28, 255])) # Dark Walnut Frame
+    parts.append(create_box([1.6, 1.6, 0.02], [-2.1, 1.5, 3.09], [170, 215, 245, 190])) # Glass
+    # Right display window (X = +2.1)
+    parts.append(create_box([1.8, 1.8, 0.08], [ 2.1, 1.5, 3.08], [65, 42, 28, 255]))
+    parts.append(create_box([1.6, 1.6, 0.02], [ 2.1, 1.5, 3.09], [170, 215, 245, 190]))
+    
+    # Heavy Timber Lintel beam above doorway
+    parts.append(create_box([1.8, 0.32, 0.22], [0, 2.40, 3.04], [68, 40, 24, 255]))
+    # Exterior Signboard "PIZZERIA DA MARIO"
+    parts.append(create_box([2.8, 0.52, 0.10], [0, 2.85, 3.10], [168, 36, 26, 255])) # Napoli Red
+    parts.append(create_box([2.9, 0.06, 0.12], [0, 3.12, 3.10], [215, 175, 55, 255])) # Gold trim top
+    parts.append(create_box([2.9, 0.06, 0.12], [0, 2.58, 3.10], [215, 175, 55, 255])) # Gold trim bottom
+    
+    # UPPER FLOORS ABOVE PIZZERIA (Y = 3.2 to 12.0) - Encloses vertical sky completely!
+    parts.append(create_box([14.0, 8.8, 0.20], [0, 7.6, 3.0], [205, 155, 105, 255])) # Warm Piedmontese ochre
+    # Horizontal stone stringcourses
+    parts.append(create_box([14.4, 0.20, 0.26], [0, 3.25, 3.04], [180, 175, 165, 255]))
+    parts.append(create_box([14.4, 0.18, 0.24], [0, 6.20, 3.04], [180, 175, 165, 255]))
+    parts.append(create_box([14.4, 0.18, 0.24], [0, 9.15, 3.04], [180, 175, 165, 255]))
+    
+    # Upper windows & shutters above pizzeria
+    for wy in [4.7, 7.6, 10.5]:
+        for wx in [-4.5, -1.8, 1.8, 4.5]:
+            parts.append(create_box([1.0, 1.6, 0.08], [wx, wy, 3.08], [30, 38, 48, 255]))
+            parts.append(create_box([1.2, 0.12, 0.14], [wx, wy - 0.85, 3.10], [195, 190, 180, 255]))
+            parts.append(create_box([0.45, 1.55, 0.06], [wx - 0.65, wy, 3.09], [38, 72, 42, 255])) # Green shutters
+            parts.append(create_box([0.45, 1.55, 0.06], [wx + 0.65, wy, 3.09], [38, 72, 42, 255]))
+            
+    # Stately Cornice and Mansard Roof at top
+    parts.append(create_box([14.8, 0.40, 0.60], [0, 12.1, 3.20], [170, 165, 155, 255]))
+    parts.append(create_box([14.6, 1.20, 1.40], [0, 13.0, 2.70], [55, 60, 70, 255]))
+    
+    # Side exterior wings
+    parts.append(create_box([0.3, 13.0, 3.5], [-7.0, 6.5, 1.5], [205, 155, 105, 255]))
+    parts.append(create_box([0.3, 13.0, 3.5], [ 7.0, 6.5, 1.5], [205, 155, 105, 255]))
+
     
     # Authentic Wood-Fired Brick Pizza Oven (back right corner)
     # Base block

@@ -14,6 +14,7 @@
 [ext_resource type="PackedScene" path="res://assets/models/furniture/cactus_small_A.gltf" id="12_pls"]
 [ext_resource type="PackedScene" path="res://assets/models/furniture/cactus_medium_A.gltf" id="13_plm"]
 [ext_resource type="PackedScene" path="res://assets/models/furniture/pictureframe_large_A.gltf" id="14_pic"]
+[ext_resource type="PackedScene" path="res://assets/models/hardware/server_rack.glb" id="15_srv"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
 size = Vector3(6.2, 0.2, 5.2)
@@ -75,6 +76,14 @@ light_energy = 0.8
 spot_range = 3.5
 spot_angle = 45.0
 
+[node name="GarageDoorLantern" type="OmniLight3D" parent="Lighting"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.9, 2.8)
+light_color = Color(1, 0.9, 0.75, 1)
+light_energy = 0.75
+omni_range = 5.0
+
+
+
 [node name="Furniture" type="Node3D" parent="."]
 
 [node name="DeskProp" parent="Furniture" instance=ExtResource("3_dsk")]
@@ -127,3 +136,8 @@ visible = false
 [node name="PlantAloeUpgrade" parent="Upgrades" instance=ExtResource("13_plm")]
 transform = Transform3D(0.9, 0, 0, 0, 0.9, 0, 0, 0, 0.9, -2.2, 0, 0.5)
 visible = false
+
+[node name="ServerRackUpgradeProp" parent="Upgrades" instance=ExtResource("15_srv")]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 2.2, 0, 1.4)
+visible = false
+

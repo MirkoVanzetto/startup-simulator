@@ -64,6 +64,8 @@ func advance_tutorial_to_in_progress() -> void:
 func mark_tutorial_website_built(result_data: Dictionary) -> void:
 	if active_contracts.has("pizzeria_da_mario"):
 		var c = active_contracts["pizzeria_da_mario"]
+		if c.get("status") == "completed" or ("pizzeria_da_mario" in completed_contracts):
+			return
 		c["status"] = "built"
 		c["website_build_data"] = result_data
 		c["objective_text"] = "Consegna il sito a Mario tramite l'app Posta sul laptop per ricevere il pagamento."
@@ -73,6 +75,8 @@ func mark_tutorial_website_built(result_data: Dictionary) -> void:
 func complete_tutorial_contract() -> void:
 	if active_contracts.has("pizzeria_da_mario"):
 		var c = active_contracts["pizzeria_da_mario"]
+		if c.get("status") == "completed" or ("pizzeria_da_mario" in completed_contracts):
+			return
 		c["status"] = "completed"
 		var reward = float(c["budget"])
 		var rep = int(c["reputation_reward"])

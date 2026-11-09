@@ -20,7 +20,7 @@ func _ready() -> void:
 	
 	footstep_player = AudioStreamPlayer.new()
 	footstep_player.name = "FootstepPlayer"
-	footstep_player.volume_db = -6.0
+	footstep_player.volume_db = -16.0
 	add_child(footstep_player)
 	
 	_load_sound_assets()

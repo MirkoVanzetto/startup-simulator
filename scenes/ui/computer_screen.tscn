@@ -414,6 +414,44 @@ layout_mode = 2
 size_flags_vertical = 8
 text = "Acquista (€ 35,00)"
 
+[node name="ServerCard" type="PanelContainer" parent="Windows/ShopWindow/Margin/VBox/Grid"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="VBox" type="VBoxContainer" parent="Windows/ShopWindow/Margin/VBox/Grid/ServerCard"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ItemName" type="Label" parent="Windows/ShopWindow/Margin/VBox/Grid/ServerCard/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.3, 1)
+theme_override_font_sizes/font_size = 16
+text = "Mini Server Rack 4U & NAS"
+
+[node name="Price" type="Label" parent="Windows/ShopWindow/Margin/VBox/Grid/ServerCard/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
+theme_override_font_sizes/font_size = 15
+text = "€ 450,00"
+
+[node name="Desc" type="Label" parent="Windows/ShopWindow/Margin/VBox/Grid/ServerCard/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Armadio server compatto con NAS RAID-10 e switch di rete. Installato nell'angolo dello studio per ospitare siti e generare rendita ricorrente."
+autowrap_mode = 2
+
+[node name="StatusLabel" type="Label" parent="Windows/ShopWindow/Margin/VBox/Grid/ServerCard"]
+layout_mode = 2
+size_flags_vertical = 8
+text = "Disponibile"
+
+[node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/Grid/ServerCard"]
+layout_mode = 2
+size_flags_vertical = 8
+text = "Acquista (€ 450,00)"
+
+
 [node name="BankWindow" type="PanelContainer" parent="Windows"]
 visible = false
 layout_mode = 1

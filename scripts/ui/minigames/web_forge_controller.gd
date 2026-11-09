@@ -180,7 +180,12 @@ func _update_website_preview() -> void:
 	quality_progress.value = quality_percent
 	quality_label.text = "Completezza Requisiti: %d%% (%d / 5 Componenti)" % [int(quality_percent), active_count]
 	
-	if active_count == 5:
+	var tut = ContractManager.get_tutorial_contract()
+	var status = tut.get("status", "available")
+	if status == "completed":
+		compile_btn.disabled = true
+		compile_btn.text = "✔ Progetto Già Consegnato a Mario (€ 650,00 Incassati)"
+	elif active_count == 5:
 		compile_btn.disabled = false
 		compile_btn.text = "✔ Compila Build e Prepara Consegna per Mario (€ 650,00)"
 	else:
@@ -188,6 +193,10 @@ func _update_website_preview() -> void:
 		compile_btn.text = "Inserisci tutti i 5 requisiti richiesti da Mario (%d/5)" % active_count
 
 func _on_compile_pressed() -> void:
+	var tut = ContractManager.get_tutorial_contract()
+	if tut.get("status") == "completed":
+		visible = false
+		return
 	SoundManager.play_ui_success()
 	var result_data = {
 		"theme": current_theme_color.to_html(),

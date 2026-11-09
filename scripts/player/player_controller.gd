@@ -69,8 +69,8 @@ func _physics_process(delta: float) -> void:
 	_handle_interaction_ray()
 
 func _handle_footsteps(delta: float, is_sprinting: bool) -> void:
-	if is_on_floor() and is_moving and velocity.length() > 0.5:
-		var current_interval = step_interval * 0.7 if is_sprinting else step_interval
+	if is_on_floor() and is_moving and velocity.length() > 0.8:
+		var current_interval = 0.36 if is_sprinting else 0.52
 		footstep_timer += delta
 		if footstep_timer >= current_interval:
 			footstep_timer = 0.0

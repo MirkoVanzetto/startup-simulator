@@ -61,6 +61,10 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 16.0
+offset_right = -24.0
+offset_bottom = -16.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 12
@@ -71,12 +75,12 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_header")
 
 [node name="HBox" type="HBoxContainer" parent="Main/Header"]
 layout_mode = 2
-theme_override_constants/separation = 20
+theme_override_constants/separation = 16
 
 [node name="IDELabel" type="Label" parent="Main/Header/HBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
-theme_override_font_sizes/font_size = 17
+theme_override_font_sizes/font_size = 15
 text = "⚡ WebForge IDE v1.0 — Progetto: Pizzeria Da Mario (Torino)"
 
 [node name="Spacer" type="Control" parent="Main/Header/HBox"]
@@ -85,21 +89,23 @@ size_flags_horizontal = 3
 
 [node name="QualityLabel" type="Label" parent="Main/Header/HBox"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 13
 text = "Completezza Requisiti: 0%"
 
 [node name="QualityProgress" type="ProgressBar" parent="Main/Header/HBox"]
-custom_minimum_size = Vector2(180, 20)
+custom_minimum_size = Vector2(160, 18)
 layout_mode = 2
 size_flags_vertical = 4
 
 [node name="ExitButton" type="Button" parent="Main/Header/HBox"]
 layout_mode = 2
+theme_override_font_sizes/font_size = 13
 text = " ✕ Chiudi IDE "
 
 [node name="Body" type="HSplitContainer" parent="Main"]
 layout_mode = 2
 size_flags_vertical = 3
-split_offset = 360
+split_offset = 320
 
 [node name="Palette" type="PanelContainer" parent="Main/Body"]
 layout_mode = 2

@@ -65,6 +65,17 @@ func _bill_daily_expenses() -> void:
 		"Addebitati € %0.2f (Affitto €25, Utenze €8, Fibra €5) per il Giorno %d." % [total_overhead, current_day],
 		"warning"
 	)
+	
+	# Milestone 4 - Passive Recurring Revenue from Server Rack Infrastructure
+	if "server_rack_upgrade" in GameManager.studio_upgrades_installed:
+		var hosting_income = 48.00
+		EconomyManager.earn(hosting_income, "Rendita Ricorrente Hosting & Cloud Server (Giorno %d)" % current_day)
+		EventBus.notification_posted.emit(
+			"Incasso Hosting Server",
+			"Accreditati € %0.2f per i servizi di hosting e cloud attivi sul tuo mini server rack!" % hosting_income,
+			"success"
+		)
+
 
 func get_formatted_time() -> String:
 	return "%02d:%02d" % [current_hour, current_minute]

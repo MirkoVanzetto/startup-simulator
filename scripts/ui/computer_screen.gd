@@ -21,9 +21,12 @@ extends Control
 @onready var buy_monitor_btn: Button = $Windows/ShopWindow/Margin/VBox/Grid/MonitorCard/BuyButton
 @onready var buy_chair_btn: Button = $Windows/ShopWindow/Margin/VBox/Grid/ChairCard/BuyButton
 @onready var buy_plant_btn: Button = $Windows/ShopWindow/Margin/VBox/Grid/PlantCard/BuyButton
+@onready var buy_server_btn: Button = $Windows/ShopWindow/Margin/VBox/Grid/ServerCard/BuyButton
 @onready var monitor_status: Label = $Windows/ShopWindow/Margin/VBox/Grid/MonitorCard/StatusLabel
 @onready var chair_status: Label = $Windows/ShopWindow/Margin/VBox/Grid/ChairCard/StatusLabel
 @onready var plant_status: Label = $Windows/ShopWindow/Margin/VBox/Grid/PlantCard/StatusLabel
+@onready var server_status: Label = $Windows/ShopWindow/Margin/VBox/Grid/ServerCard/StatusLabel
+
 
 # Freelance components
 @onready var freelance_text: RichTextLabel = $Windows/FreelanceWindow/Margin/VBox/DetailsLabel
@@ -62,8 +65,10 @@ func _ready() -> void:
 	buy_monitor_btn.pressed.connect(_buy_monitor)
 	buy_chair_btn.pressed.connect(_buy_chair)
 	buy_plant_btn.pressed.connect(_buy_plant)
+	buy_server_btn.pressed.connect(_buy_server)
 	
 	_setup_emails()
+
 	_update_shop_buttons()
 	EventBus.time_tick.connect(func(_h, _m, _d): _update_top_bar())
 	EventBus.contract_marketplace_refreshed.connect(_update_freelance_display)
@@ -151,7 +156,7 @@ func _display_email(index: int) -> void:
 		
 		var tut = ContractManager.get_tutorial_contract()
 		var tut_status = tut.get("status", "available")
-		if e["is_tutorial"] and tut_status == "built":
+		if e["is_tutorial"] and tut_status == "built" and not ("pizzeria_da_mario" in ContractManager.completed_contracts):
 			deliver_project_btn.visible = true
 			deliver_project_btn.text = "★ Consegna Progetto WebForge a Mario (€ 650,00)"
 		else:
@@ -254,6 +259,16 @@ func _update_shop_buttons() -> void:
 		buy_plant_btn.text = "Acquista (€ 35,00)"
 		plant_status.text = "Disponibile per l'ordine"
 
+	var has_server = "server_rack_upgrade" in GameManager.studio_upgrades_installed
+	if has_server:
+		buy_server_btn.disabled = true
+		buy_server_btn.text = "GIA' INSTALLATO"
+		server_status.text = "[color=#44ff88]Attivo in studio (Hosting ON)[/color]"
+	else:
+		buy_server_btn.disabled = not EconomyManager.can_afford(450.0)
+		buy_server_btn.text = "Acquista (€ 450,00)"
+		server_status.text = "Disponibile per l'ordine"
+
 func _buy_monitor() -> void:
 	if EconomyManager.spend(350.0, "Acquisto Monitor 27\" Ultrawide"):
 		EventBus.item_purchased.emit("monitor_upgrade", 350.0)
@@ -271,6 +286,13 @@ func _buy_plant() -> void:
 		EventBus.item_purchased.emit("plant_aloe", 35.0)
 		EventBus.notification_posted.emit("Arredo Posizionato", "La pianta d'arredo è stata collocata nel tuo studio!", "success")
 		_update_shop_buttons()
+
+func _buy_server() -> void:
+	if EconomyManager.spend(450.0, "Acquisto Mini Server Rack 4U & NAS"):
+		EventBus.item_purchased.emit("server_rack_upgrade", 450.0)
+		EventBus.notification_posted.emit("Infrastruttura Attiva", "Il server rack è attivo nell'angolo dello studio! Sbloccati servizi di Hosting.", "success")
+		_update_shop_buttons()
+
 
 func _update_bank_display() -> void:
 	var t = "[b]SALDO ATTUALE:[/b] € %0.2f\n\n[b]ESTRATTO CONTO RECENTE:[/b]\n" % EconomyManager.balance

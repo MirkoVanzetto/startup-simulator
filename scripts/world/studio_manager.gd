@@ -5,6 +5,7 @@ extends Node3D
 @onready var chair_office: Node3D = $Furniture/ChairOfficeProp
 @onready var chair_gaming: Node3D = $Upgrades/ChairGamingUpgradeProp
 @onready var plant_aloe: Node3D = $Upgrades/PlantAloeUpgrade
+@onready var server_rack_upgrade: Node3D = $Upgrades/ServerRackUpgradeProp
 
 func _ready() -> void:
 	EventBus.item_purchased.connect(_on_item_purchased)
@@ -14,6 +15,7 @@ func update_installed_upgrades() -> void:
 	var has_monitor = "monitor_upgrade" in GameManager.studio_upgrades_installed
 	var has_gaming_chair = "chair_gaming_upgrade" in GameManager.studio_upgrades_installed
 	var has_plant = "plant_aloe" in GameManager.studio_upgrades_installed
+	var has_server = "server_rack_upgrade" in GameManager.studio_upgrades_installed
 	
 	if monitor_upgrade:
 		monitor_upgrade.visible = has_monitor
@@ -29,5 +31,10 @@ func update_installed_upgrades() -> void:
 		plant_aloe.visible = has_plant
 		plant_aloe.process_mode = Node.PROCESS_MODE_INHERIT if has_plant else Node.PROCESS_MODE_DISABLED
 
+	if server_rack_upgrade:
+		server_rack_upgrade.visible = has_server
+		server_rack_upgrade.process_mode = Node.PROCESS_MODE_INHERIT if has_server else Node.PROCESS_MODE_DISABLED
+
 func _on_item_purchased(_item_id: String, _cost: float) -> void:
 	update_installed_upgrades()
+

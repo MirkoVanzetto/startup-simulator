@@ -135,6 +135,18 @@ custom_minimum_size = Vector2(140, 48)
 layout_mode = 2
 text = "🏛 Banca & Spese"
 
+[node name="RackIcon" type="Button" parent="DesktopIcons/VBox"]
+custom_minimum_size = Vector2(140, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
+text = "🖥 Rack Manager"
+
+[node name="TalentIcon" type="Button" parent="DesktopIcons/VBox"]
+custom_minimum_size = Vector2(140, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.75, 1, 1)
+text = "👥 Talent Hub HR"
+
 [node name="Windows" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 15
@@ -494,3 +506,204 @@ layout_mode = 2
 size_flags_vertical = 3
 bbcode_enabled = true
 text = "Estratto conto..."
+
+[node name="RackWindow" type="PanelContainer" parent="Windows"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_window")
+
+[node name="Margin" type="MarginContainer" parent="Windows/RackWindow"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="Windows/RackWindow/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="HBoxContainer" parent="Windows/RackWindow/Margin/VBox"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Windows/RackWindow/Margin/VBox/Header"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "TORINO CLOUD INFRASTRUCTURE — 19\" RACK TELEMETRY & HARDWARE"
+
+[node name="Spacer" type="Control" parent="Windows/RackWindow/Margin/VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CloseBtn" type="Button" parent="Windows/RackWindow/Margin/VBox/Header"]
+layout_mode = 2
+text = " ✕ "
+
+[node name="TelemetryBanner" type="PanelContainer" parent="Windows/RackWindow/Margin/VBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="HBox" type="HBoxContainer" parent="Windows/RackWindow/Margin/VBox/TelemetryBanner"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="TempLabel" type="Label" parent="Windows/RackWindow/Margin/VBox/TelemetryBanner/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
+theme_override_font_sizes/font_size = 14
+text = "CPU: 46.5 °C [Normale]"
+
+[node name="FansLabel" type="Label" parent="Windows/RackWindow/Margin/VBox/TelemetryBanner/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "Ventole: 2400 RPM"
+
+[node name="BandwidthLabel" type="Label" parent="Windows/RackWindow/Margin/VBox/TelemetryBanner/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 14
+text = "Banda: 340 Mbps"
+
+[node name="UptimeLabel" type="Label" parent="Windows/RackWindow/Margin/VBox/TelemetryBanner/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 14
+text = "SLA Uptime: 99.98%"
+
+[node name="CoolingRow" type="HBoxContainer" parent="Windows/RackWindow/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="CoolingTitle" type="Label" parent="Windows/RackWindow/Margin/VBox/CoolingRow"]
+layout_mode = 2
+text = "Modalità Ventole:"
+
+[node name="CoolSilentBtn" type="Button" parent="Windows/RackWindow/Margin/VBox/CoolingRow"]
+layout_mode = 2
+text = "Silenzioso (1800 RPM)"
+
+[node name="CoolAutoBtn" type="Button" parent="Windows/RackWindow/Margin/VBox/CoolingRow"]
+layout_mode = 2
+text = "Automatico (2600 RPM)"
+
+[node name="CoolBoostBtn" type="Button" parent="Windows/RackWindow/Margin/VBox/CoolingRow"]
+layout_mode = 2
+text = "Boost 100% (4500 RPM)"
+
+[node name="RecalibrateBtn" type="Button" parent="Windows/RackWindow/Margin/VBox/CoolingRow"]
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
+text = "🛠 Ricalibra & Pulisci Filtri"
+
+[node name="Split" type="HSplitContainer" parent="Windows/RackWindow/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+split_offset = 340
+
+[node name="DomainsPanel" type="PanelContainer" parent="Windows/RackWindow/Margin/VBox/Split"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="VBox" type="VBoxContainer" parent="Windows/RackWindow/Margin/VBox/Split/DomainsPanel"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Windows/RackWindow/Margin/VBox/Split/DomainsPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.3, 1)
+text = "DOMINI & CLIENTI OSPITATI SUL RACK:"
+
+[node name="DomainsText" type="RichTextLabel" parent="Windows/RackWindow/Margin/VBox/Split/DomainsPanel/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = true
+text = "Caricamento domini..."
+
+[node name="ModulesPanel" type="PanelContainer" parent="Windows/RackWindow/Margin/VBox/Split"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="VBox" type="VBoxContainer" parent="Windows/RackWindow/Margin/VBox/Split/ModulesPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Windows/RackWindow/Margin/VBox/Split/ModulesPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
+text = "ESPANSIONI HARDWARE DISPONIBILI:"
+
+[node name="BuyBladeBtn" type="Button" parent="Windows/RackWindow/Margin/VBox/Split/ModulesPanel/VBox"]
+layout_mode = 2
+text = "+ Installa Modulo Blade Quad-Core Xeon (€ 450,00)"
+
+[node name="BuyLiquidBtn" type="Button" parent="Windows/RackWindow/Margin/VBox/Split/ModulesPanel/VBox"]
+layout_mode = 2
+text = "+ Installa Raffreddamento a Liquido AIO (€ 320,00)"
+
+[node name="BuySanBtn" type="Button" parent="Windows/RackWindow/Margin/VBox/Split/ModulesPanel/VBox"]
+layout_mode = 2
+text = "+ Installa Array Storage SAN Raid-10 (€ 680,00)"
+
+[node name="TalentWindow" type="PanelContainer" parent="Windows"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_window")
+
+[node name="Margin" type="MarginContainer" parent="Windows/TalentWindow"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="Windows/TalentWindow/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="HBoxContainer" parent="Windows/TalentWindow/Margin/VBox"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="Windows/TalentWindow/Margin/VBox/Header"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.75, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "TALENT HUB — RECLUTAMENTO & TEAM MANAGEMENT (TORINO ICT)"
+
+[node name="Spacer" type="Control" parent="Windows/TalentWindow/Margin/VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CloseBtn" type="Button" parent="Windows/TalentWindow/Margin/VBox/Header"]
+layout_mode = 2
+text = " ✕ "
+
+[node name="StatsBanner" type="PanelContainer" parent="Windows/TalentWindow/Margin/VBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="StatsLabel" type="Label" parent="Windows/TalentWindow/Margin/VBox/StatsBanner"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 1, 0.7, 1)
+text = "Team Attivo: 0 Dipendenti | Payroll: € 0.00 | Utile Passivo: € 0.00/giorno"
+
+[node name="CandidatesScroll" type="ScrollContainer" parent="Windows/TalentWindow/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CandidatesList" type="VBoxContainer" parent="Windows/TalentWindow/Margin/VBox/CandidatesScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+

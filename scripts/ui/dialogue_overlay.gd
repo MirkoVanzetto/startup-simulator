@@ -56,6 +56,7 @@ func _on_continue_pressed() -> void:
 
 func _on_choice_clicked(action: String) -> void:
 	SoundManager.play_ui_click()
+	EventBus.dialogue_action_triggered.emit(action)
 	match action:
 		"accept":
 			ContractManager.advance_tutorial_to_in_progress()
@@ -69,8 +70,33 @@ func _on_choice_clicked(action: String) -> void:
 				{"text": "Chiarissimo Mario, mi metto subito al lavoro!", "action": "accept"}
 			]
 			_show_next_line()
+		"accept_cafe":
+			ContractManager.advance_contract_to_in_progress("caffe_san_carlo", "Torna al tuo studio e usa WebForge sul laptop per sviluppare il Touch Web POS.")
+			_close_dialogue()
+		"details_cafe":
+			lines_queue = [
+				"Per il POS abbiamo bisogno di: griglia touch per caffè e brioche, comande veloci per i tavoli esterni su Via Po, e integrazione con pagamenti Satispay e carta.",
+				"Completando questo, ti affideremo la gestione server cloud a € 45/giorno fissi!"
+			]
+			active_choices = [
+				{"text": "Perfetto Elena, inizio subito lo sviluppo!", "action": "accept_cafe"}
+			]
+			_show_next_line()
+		"accept_tech_shop":
+			ContractManager.advance_contract_to_in_progress("elettronica_to", "Torna al tuo studio e usa WebForge sul laptop per impostare la migrazione Cloud e il catalogo.")
+			_close_dialogue()
+		"details_tech_shop":
+			lines_queue = [
+				"La nostra architettura richiede: cluster database replicato in tempo reale, catalogo componenti hardware sincronizzato, e backup incrementale notturno sul tuo rack server.",
+				"Consegnata la migrazione, avrai € 1.850 e il 20% di sconto fisso su tutto l'hardware per sempre!"
+			]
+			active_choices = [
+				{"text": "Ottimo Davide, mi metto all'opera sul codice!", "action": "accept_tech_shop"}
+			]
+			_show_next_line()
 		"close", _:
 			_close_dialogue()
+
 
 func _close_dialogue() -> void:
 	visible = false

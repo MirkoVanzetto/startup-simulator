@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://std8studio01"]
+[gd_scene load_steps=21 format=3 uid="uid://std8studio01"]
 
 [ext_resource type="Script" path="res://scripts/world/studio_manager.gd" id="1_stm"]
 [ext_resource type="PackedScene" path="res://assets/environments/studio_room.glb" id="2_stg"]
@@ -15,6 +15,8 @@
 [ext_resource type="PackedScene" path="res://assets/models/furniture/cactus_medium_A.gltf" id="13_plm"]
 [ext_resource type="PackedScene" path="res://assets/models/furniture/pictureframe_large_A.gltf" id="14_pic"]
 [ext_resource type="PackedScene" path="res://assets/models/hardware/server_rack.glb" id="15_srv"]
+[ext_resource type="PackedScene" path="res://assets/characters/character_employee.glb" id="16_emp"]
+[ext_resource type="Script" path="res://scripts/world/server_rack_interactable.gd" id="17_sri"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
 size = Vector3(6.2, 0.2, 5.2)
@@ -27,6 +29,9 @@ size = Vector3(0.2, 3.2, 5.2)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_wall_door_left"]
 size = Vector3(2.5, 3.2, 0.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_rack"]
+size = Vector3(0.9, 1.8, 0.9)
 
 [node name="Studio" type="Node3D"]
 script = ExtResource("1_stm")
@@ -82,8 +87,6 @@ light_color = Color(1, 0.9, 0.75, 1)
 light_energy = 0.75
 omni_range = 5.0
 
-
-
 [node name="Furniture" type="Node3D" parent="."]
 
 [node name="DeskProp" parent="Furniture" instance=ExtResource("3_dsk")]
@@ -108,7 +111,7 @@ transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 0, 0.01, -1.1)
 transform = Transform3D(0.65, 0, 0, 0, 0.65, 0, 0, 0, 0.65, -0.55, 0.74, -1.55)
 
 [node name="DeskPlant" parent="Furniture" instance=ExtResource("12_pls")]
-transform = Transform3D(0.65, 0, 0, 0, 0.65, 0, 0, 0, 0.65, 0.55, 0.74, -1.55)
+transform = Transform3D(0.65, 0, 0, 0, 0.65, 0, 0, 0, 0.65, -0.75, 0.74, -1.35)
 
 [node name="DiplomaFrame" parent="Furniture" instance=ExtResource("14_pic")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9, -2.48)
@@ -141,3 +144,38 @@ visible = false
 transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 2.2, 0, 1.4)
 visible = false
 
+[node name="RackInteractable" type="StaticBody3D" parent="Upgrades/ServerRackUpgradeProp"]
+collision_layer = 3
+collision_mask = 0
+script = ExtResource("17_sri")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Upgrades/ServerRackUpgradeProp/RackInteractable"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("BoxShape3D_rack")
+
+[node name="EmployeeWorkstation" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.7, 0, 0.6)
+visible = false
+
+[node name="WorkstationDesk" parent="EmployeeWorkstation" instance=ExtResource("3_dsk")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
+
+[node name="WorkstationChair" parent="EmployeeWorkstation" instance=ExtResource("4_ch1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.6)
+
+[node name="WorkstationMonitor" parent="EmployeeWorkstation" instance=ExtResource("6_mon")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.74, -0.1)
+
+[node name="EmployeeModel" parent="EmployeeWorkstation" instance=ExtResource("16_emp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
+
+[node name="EmployeeNameTag" type="Label3D" parent="EmployeeWorkstation"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0.1)
+billboard = 1
+text = "Luca Vianello
+★ Junior Frontend Dev ★
+[In Studio - Operativo]"
+font_size = 18
+modulate = Color(0.3, 0.9, 0.6, 1)
+outline_size = 6
+outline_color = Color(0.08, 0.12, 0.18, 1)

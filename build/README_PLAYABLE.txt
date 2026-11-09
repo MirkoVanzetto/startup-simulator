@@ -1,38 +1,54 @@
 ================================================================================
-STARTUP SIMULATOR — WINDOWS PLAYABLE BUILD v1.0
+STARTUP SIMULATOR — EDIZIONE TORINO (MILESTONES 5 & 6)
+Release Windows x86_64
 ================================================================================
-Autore: Antigravity Game Studio
-Engine: Godot Engine 4.3 (GL Compatibility / Forward+)
-Piattaforma: Windows x86_64
 
-ISTRUZIONI PER IL TEST DELLA BUILD:
-1. Estrai la cartella "StartupSimulator" sul tuo computer.
-2. Fai doppio clic su "StartupSimulator.exe" per avviare il gioco.
-3. Il gioco si avvierà direttamente con il Menu Principale:
-   - Fai clic su "Nuova Partita".
-   - Ti risveglierai nel tuo studio a Torino in prima persona!
+Benvenuto in STARTUP SIMULATOR!
+Un simulatore gestionale e di vita in prima persona 3D ambientato a Torino, Italia.
+
+CARATTERISTICHE DELLE MILESTONES 5 & 6:
+--------------------------------------------------------------------------------
+1. SIMULAZIONE SERVER RACK 19" (Milestone 5):
+   - Acquista il server rack dallo store hardware e attivalo nel tuo studio!
+   - Telemetria live: temperatura CPU (°C), giri ventole (RPM), banda (Mbps) e SLA Uptime.
+   - 3 Modalità di raffreddamento: Silenzioso, Automatico, Boost 100%.
+   - Manutenzione fisica direttamente in 3D: avvicinati al rack e premi [E] per calibrare ventole e pulire filtri!
+   - Hosting di siti web dei clienti con rendite passive giornaliere (€ 30-65/giorno per dominio).
+   - Espansioni hardware installabili: Blade Quad-Core Xeon, Raffreddamento a Liquido AIO, Storage SAN Raid-10.
+
+2. ASSUNZIONE DIPENDENTI E RISORSE UMANE (Milestone 6):
+   - App Talent Hub su TO-OS per consultare CV e assumere talenti ICT torinesi:
+     * Luca Vianello (Junior Frontend Developer): velocizza i contratti web e produce utile passivo.
+     * Sara Bellini (DevOps & Cloud SysAdmin): +35% SLA hosting ed elimina il rischio surriscaldamento rack.
+     * Marco Ferri (B2B Account Closer): chiude contratti aziendali ad alto valore.
+   - Seconda postazione 3D in studio con dipendente visibile e targhetta nominativa in tempo reale!
+
+3. ESPANSIONE DISTRETTO VIA PO & NUOVE ATTIVITÀ:
+   - "Caffè San Carlo": Storico bar torinese con bancone in mogano e macchina espresso.
+     Parla con Elena per accettare la Missione 2 (Web POS Touchscreen, € 1.250).
+   - "Elettronica TO": Negozio di componentistica con scaffali per server blade e GPU.
+     Parla con Davide per accettare la Missione 3 (Migrazione Cloud & Catalogo B2B, € 1.850).
+   - "Pizzeria Da Mario": Missione 1 introduttiva con Mario Esposito (€ 650).
+
+4. ANTI-CLIPPING & INTERIOR POLISH:
+   - Eliminato completamente ogni fenomeno di compenetrazione/clipping negli arredi.
+   - Studio con pianta spostata sulla sinistra, libero per monitor ultrawide e seconda postazione.
+   - Forno a legna autentico napoletano nella Pizzeria.
 
 COMANDI DI GIOCO:
-- W / A / S / D : Movimento del personaggio
-- Mouse : Controllo della telecamera
-- [E] o Click Sinistro : Interazione con oggetti (Laptop, NPC Mario, Porte)
-- [Spazio] : Salto
-- [Shift Sinistro] : Corsa / Sprint
-- [ESC] : Menu di Pausa in-game con Salvataggio, Caricamento e Impostazioni live
-          (oppure chiusura/uscita da schermate del laptop e minigiochi)
+--------------------------------------------------------------------------------
+- [W, A, S, D]: Movimento prima persona
+- [Shift]: Scatto / Corsa
+- [Spazio]: Salto
+- [Mouse]: Rotazione visuale
+- [E] oppure [Click Sinistro]: Interagisci (Laptop, Mario, Elena, Davide, Server Rack)
+- [ESC]: Menu di Pausa / Chiudi TO-OS / Alzati dalla scrivania
 
-FLUSSO VERTICAL SLICE & MILESTONE 3:
-1. Esplora lo studio e avvicinati alla scrivania.
-2. Premi [E] per utilizzare il laptop: accedi al sistema operativo TO-OS.
-3. Controlla l'app "Posta" e l'app "Freelance Hub" per vedere l'offerta di lavoro della Pizzeria Da Mario e il nuovo Marketplace B2B di Torino.
-4. Alzati dal laptop, esci dalla porta dello studio e incamminati lungo la suggestiva strada di Torino sotto i portici.
-5. Raggiungi la Pizzeria Da Mario, entra e parla con Mario al bancone [E].
-6. Accetta la commissione di sviluppo del sito web (€ 650,00).
-7. Torna allo studio, siediti al laptop e avvia l'app WebForge IDE.
-8. Assembla tutti i componenti richiesti (Logo Mole, Hero, Menu, Orari, Prenotazione) e compila la build.
-9. Apri la posta, consegna il lavoro e incassa il pagamento!
-10. Usa TorinoHardware sul laptop per acquistare il Secondo Monitor 27" o la Sedia Ergonomica: guardali apparire istantaneamente nello studio 3D!
-11. Premi [ESC] in qualsiasi momento durante il gioco per aprire il nuovo Menu di Pausa, regolare il volume e la sensibilità del mouse, oppure salvare la partita.
+ISTRUZIONI DI AVVIO:
+--------------------------------------------------------------------------------
+1. Estrai tutti i file dallo zip in una cartella a tuo piacimento su Windows.
+2. Assicurati che "StartupSimulator.exe" e "StartupSimulator.pck" si trovino nella stessa cartella.
+3. Fai doppio clic su "StartupSimulator.exe" per avviare il gioco.
 
-Buon divertimento con Startup Simulator!
+Buon divertimento a Torino!
 ================================================================================

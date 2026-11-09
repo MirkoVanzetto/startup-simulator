@@ -23,6 +23,7 @@ signal minigame_completed(score: float, result_data: Dictionary)
 # Dialogue signals
 signal dialogue_started(speaker_name: String, text_lines: Array, choices: Array)
 signal dialogue_choice_selected(choice_index: int)
+signal dialogue_action_triggered(action: String)
 signal dialogue_ended()
 
 # Notification signals
@@ -35,3 +36,8 @@ signal daily_expenses_billed(total_amount: float, details: Dictionary)
 signal random_event_triggered(event_data: Dictionary)
 signal random_event_resolved(choice_index: int)
 signal contract_marketplace_refreshed()
+
+# Milestone 6 - Employee signals
+signal employee_hired(employee_id: String, employee_name: String)
+signal employee_fired(employee_id: String)
+

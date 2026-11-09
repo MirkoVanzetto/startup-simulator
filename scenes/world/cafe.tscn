@@ -1,0 +1,75 @@
+[gd_scene load_steps=9 format=3 uid="uid://caffe01"]
+
+[ext_resource type="PackedScene" path="res://assets/environments/cafe_interior.glb" id="1_csi"]
+[ext_resource type="PackedScene" path="res://scenes/world/elena_npc.tscn" id="2_eln"]
+[ext_resource type="PackedScene" path="res://assets/models/restaurant/table_round_A.gltf" id="3_tbl"]
+[ext_resource type="PackedScene" path="res://assets/models/restaurant/chair_A.gltf" id="4_chr"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
+size = Vector3(6.2, 0.2, 5.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_back"]
+size = Vector3(6.2, 3.4, 0.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_side"]
+size = Vector3(0.2, 3.4, 5.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bar"]
+size = Vector3(3.0, 1.15, 0.9)
+
+[node name="Cafe" type="Node3D"]
+
+[node name="Model" parent="." instance=ExtResource("1_csi")]
+
+[node name="Collisions" type="StaticBody3D" parent="."]
+collision_layer = 1
+collision_mask = 0
+
+[node name="FloorCol" type="CollisionShape3D" parent="Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+shape = SubResource("BoxShape3D_floor")
+
+[node name="WallBack" type="CollisionShape3D" parent="Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, -2.5)
+shape = SubResource("BoxShape3D_wall_back")
+
+[node name="WallLeft" type="CollisionShape3D" parent="Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.0, 1.6, 0)
+shape = SubResource("BoxShape3D_wall_side")
+
+[node name="WallRight" type="CollisionShape3D" parent="Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.0, 1.6, 0)
+shape = SubResource("BoxShape3D_wall_side")
+
+[node name="BarCol" type="CollisionShape3D" parent="Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0.58, -0.9)
+shape = SubResource("BoxShape3D_bar")
+
+[node name="CafeProps" type="Node3D" parent="."]
+
+[node name="BistroTable" parent="CafeProps" instance=ExtResource("3_tbl")]
+transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 1.6, 0, 0.6)
+
+[node name="ChairA" parent="CafeProps" instance=ExtResource("4_chr")]
+transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 1.6, 0, 0.0)
+
+[node name="ChairB" parent="CafeProps" instance=ExtResource("4_chr")]
+transform = Transform3D(-0.8, 0, 0, 0, 0.8, 0, 0, 0, -0.8, 1.6, 0, 1.2)
+
+[node name="Lighting" type="Node3D" parent="."]
+
+[node name="ChandelierLight" type="OmniLight3D" parent="Lighting"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.7, 0)
+light_color = Color(1, 0.92, 0.8, 1)
+light_energy = 1.6
+omni_range = 8.5
+
+[node name="BarSpot" type="SpotLight3D" parent="Lighting"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -0.5, 2.8, -0.9)
+light_color = Color(1, 0.85, 0.6, 1)
+light_energy = 1.3
+spot_range = 4.0
+spot_angle = 50.0
+
+[node name="ElenaNPC" parent="." instance=ExtResource("2_eln")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0.05, -1.5)

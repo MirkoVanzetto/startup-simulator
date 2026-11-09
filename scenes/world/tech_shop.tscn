@@ -1,0 +1,62 @@
+[gd_scene load_steps=7 format=3 uid="uid://tshop01"]
+
+[ext_resource type="PackedScene" path="res://assets/environments/tech_shop_interior.glb" id="1_tsi"]
+[ext_resource type="PackedScene" path="res://scenes/world/davide_npc.tscn" id="2_dvd"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
+size = Vector3(6.2, 0.2, 5.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_back"]
+size = Vector3(6.2, 3.4, 0.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_side"]
+size = Vector3(0.2, 3.4, 5.2)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_counter"]
+size = Vector3(2.4, 1.1, 0.8)
+
+[node name="TechShop" type="Node3D"]
+
+[node name="Model" parent="." instance=ExtResource("1_tsi")]
+
+[node name="Collisions" type="StaticBody3D" parent="."]
+collision_layer = 1
+collision_mask = 0
+
+[node name="FloorCol" type="CollisionShape3D" parent="Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+shape = SubResource("BoxShape3D_floor")
+
+[node name="WallBack" type="CollisionShape3D" parent="Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, -2.5)
+shape = SubResource("BoxShape3D_wall_back")
+
+[node name="WallLeft" type="CollisionShape3D" parent="Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.0, 1.6, 0)
+shape = SubResource("BoxShape3D_wall_side")
+
+[node name="WallRight" type="CollisionShape3D" parent="Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.0, 1.6, 0)
+shape = SubResource("BoxShape3D_wall_side")
+
+[node name="CounterCol" type="CollisionShape3D" parent="Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 0.55, -0.8)
+shape = SubResource("BoxShape3D_counter")
+
+[node name="Lighting" type="Node3D" parent="."]
+
+[node name="ShopMainLight" type="OmniLight3D" parent="Lighting"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.7, 0)
+light_color = Color(0.9, 0.95, 1, 1)
+light_energy = 1.6
+omni_range = 8.0
+
+[node name="CounterSpot" type="SpotLight3D" parent="Lighting"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -0.6, 2.8, -0.8)
+light_color = Color(0.4, 0.85, 1, 1)
+light_energy = 1.2
+spot_range = 4.0
+spot_angle = 50.0
+
+[node name="DavideNPC" parent="." instance=ExtResource("2_dvd")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 0.05, -1.45)

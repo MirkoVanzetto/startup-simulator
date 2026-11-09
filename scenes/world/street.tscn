@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://str8street01"]
+[gd_scene load_steps=27 format=3 uid="uid://str8street01"]
 
 [ext_resource type="PackedScene" path="res://assets/environments/street_district.glb" id="1_str_dist"]
 [ext_resource type="PackedScene" path="res://assets/models/city/building_A.gltf" id="2_bld_a"]
@@ -23,12 +23,17 @@
 [ext_resource type="PackedScene" path="res://assets/models/urban/detail-awning-wide.glb" id="21_awn"]
 [ext_resource type="PackedScene" path="res://assets/models/restaurant/table_round_A.gltf" id="22_tbl"]
 [ext_resource type="PackedScene" path="res://assets/models/restaurant/chair_A.gltf" id="23_chr"]
+[ext_resource type="PackedScene" path="res://scenes/world/tech_shop.tscn" id="24_tsh"]
+[ext_resource type="PackedScene" path="res://scenes/world/cafe.tscn" id="25_caf"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_road"]
 size = Vector3(16.0, 0.4, 30.0)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_wall_lateral"]
-size = Vector3(1.0, 8.0, 30.0)
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_north"]
+size = Vector3(1.0, 8.0, 9.0)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_south"]
+size = Vector3(1.0, 8.0, 15.0)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_wall_cap"]
 size = Vector3(20.0, 8.0, 1.0)
@@ -42,8 +47,8 @@ size = Vector3(20.0, 8.0, 1.0)
 [node name="BuildingA" parent="Buildings" instance=ExtResource("2_bld_a")]
 transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -6.2, 0, 2.0)
 
-[node name="BuildingB" parent="Buildings" instance=ExtResource("3_bld_b")]
-transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -6.2, 0, 8.4)
+[node name="BuildingB_Upper" parent="Buildings" instance=ExtResource("3_bld_b")]
+transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -6.2, 3.2, 8.4)
 
 [node name="BuildingC" parent="Buildings" instance=ExtResource("4_bld_c")]
 transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -6.2, 0, 14.8)
@@ -54,8 +59,8 @@ transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -6.2, 0, 21.2)
 [node name="BuildingD" parent="Buildings" instance=ExtResource("5_bld_d")]
 transform = Transform3D(-3.2, 0, 0, 0, 3.2, 0, 0, 0, -3.2, 6.2, 0, 2.0)
 
-[node name="BuildingE" parent="Buildings" instance=ExtResource("6_bld_e")]
-transform = Transform3D(-3.2, 0, 0, 0, 3.2, 0, 0, 0, -3.2, 6.2, 0, 8.4)
+[node name="BuildingE_Upper" parent="Buildings" instance=ExtResource("6_bld_e")]
+transform = Transform3D(-3.2, 0, 0, 0, 3.2, 0, 0, 0, -3.2, 6.2, 3.2, 8.4)
 
 [node name="BuildingF" parent="Buildings" instance=ExtResource("7_bld_f")]
 transform = Transform3D(-3.2, 0, 0, 0, 3.2, 0, 0, 0, -3.2, 6.2, 0, 14.8)
@@ -78,6 +83,12 @@ transform = Transform3D(0, 0, -3.5, 0, 3.5, 0, 3.5, 0, 0, 4.5, 0, 24.5)
 [node name="SouthCapCenter" parent="Buildings" instance=ExtResource("4_bld_c")]
 transform = Transform3D(3.5, 0, 0, 0, 3.5, 0, 0, 0, 3.5, 0.0, 0, 26.5)
 
+[node name="TechShopVenue" parent="." instance=ExtResource("24_tsh")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -6.2, 0.0, 8.4)
+
+[node name="CafeVenue" parent="." instance=ExtResource("25_caf")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 6.2, 0.0, 8.4)
+
 [node name="StreetProps" type="Node3D" parent="."]
 
 [node name="TreeWest1" parent="StreetProps" instance=ExtResource("14_tree")]
@@ -96,31 +107,31 @@ transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, 3.6, 0.16, 12.0)
 transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -3.5, 0.16, 3.2)
 
 [node name="StreetLightWest2" parent="StreetProps" instance=ExtResource("15_stl")]
-transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -3.5, 0.16, 9.5)
+transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -3.5, 0.16, 11.2)
 
 [node name="StreetLightWest3" parent="StreetProps" instance=ExtResource("15_stl")]
 transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -3.5, 0.16, 15.5)
 
 [node name="StreetLightEast1" parent="StreetProps" instance=ExtResource("15_stl")]
-transform = Transform3D(-3.2, 0, 0, 0, 3.2, 0, 0, 0, -3.2, 3.5, 0.16, 6.5)
+transform = Transform3D(-3.2, 0, 0, 0, 3.2, 0, 0, 0, -3.2, 3.5, 0.16, 4.5)
 
 [node name="StreetLightEast2" parent="StreetProps" instance=ExtResource("15_stl")]
-transform = Transform3D(-3.2, 0, 0, 0, 3.2, 0, 0, 0, -3.2, 3.5, 0.16, 13.0)
+transform = Transform3D(-3.2, 0, 0, 0, 3.2, 0, 0, 0, -3.2, 3.5, 0.16, 12.5)
 
 [node name="StreetLightEast3" parent="StreetProps" instance=ExtResource("15_stl")]
 transform = Transform3D(-3.2, 0, 0, 0, 3.2, 0, 0, 0, -3.2, 3.5, 0.16, 19.5)
 
 [node name="BenchWest" parent="StreetProps" instance=ExtResource("16_bnc")]
-transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -3.6, 0.16, 7.2)
+transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, -3.6, 0.16, 6.0)
 
 [node name="BenchEast" parent="StreetProps" instance=ExtResource("16_bnc")]
-transform = Transform3D(-3.2, 0, 0, 0, 3.2, 0, 0, 0, -3.2, 3.6, 0.16, 10.2)
+transform = Transform3D(-3.2, 0, 0, 0, 3.2, 0, 0, 0, -3.2, 3.6, 0.16, 10.8)
 
 [node name="Bush1" parent="StreetProps" instance=ExtResource("17_bsh")]
-transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, -3.6, 0.16, 8.5)
+transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, -3.6, 0.16, 10.8)
 
 [node name="Bush2" parent="StreetProps" instance=ExtResource("17_bsh")]
-transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, 3.6, 0.16, 8.5)
+transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, 3.6, 0.16, 6.0)
 
 [node name="FireHydrant" parent="StreetProps" instance=ExtResource("18_hyd")]
 transform = Transform3D(2.0, 0, 0, 0, 2.0, 0, 0, 0, 2.0, -2.8, 0.16, 4.0)
@@ -164,12 +175,20 @@ outline_size = 8
 outline_color = Color(0.08, 0.1, 0.18, 1)
 
 [node name="TechShopSign" type="Label3D" parent="StreetProps"]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -4.4, 3.4, 8.4)
-text = "★ ELETTRONICA TO ★\nHardware, Server & Tech Store"
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -3.6, 3.4, 8.4)
+text = "★ ELETTRONICA TO ★\nHardware, Server & Cloud"
 font_size = 24
 modulate = Color(0.3, 0.85, 1, 1)
 outline_size = 8
 outline_color = Color(0.05, 0.15, 0.3, 1)
+
+[node name="CafeSign" type="Label3D" parent="StreetProps"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 3.6, 3.4, 8.4)
+text = "★ CAFFÈ SAN CARLO ★\nTorrefazione & Bistrot dal 1822"
+font_size = 24
+modulate = Color(1, 0.85, 0.35, 1)
+outline_size = 8
+outline_color = Color(0.25, 0.12, 0.05, 1)
 
 [node name="PizzeriaSign" type="Label3D" parent="StreetProps"]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 3.6, 14.9)
@@ -195,13 +214,21 @@ collision_mask = 0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 12.0)
 shape = SubResource("BoxShape3D_road")
 
-[node name="WallLateralWest" type="CollisionShape3D" parent="Collisions"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.2, 4.0, 12.0)
-shape = SubResource("BoxShape3D_wall_lateral")
+[node name="WallLateralWestNorth" type="CollisionShape3D" parent="Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.2, 4.0, 2.5)
+shape = SubResource("BoxShape3D_wall_north")
 
-[node name="WallLateralEast" type="CollisionShape3D" parent="Collisions"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.2, 4.0, 12.0)
-shape = SubResource("BoxShape3D_wall_lateral")
+[node name="WallLateralWestSouth" type="CollisionShape3D" parent="Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.2, 4.0, 17.5)
+shape = SubResource("BoxShape3D_wall_south")
+
+[node name="WallLateralEastNorth" type="CollisionShape3D" parent="Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.2, 4.0, 2.5)
+shape = SubResource("BoxShape3D_wall_north")
+
+[node name="WallLateralEastSouth" type="CollisionShape3D" parent="Collisions"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.2, 4.0, 17.5)
+shape = SubResource("BoxShape3D_wall_south")
 
 [node name="WallSouthCap" type="CollisionShape3D" parent="Collisions"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.0, 22.8)
@@ -216,19 +243,19 @@ light_energy = 0.85
 omni_range = 8.0
 
 [node name="StreetLamp2" type="OmniLight3D" parent="Lighting"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 3.8, 6.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 3.8, 4.5)
 light_color = Color(1, 0.92, 0.75, 1)
 light_energy = 0.85
 omni_range = 8.0
 
 [node name="StreetLamp3" type="OmniLight3D" parent="Lighting"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 3.8, 9.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 3.8, 11.2)
 light_color = Color(1, 0.92, 0.75, 1)
 light_energy = 0.85
 omni_range = 8.0
 
 [node name="StreetLamp4" type="OmniLight3D" parent="Lighting"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 3.8, 13.0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 3.8, 12.5)
 light_color = Color(1, 0.92, 0.75, 1)
 light_energy = 0.85
 omni_range = 8.0
@@ -240,8 +267,13 @@ light_energy = 1.2
 omni_range = 6.0
 
 [node name="TechShopGlow" type="OmniLight3D" parent="Lighting"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.2, 3.4, 8.4)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.8, 3.4, 8.4)
 light_color = Color(0.3, 0.8, 1, 1)
-light_energy = 1.0
-omni_range = 6.0
+light_energy = 1.2
+omni_range = 7.0
 
+[node name="CafeGlow" type="OmniLight3D" parent="Lighting"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.8, 3.4, 8.4)
+light_color = Color(1, 0.85, 0.4, 1)
+light_energy = 1.2
+omni_range = 7.0

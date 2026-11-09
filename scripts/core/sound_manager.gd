@@ -52,6 +52,10 @@ func play_ui_notification() -> void:
 func play_ui_success() -> void:
 	_play_ui("ui_success")
 
+func play_ui_error() -> void:
+	_play_ui("ui_notification")
+
+
 func play_cash_register() -> void:
 	_play_ui("cash_register")
 

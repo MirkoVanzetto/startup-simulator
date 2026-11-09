@@ -66,13 +66,33 @@ func _bill_daily_expenses() -> void:
 		"warning"
 	)
 	
-	# Milestone 4 - Passive Recurring Revenue from Server Rack Infrastructure
-	if "server_rack_upgrade" in GameManager.studio_upgrades_installed:
-		var hosting_income = 48.00
-		EconomyManager.earn(hosting_income, "Rendita Ricorrente Hosting & Cloud Server (Giorno %d)" % current_day)
+	# Milestone 5 - Dynamic Hosting Revenue from ServerRackManager
+	if ServerRackManager.is_rack_unlocked or ("server_rack_upgrade" in GameManager.studio_upgrades_installed):
+		var hosting_income = ServerRackManager.calculate_daily_hosting_revenue()
+		if hosting_income > 0.0:
+			EconomyManager.earn(hosting_income, "Rendita Ricorrente Hosting Domini & Cloud (Giorno %d)" % current_day)
+			EventBus.notification_posted.emit(
+				"Incasso Hosting Server",
+				"Accreditati € %0.2f per i domini attivi ospitati sul server rack!" % hosting_income,
+				"success"
+			)
+			
+	# Milestone 6 - Employee Payroll & Productivity
+	var payroll = EmployeeManager.calculate_daily_payroll()
+	if payroll > 0.0:
+		EconomyManager.spend(payroll, "Stipendi & Buste Paga Dipendenti (Giorno %d)" % current_day)
 		EventBus.notification_posted.emit(
-			"Incasso Hosting Server",
-			"Accreditati € %0.2f per i servizi di hosting e cloud attivi sul tuo mini server rack!" % hosting_income,
+			"Buste Paga Pagate",
+			"Liquidati € %0.2f per gli stipendi giornalieri del tuo team." % payroll,
+			"warning"
+		)
+		
+	var emp_revenue = EmployeeManager.calculate_employee_revenue()
+	if emp_revenue > 0.0:
+		EconomyManager.earn(emp_revenue, "Produttività & Ticket Chiusi dal Team (Giorno %d)" % current_day)
+		EventBus.notification_posted.emit(
+			"Fatturato Dipendenti",
+			"Il tuo team ha generato € %0.2f chiudendo task e contratti aziendali!" % emp_revenue,
 			"success"
 		)
 

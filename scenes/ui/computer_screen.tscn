@@ -104,50 +104,58 @@ offset_right = 180.0
 grow_vertical = 2
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = 20
+theme_override_constants/margin_bottom = 10
 
-[node name="VBox" type="VBoxContainer" parent="DesktopIcons"]
+[node name="Scroll" type="ScrollContainer" parent="DesktopIcons"]
 layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+vertical_scroll_mode = 1
+
+[node name="VBox" type="VBoxContainer" parent="DesktopIcons/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 16
 
-[node name="MailIcon" type="Button" parent="DesktopIcons/VBox"]
+[node name="MailIcon" type="Button" parent="DesktopIcons/Scroll/VBox"]
 custom_minimum_size = Vector2(140, 48)
 layout_mode = 2
 text = "✉ Posta / Mail"
 
-[node name="FreelanceIcon" type="Button" parent="DesktopIcons/VBox"]
+[node name="FreelanceIcon" type="Button" parent="DesktopIcons/Scroll/VBox"]
 custom_minimum_size = Vector2(140, 48)
 layout_mode = 2
 text = "💼 Freelance Hub"
 
-[node name="WebForgeIcon" type="Button" parent="DesktopIcons/VBox"]
+[node name="WebForgeIcon" type="Button" parent="DesktopIcons/Scroll/VBox"]
 custom_minimum_size = Vector2(140, 48)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.9, 1, 1)
 text = "⚡ WebForge IDE"
 
-[node name="ShopIcon" type="Button" parent="DesktopIcons/VBox"]
+[node name="ShopIcon" type="Button" parent="DesktopIcons/Scroll/VBox"]
 custom_minimum_size = Vector2(140, 48)
 layout_mode = 2
 text = "🛒 TorinoHardware"
 
-[node name="BankIcon" type="Button" parent="DesktopIcons/VBox"]
+[node name="BankIcon" type="Button" parent="DesktopIcons/Scroll/VBox"]
 custom_minimum_size = Vector2(140, 48)
 layout_mode = 2
 text = "🏛 Banca & Spese"
 
-[node name="RackIcon" type="Button" parent="DesktopIcons/VBox"]
+[node name="RackIcon" type="Button" parent="DesktopIcons/Scroll/VBox"]
 custom_minimum_size = Vector2(140, 48)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
 text = "🖥 Rack Manager"
 
-[node name="TalentIcon" type="Button" parent="DesktopIcons/VBox"]
+[node name="TalentIcon" type="Button" parent="DesktopIcons/Scroll/VBox"]
 custom_minimum_size = Vector2(140, 48)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.75, 1, 1)
 text = "👥 Talent Hub HR"
 
-[node name="FirewallIcon" type="Button" parent="DesktopIcons/VBox"]
+[node name="FirewallIcon" type="Button" parent="DesktopIcons/Scroll/VBox"]
 custom_minimum_size = Vector2(140, 48)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.55, 0.2, 1)
@@ -319,7 +327,7 @@ text = " ✕ "
 [node name="ShopScroll" type="ScrollContainer" parent="Windows/ShopWindow/Margin/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
-horizontal_scroll_mode = 0
+horizontal_scroll_mode = 1
 
 [node name="Grid" type="GridContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll"]
 layout_mode = 2
@@ -330,7 +338,7 @@ theme_override_constants/h_separation = 16
 theme_override_constants/v_separation = 16
 
 [node name="MonitorCard" type="PanelContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid"]
-custom_minimum_size = Vector2(460, 220)
+custom_minimum_size = Vector2(380, 190)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
@@ -357,18 +365,22 @@ size_flags_vertical = 3
 text = "Braccio orientabile in alluminio, risoluzione 2K IPS. Si posiziona fisicamente sulla scrivania nel tuo studio per mostrare il codice e le metriche."
 autowrap_mode = 2
 
-[node name="StatusLabel" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/MonitorCard"]
+[node name="HBox" type="HBoxContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/MonitorCard/VBox"]
 layout_mode = 2
-size_flags_vertical = 8
+theme_override_constants/separation = 8
+
+[node name="StatusLabel" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/MonitorCard/VBox/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "Disponibile"
 
-[node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/MonitorCard"]
+[node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/MonitorCard/VBox/HBox"]
+custom_minimum_size = Vector2(160, 36)
 layout_mode = 2
-size_flags_vertical = 8
 text = "Acquista (€ 350,00)"
 
 [node name="ChairCard" type="PanelContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid"]
-custom_minimum_size = Vector2(460, 220)
+custom_minimum_size = Vector2(380, 190)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
@@ -395,18 +407,22 @@ size_flags_vertical = 3
 text = "Schienale alto con supporto lombare e finiture rosso fuoco. Sostituisce la sedia base del tuo studio migliorando il comfort e l'efficienza."
 autowrap_mode = 2
 
-[node name="StatusLabel" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ChairCard"]
+[node name="HBox" type="HBoxContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ChairCard/VBox"]
 layout_mode = 2
-size_flags_vertical = 8
+theme_override_constants/separation = 8
+
+[node name="StatusLabel" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ChairCard/VBox/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "Disponibile"
 
-[node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ChairCard"]
+[node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ChairCard/VBox/HBox"]
+custom_minimum_size = Vector2(160, 36)
 layout_mode = 2
-size_flags_vertical = 8
 text = "Acquista (€ 220,00)"
 
 [node name="PlantCard" type="PanelContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid"]
-custom_minimum_size = Vector2(460, 220)
+custom_minimum_size = Vector2(380, 190)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
@@ -433,18 +449,22 @@ size_flags_vertical = 3
 text = "Vaso in ceramica con pianta d'arredo. Aumenta la vivibilità dello studio e riduce lo stress da debugging."
 autowrap_mode = 2
 
-[node name="StatusLabel" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/PlantCard"]
+[node name="HBox" type="HBoxContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/PlantCard/VBox"]
 layout_mode = 2
-size_flags_vertical = 8
+theme_override_constants/separation = 8
+
+[node name="StatusLabel" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/PlantCard/VBox/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "Disponibile"
 
-[node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/PlantCard"]
+[node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/PlantCard/VBox/HBox"]
+custom_minimum_size = Vector2(160, 36)
 layout_mode = 2
-size_flags_vertical = 8
 text = "Acquista (€ 35,00)"
 
 [node name="ServerCard" type="PanelContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid"]
-custom_minimum_size = Vector2(460, 220)
+custom_minimum_size = Vector2(380, 190)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
@@ -471,14 +491,18 @@ size_flags_vertical = 3
 text = "Armadio server compatto con NAS RAID-10 e switch di rete. Installato nell'angolo dello studio per ospitare siti e generare rendita ricorrente."
 autowrap_mode = 2
 
-[node name="StatusLabel" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ServerCard"]
+[node name="HBox" type="HBoxContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ServerCard/VBox"]
 layout_mode = 2
-size_flags_vertical = 8
+theme_override_constants/separation = 8
+
+[node name="StatusLabel" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ServerCard/VBox/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "Disponibile"
 
-[node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ServerCard"]
+[node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ServerCard/VBox/HBox"]
+custom_minimum_size = Vector2(160, 36)
 layout_mode = 2
-size_flags_vertical = 8
 text = "Acquista (€ 450,00)"
 
 

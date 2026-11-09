@@ -109,8 +109,8 @@ func _build_matrix_ui() -> void:
 		for x in range(GRID_SIZE):
 			var pos = Vector2i(x, y)
 			var btn = Button.new()
-			btn.custom_minimum_size = Vector2(76, 76)
-			btn.add_theme_font_size_override("font_size", 18)
+			btn.custom_minimum_size = Vector2(56, 56)
+			btn.add_theme_font_size_override("font_size", 15)
 			btn.pressed.connect(func(): _on_cell_clicked(pos))
 			grid_container.add_child(btn)
 			cell_buttons[pos] = btn

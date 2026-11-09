@@ -21,14 +21,14 @@ extends Control
 @onready var deliver_project_btn: Button = $Windows/MailWindow/Margin/VBox/Split/MailBody/DeliverButton
 
 # Shop components
-@onready var buy_monitor_btn: Button = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/MonitorCard/BuyButton
-@onready var buy_chair_btn: Button = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ChairCard/BuyButton
-@onready var buy_plant_btn: Button = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/PlantCard/BuyButton
-@onready var buy_server_btn: Button = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ServerCard/BuyButton
-@onready var monitor_status: Label = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/MonitorCard/StatusLabel
-@onready var chair_status: Label = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ChairCard/StatusLabel
-@onready var plant_status: Label = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/PlantCard/StatusLabel
-@onready var server_status: Label = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ServerCard/StatusLabel
+@onready var buy_monitor_btn: Button = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/MonitorCard/VBox/HBox/BuyButton
+@onready var buy_chair_btn: Button = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ChairCard/VBox/HBox/BuyButton
+@onready var buy_plant_btn: Button = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/PlantCard/VBox/HBox/BuyButton
+@onready var buy_server_btn: Button = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ServerCard/VBox/HBox/BuyButton
+@onready var monitor_status: Label = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/MonitorCard/VBox/HBox/StatusLabel
+@onready var chair_status: Label = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ChairCard/VBox/HBox/StatusLabel
+@onready var plant_status: Label = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/PlantCard/VBox/HBox/StatusLabel
+@onready var server_status: Label = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ServerCard/VBox/HBox/StatusLabel
 
 # Freelance components
 @onready var freelance_text: RichTextLabel = $Windows/FreelanceWindow/Margin/VBox/DetailsLabel
@@ -56,7 +56,7 @@ extends Control
 # Talent Hub components
 @onready var talent_stats_label: Label = $Windows/TalentWindow/Margin/VBox/StatsBanner/StatsLabel
 @onready var candidates_list: VBoxContainer = $Windows/TalentWindow/Margin/VBox/CandidatesScroll/CandidatesList
-@onready var firewall_icon: Button = $DesktopIcons/VBox/FirewallIcon
+@onready var firewall_icon: Button = $DesktopIcons/Scroll/VBox/FirewallIcon
 
 var emails: Array[Dictionary] = []
 
@@ -70,13 +70,13 @@ func _ready() -> void:
 	exit_button.pressed.connect(_on_exit_pressed)
 	
 	# Desktop icons
-	$DesktopIcons/VBox/MailIcon.pressed.connect(func(): _open_window(mail_window))
-	$DesktopIcons/VBox/FreelanceIcon.pressed.connect(func(): _open_window(freelance_window))
-	$DesktopIcons/VBox/WebForgeIcon.pressed.connect(_launch_webforge)
-	$DesktopIcons/VBox/ShopIcon.pressed.connect(func(): _open_window(shop_window))
-	$DesktopIcons/VBox/BankIcon.pressed.connect(func(): _open_window(bank_window))
-	$DesktopIcons/VBox/RackIcon.pressed.connect(func(): _open_window(rack_window))
-	$DesktopIcons/VBox/TalentIcon.pressed.connect(func(): _open_window(talent_window))
+	$DesktopIcons/Scroll/VBox/MailIcon.pressed.connect(func(): _open_window(mail_window))
+	$DesktopIcons/Scroll/VBox/FreelanceIcon.pressed.connect(func(): _open_window(freelance_window))
+	$DesktopIcons/Scroll/VBox/WebForgeIcon.pressed.connect(_launch_webforge)
+	$DesktopIcons/Scroll/VBox/ShopIcon.pressed.connect(func(): _open_window(shop_window))
+	$DesktopIcons/Scroll/VBox/BankIcon.pressed.connect(func(): _open_window(bank_window))
+	$DesktopIcons/Scroll/VBox/RackIcon.pressed.connect(func(): _open_window(rack_window))
+	$DesktopIcons/Scroll/VBox/TalentIcon.pressed.connect(func(): _open_window(talent_window))
 	firewall_icon.pressed.connect(_launch_firewall)
 	
 	# Close buttons for windows
@@ -485,11 +485,81 @@ func _update_talent_display() -> void:
 	var revenue = EmployeeManager.calculate_employee_revenue()
 	var net = revenue - payroll
 	
-	talent_stats_label.text = "👥 Team Attivo: %d Dipendenti | Buste Paga: € %0.2f/g | Utile Generato: +€ %0.2f/g | Netto: +€ %0.2f/g" % [hired.size(), payroll, revenue, net]
+	var max_slots: int = GameManager.get_max_employee_slots() if GameManager.has_method("get_max_employee_slots") else 1
+	var tier_name: String = GameManager.get_company_tier_name() if GameManager.has_method("get_company_tier_name") else "Sede Aziendale"
+	talent_stats_label.text = "🏢 Sede: %s (Scrivanie: %d/%d) | 👥 Team: %d | Buste Paga: € %0.2f/g | Ricavi: +€ %0.2f/g | Netto: +€ %0.2f/g" % [
+		tier_name, hired.size(), max_slots, hired.size(), payroll, revenue, net
+	]
 	
 	# Clear previous candidates
 	for child in candidates_list.get_children():
 		child.queue_free()
+		
+	# Company Expansion Section (if not at max tier)
+	if GameManager.company_tier < 4:
+		var exp_check: Dictionary = GameManager.can_upgrade_company_tier()
+		var target_tier: int = GameManager.company_tier + 1
+		var target_name: String = GameManager.get_company_tier_name(target_tier)
+		
+		var exp_card = PanelContainer.new()
+		var exp_style = StyleBoxFlat.new()
+		exp_style.bg_color = Color(0.14, 0.18, 0.26, 1)
+		exp_style.border_color = Color(0.35, 0.55, 0.85, 0.8)
+		exp_style.set_border_width_all(1)
+		exp_style.set_content_margin_all(12)
+		exp_style.set_corner_radius_all(6)
+		exp_card.add_theme_stylebox_override("panel", exp_style)
+		
+		var exp_hbox = HBoxContainer.new()
+		exp_hbox.add_theme_constant_override("separation", 16)
+		
+		var exp_vbox = VBoxContainer.new()
+		exp_vbox.size_flags_horizontal = SIZE_EXPAND_FILL
+		
+		var exp_title = Label.new()
+		exp_title.text = "🏢 Espansione Sede: %s (Livello %d)" % [target_name, target_tier]
+		exp_title.add_theme_font_size_override("font_size", 15)
+		exp_title.add_theme_color_override("font_color", Color(0.95, 0.82, 0.35, 1))
+		exp_vbox.add_child(exp_title)
+		
+		var exp_desc = Label.new()
+		var target_slots: int = 1 if target_tier == 2 else (3 if target_tier == 3 else 6)
+		exp_desc.text = "Espandi l'ufficio per ospitare fino a %d dipendenti e sbloccare nuove opportunità commerciali a Torino." % target_slots
+		exp_desc.add_theme_font_size_override("font_size", 12)
+		exp_desc.add_theme_color_override("font_color", Color(0.75, 0.8, 0.85, 1))
+		exp_vbox.add_child(exp_desc)
+		
+		var exp_req = Label.new()
+		var cost_val = exp_check.get("cost", 0.0)
+		exp_req.text = "Costo Espansione: € %0.2f | Reputazione Richiesta: %s" % [cost_val, "50" if target_tier == 2 else ("120" if target_tier == 3 else "250")]
+		exp_req.add_theme_font_size_override("font_size", 11)
+		exp_req.add_theme_color_override("font_color", Color(0.4, 0.9, 0.6, 1))
+		exp_vbox.add_child(exp_req)
+		
+		if not exp_check.get("allowed", false):
+			var exp_blocked_lbl = Label.new()
+			exp_blocked_lbl.text = "🔒 " + str(exp_check.get("reason", "Requisiti non soddisfatti"))
+			exp_blocked_lbl.add_theme_font_size_override("font_size", 11)
+			exp_blocked_lbl.add_theme_color_override("font_color", Color(1.0, 0.45, 0.45, 1))
+			exp_blocked_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			exp_vbox.add_child(exp_blocked_lbl)
+			
+		exp_hbox.add_child(exp_vbox)
+		
+		var exp_btn = Button.new()
+		exp_btn.custom_minimum_size = Vector2(160, 42)
+		exp_btn.size_flags_vertical = SIZE_SHRINK_CENTER
+		exp_btn.text = "Espandi Sede (€ %0.2f)" % cost_val
+		exp_btn.disabled = not exp_check.get("allowed", false)
+		if exp_check.get("allowed", false):
+			exp_btn.add_theme_color_override("font_color", Color(1, 0.85, 0.2, 1))
+		exp_btn.pressed.connect(func():
+			if GameManager.upgrade_company_tier():
+				_update_talent_display()
+		)
+		exp_hbox.add_child(exp_btn)
+		exp_card.add_child(exp_hbox)
+		candidates_list.add_child(exp_card)
 		
 	var candidates = EmployeeManager.get_all_candidates()
 	for cand in candidates:
@@ -530,8 +600,6 @@ func _update_talent_display() -> void:
 		salary_lbl.add_theme_color_override("font_color", Color(0.4, 1, 0.6, 1))
 		vbox.add_child(salary_lbl)
 		
-		hbox.add_child(vbox)
-		
 		var is_hired = EmployeeManager.is_employee_hired(cand["id"])
 		var action_btn = Button.new()
 		action_btn.custom_minimum_size = Vector2(140, 42)
@@ -543,13 +611,28 @@ func _update_talent_display() -> void:
 			var cid = cand["id"]
 			action_btn.pressed.connect(func(): EmployeeManager.fire_employee(cid); _update_talent_display())
 		else:
+			var hire_check: Dictionary = EmployeeManager.can_hire_employee(cand["id"])
+			var can_hire: bool = hire_check.get("allowed", false)
 			action_btn.text = "Assumi (€ %0.2f)" % cand["daily_salary"]
-			action_btn.add_theme_color_override("font_color", Color(0.3, 1, 0.6, 1))
-			var can_hire = GameManager.reputation_points >= cand["reputation_req"] and EconomyManager.can_afford(cand["daily_salary"])
 			action_btn.disabled = not can_hire
+			if can_hire:
+				action_btn.add_theme_color_override("font_color", Color(0.3, 1, 0.6, 1))
+			else:
+				action_btn.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6, 1))
+				var block_lbl = Label.new()
+				block_lbl.text = "🔒 " + str(hire_check.get("reason", "Assunzione non consentita"))
+				block_lbl.add_theme_font_size_override("font_size", 11)
+				block_lbl.add_theme_color_override("font_color", Color(1.0, 0.45, 0.45, 1))
+				block_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+				vbox.add_child(block_lbl)
+				
 			var cid = cand["id"]
 			action_btn.pressed.connect(func(): EmployeeManager.hire_employee(cid); _update_talent_display())
 			
+		hbox.add_child(vbox)
 		hbox.add_child(action_btn)
 		card.add_child(hbox)
 		candidates_list.add_child(card)
+
+func _render_talent_hub() -> void:
+	_update_talent_display()

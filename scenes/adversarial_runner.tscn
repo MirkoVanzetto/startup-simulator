@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://advtier5runner01"]
+
+[ext_resource type="Script" path="res://tests/adversarial_stress_tier5.gd" id="1_adv"]
+
+[node name="AdversarialRunner" type="Node"]
+script = ExtResource("1_adv")

@@ -9,11 +9,22 @@ extends Control
 @onready var objective_label: Label = $TopLeft/ObjectivePanel/VBox/ObjectiveText
 @onready var toast_container: VBoxContainer = $BottomLeft/ToastContainer
 
+const QuestManagerClass = preload("res://scripts/core/quest_manager.gd")
+var quest_manager: Node = null
+
 func _ready() -> void:
+	quest_manager = QuestManagerClass.new()
+	add_child(quest_manager)
+	quest_manager.objective_updated.connect(_on_quest_objective_updated)
+	
+	if objective_label:
+		objective_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		
 	EventBus.prompt_changed.connect(_on_prompt_changed)
 	EventBus.funds_changed.connect(_on_funds_changed)
 	EventBus.contract_updated.connect(_on_contract_updated)
 	EventBus.contract_completed.connect(_on_contract_completed)
+	EventBus.item_purchased.connect(_on_item_purchased)
 	EventBus.notification_posted.connect(_on_notification_posted)
 	EventBus.game_state_changed.connect(_on_game_state_changed)
 	
@@ -26,14 +37,19 @@ func _on_prompt_changed(text: String) -> void:
 func _on_funds_changed(new_balance: float, _delta: float, _reason: String) -> void:
 	balance_label.text = "€ %0.2f" % new_balance
 
-func _on_contract_updated(contract_id: String, _status: String) -> void:
-	if contract_id == "pizzeria_da_mario":
-		var tut = ContractManager.get_tutorial_contract()
-		objective_label.text = tut.get("objective_text", "")
+func _on_contract_updated(_contract_id: String, _status: String) -> void:
+	_update_objective_display()
 
 func _on_contract_completed(_id: String, _reward: float, _rep: int) -> void:
 	reputation_label.text = "★ %d Rep" % GameManager.reputation_points
-	objective_label.text = "Visita TorinoHardware sul laptop per acquistare i primi upgrade per lo studio!"
+	_update_objective_display()
+
+func _on_item_purchased(_item_id: String, _cost: float) -> void:
+	_update_objective_display()
+
+func _on_quest_objective_updated(text: String, _category: String, _is_complete: bool) -> void:
+	if objective_label:
+		objective_label.text = text
 
 func _on_notification_posted(title: String, message: String, _icon_type: String) -> void:
 	var toast = PanelContainer.new()
@@ -66,9 +82,13 @@ func _on_notification_posted(title: String, message: String, _icon_type: String)
 func _on_game_state_changed(new_state: int, _old_state: int) -> void:
 	visible = (new_state == GameManager.GameState.FIRST_PERSON)
 
+func _update_objective_display() -> void:
+	if objective_label and quest_manager and quest_manager.has_method("get_current_objective"):
+		objective_label.text = quest_manager.get_current_objective()
+
 func _update_hud_display() -> void:
 	balance_label.text = "€ %0.2f" % EconomyManager.balance
 	reputation_label.text = "★ %d Rep" % GameManager.reputation_points
-	var tut = ContractManager.get_tutorial_contract()
-	objective_label.text = tut.get("objective_text", "Esplora lo studio e controlla il laptop.")
+	_update_objective_display()
 	prompt_container.visible = false
+

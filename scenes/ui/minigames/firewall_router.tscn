@@ -7,9 +7,9 @@ bg_color = Color(0.1, 0.12, 0.16, 0.98)
 border_width_bottom = 2
 border_color = Color(1, 0.55, 0.2, 0.8)
 content_margin_left = 16.0
-content_margin_top = 8.0
+content_margin_top = 6.0
 content_margin_right = 16.0
-content_margin_bottom = 8.0
+content_margin_bottom = 6.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
 bg_color = Color(0.12, 0.14, 0.18, 1)
@@ -22,10 +22,10 @@ corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
-content_margin_left = 16.0
-content_margin_top = 16.0
-content_margin_right = 16.0
-content_margin_bottom = 16.0
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_logs"]
 bg_color = Color(0.06, 0.08, 0.1, 1)
@@ -66,13 +66,13 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 24.0
-offset_top = 16.0
-offset_right = -24.0
-offset_bottom = -16.0
+offset_left = 20.0
+offset_top = 6.0
+offset_right = -20.0
+offset_bottom = -20.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
 [node name="Header" type="PanelContainer" parent="Main"]
 layout_mode = 2
@@ -80,12 +80,12 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_header")
 
 [node name="HBox" type="HBoxContainer" parent="Main/Header"]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 12
 
 [node name="TitleLabel" type="Label" parent="Main/Header/HBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.65, 0.2, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 14
 text = "🛡 NetShield — Configurazione Regole Firewall & Circuit Routing"
 
 [node name="Spacer" type="Control" parent="Main/Header/HBox"]
@@ -106,19 +106,19 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 13
 text = " ✕ Chiudi "
 
-[node name="Body" type="HSplitContainer" parent="Main"]
+[node name="Body" type="MarginContainer" parent="Main"]
 layout_mode = 2
 size_flags_vertical = 3
-split_offset = 480
 
 [node name="HBox" type="HBoxContainer" parent="Main/Body"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 16
+size_flags_vertical = 3
+theme_override_constants/separation = 12
 
 [node name="Center" type="VBoxContainer" parent="Main/Body/HBox"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 
 [node name="MatrixPanel" type="PanelContainer" parent="Main/Body/HBox/Center"]
 layout_mode = 2
@@ -127,20 +127,20 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
 [node name="VBox" type="VBoxContainer" parent="Main/Body/HBox/Center/MatrixPanel"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 
 [node name="MatrixTitle" type="Label" parent="Main/Body/HBox/Center/MatrixPanel/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.85, 1, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 12
 text = "MATRICE PORTE FIREWALL 5x5 (Clicca per tracciare il percorso sequenziale 1 -> N)"
 
 [node name="Grid" type="GridContainer" parent="Main/Body/HBox/Center/MatrixPanel/VBox"]
 layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 3
-theme_override_constants/h_separation = 8
-theme_override_constants/v_separation = 8
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6
 columns = 5
 
 [node name="RightPanel" type="PanelContainer" parent="Main/Body/HBox"]
@@ -150,12 +150,12 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
 [node name="VBox" type="VBoxContainer" parent="Main/Body/HBox/RightPanel"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
 [node name="StatusLabel" type="Label" parent="Main/Body/HBox/RightPanel/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 13
 text = "Prossimo Nodo Richiesto: Nodo 1"
 
 [node name="LogsPanel" type="PanelContainer" parent="Main/Body/HBox/RightPanel/VBox"]
@@ -172,16 +172,16 @@ text = "Inizializzazione NetShield..."
 
 [node name="BtnRow" type="HBoxContainer" parent="Main/Body/HBox/RightPanel/VBox"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
 
 [node name="UndoBtn" type="Button" parent="Main/Body/HBox/RightPanel/VBox/BtnRow"]
-custom_minimum_size = Vector2(0, 38)
+custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "↩ Annulla Passo"
 
 [node name="ResetBtn" type="Button" parent="Main/Body/HBox/RightPanel/VBox/BtnRow"]
-custom_minimum_size = Vector2(0, 38)
+custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
 size_flags_horizontal = 3
 text = "↺ Resetta Percorso"
@@ -190,7 +190,7 @@ text = "↺ Resetta Percorso"
 layout_mode = 2
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 4
+theme_override_constants/margin_bottom = 0
 
 [node name="HBox" type="HBoxContainer" parent="Main/Footer"]
 layout_mode = 2
@@ -200,9 +200,9 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="DeployButton" type="Button" parent="Main/Footer/HBox"]
-custom_minimum_size = Vector2(320, 42)
+custom_minimum_size = Vector2(280, 38)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 13
 disabled = true
 text = "Collega tutti i nodi di sicurezza per distribuire"

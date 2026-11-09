@@ -8,4 +8,4 @@ Thumbs.db
 __pycache__/
 .venv/
 bin/godot
-
+.agents/

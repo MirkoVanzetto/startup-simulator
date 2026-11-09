@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://adv8wfrun01"]
+
+[ext_resource type="Script" path="res://tests/adversarial_workflows_challenger.gd" id="1_adv"]
+
+[node name="AdversarialWorkflowsRunner" type="Node"]
+script = ExtResource("1_adv")

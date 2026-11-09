@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://std8studio01"]
+[gd_scene load_steps=22 format=3 uid="uid://std8studio01"]
 
 [ext_resource type="Script" path="res://scripts/world/studio_manager.gd" id="1_stm"]
 [ext_resource type="PackedScene" path="res://assets/environments/studio_room.glb" id="2_stg"]
@@ -15,8 +15,35 @@
 [ext_resource type="PackedScene" path="res://assets/models/furniture/cactus_medium_A.gltf" id="13_plm"]
 [ext_resource type="PackedScene" path="res://assets/models/furniture/pictureframe_large_A.gltf" id="14_pic"]
 [ext_resource type="PackedScene" path="res://assets/models/hardware/server_rack.glb" id="15_srv"]
-[ext_resource type="PackedScene" path="res://assets/models/characters/character-male-c.glb" id="16_emp"]
+[ext_resource type="PackedScene" path="res://assets/models/characters/Rogue.glb" id="16_emp"]
 [ext_resource type="Script" path="res://scripts/world/server_rack_interactable.gd" id="17_sri"]
+
+[sub_resource type="GDScript" id="GDScript_luca_anim"]
+script/source = "extends Node
+
+func _ready() -> void:
+	_hide_weapons()
+	_play_sitting()
+
+func _hide_weapons() -> void:
+	var model = get_parent()
+	for child in model.find_children(\"*\", \"MeshInstance3D\", true, false):
+		var n = child.name.to_lower()
+		if \"sword\" in n or \"shield\" in n or \"staff\" in n or \"wand\" in n or \"axe\" in n or \"crossbow\" in n or \"knife\" in n or \"throwable\" in n or \"potion\" in n or \"flask\" in n:
+			child.visible = false
+
+func _play_sitting() -> void:
+	var model = get_parent()
+	var ap: AnimationPlayer = model.find_child(\"AnimationPlayer\", true, false)
+	if ap:
+		for anim_name in [\"Sit_Chair_Idle\", \"Idle\", \"idle\"]:
+			if ap.has_animation(anim_name):
+				var a = ap.get_animation(anim_name)
+				if a:
+					a.loop_mode = Animation.LOOP_LINEAR
+				ap.play(anim_name)
+				break
+"
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
 size = Vector3(6.2, 0.2, 5.2)
@@ -93,7 +120,7 @@ omni_range = 5.0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.5)
 
 [node name="ChairOfficeProp" parent="Furniture" instance=ExtResource("4_ch1")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.85)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.15)
 
 [node name="LaptopProp" parent="Furniture" instance=ExtResource("5_lpt")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.74, -1.45)
@@ -133,7 +160,7 @@ transform = Transform3D(0.965926, 0, 0.258819, 0, 1, 0, -0.258819, 0, 0.965926, 
 visible = false
 
 [node name="ChairGamingUpgradeProp" parent="Upgrades" instance=ExtResource("7_ch2")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.85)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.15)
 visible = false
 
 [node name="PlantAloeUpgrade" parent="Upgrades" instance=ExtResource("13_plm")]
@@ -167,8 +194,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.6)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.74, -0.1)
 
 [node name="EmployeeModel" parent="EmployeeWorkstation" instance=ExtResource("16_emp")]
-transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, 0, 0, 0.45)
+transform = Transform3D(0.85, 0, 0, 0, 0.85, 0, 0, 0, 0.85, 0, 0, 0.45)
 
+[node name="AnimationController" type="Node" parent="EmployeeWorkstation/EmployeeModel"]
+script = SubResource("GDScript_luca_anim")
 
 [node name="EmployeeNameTag" type="Label3D" parent="EmployeeWorkstation"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0.1)
@@ -180,3 +209,6 @@ font_size = 18
 modulate = Color(0.3, 0.9, 0.6, 1)
 outline_size = 6
 outline_color = Color(0.08, 0.12, 0.18, 1)
+
+[node name="PlacedFurniture" type="Node3D" parent="."]
+

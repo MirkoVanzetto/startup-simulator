@@ -179,6 +179,12 @@ func _unlock_next_story_mission(just_completed_id: String) -> void:
 				"Davide di Elettronica TO ha bisogno di una soluzione Cloud per il negozio! Trovalo in Via Po.",
 				"contract"
 			)
+		"elettronica_to":
+			EventBus.notification_posted.emit(
+				"Missioni Principali Completate!",
+				"Tutti i contratti della storia completati! Espandi l'azienda o affronta incarichi B2B dal Marketplace.",
+				"success"
+			)
 
 func accept_marketplace_contract(contract_id: String) -> bool:
 	for i in range(marketplace_contracts.size()):

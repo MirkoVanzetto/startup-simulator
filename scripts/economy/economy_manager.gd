@@ -16,7 +16,9 @@ func reset_economy(initial_funds: float = 250.00) -> void:
 func can_afford(amount: float) -> bool:
 	return balance >= amount
 
-func spend(amount: float, reason: String) -> bool:
+func spend(amount: float, reason: String = "") -> bool:
+	if amount <= 0.0:
+		return false
 	if not can_afford(amount):
 		EventBus.notification_posted.emit("Fondi Insufficienti", "Non hai abbastanza denaro sul conto aziendale.", "warning")
 		return false

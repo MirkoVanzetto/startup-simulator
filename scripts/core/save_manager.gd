@@ -3,6 +3,7 @@ extends Node
 
 const SAVE_PATH: String = "user://savegame.json"
 const BACKUP_PATH: String = "user://savegame.json.bak"
+const FurniturePlacementManagerScript = preload("res://scripts/world/furniture_placement_manager.gd")
 
 func has_save_file() -> bool:
 	return FileAccess.file_exists(SAVE_PATH)
@@ -38,7 +39,8 @@ func save_game() -> bool:
 			"pos_y": player_pos.y,
 			"pos_z": player_pos.z,
 			"rot_y": player_rot
-		}
+		},
+		"placed_furniture": FurniturePlacementManagerScript.get_placed_furniture()
 	}
 	
 	var json_string = JSON.stringify(save_dict, "\t")
@@ -106,6 +108,12 @@ func load_game() -> bool:
 		var p = data["player"]
 		GameManager.player_node.global_position = Vector3(float(p.get("pos_x", 0)), float(p.get("pos_y", 0)), float(p.get("pos_z", 0)))
 		GameManager.player_node.rotation.y = float(p.get("rot_y", 0))
+
+	# Restore Placed Furniture (M4)
+	if data.has("placed_furniture") and data["placed_furniture"] is Array:
+		FurniturePlacementManagerScript.load_placed_furniture(data["placed_furniture"])
+	else:
+		FurniturePlacementManagerScript.load_placed_furniture([])
 		
 	GameManager.change_state(GameManager.GameState.FIRST_PERSON)
 	EventBus.notification_posted.emit("Partita Caricata", "Bentornato nella tua startup!", "success")

@@ -16,6 +16,7 @@ var player_node: Node = null
 var current_interactive_target: Node = null
 
 # Startup progression flags
+var company_tier: int = 1 # 1: Freelance nel Garage, 2: Startup Emergente, 3: Software House Strutturata, 4: Tech Company & Server Room
 var studio_upgrades_installed: Array[String] = []
 var reputation_points: int = 0
 var days_elapsed: int = 1
@@ -48,6 +49,7 @@ func change_state(new_state: GameState) -> void:
 	EventBus.game_state_changed.emit(current_state, previous_state)
 
 func start_new_game() -> void:
+	company_tier = 1
 	studio_upgrades_installed.clear()
 	reputation_points = 0
 	days_elapsed = 1
@@ -79,3 +81,146 @@ func _on_item_purchased(item_id: String, _cost: float) -> void:
 	if not item_id in studio_upgrades_installed:
 		studio_upgrades_installed.append(item_id)
 		SaveManager.request_auto_save()
+
+## Progression & Expansion System
+func get_company_tier_name(tier: int = -1) -> String:
+	var t = tier if tier >= 0 else company_tier
+	match t:
+		1:
+			return "Freelance nel Garage"
+		2:
+			return "Startup Emergente"
+		3:
+			return "Software House Strutturata"
+		4:
+			return "Tech Company & Server Room"
+		_:
+			return "Azienda Livello %d" % t
+
+func get_max_employee_slots() -> int:
+	match company_tier:
+		1:
+			return 0
+		2:
+			return 1
+		3:
+			return 3
+		4:
+			return 6
+		_:
+			return 0
+
+func can_upgrade_company_tier() -> Dictionary:
+	var target_tier = company_tier + 1
+	if target_tier > 4:
+		return {
+			"allowed": false,
+			"can_upgrade": false,
+			"reason": "Hai già raggiunto il livello aziendale massimo (Tech Company & Server Room)!"
+		}
+		
+	match target_tier:
+		2:
+			var req_rep = 50
+			var req_cap = 2500.0
+			var cost = 1200.0
+			if reputation_points < req_rep:
+				return {
+					"allowed": false,
+					"can_upgrade": false,
+					"reason": "Reputazione insufficiente: servono almeno %d punti Reputazione (attuali: %d)." % [req_rep, reputation_points]
+				}
+			if EconomyManager.balance < req_cap:
+				return {
+					"allowed": false,
+					"can_upgrade": false,
+					"reason": "Capitale insufficiente: servono almeno € %0.2f di capitale aziendale (saldo attuale: € %0.2f)." % [req_cap, EconomyManager.balance]
+				}
+			if not ContractManager.is_contract_completed("pizzeria_da_mario"):
+				return {
+					"allowed": false,
+					"can_upgrade": false,
+					"reason": "Devi completare la commessa principale con Pizzeria Da Mario prima di registrare l'espansione aziendale."
+				}
+			return {
+				"allowed": true,
+				"can_upgrade": true,
+				"reason": "",
+				"target_tier": 2,
+				"cost": cost,
+				"tier_name": "Startup Emergente"
+			}
+		3:
+			var req_rep = 120
+			var req_cap = 8000.0
+			var cost = 3500.0
+			if reputation_points < req_rep:
+				return {
+					"allowed": false,
+					"can_upgrade": false,
+					"reason": "Reputazione insufficiente: servono almeno %d punti Reputazione (attuali: %d)." % [req_rep, reputation_points]
+				}
+			if EconomyManager.balance < req_cap:
+				return {
+					"allowed": false,
+					"can_upgrade": false,
+					"reason": "Capitale insufficiente: servono almeno € %0.2f (saldo attuale: € %0.2f)." % [req_cap, EconomyManager.balance]
+				}
+			return {
+				"allowed": true,
+				"can_upgrade": true,
+				"reason": "",
+				"target_tier": 3,
+				"cost": cost,
+				"tier_name": "Software House Strutturata"
+			}
+		4:
+			var req_rep = 250
+			var req_cap = 20000.0
+			var cost = 8000.0
+			if reputation_points < req_rep:
+				return {
+					"allowed": false,
+					"can_upgrade": false,
+					"reason": "Reputazione insufficiente: servono almeno %d punti Reputazione (attuali: %d)." % [req_rep, reputation_points]
+				}
+			if EconomyManager.balance < req_cap:
+				return {
+					"allowed": false,
+					"can_upgrade": false,
+					"reason": "Capitale insufficiente: servono almeno € %0.2f (saldo attuale: € %0.2f)." % [req_cap, EconomyManager.balance]
+				}
+			return {
+				"allowed": true,
+				"can_upgrade": true,
+				"reason": "",
+				"target_tier": 4,
+				"cost": cost,
+				"tier_name": "Tech Company & Server Room"
+			}
+		_:
+			return {"allowed": false, "can_upgrade": false, "reason": "Livello aziendale non valido."}
+
+func upgrade_company_tier(bypass_requirements: bool = false) -> bool:
+	var check = can_upgrade_company_tier()
+	if not bypass_requirements:
+		if not check.get("allowed", false):
+			EventBus.notification_posted.emit("Espansione Non Disponibile", check.get("reason", "Requisiti non soddisfatti"), "warning")
+			return false
+		
+		var cost = float(check.get("cost", 0.0))
+		if cost > 0.0:
+			if not EconomyManager.spend(cost, "Espansione Sede Aziendale a %s" % check.get("tier_name", "Tier %d" % (company_tier + 1))):
+				return false
+				
+	company_tier += 1
+	var tier_name = get_company_tier_name(company_tier)
+	EventBus.notification_posted.emit(
+		"Espansione Sede Completata!",
+		"Congratulazioni! La tua azienda è ora una '%s'! Postazioni dipendenti disponibili: %d." % [tier_name, get_max_employee_slots()],
+		"success"
+	)
+	SoundManager.play_ui_success()
+	SaveManager.request_auto_save()
+	return true
+

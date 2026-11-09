@@ -8,21 +8,21 @@ var candidates: Array[Dictionary] = [
 		"name": "Luca Vianello",
 		"role": "Junior Frontend Developer",
 		"avatar_desc": "Laureato ITS ICT Torino, esperto Vue.js, Tailwind & Responsive Design.",
-		"daily_salary": 45.00,
-		"daily_revenue": 95.00,
-		"reputation_req": 20,
+		"daily_salary": 55.00,
+		"daily_revenue": 70.00,
+		"reputation_req": 50,
 		"hired": false,
 		"status": "In cerca di lavoro",
-		"perk": "+50% velocità contratti web & genera € 95/giorno passivi da micro-task"
+		"perk": "-2.5s tempo compilazione WebForge & genera € 70/giorno passivi da micro-task"
 	},
 	{
 		"id": "emp_sara",
 		"name": "Sara Bellini",
 		"role": "DevOps & Cloud SysAdmin",
 		"avatar_desc": "Specialista Docker, Linux Server e cluster ad alta disponibilità.",
-		"daily_salary": 65.00,
-		"daily_revenue": 140.00,
-		"reputation_req": 40,
+		"daily_salary": 85.00,
+		"daily_revenue": 110.00,
+		"reputation_req": 100,
 		"hired": false,
 		"status": "In cerca di lavoro",
 		"perk": "+35% ricavi SLA server rack & azzera rischio surriscaldamento hardware"
@@ -32,12 +32,12 @@ var candidates: Array[Dictionary] = [
 		"name": "Marco Ferri",
 		"role": "B2B Sales & Account Closer",
 		"avatar_desc": "Esperienza commerciale pluriennale nel settore industriale torinese.",
-		"daily_salary": 75.00,
-		"daily_revenue": 175.00,
-		"reputation_req": 60,
+		"daily_salary": 100.00,
+		"daily_revenue": 130.00,
+		"reputation_req": 140,
 		"hired": false,
 		"status": "In cerca di lavoro",
-		"perk": "+15% valore su tutti i contratti marketplace & porta clienti enterprise"
+		"perk": "+20% valore su contratti marketplace & porta clienti enterprise"
 	}
 ]
 
@@ -65,33 +65,56 @@ func get_hired_employees() -> Array[Dictionary]:
 			result.append(c)
 	return result
 
-func hire_employee(emp_id: String) -> bool:
+func can_hire_employee(emp_id: String) -> Dictionary:
 	var cand = get_candidate(emp_id)
 	if cand.is_empty():
-		return false
+		return {"allowed": false, "reason": "Candidato non trovato nel database."}
+		
 	if is_employee_hired(emp_id):
-		EventBus.notification_posted.emit("Già Assunto", "%s fa già parte del tuo team!" % cand["name"], "warning")
-		return false
+		return {"allowed": false, "reason": "%s fa già parte del tuo team attivo!" % cand["name"]}
 		
-	if GameManager.reputation_points < cand["reputation_req"]:
-		EventBus.notification_posted.emit(
-			"Reputazione Insufficiente",
-			"%s richiede almeno %d punti Reputazione per unirsi alla tua startup!" % [cand["name"], cand["reputation_req"]],
-			"error"
-		)
-		return false
+	var comp_tier = GameManager.company_tier if ("company_tier" in GameManager) else 1
+	if comp_tier < 2:
+		return {
+			"allowed": false,
+			"reason": "La tua azienda è ancora al Livello Garage (Solo Freelance). Espandi lo studio a Startup Emergente per assumere dipendenti!"
+		}
 		
-	# First day salary deposit check
+	var hired = get_hired_employees()
+	var max_slots = GameManager.get_max_employee_slots() if GameManager.has_method("get_max_employee_slots") else 1
+	if hired.size() >= max_slots:
+		return {
+			"allowed": false,
+			"reason": "Postazioni di lavoro esaurite (%d/%d). Potenzia l'ufficio per creare nuove scrivanie!" % [hired.size(), max_slots]
+		}
+		
+	var rep = GameManager.reputation_points if ("reputation_points" in GameManager) else 0
+	if rep < cand["reputation_req"]:
+		return {
+			"allowed": false,
+			"reason": "Reputazione insufficiente (%d / %d richiesta per %s)." % [rep, cand["reputation_req"], cand["name"]]
+		}
+		
 	if not EconomyManager.can_afford(cand["daily_salary"]):
-		EventBus.notification_posted.emit(
-			"Fondi Insufficienti",
-			"Ti servono almeno € %0.2f per coprire la prima giornata di assunzione di %s." % [cand["daily_salary"], cand["name"]],
-			"error"
-		)
+		return {
+			"allowed": false,
+			"reason": "Fondi insufficienti sul conto aziendale: servono almeno € %0.2f per coprire la prima giornata di assunzione di %s." % [cand["daily_salary"], cand["name"]]
+		}
+		
+	return {"allowed": true, "reason": ""}
+
+func hire_employee(emp_id: String) -> bool:
+	var check = can_hire_employee(emp_id)
+	if not check.get("allowed", false):
+		var reason = check.get("reason", "Assunzione non consentita.")
+		EventBus.notification_posted.emit("Assunzione Non Riuscita", reason, "error")
 		return false
 		
+	var cand = get_candidate(emp_id)
 	# Deduct signing fee / initial day
-	EconomyManager.spend(cand["daily_salary"], "Assunzione & Onboarding: " + cand["name"])
+	if not EconomyManager.spend(cand["daily_salary"], "Assunzione & Onboarding: " + cand["name"]):
+		return false
+		
 	hired_employee_ids.append(emp_id)
 	cand["hired"] = true
 	cand["status"] = "Attivo in Studio"
@@ -99,7 +122,7 @@ func hire_employee(emp_id: String) -> bool:
 	EventBus.employee_hired.emit(emp_id, cand["name"])
 	EventBus.notification_posted.emit(
 		"Nuovo Dipendente Assunto!",
-		"%s (%s) si è seduto alla seconda postazione nel tuo studio!" % [cand["name"], cand["role"]],
+		"%s (%s) si è seduto alla postazione nel tuo studio!" % [cand["name"], cand["role"]],
 		"success"
 	)
 	SoundManager.play_ui_success()

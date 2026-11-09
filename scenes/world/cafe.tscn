@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://caffe01"]
+[gd_scene load_steps=12 format=3 uid="uid://caffe01"]
 
 [ext_resource type="PackedScene" path="res://assets/environments/cafe_interior.glb" id="1_csi"]
 [ext_resource type="PackedScene" path="res://scenes/world/elena_npc.tscn" id="2_eln"]
@@ -16,6 +16,16 @@ size = Vector3(0.2, 3.4, 5.2)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_bar"]
 size = Vector3(3.0, 1.15, 0.9)
+
+[sub_resource type="BoxMesh" id="BoxMesh_platform"]
+size = Vector3(2.8, 0.2, 0.9)
+
+[sub_resource type="StandardMaterial3D" id="Mat_wood_platform"]
+albedo_color = Color(0.35, 0.22, 0.12, 1)
+roughness = 0.7
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_platform"]
+size = Vector3(2.8, 0.2, 0.9)
 
 [node name="Cafe" type="Node3D"]
 
@@ -71,5 +81,17 @@ light_energy = 1.3
 spot_range = 4.0
 spot_angle = 50.0
 
+[node name="BaristaPlatform" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0.1, -1.45)
+collision_layer = 1
+collision_mask = 0
+
+[node name="PlatformMesh" type="MeshInstance3D" parent="BaristaPlatform"]
+mesh = SubResource("BoxMesh_platform")
+surface_material_override/0 = SubResource("Mat_wood_platform")
+
+[node name="PlatformCol" type="CollisionShape3D" parent="BaristaPlatform"]
+shape = SubResource("BoxShape3D_platform")
+
 [node name="ElenaNPC" parent="." instance=ExtResource("2_eln")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0.05, -1.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0.2, -1.35)

@@ -8,6 +8,9 @@ const FRIDGE_SCRIPT = preload("res://scripts/world/fridge_interactable.gd")
 const MARIO_SCRIPT = preload("res://scripts/world/mario_interactable.gd")
 const ELENA_SCRIPT = preload("res://scripts/world/elena_interactable.gd")
 const DAVIDE_SCRIPT = preload("res://scripts/world/davide_interactable.gd")
+const BELLINI_SCRIPT = preload("res://scripts/world/bellini_interactable.gd")
+const FACTORY_ITEM_SCRIPT = preload("res://scripts/world/factory_interactable.gd")
+const FACTORY_SYNC_SCRIPT = preload("res://scripts/world/factory_venue_sync.gd")
 
 # ------------------------------------------------------------------ STUDIO
 static func build_studio(studio: Node3D) -> void:
@@ -24,13 +27,13 @@ static func build_studio(studio: Node3D) -> void:
 	VillageProps.add_studio_shell(sm)
 	VillageProps.add_bed(sm, Vector3(3.10, 0.0, -0.75), 0.0)
 	VillageProps.add_fridge(sm, Vector3(-3.22, 0.0, 1.98), PI * 0.5)
-	# Tavola legno sotto l'insegna esterna dello Studio
-	sm.box("wood_dark", Vector3(0, 2.86, 2.78), Vector3(3.4, 0.44, 0.08))
+	# Tavola legno e insegna esterna ben sopra la tenda blu (tenda arriva a Y=2.59)
+	sm.box("wood_dark", Vector3(0, 2.94, 2.79), Vector3(3.4, 0.42, 0.08))
 
 	var holder := VillageProps.spawn_mesh_and_collisions(studio, "BorgoStudio", sm, "wood")
 
 	# Insegna esterna sopra la porta dello Studio
-	_add_sign(holder, "STUDIO TECH · Borgo San Carlo", Vector3(0, 2.86, 2.84), 0.0, 26, Color(1.0, 0.94, 0.74))
+	_add_sign(holder, "STUDIO TECH · Borgo San Carlo", Vector3(0, 2.94, 2.85), 0.0, 26, Color(1.0, 0.94, 0.74))
 
 	# Area interattiva Letto (riposo)
 	var rest_body := StaticBody3D.new()
@@ -105,8 +108,8 @@ static func build_village(street: Node3D) -> void:
 
 	# 1. Terreno e pavimentazioni a strati non sovrapposti (tutti top a Y=0.0, spessore sotto Y=0)
 	var terrain_sm := StyleMesh.new()
-	# Prato di base ampio tutto intorno al borgo
-	terrain_sm.box("grass", Vector3(0, -0.24, 18.0), Vector3(96.0, 0.40, 96.0), {"col": true, "surface": "grass"})
+	# Prato di base esteso da Borgo San Carlo (-50..+24) fino a Borgo Valdocco & Officina (+110)
+	terrain_sm.box("grass", Vector3(30.0, -0.24, 22.0), Vector3(160.0, 0.40, 110.0), {"col": true, "surface": "grass"})
 	# Via del Borgo (Z: 2.5 .. 13.5, X: -4.2 .. 4.2) top Y=0.0
 	terrain_sm.box("cobble", Vector3(0, -0.05, 8.0), Vector3(8.4, 0.10, 11.2), {"col": true, "surface": "stone"})
 	# Piazzetta San Carlo (Z: 13.5 .. 27.5, X: -10.5 .. 10.5) top Y=0.0
@@ -118,22 +121,57 @@ static func build_village(street: Node3D) -> void:
 	# Piazzole parcheggio in asfalto libere dagli edifici (X:[11.4..19.0], Z:[9.1..14.5])
 	terrain_sm.box("asphalt", Vector3(-15.2, -0.045, 11.8), Vector3(7.6, 0.09, 5.4), {"col": true, "surface": "asphalt"})
 	terrain_sm.box("asphalt", Vector3(15.2, -0.045, 11.8), Vector3(7.6, 0.09, 5.4), {"col": true, "surface": "asphalt"})
-	# Sentieri parchetto in ghiaia
+	# Sentieri parchetto in ghiaia (lato SE spostato a Z=35.8 per lasciare aperto il viale Est Z=28.0!)
 	terrain_sm.box("gravel", Vector3(-7.5, -0.04, 30.0), Vector3(4.2, 0.08, 6.0), {"col": true, "surface": "stone"})
-	terrain_sm.box("gravel", Vector3(7.5, -0.04, 30.0), Vector3(4.2, 0.08, 6.0), {"col": true, "surface": "stone"})
+	terrain_sm.box("gravel", Vector3(7.5, -0.04, 35.8), Vector3(4.2, 0.08, 5.0), {"col": true, "surface": "stone"})
 
-	# Muretti perimetrali in pietra del borgo
+	# Raccordo in acciottolato + Strada Asfaltata Est verso Borgo Valdocco (asse Z=28.0)
+	terrain_sm.box("cobble", Vector3(8.25, -0.05, 29.1), Vector3(4.5, 0.10, 3.2), {"col": true, "surface": "stone"})
+	terrain_sm.box("cobble", Vector3(17.25, -0.05, 28.0), Vector3(13.5, 0.10, 5.4), {"col": true, "surface": "stone"})
+	terrain_sm.box("asphalt", Vector3(43.0, -0.045, 28.0), Vector3(38.0, 0.09, 5.4), {"col": true, "surface": "asphalt"})
+	terrain_sm.box("stone_trim", Vector3(43.0, 0.07, 25.05), Vector3(37.6, 0.14, 0.42), {"col": true, "surface": "stone"})
+	terrain_sm.box("stone_trim", Vector3(43.0, 0.07, 30.95), Vector3(37.6, 0.14, 0.42), {"col": true, "surface": "stone"})
+	for rx in range(26, 61, 4):
+		terrain_sm.box("road_line", Vector3(float(rx), 0.006, 28.0), Vector3(1.9, 0.012, 0.18))
+	terrain_sm.box("gravel", Vector3(43.0, -0.04, 22.8), Vector3(6.6, 0.08, 3.6), {"col": true, "surface": "stone"})
+
+	# Piazza di Borgo Valdocco (X: 62.0 .. 80.0, Z: 18.0 .. 38.0)
+	terrain_sm.box("cobble", Vector3(71.0, -0.05, 28.0), Vector3(18.0, 0.10, 20.0), {"col": true, "surface": "stone"})
+
+	# Muretti perimetrali in pietra San Carlo (muro Est diviso attorno al varco Z=24.8..31.2!)
 	terrain_sm.box("ashlar", Vector3(0, 0.65, -9.0), Vector3(48.0, 1.3, 0.5), {"col": true})
 	terrain_sm.box("ashlar", Vector3(0, 0.65, 42.0), Vector3(48.0, 1.3, 0.5), {"col": true})
 	terrain_sm.box("ashlar", Vector3(-24.0, 0.65, 16.5), Vector3(0.5, 1.3, 51.0), {"col": true})
-	terrain_sm.box("ashlar", Vector3(24.0, 0.65, 16.5), Vector3(0.5, 1.3, 51.0), {"col": true})
+	terrain_sm.box("ashlar", Vector3(24.0, 0.65, 7.9), Vector3(0.5, 1.3, 33.8), {"col": true})
+	terrain_sm.box("ashlar", Vector3(24.0, 0.65, 36.6), Vector3(0.5, 1.3, 10.8), {"col": true})
 
-	# Alberi sullo sfondo fuori dal muretto perimetro
+	# Muretti perimetrali in pietra Borgo Valdocco (X: 59 .. 97, Z: 14 .. 42)
+	terrain_sm.box("ashlar", Vector3(78.0, 0.65, 14.0), Vector3(38.0, 1.3, 0.5), {"col": true})
+	terrain_sm.box("ashlar", Vector3(78.0, 0.65, 42.0), Vector3(38.0, 1.3, 0.5), {"col": true})
+	terrain_sm.box("ashlar", Vector3(97.0, 0.65, 28.0), Vector3(0.5, 1.3, 28.0), {"col": true})
+	terrain_sm.box("ashlar", Vector3(59.0, 0.65, 19.4), Vector3(0.5, 1.3, 10.8), {"col": true})
+	terrain_sm.box("ashlar", Vector3(59.0, 0.65, 36.6), Vector3(0.5, 1.3, 10.8), {"col": true})
+
+	# Arco stradale di collegamento San Carlo <-> Borgo Valdocco + cartelli + pozzo storico
+	VillageProps.add_archway_gate(terrain_sm, Vector3(24.0, 0.0, 28.0), 6.4, 3.7, PI * 0.5)
+	VillageProps.add_road_sign(terrain_sm, Vector3(21.8, 0.0, 24.0), -PI * 0.5)
+	VillageProps.add_road_sign(terrain_sm, Vector3(61.5, 0.0, 24.4), -PI * 0.5)
+	VillageProps.add_well(terrain_sm, Vector3(68.5, 0.0, 22.8))
+
+	# Alberi sullo sfondo fuori dai muretti perimetrali
 	for tx in [-28.0, -16.0, -4.0, 8.0, 20.0]:
 		VillageProps.add_tree(terrain_sm, Vector3(tx, 0.0, 45.5), int(absf(tx)) + 30, 1.45)
 		VillageProps.add_tree(terrain_sm, Vector3(tx, 0.0, -12.5), int(absf(tx)) + 60, 1.35)
+	for vx in [32.0, 44.0, 56.0, 68.0, 80.0, 92.0]:
+		VillageProps.add_tree(terrain_sm, Vector3(vx, 0.0, 10.5), int(vx) + 12, 1.35)
+		VillageProps.add_tree(terrain_sm, Vector3(vx, 0.0, 45.5), int(vx) + 44, 1.40)
 
 	VillageProps.spawn_mesh_and_collisions(street, "BorgoTerrain", terrain_sm, "stone")
+
+	_add_sign(street, "➔ BORGO VALDOCCO · OFFICINA BELLINI", Vector3(23.72, 3.52, 28.0), -PI * 0.5, 24, Color(1.0, 0.90, 0.52))
+	_add_sign(street, "BORGO SAN CARLO ➔", Vector3(24.28, 3.52, 28.0), PI * 0.5, 24, Color(1.0, 0.90, 0.52))
+	_add_sign(street, "BORGO VALDOCCO ➔\nOfficina Bellini (40m)", Vector3(21.70, 2.05, 24.0), -PI * 0.5, 20, Color(1.0, 0.95, 0.80))
+	_add_sign(street, "★ BORGO VALDOCCO ★\nOfficina Bellini", Vector3(61.40, 2.05, 24.4), -PI * 0.5, 20, Color(1.0, 0.95, 0.72))
 
 	# 2. Contenitore Collisions compatibilità
 	var cols_node := Node3D.new()
@@ -179,9 +217,11 @@ static func build_village(street: Node3D) -> void:
 	VillageProps.add_shop_building(tech_sm, Vector3.ZERO, 7.6, 5.8, {
 		"wall": "plaster_sky", "floor": "tile_gray", "awning": "awning_blue", "roof": "roof_slate"
 	})
-	# Scaffali hardware interni
+	# Scaffali hardware interni + terminale banco acquisto componenti hardware
 	tech_sm.box("iron", Vector3(-2.6, 1.0, -0.4), Vector3(0.5, 2.0, 2.4), {"col": true})
 	tech_sm.box("glass_cool", Vector3(-2.33, 1.35, -0.4), Vector3(0.05, 0.4, 1.8))
+	tech_sm.box("iron", Vector3(-1.8, 1.05, -1.05), Vector3(0.75, 0.24, 0.34))
+	tech_sm.box("cyan_accent", Vector3(-1.8, 1.18, -1.00), Vector3(0.58, 0.22, 0.06))
 	VillageProps.spawn_mesh_and_collisions(tech_venue, "TechMesh", tech_sm, "tile")
 	_add_sign(tech_venue, "ELETTRONICA TO", Vector3(0, 3.12, 3.06), 0.0, 32, Color(0.78, 0.94, 1.0))
 	var davide := _spawn_npc(tech_venue, "DavideNPC", Vector3(0.0, 0.18, -1.86), 0.0, DAVIDE_SCRIPT, {
@@ -189,6 +229,7 @@ static func build_village(street: Node3D) -> void:
 		"hair_style": "quiff", "glasses": true, "vest": "vest_charcoal"
 	}, "Davide Ferrero\n★ Elettronica TO ★", Color(0.65, 0.88, 1.0))
 	davide.name = "DavideNPC"
+	_spawn_shop_trigger(tech_venue, "TechHardwareShop", Vector3(-1.8, 0.96, -1.05), "elettronica_componenti", "Elettronica TO — Hardware Clienti", Vector3(1.6, 1.0, 1.0))
 	_add_omni(tech_venue, Vector3(0, 2.7, 0.5), Color(0.85, 0.94, 1.0), 0.55, 8.5)
 
 	# 4. Negozi del Borgo: Forno Bruno, Alimentari Rosa, Edicola Sabrina
@@ -201,7 +242,6 @@ static func build_village(street: Node3D) -> void:
 	VillageProps.add_shop_building(pan_sm, Vector3.ZERO, 6.2, 5.2, {
 		"wall": "plaster_ochre", "floor": "wood_light", "awning": "awning_yellow", "roof": "roof_terracotta"
 	})
-	# Pagnotte sul bancone (top ~0.935) + mensole pane a muro laterali
 	for bx in [-0.8, 0.0, 0.8]:
 		pan_sm.blob("bread", Vector3(bx, 1.03, -0.94), Vector3(0.24, 0.12, 0.18), 3, 7, 0.06, int(bx * 10) + 5)
 	for sx in [-1.85, 1.85]:
@@ -225,7 +265,6 @@ static func build_village(street: Node3D) -> void:
 	VillageProps.add_shop_building(ali_sm, Vector3.ZERO, 6.2, 5.2, {
 		"wall": "plaster_sage", "floor": "tile_gray", "awning": "awning_green", "roof": "roof_terracotta"
 	})
-	# Cassette di frutta davanti + mensole laterali con frutta fresca
 	ali_sm.box("wood_light", Vector3(-1.8, 0.35, 3.1), Vector3(1.1, 0.65, 0.55), {"col": true})
 	ali_sm.blob("apple", Vector3(-2.0, 0.72, 3.1), Vector3(0.18, 0.14, 0.18), 3, 6, 0.08, 1)
 	ali_sm.blob("orange", Vector3(-1.6, 0.72, 3.1), Vector3(0.18, 0.14, 0.18), 3, 6, 0.08, 2)
@@ -242,7 +281,6 @@ static func build_village(street: Node3D) -> void:
 	}, "Rosa\n★ Alimentari Rosa ★", Color(0.75, 1.0, 0.75), {"shop_id": "alimentari", "shop_title": "Alimentari Rosa"})
 	_spawn_shop_trigger(alimentari, "AlimentariShop", Vector3(0.0, 0.96, -0.9), "alimentari", "Alimentari Rosa", Vector3(2.8, 0.9, 0.9))
 
-	# Edicola Sabrina (chiosco in Piazzetta angolo Nord-Est con Sabrina affacciata allo sportello aperto)
 	var edicola := Node3D.new()
 	edicola.name = "EdicolaVenue"
 	edicola.position = Vector3(6.8, 0, 14.5)
@@ -258,77 +296,159 @@ static func build_village(street: Node3D) -> void:
 	}, "Sabrina\n★ Edicola ★", Color(0.80, 0.92, 1.0), {"shop_id": "edicola", "shop_title": "Edicola Sabrina"})
 	_spawn_shop_trigger(edicola, "EdicolaShop", Vector3(0, 1.1, 0.95), "edicola", "Edicola Sabrina", Vector3(2.2, 1.4, 1.2))
 
-	# 5. Case del Borgo attorno allo Studio e alla Piazzetta
+	# 4b. OFFICINA MECCANICA BELLINI (Borgo Valdocco Est, accessibile da Ovest)
+	var factory_venue := Node3D.new()
+	factory_venue.name = "FactoryVenue"
+	factory_venue.position = Vector3(85.0, 0, 27.5)
+	factory_venue.rotation.y = -PI * 0.5
+	factory_venue.set_script(FACTORY_SYNC_SCRIPT)
+	street.add_child(factory_venue)
+
+	var fac_sm := StyleMesh.new()
+	VillageProps.add_factory_building(fac_sm, Vector3.ZERO, 12.0, 9.6, 0.0)
+	VillageProps.spawn_mesh_and_collisions(factory_venue, "FactoryMesh", fac_sm, "tile")
+	_add_sign(factory_venue, "OFFICINA MECCANICA BELLINI", Vector3(0, 3.44, 4.96), 0.0, 32, Color(1.0, 0.88, 0.30))
+
+	_spawn_npc(factory_venue, "BelliniNPC", Vector3(2.8, 0.04, -1.75), -0.35, BELLINI_SCRIPT, {
+		"shirt": "shirt_ochre", "pants": "denim", "hair": "hair_salt", "iris": "iris_brown",
+		"vest": "vest_charcoal", "hat": "hardhat", "mustache": true, "glasses": true, "rolled_sleeves": true
+	}, "Ing. Gianluca Bellini\n★ Officina Valdocco ★", Color(1.0, 0.84, 0.32))
+
+	# 4 Zone Sopralluogo (perlustrazione fabbrica)
+	_spawn_factory_interactable(factory_venue, "ScoutZone_Ingresso", Vector3(-2.3, 1.05, 3.2), {
+		"mode": "scout", "zone_id": "scout_ingresso", "zone_title": "Ingresso & Quadro Rete Wi-Fi"
+	}, true)
+	_spawn_factory_interactable(factory_venue, "ScoutZone_Magazzino", Vector3(-0.8, 1.05, -2.8), {
+		"mode": "scout", "zone_id": "scout_magazzino", "zone_title": "Magazzino & Banco Server"
+	}, true)
+	_spawn_factory_interactable(factory_venue, "ScoutZone_Ufficio", Vector3(3.0, 1.05, 0.4), {
+		"mode": "scout", "zone_id": "scout_ufficio", "zone_title": "Ufficio Tecnico CAD"
+	}, true)
+	_spawn_factory_interactable(factory_venue, "ScoutZone_Vetrina", Vector3(-3.0, 1.05, -1.6), {
+		"mode": "scout", "zone_id": "scout_vetrina", "zone_title": "Vetrina CNC & Catalogo Web"
+	}, true)
+
+	# 3 Stazioni Installazione Hardware in Officina
+	_spawn_factory_interactable(factory_venue, "InstallStation_Wifi", Vector3(-2.4, 1.45, 4.15), {"mode": "wifi"}, false)
+	_spawn_factory_interactable(factory_venue, "InstallStation_Server", Vector3(-0.8, 1.05, -3.85), {"mode": "server"}, false)
+	_spawn_factory_interactable(factory_venue, "InstallStation_PCs", Vector3(4.1, 1.05, -1.0), {"mode": "pcs"}, false)
+
+	# Prop visuali hardware installato (sincronizzati da FactoryVenueSync)
+	var wifi_sm := StyleMesh.new()
+	VillageProps.add_factory_installed_wifi(wifi_sm, Vector3(-2.45, 1.38, 4.15))
+	var wifi_node := VillageProps.spawn_mesh_and_collisions(factory_venue, "InstalledWifi", wifi_sm, "metal")
+	wifi_node.visible = false
+
+	var srv_sm := StyleMesh.new()
+	VillageProps.add_factory_installed_server(srv_sm, Vector3(-0.8, 0.18, -4.10))
+	var srv_node := VillageProps.spawn_mesh_and_collisions(factory_venue, "InstalledServer", srv_sm, "metal")
+	srv_node.visible = false
+
+	var pcs_sm := StyleMesh.new()
+	VillageProps.add_workstation_pc_prop(pcs_sm, Vector3(4.65, 0.81, -2.6), PI * 0.5)
+	VillageProps.add_workstation_pc_prop(pcs_sm, Vector3(4.65, 0.81, 0.55), PI * 0.5)
+	var pcs_node := VillageProps.spawn_mesh_and_collisions(factory_venue, "InstalledPCs", pcs_sm, "metal")
+	pcs_node.visible = false
+
+	_add_omni(factory_venue, Vector3(0, 3.25, 1.4), Color(1.0, 0.94, 0.82), 0.75, 10.5)
+	_add_omni(factory_venue, Vector3(0, 3.25, -2.4), Color(0.90, 0.96, 1.0), 0.75, 10.5)
+
+	# 5. Case dei due Borghi + arredo urbano
 	var houses_sm := StyleMesh.new()
+	# San Carlo
 	VillageProps.add_house(houses_sm, Vector3(-8.5, 0, 0.0), 6.2, 5.4, 2, {"wall": "plaster_rose", "roof": "roof_terracotta", "shutter": "fabric_green"})
 	VillageProps.add_house(houses_sm, Vector3(8.5, 0, 0.0), 6.2, 5.4, 2, {"wall": "plaster_cream", "roof": "roof_slate", "shutter": "fabric_blue"})
 	VillageProps.add_house(houses_sm, Vector3(-14.5, 0, 29.5), 6.5, 5.6, 2, {"wall": "plaster_ochre", "roof": "roof_terracotta", "rot": PI * 0.2})
-	VillageProps.add_house(houses_sm, Vector3(14.5, 0, 29.5), 6.5, 5.6, 2, {"wall": "plaster_sage", "roof": "roof_slate", "rot": -PI * 0.2})
+	VillageProps.add_house(houses_sm, Vector3(15.5, 0, 36.2), 6.5, 5.6, 2, {"wall": "plaster_sage", "roof": "roof_slate", "rot": -PI * 0.15})
 	VillageProps.add_house(houses_sm, Vector3(-15.5, 0, 5.5), 5.6, 5.4, 2, {"wall": "plaster_cream", "roof": "roof_terracotta", "rot": PI * 0.5})
 	VillageProps.add_house(houses_sm, Vector3(15.5, 0, 5.5), 5.6, 5.4, 2, {"wall": "plaster_rose", "roof": "roof_terracotta", "rot": -PI * 0.5})
+	# Borgo Valdocco
+	VillageProps.add_house(houses_sm, Vector3(68.0, 0, 16.5), 6.2, 4.8, 2, {"wall": "plaster_ochre", "roof": "roof_terracotta", "shutter": "fabric_green"})
+	VillageProps.add_house(houses_sm, Vector3(66.5, 0, 39.2), 5.8, 4.8, 2, {"wall": "plaster_cream", "roof": "roof_slate", "shutter": "fabric_blue", "rot": PI})
+	VillageProps.add_house(houses_sm, Vector3(74.2, 0, 39.2), 5.6, 4.8, 2, {"wall": "plaster_terracotta", "roof": "roof_terracotta", "shutter": "fabric_green", "rot": PI})
 
 	# Fontana al centro della Piazzetta San Carlo (0, 0, 21.0)
 	VillageProps.add_fountain(houses_sm, Vector3(0, 0, 21.0))
 
-	# Panchine attorno alla fontana e nel parchetto
+	# Panchine San Carlo & Borgo Valdocco
 	VillageProps.add_bench(houses_sm, Vector3(-4.2, 0, 21.0), PI * 0.5)
 	VillageProps.add_bench(houses_sm, Vector3(4.2, 0, 21.0), -PI * 0.5)
 	VillageProps.add_bench(houses_sm, Vector3(0.0, 0, 16.8), 0.0)
 	VillageProps.add_bench(houses_sm, Vector3(-7.5, 0, 29.5), 0.0)
-	VillageProps.add_bench(houses_sm, Vector3(7.5, 0, 29.5), 0.0)
+	VillageProps.add_bench(houses_sm, Vector3(7.5, 0, 35.2), 0.0)
+	VillageProps.add_bench(houses_sm, Vector3(65.2, 0, 22.8), PI * 0.5)
+	VillageProps.add_bench(houses_sm, Vector3(71.8, 0, 22.8), -PI * 0.5)
 
-	# Lampioni torinesi lungo la via e la piazzetta
+	# Lampioni torinesi lungo San Carlo, strada Est e Borgo Valdocco
 	for lp in [
 		Vector3(-3.6, 0, 4.8), Vector3(3.6, 0, 4.8),
 		Vector3(-3.6, 0, 11.8), Vector3(3.6, 0, 11.8),
-		Vector3(-8.6, 0, 16.0), Vector3(8.6, 0, 26.0),
-		Vector3(-8.6, 0, 26.0)
+		Vector3(-8.6, 0, 16.0), Vector3(8.6, 0, 24.4),
+		Vector3(-8.6, 0, 26.0),
+		Vector3(23.0, 0, 24.6), Vector3(32.0, 0, 24.6), Vector3(43.0, 0, 31.4),
+		Vector3(54.0, 0, 24.6), Vector3(63.5, 0, 24.6), Vector3(63.5, 0, 31.4),
+		Vector3(77.5, 0, 23.0), Vector3(77.5, 0, 32.5)
 	]:
 		VillageProps.add_lamp(houses_sm, lp)
 		_add_omni(street, lp + Vector3(0, 3.4, 0), Color(1.0, 0.88, 0.62), 0.9, 8.5)
 
-	# Alberi e cespugli nel borgo
+	# Alberi e cespugli (San Carlo SE spostati a sud del viale Est + verde strada & Valdocco)
 	var trees := [
 		[Vector3(-5.8, 0, 15.2), 11, 1.05],
 		[Vector3(-8.5, 0, 26.5), 12, 1.15],
-		[Vector3(8.5, 0, 26.5), 13, 1.10],
+		[Vector3(9.4, 0, 33.2), 13, 1.10],
 		[Vector3(-10.8, 0, 31.5), 14, 1.25],
-		[Vector3(10.8, 0, 31.5), 15, 1.20],
+		[Vector3(11.8, 0, 34.4), 15, 1.20],
 		[Vector3(-12.5, 0, -4.5), 16, 1.15],
 		[Vector3(12.5, 0, -4.5), 17, 1.10],
 		[Vector3(-19.0, 0, 20.5), 18, 1.30],
 		[Vector3(19.0, 0, 20.5), 19, 1.25],
+		[Vector3(29.0, 0, 22.4), 21, 1.15],
+		[Vector3(37.5, 0, 33.8), 22, 1.20],
+		[Vector3(49.5, 0, 22.4), 23, 1.15],
+		[Vector3(56.0, 0, 33.8), 24, 1.25],
+		[Vector3(64.2, 0, 20.0), 25, 1.05],
+		[Vector3(75.0, 0, 19.5), 26, 1.10],
+		[Vector3(84.5, 0, 17.5), 27, 1.25],
+		[Vector3(84.5, 0, 38.5), 28, 1.20]
 	]
 	for t in trees:
 		VillageProps.add_tree(houses_sm, t[0], t[1], t[2])
 	for bp in [
 		Vector3(-3.4, 0, 14.5), Vector3(3.4, 0, 14.5),
-		Vector3(-5.5, 0, 28.2), Vector3(5.5, 0, 28.2),
-		Vector3(-11.2, 0, 15.6), Vector3(11.2, 0, 15.6)
+		Vector3(-5.5, 0, 28.2), Vector3(6.2, 0, 32.5),
+		Vector3(-11.2, 0, 15.6), Vector3(11.2, 0, 15.6),
+		Vector3(27.0, 0, 32.4), Vector3(51.5, 0, 24.0),
+		Vector3(64.5, 0, 33.5)
 	]:
 		VillageProps.add_bush(houses_sm, bp, int(absf(bp.x) * 3), 0.95)
 
 	VillageProps.spawn_mesh_and_collisions(street, "BorgoPropsAndHouses", houses_sm, "stone")
 
-	# 6. Auto parcheggiate affiancate nei due slarghi laterali (fuori dai muri di Caffè ed Elettronica!)
+	# 6. Auto parcheggiate affiancate nei due slarghi laterali + Furgone Consegne strada Valdocco
 	var street_props := Node3D.new()
 	street_props.name = "StreetProps"
 	street.add_child(street_props)
 
 	var cars := [
-		{"name": "CarHatchback", "pos": Vector3(-13.6, 0.0, 11.8), "rot": 0.0, "color": "car_red"},
-		{"name": "CarSedan", "pos": Vector3(-16.6, 0.0, 11.8), "rot": PI, "color": "car_blue"},
-		{"name": "CarTaxi", "pos": Vector3(13.6, 0.0, 11.8), "rot": 0.0, "color": "car_cream"},
-		{"name": "CarStationWagon", "pos": Vector3(16.6, 0.0, 11.8), "rot": PI, "color": "car_sage"},
+		{"name": "CarHatchback", "pos": Vector3(-13.6, 0.0, 11.8), "rot": 0.0, "color": "car_red", "van": false},
+		{"name": "CarSedan", "pos": Vector3(-16.6, 0.0, 11.8), "rot": PI, "color": "car_blue", "van": false},
+		{"name": "CarTaxi", "pos": Vector3(13.6, 0.0, 11.8), "rot": 0.0, "color": "car_cream", "van": false},
+		{"name": "CarStationWagon", "pos": Vector3(16.6, 0.0, 11.8), "rot": PI, "color": "car_sage", "van": false},
+		{"name": "DeliveryVanValdocco", "pos": Vector3(43.0, 0.0, 22.8), "rot": PI * 0.5, "color": "car_cream", "van": true},
 	]
 	for c in cars:
 		var c_sm := StyleMesh.new()
-		VillageProps.add_car(c_sm, Vector3.ZERO, c["rot"], c["color"])
+		if c.get("van", false):
+			VillageProps.add_delivery_van(c_sm, Vector3.ZERO, c["rot"], c["color"])
+		else:
+			VillageProps.add_car(c_sm, Vector3.ZERO, c["rot"], c["color"])
 		var c_node := VillageProps.spawn_mesh_and_collisions(street_props, c["name"], c_sm, "stone")
 		c_node.position = c["pos"]
 
-	# Luce sulla fontana
+	# Luce sulla fontana e sul pozzo di Borgo Valdocco
 	_add_omni(street, Vector3(0, 2.6, 21.0), Color(0.75, 0.92, 1.0), 1.1, 10.0)
+	_add_omni(street, Vector3(68.5, 2.8, 22.8), Color(1.0, 0.92, 0.72), 0.95, 10.0)
 
 # ------------------------------------------------------------------ Helpers nodi
 static func _add_sign(parent: Node3D, txt: String, pos: Vector3, rot_y: float, font_sz: int, col: Color) -> void:
@@ -364,6 +484,34 @@ static func _spawn_shop_trigger(parent: Node3D, node_name: String, pos: Vector3,
 	cs.shape = box
 	sb.add_child(cs)
 	parent.add_child(sb)
+
+static func _spawn_factory_interactable(parent: Node3D, node_name: String, pos: Vector3, props: Dictionary, with_beacon: bool) -> StaticBody3D:
+	var sb := StaticBody3D.new()
+	sb.name = node_name
+	sb.position = pos
+	sb.set_script(FACTORY_ITEM_SCRIPT)
+	for k in props:
+		sb.set(k, props[k])
+	var cs := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = Vector3(1.1, 1.25, 1.1)
+	cs.shape = box
+	sb.add_child(cs)
+
+	if with_beacon:
+		var beacon := Node3D.new()
+		beacon.name = "Beacon"
+		var bsm := StyleMesh.new()
+		bsm.cyl("safety_yellow", Vector3(0, -1.00, 0), 0.34, 0.34, 0.05, 12)
+		bsm.ellipsoid("cyan_accent", Vector3(0, 0.15, 0), Vector3(0.14, 0.22, 0.14), 6, 10)
+		var bmi := MeshInstance3D.new()
+		bmi.mesh = bsm.to_mesh(Callable(VillageMaterials, "mat"))
+		beacon.add_child(bmi)
+		sb.add_child(beacon)
+		sb.set("beacon_path", NodePath("Beacon"))
+
+	parent.add_child(sb)
+	return sb
 
 static func _spawn_npc(parent: Node3D, node_name: String, pos: Vector3, rot_y: float, script_res: Script, style: Dictionary, tag_txt: String, tag_col: Color, extra_props: Dictionary = {}) -> StaticBody3D:
 	var npc := StaticBody3D.new()

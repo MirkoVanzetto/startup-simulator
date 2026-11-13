@@ -69,11 +69,19 @@ static func add_studio_shell(sm: StyleMesh) -> void:
 	sm.box("plaster_studio", Vector3(-2.42, h * 0.5, 2.5 + wt * 0.5), Vector3(3.04, h, wt), {"col": true})
 	sm.box("plaster_studio", Vector3(2.42, h * 0.5, 2.5 + wt * 0.5), Vector3(3.04, h, wt), {"col": true})
 	sm.box("plaster_studio", Vector3(0, 2.35 + (h - 2.35) * 0.5, 2.5 + wt * 0.5), Vector3(1.8, h - 2.35, wt), {"col": true})
-	# Stipiti porta in legno + soglia
-	sm.box("wood_dark", Vector3(-0.94, 1.175, 2.5 + wt * 0.5), Vector3(0.08, 2.35, wt + 0.06))
-	sm.box("wood_dark", Vector3(0.94, 1.175, 2.5 + wt * 0.5), Vector3(0.08, 2.35, wt + 0.06))
-	sm.box("wood_dark", Vector3(0, 2.38, 2.5 + wt * 0.5), Vector3(1.96, 0.1, wt + 0.06))
-	sm.box("stone_trim", Vector3(0, 0.02, 2.5 + wt * 0.5), Vector3(1.9, 0.04, wt + 0.12))
+	# Stipiti porta in legno + soglia (sporgenza pulita, nessuna sovrapposizione con lo zoccolo)
+	sm.box("wood_dark", Vector3(-0.95, 1.175, 2.5 + wt * 0.5), Vector3(0.10, 2.35, wt + 0.08))
+	sm.box("wood_dark", Vector3(0.95, 1.175, 2.5 + wt * 0.5), Vector3(0.10, 2.35, wt + 0.08))
+	sm.box("wood_dark", Vector3(0, 2.39, 2.5 + wt * 0.5), Vector3(2.00, 0.12, wt + 0.08))
+	sm.box("stone_trim", Vector3(0, 0.02, 2.5 + wt * 0.5), Vector3(1.94, 0.04, wt + 0.14))
+	# Battente porta a vetri aperto verso l'interno (lato sx, non ostruisce il passaggio)
+	sm.box("wood_dark", Vector3(-0.90, 1.16, 2.02), Vector3(0.06, 2.28, 0.88), {"rot": 0.22})
+	sm.box("glass_cool", Vector3(-0.90, 1.38, 2.02), Vector3(0.075, 1.18, 0.64), {"rot": 0.22})
+	sm.box("brass", Vector3(-0.81, 1.05, 1.66), Vector3(0.10, 0.05, 0.12), {"rot": 0.22})
+	# Applique lampioncini in ottone ai lati dell'ingresso
+	for lx in [-1.24, 1.24]:
+		sm.box("iron", Vector3(lx, 1.98, 2.77), Vector3(0.08, 0.08, 0.10))
+		sm.box("lamp_glow", Vector3(lx, 1.94, 2.84), Vector3(0.14, 0.22, 0.14))
 	# Battiscopa interno
 	sm.box("wood_dark", Vector3(0, 0.06, -3.27), Vector3(iw - 0.04, 0.12, 0.04))
 	sm.box("wood_dark", Vector3(-3.67, 0.06, cz), Vector3(0.04, 0.12, id - 0.04))
@@ -83,15 +91,16 @@ static func add_studio_shell(sm: StyleMesh) -> void:
 	sm.box("glass_cool", Vector3(-3.72, 1.55, -0.45), Vector3(0.34, 1.04, 1.24))
 	sm.box("wood_dark", Vector3(-3.72, 1.55, -0.45), Vector3(0.36, 0.05, 1.24))
 	sm.box("wood_dark", Vector3(-3.72, 1.55, -0.45), Vector3(0.36, 1.04, 0.05))
-	# Rivestimento esterno e zoccolo in pietra + tetto a capanna
-	sm.box("ashlar", Vector3(0, 0.28, -3.3 - wt - 0.02), Vector3(iw + 0.6, 0.56, 0.06))
-	sm.box("ashlar", Vector3(-3.7 - wt - 0.02, 0.28, cz), Vector3(0.06, 0.56, id + 0.5))
-	sm.box("ashlar", Vector3(3.7 + wt + 0.02, 0.28, cz), Vector3(0.06, 0.56, id + 0.5))
-	sm.box("ashlar", Vector3(-2.42, 0.28, 2.5 + wt + 0.02), Vector3(3.04, 0.56, 0.06))
-	sm.box("ashlar", Vector3(2.42, 0.28, 2.5 + wt + 0.02), Vector3(3.04, 0.56, 0.06))
-	# Facciata esterna calda + tenda sopra l'ingresso + tetto
-	sm.box("plaster_ochre", Vector3(0, h * 0.5 + 0.28, 2.5 + wt + 0.015), Vector3(iw + 0.5, 0.45, 0.04))
-	sm.box("awning_blue", Vector3(0, 2.58, 3.15), Vector3(2.6, 0.16, 0.95), {"rot": 0.0})
+	# Rivestimento esterno e zoccolo in pietra (ben staccato dagli stipiti |X|>=1.02 e agli angoli senza Z-fighting)
+	sm.box("ashlar", Vector3(0, 0.28, -3.3 - wt - 0.025), Vector3(iw + wt * 2.0 + 0.08, 0.56, 0.05))
+	sm.box("ashlar", Vector3(-3.7 - wt - 0.025, 0.28, cz), Vector3(0.05, 0.56, id + wt * 2.0))
+	sm.box("ashlar", Vector3(3.7 + wt + 0.025, 0.28, cz), Vector3(0.05, 0.56, id + wt * 2.0))
+	sm.box("ashlar", Vector3(-2.51, 0.28, 2.5 + wt + 0.025), Vector3(2.96, 0.56, 0.05))
+	sm.box("ashlar", Vector3(2.51, 0.28, 2.5 + wt + 0.025), Vector3(2.96, 0.56, 0.05))
+	# Fasce decorative ocra ai due lati della porta (mai sopra il vano d'ingresso!) + tenda sotto l'insegna
+	sm.box("plaster_ochre", Vector3(-2.50, 1.88, 2.5 + wt + 0.015), Vector3(2.94, 0.34, 0.03))
+	sm.box("plaster_ochre", Vector3(2.50, 1.88, 2.5 + wt + 0.015), Vector3(2.94, 0.34, 0.03))
+	sm.box("awning_blue", Vector3(0, 2.52, 3.22), Vector3(2.45, 0.14, 0.90), {"rot": 0.0})
 	sm.gable("roof_terracotta", "plaster_ochre", Vector3(0, h + 0.16, cz), iw + 1.0, id + 1.0, 1.75, true)
 	# Comignolo
 	sm.box("brick", Vector3(2.4, h + 1.2, -1.7), Vector3(0.45, 1.1, 0.45))
@@ -298,6 +307,178 @@ static func add_car(sm: StyleMesh, pos: Vector3, rot: float = 0.0, color_key: St
 	m.box("steel", Vector3(0, 0.36, -1.70), Vector3(1.56, 0.14, 0.10))
 	m.box("lamp_glow", Vector3(-0.56, 0.62, 1.69), Vector3(0.24, 0.14, 0.04))
 	m.box("lamp_glow", Vector3(0.56, 0.62, 1.69), Vector3(0.24, 0.14, 0.04))
+	_merge_transformed(sm, m, pos, rot)
+
+static func add_delivery_van(sm: StyleMesh, pos: Vector3, rot: float = 0.0, color_key: String = "car_cream") -> void:
+	var m := StyleMesh.new()
+	# Ruote esattamente a terra (Y=0)
+	for wx in [-0.84, 0.84]:
+		for wz in [-1.22, 1.22]:
+			m.box("tire", Vector3(wx, 0.28, wz), Vector3(0.24, 0.56, 0.56))
+	# Cassone furgone + cabina anteriore (+Z fronte)
+	m.box(color_key, Vector3(0, 1.18, -0.52), Vector3(1.86, 1.62, 2.72), {"col": true})
+	m.box(color_key, Vector3(0, 0.86, 1.30), Vector3(1.80, 1.02, 1.10), {"col": true})
+	m.box("glass_cool", Vector3(0, 1.12, 1.48), Vector3(1.62, 0.48, 0.78))
+	m.box("cyan_accent", Vector3(0, 1.15, -0.52), Vector3(1.88, 0.14, 2.30))
+	m.box("steel", Vector3(0, 0.36, 1.88), Vector3(1.76, 0.14, 0.10))
+	m.box("steel", Vector3(0, 0.36, -1.92), Vector3(1.76, 0.14, 0.10))
+	m.box("lamp_glow", Vector3(-0.62, 0.62, 1.87), Vector3(0.26, 0.14, 0.04))
+	m.box("lamp_glow", Vector3(0.62, 0.62, 1.87), Vector3(0.26, 0.14, 0.04))
+	_merge_transformed(sm, m, pos, rot)
+
+# ------------------------------------------------------------------ Arco Stradale, Pozzo & Cartelli (Borgo Valdocco)
+static func add_archway_gate(sm: StyleMesh, pos: Vector3, width: float = 6.2, height: float = 3.7, rot: float = 0.0) -> void:
+	var m := StyleMesh.new()
+	var px := width * 0.5
+	for sx in [-px, px]:
+		m.box("ashlar", Vector3(sx, height * 0.5, 0), Vector3(0.72, height, 0.72), {"col": true})
+		m.box("stone_trim", Vector3(sx, height + 0.10, 0), Vector3(0.88, 0.20, 0.88))
+	m.box("wood_dark", Vector3(0, height - 0.18, 0), Vector3(width + 0.6, 0.56, 0.34))
+	m.box("stone_trim", Vector3(0, height + 0.14, 0), Vector3(width + 0.7, 0.14, 0.44))
+	_merge_transformed(sm, m, pos, rot)
+
+static func add_well(sm: StyleMesh, pos: Vector3) -> void:
+	sm.cyl("ashlar", pos, 0.96, 0.92, 0.78, 12, {"smooth": false})
+	sm.cyl("stone_trim", pos + Vector3(0, 0.78, 0), 1.04, 1.04, 0.12, 12, {"smooth": false})
+	sm.cyl("water", pos + Vector3(0, 0.52, 0), 0.74, 0.74, 0.04, 10, {"smooth": true})
+	for sx in [-0.78, 0.78]:
+		sm.box("wood_dark", pos + Vector3(sx, 1.48, 0), Vector3(0.14, 1.40, 0.14))
+	sm.box("wood_dark", pos + Vector3(0, 1.45, 0), Vector3(1.52, 0.08, 0.08))
+	sm.cyl("copper", pos + Vector3(0.22, 1.10, 0), 0.12, 0.14, 0.24, 8)
+	sm.gable("roof_terracotta", "wood_mid", pos + Vector3(0, 2.15, 0), 2.15, 1.65, 0.72, true)
+	sm.add_collider_cyl(pos + Vector3(0, 0.85, 0), 1.06, 1.7)
+
+static func add_road_sign(sm: StyleMesh, pos: Vector3, rot: float = 0.0) -> void:
+	var m := StyleMesh.new()
+	m.cyl("iron", Vector3(0, 0, 0), 0.06, 0.05, 2.45, 8)
+	m.box("iron", Vector3(0, 2.05, 0), Vector3(1.75, 0.72, 0.08))
+	m.box("wood_mid", Vector3(0, 2.05, 0), Vector3(1.62, 0.58, 0.10))
+	m.add_collider_cyl(Vector3(0, 1.1, 0), 0.14, 2.2)
+	_merge_transformed(sm, m, pos, rot)
+
+# ------------------------------------------------------------------ Officina Meccanica Bellini (accessibile, +Z fronte)
+## Costruisce uno stabilimento industriale accessibile 12.0 x 9.6m con reparto CNC, banco server e ufficio CAD.
+static func add_factory_building(sm: StyleMesh, center: Vector3, w: float = 12.0, d: float = 9.6, rot: float = 0.0) -> void:
+	var h := 3.8
+	var wt := 0.28
+	var door_w := 3.6
+	var side_w := (w - door_w) * 0.5
+
+	var m := StyleMesh.new()
+	# Pavimento industriale top Y = 0.04 + rampa/soglia dolce verso la piazza
+	m.box("tile_gray", Vector3(0, 0.02, 0), Vector3(w, 0.04, d), {"col": true, "surface": "tile"})
+	m.box("stone_trim", Vector3(0, 0.02, d * 0.5 + 0.18), Vector3(door_w + 0.2, 0.04, 0.36), {"col": true, "surface": "stone"})
+	# Soffitto e tetto a capanna industriale
+	m.box("metal_panel", Vector3(0, h + 0.06, 0), Vector3(w, 0.12, d), {"col": true})
+	m.gable("roof_slate", "metal_panel", Vector3(0, h + 0.12, 0), w + 0.6, d + 0.6, 1.65, w >= d)
+	# Camini / lucernari industriali sul tetto
+	for cx in [-2.6, 2.6]:
+		m.box("steel", Vector3(cx, h + 1.05, -1.2), Vector3(0.65, 0.65, 0.65))
+		m.box("glass_cool", Vector3(cx, h + 1.40, -1.2), Vector3(0.55, 0.08, 0.55))
+
+	# Parete posteriore & laterali (rivestimento intonaco industriale + zoccolo in mattoni)
+	m.box("plaster_rough", Vector3(0, h * 0.5, -d * 0.5 + wt * 0.5), Vector3(w, h, wt), {"col": true})
+	m.box("plaster_rough", Vector3(-w * 0.5 + wt * 0.5, h * 0.5, 0), Vector3(wt, h, d - wt), {"col": true})
+	m.box("plaster_rough", Vector3(w * 0.5 - wt * 0.5, h * 0.5, 0), Vector3(wt, h, d - wt), {"col": true})
+	m.box("brick", Vector3(0, 0.52, -d * 0.5 - 0.025), Vector3(w + 0.06, 1.04, 0.05))
+	m.box("brick", Vector3(-w * 0.5 - 0.025, 0.52, 0), Vector3(0.05, 1.04, d + 0.06))
+	m.box("brick", Vector3(w * 0.5 + 0.025, 0.52, 0), Vector3(0.05, 1.04, d + 0.06))
+
+	# Finestre industriali ampie sulle pareti laterali
+	for wx_side in [-w * 0.5, w * 0.5]:
+		var sign_s := signf(wx_side)
+		for fz in [-2.2, 2.0]:
+			m.box("iron", Vector3(wx_side + sign_s * 0.02, 1.95, fz), Vector3(0.10, 1.35, 2.45))
+			m.box("glass_cool", Vector3(wx_side + sign_s * 0.04, 1.95, fz), Vector3(0.04, 1.18, 2.24))
+
+	# Parete frontale (+Z) con ampio portone carraio aperto (3.6m) e vetrate
+	m.box("plaster_rough", Vector3(-w * 0.5 + side_w * 0.5, h * 0.5, d * 0.5 - wt * 0.5), Vector3(side_w, h, wt), {"col": true})
+	m.box("plaster_rough", Vector3(w * 0.5 - side_w * 0.5, h * 0.5, d * 0.5 - wt * 0.5), Vector3(side_w, h, wt), {"col": true})
+	m.box("plaster_rough", Vector3(0, 2.80 + (h - 2.80) * 0.5, d * 0.5 - wt * 0.5), Vector3(door_w, h - 2.80, wt), {"col": true})
+	for sx in [-w * 0.5 + side_w * 0.5, w * 0.5 - side_w * 0.5]:
+		m.box("brick", Vector3(sx, 0.52, d * 0.5 + 0.025), Vector3(side_w, 1.04, 0.05))
+		m.box("iron", Vector3(sx, 1.95, d * 0.5 + 0.02), Vector3(2.6, 1.35, 0.08))
+		m.box("glass_cool", Vector3(sx, 1.95, d * 0.5 + 0.04), Vector3(2.4, 1.18, 0.03))
+	# Portale portone industriale giallo sicurezza + serranda arrotolata in alto
+	m.box("safety_yellow", Vector3(-door_w * 0.5 - 0.06, 1.40, d * 0.5 + 0.02), Vector3(0.14, 2.80, 0.24))
+	m.box("safety_yellow", Vector3(door_w * 0.5 + 0.06, 1.40, d * 0.5 + 0.02), Vector3(0.14, 2.80, 0.24))
+	m.box("iron", Vector3(0, 2.94, d * 0.5 + 0.04), Vector3(door_w + 0.28, 0.34, 0.28))
+	m.box("safety_yellow", Vector3(0, 2.75, d * 0.5 + 0.04), Vector3(door_w + 0.20, 0.08, 0.26))
+	# Insegna grande sopra il portone
+	m.box("iron", Vector3(0, 3.44, d * 0.5 + 0.08), Vector3(5.6, 0.52, 0.12))
+
+	# --- INTERNO ZONIZZATO (corridoio centrale X:[-1.6, 1.6] libero!) ---
+	# 1. Macchinario CNC Verde (sinistra posteriore)
+	m.box("iron", Vector3(-4.1, 0.48, -2.6), Vector3(2.2, 0.88, 1.6), {"col": true})
+	m.box("fabric_green", Vector3(-4.1, 1.36, -2.6), Vector3(2.05, 0.90, 1.45), {"col": true})
+	m.box("glass_cool", Vector3(-3.04, 1.38, -2.6), Vector3(0.06, 0.58, 0.96))
+	m.box("safety_yellow", Vector3(-4.1, 1.88, -2.6), Vector3(2.12, 0.12, 1.52))
+	m.cyl("safety_yellow", Vector3(-3.4, 1.94, -2.1), 0.08, 0.08, 0.18, 8)
+	# Quadro comandi CNC accanto
+	m.box("steel", Vector3(-3.0, 0.68, -1.45), Vector3(0.45, 1.28, 0.45), {"col": true})
+	m.box("cyan_accent", Vector3(-2.76, 1.15, -1.45), Vector3(0.04, 0.28, 0.32))
+
+	# 2. Banco da lavoro meccanico (lato sinistro davanti)
+	m.box("iron", Vector3(-5.1, 0.44, 0.85), Vector3(0.85, 0.80, 2.4), {"col": true})
+	m.box("wood_mid", Vector3(-5.1, 0.88, 0.85), Vector3(0.92, 0.08, 2.5))
+	m.box("copper", Vector3(-5.05, 1.00, 0.4), Vector3(0.24, 0.16, 0.28))
+
+	# 3. Scaffalature Magazzino (fondo sinistra)
+	m.box("iron", Vector3(-3.0, 1.08, -4.15), Vector3(2.3, 2.08, 0.65), {"col": true})
+	m.box("wood_mid", Vector3(-3.0, 0.72, -4.15), Vector3(2.18, 0.06, 0.58))
+	m.box("wood_mid", Vector3(-3.0, 1.44, -4.15), Vector3(2.18, 0.06, 0.58))
+	m.box("wood_light", Vector3(-3.4, 0.92, -4.15), Vector3(0.55, 0.34, 0.42))
+	m.box("wood_light", Vector3(-2.5, 1.64, -4.15), Vector3(0.62, 0.34, 0.42))
+
+	# 4. Basamento & Canalina per Server Xeon (fondo centro-sx)
+	m.box("stone_trim", Vector3(-0.8, 0.11, -4.10), Vector3(1.25, 0.14, 0.95), {"col": true})
+	m.box("safety_yellow", Vector3(-0.8, 0.19, -3.65), Vector3(1.25, 0.04, 0.06))
+	m.box("iron", Vector3(-0.8, 1.35, -4.55), Vector3(0.55, 1.85, 0.10))
+
+	# 5. Quadro Elettrico & Staffa Wi-Fi (parete interna anteriore-sx)
+	m.box("iron", Vector3(-2.45, 1.38, 4.34), Vector3(0.68, 0.74, 0.16))
+	m.box("safety_yellow", Vector3(-2.45, 1.38, 4.25), Vector3(0.16, 0.16, 0.03))
+
+	# 6. Bancone Reception / Progetti Ing. Bellini (destra centro-retro)
+	m.box("iron", Vector3(2.75, 0.42, -2.75), Vector3(1.75, 0.76, 0.70), {"col": true})
+	m.box("wood_mid", Vector3(2.75, 0.83, -2.75), Vector3(1.84, 0.06, 0.78))
+	m.box("white", Vector3(2.65, 0.87, -2.75), Vector3(0.62, 0.02, 0.42))
+
+	# 7. Due Scrivanie Ufficio Tecnico CAD (lato destro lungo parete +X)
+	for dz in [-2.6, 0.55]:
+		m.box("iron", Vector3(4.65, 0.40, dz), Vector3(0.85, 0.72, 1.85), {"col": true})
+		m.box("wood_mid", Vector3(4.65, 0.78, dz), Vector3(0.92, 0.06, 1.92))
+		# Sedia ergonomica accostata alla scrivania (chiaramente davanti, senza clippare!)
+		m.box("gaming_black", Vector3(3.75, 0.44, dz), Vector3(0.46, 0.08, 0.46), {"col": true})
+		m.box("gaming_black", Vector3(3.54, 0.78, dz), Vector3(0.08, 0.62, 0.44))
+		m.cyl("steel", Vector3(3.75, 0.04, dz), 0.24, 0.06, 0.38, 6)
+
+	_merge_transformed(sm, m, center, rot)
+
+static func add_factory_installed_wifi(sm: StyleMesh, pos: Vector3) -> void:
+	# Router Wi-Fi 6 industriale montato sul quadro parete (faccia verso -Z interno)
+	sm.box("steel", pos, Vector3(0.42, 0.14, 0.22))
+	sm.box("cyan_accent", pos + Vector3(0, 0.02, -0.115), Vector3(0.28, 0.03, 0.02))
+	sm.cyl("iron", pos + Vector3(-0.14, 0.07, 0.02), 0.015, 0.010, 0.26, 6)
+	sm.cyl("iron", pos + Vector3(0.14, 0.07, 0.02), 0.015, 0.010, 0.26, 6)
+
+static func add_factory_installed_server(sm: StyleMesh, pos: Vector3) -> void:
+	# Server Tower / Rack Xeon RAID-10 sopra il basamento (pos = top plinth Y=0.18)
+	sm.box("iron", pos + Vector3(0, 0.78, 0), Vector3(0.84, 1.56, 0.72))
+	sm.box("gaming_black", pos + Vector3(0, 0.78, 0.365), Vector3(0.72, 1.40, 0.03))
+	for ry in [0.35, 0.65, 0.95, 1.25]:
+		sm.box("cyan_accent", pos + Vector3(0, ry, 0.385), Vector3(0.56, 0.04, 0.02))
+	sm.box("steel", pos + Vector3(0.25, 0.22, 0.385), Vector3(0.14, 0.08, 0.02))
+
+static func add_workstation_pc_prop(sm: StyleMesh, pos: Vector3, rot: float = 0.0) -> void:
+	var m := StyleMesh.new()
+	# Monitor CAD widescreen + base + tastiera + Case Torre Xeon sul piano scrivania (Y=0 locale)
+	m.box("steel", Vector3(0, 0.06, 0.14), Vector3(0.16, 0.12, 0.12))
+	m.box("gaming_black", Vector3(0, 0.28, 0.16), Vector3(0.66, 0.38, 0.05))
+	m.box("glass_cool", Vector3(0, 0.28, 0.13), Vector3(0.60, 0.32, 0.02))
+	m.box("gaming_black", Vector3(0, 0.015, -0.14), Vector3(0.36, 0.025, 0.13))
+	m.box("iron", Vector3(0.52, 0.22, 0.04), Vector3(0.22, 0.44, 0.42))
+	m.box("cyan_accent", Vector3(0.52, 0.32, -0.175), Vector3(0.04, 0.16, 0.02))
 	_merge_transformed(sm, m, pos, rot)
 
 # ------------------------------------------------------------------ NPC stilizzati unificati (scolpiti)

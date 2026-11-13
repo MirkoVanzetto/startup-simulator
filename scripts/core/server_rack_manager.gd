@@ -140,6 +140,7 @@ func _on_time_tick(_h: int, _m: int, _d: int) -> void:
 	if not is_rack_unlocked:
 		return
 		
+	var has_sara := EmployeeManager != null and EmployeeManager.is_employee_hired("emp_sara")
 	var max_safe = get_max_safe_domains()
 	var is_overloaded = hosted_domains.size() > max_safe
 	
@@ -152,7 +153,7 @@ func _on_time_tick(_h: int, _m: int, _d: int) -> void:
 		
 	if is_overloaded:
 		base_temp += 26.0 # Extreme heat from overloaded CPU/bus
-		if active_incident == "":
+		if active_incident == "" and not has_sara:
 			trigger_incident(
 				"overload_cacoso",
 				"Sovraccarico Hardware Server Rack",
@@ -169,13 +170,22 @@ func _on_time_tick(_h: int, _m: int, _d: int) -> void:
 	elif active_incident == "thermal_throttle":
 		base_temp += 22.0
 		
-	temperature_celsius = lerp(temperature_celsius, base_temp, 0.18)
+	if has_sara:
+		# Sara DevOps gestisce attivamente il raffreddamento impedendo qualsiasi surriscaldamento
+		base_temp = minf(base_temp, 54.0)
+		if active_incident == "thermal_throttle" or active_incident == "overload_cacoso":
+			active_incident = ""
+		temperature_celsius = minf(lerp(temperature_celsius, base_temp, 0.25), 58.0)
+	else:
+		temperature_celsius = lerp(temperature_celsius, base_temp, 0.18)
 	
 	# Update bandwidth
 	bandwidth_mbps = 180.0 + (hosted_domains.size() * 85.0) + randf_range(-15.0, 25.0)
 	
 	# Check health status
-	if is_overloaded or temperature_celsius > 75.0:
+	if has_sara:
+		status_health = "warning" if is_overloaded else "normal"
+	elif is_overloaded or temperature_celsius > 75.0:
 		status_health = "critical"
 		if active_incident == "":
 			trigger_incident("thermal_throttle", "Surriscaldamento Rack Server", "Temperatura a %0.1f°C! Intervieni fisicamente sul rack o attiva la modalità Boost!" % temperature_celsius)
@@ -231,13 +241,51 @@ func calculate_daily_hosting_revenue() -> float:
 func _on_contract_completed(contract_id: String, _reward: float, _rep: int) -> void:
 	if not is_rack_unlocked:
 		return
-		
+
 	if contract_id == "pizzeria_da_mario":
 		add_hosted_client("pizzeriadamario-torino.it", "Pizzeria Da Mario (E-commerce & Menu)", 38.00)
 	elif contract_id == "caffe_san_carlo":
 		add_hosted_client("caffesancarlo.to.it", "Caffè San Carlo (Web POS & Prenotazioni)", 45.00)
 	elif contract_id == "elettronica_to":
 		add_hosted_client("elettronicato.com", "Elettronica TO (Catalogo & Cloud Sync)", 65.00)
+	elif contract_id == "factory_bellini_web":
+		add_hosted_client("officinabellini.it", "Officina Meccanica Bellini (Portale B2B)", 85.00)
+
+func reset() -> void:
+	is_rack_unlocked = false
+	installed_modules.clear()
+	rack_tier = 1
+	temperature_celsius = 46.5
+	fan_speed_rpm = 2400
+	cooling_mode = "auto"
+	bandwidth_mbps = 340.0
+	uptime_percent = 99.98
+	status_health = "normal"
+	hosted_domains.clear()
+	active_incident = ""
+
+func serialize() -> Dictionary:
+	return {
+		"is_rack_unlocked": is_rack_unlocked,
+		"installed_modules": installed_modules.duplicate(),
+		"rack_tier": rack_tier,
+		"cooling_mode": cooling_mode,
+		"hosted_domains": hosted_domains.duplicate(true),
+		"active_incident": active_incident
+	}
+
+func deserialize(data: Dictionary) -> void:
+	reset()
+	is_rack_unlocked = bool(data.get("is_rack_unlocked", false))
+	rack_tier = maxi(1, int(data.get("rack_tier", 1)))
+	cooling_mode = str(data.get("cooling_mode", "auto"))
+	active_incident = str(data.get("active_incident", ""))
+	for m in data.get("installed_modules", []):
+		installed_modules.append(str(m))
+	for hd in data.get("hosted_domains", []):
+		if hd is Dictionary:
+			hosted_domains.append(hd.duplicate(true))
+	_recalculate_telemetry()
 
 func _recalculate_telemetry() -> void:
 	_emit_telemetry()

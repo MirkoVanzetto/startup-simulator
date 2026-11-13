@@ -21,17 +21,21 @@ extends Control
 @onready var deliver_project_btn: Button = $Windows/MailWindow/Margin/VBox/Split/MailBody/DeliverButton
 
 # Shop components
-@onready var buy_monitor_btn: Button = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/MonitorCard/VBox/HBox/BuyButton
-@onready var buy_chair_btn: Button = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ChairCard/VBox/HBox/BuyButton
-@onready var buy_plant_btn: Button = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/PlantCard/VBox/HBox/BuyButton
-@onready var buy_server_btn: Button = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ServerCard/VBox/HBox/BuyButton
-@onready var monitor_status: Label = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/MonitorCard/VBox/HBox/StatusLabel
-@onready var chair_status: Label = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ChairCard/VBox/HBox/StatusLabel
-@onready var plant_status: Label = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/PlantCard/VBox/HBox/StatusLabel
-@onready var server_status: Label = $Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ServerCard/VBox/HBox/StatusLabel
+@onready var buy_monitor_btn: Button = $Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/MonitorCard/VBox/HBox/BuyButton
+@onready var buy_chair_btn: Button = $Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/ChairCard/VBox/HBox/BuyButton
+@onready var buy_plant_btn: Button = $Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/PlantCard/VBox/HBox/BuyButton
+@onready var buy_server_btn: Button = $Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/ServerCard/VBox/HBox/BuyButton
+@onready var monitor_status: Label = $Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/MonitorCard/VBox/HBox/StatusLabel
+@onready var chair_status: Label = $Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/ChairCard/VBox/HBox/StatusLabel
+@onready var plant_status: Label = $Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/PlantCard/VBox/HBox/StatusLabel
+@onready var server_status: Label = $Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/ServerCard/VBox/HBox/StatusLabel
+@onready var hw_hint_label: Label = $Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/HwHintLabel
+@onready var hw_grid: GridContainer = $Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/HwGrid
 
 # Freelance components
-@onready var freelance_text: RichTextLabel = $Windows/FreelanceWindow/Margin/VBox/DetailsLabel
+@onready var lead_banner_label: Label = $Windows/FreelanceWindow/Margin/VBox/LeadBanner/LeadLabel
+@onready var freelance_cards: VBoxContainer = $Windows/FreelanceWindow/Margin/VBox/FreelanceScroll/FreelanceVBox/CardsContainer
+@onready var freelance_text: RichTextLabel = $Windows/FreelanceWindow/Margin/VBox/FreelanceScroll/FreelanceVBox/DetailsLabel
 @onready var open_webforge_btn: Button = $Windows/FreelanceWindow/Margin/VBox/LaunchWebForgeButton
 
 # Bank components
@@ -59,6 +63,7 @@ extends Control
 @onready var firewall_icon: Button = $DesktopIcons/Scroll/VBox/FirewallIcon
 
 var emails: Array[Dictionary] = []
+var _selected_email_cid: String = ""
 
 func _ready() -> void:
 	visible = false
@@ -66,6 +71,12 @@ func _ready() -> void:
 	EventBus.computer_closed.connect(_on_computer_closed)
 	EventBus.funds_changed.connect(_on_funds_changed)
 	EventBus.contract_updated.connect(_on_contract_updated)
+	EventBus.contract_completed.connect(func(_id, _r, _rep):
+		_update_freelance_display()
+		_update_shop_buttons()
+		_setup_emails()
+		_update_rack_display()
+	)
 	
 	exit_button.pressed.connect(_on_exit_pressed)
 	
@@ -107,18 +118,35 @@ func _ready() -> void:
 	upgrade_tier3_btn.pressed.connect(func(): ServerRackManager.upgrade_rack_tier(3); _update_rack_display())
 	
 	ServerRackManager.telemetry_updated.connect(_on_rack_telemetry)
-	EventBus.employee_hired.connect(func(_id, _n): _update_talent_display())
-	EventBus.employee_fired.connect(func(_id): _update_talent_display())
+	EventBus.employee_hired.connect(func(_id, _n):
+		_update_talent_display()
+		_update_freelance_display()
+	)
+	EventBus.employee_fired.connect(func(_id):
+		_update_talent_display()
+		_update_freelance_display()
+	)
+	if ShopManager.has_signal("hardware_changed"):
+		ShopManager.hardware_changed.connect(func():
+			_update_shop_buttons()
+			_update_freelance_display()
+		)
 	
 	_setup_emails()
 	_update_shop_buttons()
-	EventBus.time_tick.connect(func(_h, _m, _d): _update_top_bar())
+	_update_freelance_display()
+	EventBus.time_tick.connect(func(_h, _m, _d):
+		_update_top_bar()
+		if visible and freelance_window.visible:
+			_update_lead_banner_only()
+	)
 	EventBus.contract_marketplace_refreshed.connect(_update_freelance_display)
 
 func _on_computer_opened() -> void:
 	visible = true
 	SoundManager.play_keyboard_sound()
 	_update_top_bar()
+	_setup_emails()
 	_update_freelance_display()
 	_update_bank_display()
 	_update_shop_buttons()
@@ -142,6 +170,8 @@ func _on_funds_changed(new_balance: float, _delta: float, _reason: String) -> vo
 	_update_shop_buttons()
 	_update_bank_display()
 	_update_rack_display()
+	if freelance_window.visible:
+		_update_freelance_display()
 
 func _on_contract_updated(_id: String, _status: String) -> void:
 	_update_freelance_display()
@@ -156,36 +186,62 @@ func _open_window(target_window: PanelContainer) -> void:
 	rack_window.visible = false
 	talent_window.visible = false
 	target_window.visible = true
+	if target_window == freelance_window:
+		_update_freelance_display()
+	elif target_window == shop_window:
+		_update_shop_buttons()
 
 func _setup_emails() -> void:
 	mail_list.clear()
 	emails.clear()
+	_selected_email_cid = ""
 	
 	# Mario (Pizzeria)
 	emails.append({
 		"from": "Mario Esposito <mario@pizzeriadamario-to.it>",
 		"subject": "Richiesta Realizzazione Sito Web - Pizzeria Da Mario (Via Po)",
-		"body": "Gentile Dottore,\n\nHo visto il suo annuncio su Freelance Hub Torino. Cerchiamo qualcuno che crei il nostro sito web ufficiale per attirare turisti e clienti a Torino.\n\nBudget concordato: € 650,00 netti.\n\nPassi a trovarmi direttamente di persona in bottega in Via Po 18 (esca dal suo garage e segua la via fino all'insegna luminosa).\n\nMario Esposito - Titolare",
+		"body": "Gentile Dottore,\n\nHo visto il suo annuncio su Freelance Hub Torino. Cerchiamo qualcuno che crei il nostro sito web ufficiale per attirare turisti e clienti a Torino.\n\nBudget concordato: € 650,00 netti.\n\nPassi a trovarmi direttamente di persona in bottega in Via Po 18 (esca dal suo studio e segua la via fino all'insegna luminosa).\n\nMario Esposito - Titolare",
 		"contract_id": "pizzeria_da_mario"
 	})
 	
-	# Elena (Caffè San Carlo) - Appears after tutorial or when contract unlocked
+	# Elena (Caffè San Carlo)
 	if ContractManager.is_contract_completed("pizzeria_da_mario") or ContractManager.active_contracts.has("caffe_san_carlo"):
 		emails.append({
-			"from": "Elena Barista <elena@caffesancarlo.to.it>",
+			"from": "Elena Rossi <elena@caffesancarlo.to.it>",
 			"subject": "Richiesta Touch Web POS Cassa & Ordini - Caffè San Carlo",
-			"body": "Gentile Sviluppatore,\n\nMario mi ha mostrato il nuovo sito web e ne sono rimasta affascinata!\nQui al Caffè San Carlo in Via Po abbiamo code infinite al bancone nelle ore di punta.\nCi serve un sistema Web POS moderno per velocizzare le ordinazioni di caffè e bicerin e gestire i tavoli del dehors.\n\nBudget: € 1.250,00 netti + Hosting mensile sul suo server rack!\nPassi a trovarmi al bancone del Caffè in Via Po per definire i dettagli.\n\nCordiali saluti,\nElena - Store Manager",
+			"body": "Gentile Sviluppatore,\n\nMario mi ha mostrato il nuovo sito web e ne sono rimasta affascinata!\nQui al Caffè San Carlo abbiamo code al bancone nelle ore di punta. Ci serve un sistema Web POS moderno per velocizzare le ordinazioni di caffè e bicerin.\n\nBudget: € 1.250,00 netti + Hosting mensile sul suo server rack!\nPassi al bancone del Caffè in Piazzetta per definire i dettagli.\n\nCordiali saluti,\nElena - Store Manager",
 			"contract_id": "caffe_san_carlo"
 		})
 		
-	# Davide (Elettronica TO) - Appears after Caffè San Carlo
+	# Davide (Elettronica TO)
 	if ContractManager.is_contract_completed("caffe_san_carlo") or ContractManager.active_contracts.has("elettronica_to"):
 		emails.append({
-			"from": "Davide Tecnico <davide@elettronicato.com>",
+			"from": "Davide Ferrero <davide@elettronicato.com>",
 			"subject": "Proposta Migrazione Cloud & Catalogo - Elettronica TO",
-			"body": "Ciao collega,\n\nHo saputo del Web POS che hai installato al Caffè San Carlo, lavoro eccellente!\nDa Elettronica TO dobbiamo dismettere il nostro vecchio server locale e migrare a un'architettura cloud con database ridondato e backup sul tuo server rack.\n\nBudget stanziato: € 1.850,00 netti + 20% di sconto permanente su tutti i nostri prodotti hardware!\nVieni in negozio in Via Po per iniziare.\n\nA presto,\nDavide - Senior Tech Clerk",
+			"body": "Ciao collega,\n\nHo saputo del Web POS installato al Caffè San Carlo, lavoro eccellente!\nDa Elettronica TO dobbiamo dismettere il nostro vecchio server locale e migrare a un'architettura cloud con database ridondato e backup sul tuo server rack.\n\nBudget stanziato: € 1.850,00 netti + 20% di sconto permanente sui componenti hardware (Router Wi-Fi, Server Xeon, PC & Firewall)!\nVieni in negozio in Piazzetta per iniziare.\n\nA presto,\nDavide - Tecnico Elettronica TO",
 			"contract_id": "elettronica_to"
 		})
+
+	# Officina Bellini e contratti B2B WebForge in corso o pronti per consegna
+	for cid in ContractManager.active_contracts:
+		if cid in ["pizzeria_da_mario", "caffe_san_carlo", "elettronica_to"]:
+			continue
+		var ac = ContractManager.active_contracts[cid]
+		if ac is Dictionary and ac.get("execution_type", "webforge") == "webforge":
+			var st = ac.get("status", "")
+			if st == "in_progress" or st == "built":
+				emails.append({
+					"from": "%s <b2b@torino-clienti.it>" % str(ac.get("client", "Cliente B2B")),
+					"subject": "%s%s (€ %0.2f)" % ["[PRONTA CONSEGNA] " if st == "built" else "[ATTIVO] ", str(ac.get("title", cid)), float(ac.get("budget", 0.0))],
+					"body": "Commissione B2B attiva: %s\n\n%s\n\nCompenso base: € %0.2f\nStato attuale: %s\nRequisiti: %s" % [
+						str(ac.get("title", cid)),
+						str(ac.get("brief", ac.get("objective_text", ""))),
+						float(ac.get("budget", 0.0)),
+						st.to_upper(),
+						", ".join(ac.get("requirements", []))
+					],
+					"contract_id": cid
+				})
 	
 	emails.append({
 		"from": "Risorse Umane <recruiting@megacorp-consulting.it>",
@@ -217,7 +273,8 @@ func _display_email(index: int) -> void:
 		mail_subject.text = e["subject"]
 		mail_content.text = "[b]Da:[/b] " + e["from"] + "\n\n" + e["body"]
 		
-		var cid = e.get("contract_id", "")
+		var cid = str(e.get("contract_id", ""))
+		_selected_email_cid = cid
 		if cid != "":
 			var c = ContractManager.get_contract(cid)
 			var status = c.get("status", "available")
@@ -228,76 +285,355 @@ func _display_email(index: int) -> void:
 		deliver_project_btn.visible = false
 
 func _on_deliver_project_pressed() -> void:
-	# Find built contract to complete
-	for cid in ["pizzeria_da_mario", "caffe_san_carlo", "elettronica_to"]:
+	if _selected_email_cid != "":
+		var sel = ContractManager.get_contract(_selected_email_cid)
+		if sel.get("status") == "built":
+			_complete_contract_by_id(_selected_email_cid)
+			return
+	for cid in ContractManager.active_contracts.keys():
 		var c = ContractManager.get_contract(cid)
 		if c.get("status") == "built":
-			ContractManager.complete_story_contract(cid)
-			deliver_project_btn.visible = false
-			_setup_emails()
-			_update_shop_buttons()
-			_update_rack_display()
+			_complete_contract_by_id(cid)
 			return
 
+func _complete_contract_by_id(cid: String) -> void:
+	if cid in ["pizzeria_da_mario", "caffe_san_carlo", "elettronica_to"]:
+		ContractManager.complete_story_contract(cid)
+	else:
+		ContractManager.complete_marketplace_contract(cid)
+	deliver_project_btn.visible = false
+	_setup_emails()
+	_update_freelance_display()
+	_update_shop_buttons()
+	_update_rack_display()
+
+func _update_lead_banner_only() -> void:
+	if not lead_banner_label:
+		return
+	var hw_summary := "Magazzino Hardware: Router x%d | Server x%d | PC x%d | Firewall x%d" % [
+		ShopManager.get_hardware_count("hw_wifi_router"),
+		ShopManager.get_hardware_count("hw_server_tower"),
+		ShopManager.get_hardware_count("hw_workstation_pc"),
+		ShopManager.get_hardware_count("hw_firewall_appliance")
+	]
+	lead_banner_label.text = "📡 %s\n📦 %s" % [ContractManager.get_lead_eta_text(), hw_summary]
+
+func _make_hub_card(bg: Color, border: Color) -> PanelContainer:
+	var card := PanelContainer.new()
+	var st := StyleBoxFlat.new()
+	st.bg_color = bg
+	st.border_color = border
+	st.set_border_width_all(1)
+	st.set_corner_radius_all(6)
+	st.set_content_margin_all(10)
+	card.add_theme_stylebox_override("panel", st)
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	return card
+
 func _update_freelance_display() -> void:
-	var t = "[b]COMMISSIONI E MISSIONI STORIA:[/b]\n\n"
-	
-	for cid in ["pizzeria_da_mario", "caffe_san_carlo", "elettronica_to"]:
-		var c = ContractManager.get_contract(cid)
-		if c.is_empty():
+	_update_lead_banner_only()
+	if not freelance_cards:
+		return
+	for ch in freelance_cards.get_children():
+		ch.queue_free()
+
+	# 1. Grande Appalto Officina Bellini (Borgo Valdocco Est)
+	var fac := ContractManager.get_factory_progress_summary()
+	if fac["accepted"] or ContractManager.is_contract_completed("elettronica_to"):
+		var f_card := _make_hub_card(Color(0.14, 0.17, 0.24, 1.0), Color(0.92, 0.65, 0.22, 0.85))
+		var f_vbox := VBoxContainer.new()
+		f_vbox.add_theme_constant_override("separation", 6)
+		f_card.add_child(f_vbox)
+
+		var f_title := Label.new()
+		f_title.text = "🏭 MAXI-APPALTO: OFFICINA MECCANICA BELLINI (BORGO VALDOCCO — EST)"
+		f_title.add_theme_font_size_override("font_size", 13)
+		f_title.add_theme_color_override("font_color", Color(1.0, 0.82, 0.35))
+		f_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		f_vbox.add_child(f_title)
+
+		var f_info := Label.new()
+		f_info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		f_info.add_theme_font_size_override("font_size", 12)
+		if not fac["accepted"]:
+			f_info.text = "Esci dalla piazzetta e segui la strada asfaltata verso Est fino a Borgo Valdocco. Parla con l'Ing. Bellini e perlustra la fabbrica (Wi-Fi, Sito, Server Xeon, 2 PC)!"
+			f_info.add_theme_color_override("font_color", Color(0.84, 0.88, 0.94))
+			f_vbox.add_child(f_info)
+		elif fac["completed"]:
+			f_info.text = "✔ Appalto Completato al 100%%! Wi-Fi, Sito Web, Server Xeon e 2 Workstation CAD attivi."
+			f_info.add_theme_color_override("font_color", Color(0.35, 1.0, 0.58))
+			f_vbox.add_child(f_info)
+		else:
+			var s_tag := "✔" if fac["all_scouted"] else "○"
+			var w_tag := "✔" if fac["wifi_done"] else ("⚡NetShield" if fac["wifi_mounted"] else "○")
+			var web_tag := "✔" if fac["web_done"] else "○"
+			var srv_tag := "✔" if fac["server_done"] else "○"
+			var pc_tag := "✔" if fac["pcs_done"] else "○"
+			f_info.text = "Sopralluogo %s (%d/4 zone) | %s Wi-Fi Router & VLAN | %s Portale Web | %s Server Xeon | %s 2x PC CAD" % [
+				s_tag, fac["scouted_count"], w_tag, web_tag, srv_tag, pc_tag
+			]
+			f_info.add_theme_color_override("font_color", Color(0.86, 0.92, 0.98))
+			f_vbox.add_child(f_info)
+
+			var f_actions := HFlowContainer.new()
+			f_actions.add_theme_constant_override("h_separation", 8)
+			f_actions.add_theme_constant_override("v_separation", 6)
+			var web_c := ContractManager.get_contract("factory_bellini_web")
+			var web_st := str(web_c.get("status", ""))
+			if web_st == "in_progress":
+				var b_wf := Button.new()
+				b_wf.text = "⚡ Sito WebForge (€ 950)"
+				b_wf.pressed.connect(func(): _launch_webforge_for("factory_bellini_web"))
+				f_actions.add_child(b_wf)
+			elif web_st == "built":
+				var b_del := Button.new()
+				b_del.text = "★ Consegna Sito (€ 950)"
+				b_del.add_theme_color_override("font_color", Color(0.35, 1.0, 0.55))
+				b_del.pressed.connect(func(): _complete_contract_by_id("factory_bellini_web"))
+				f_actions.add_child(b_del)
+			if fac["wifi_mounted"] and not fac["wifi_done"]:
+				var b_ns := Button.new()
+				b_ns.text = "🛡 VLAN NetShield (€ 350)"
+				b_ns.add_theme_color_override("font_color", Color(1.0, 0.72, 0.3))
+				b_ns.pressed.connect(func(): _launch_netshield_for("factory_bellini_wifi"))
+				f_actions.add_child(b_ns)
+			if f_actions.get_child_count() > 0:
+				f_vbox.add_child(f_actions)
+
+		freelance_cards.add_child(f_card)
+
+	# 2. Incarichi Attivi (Storia + B2B presi in carico)
+	var active_ids: Array[String] = []
+	for cid in ContractManager.active_contracts.keys():
+		if cid == "factory_bellini_web":
 			continue
-		var st = c.get("status", "available")
-		var st_color = "#ffbb33"
-		if st == "in_progress": st_color = "#33ccff"
-		elif st == "built": st_color = "#33ff77"
-		elif st == "completed": st_color = "#88ff88"
-		
-		t += "• [b]%s[/b] — %s\n" % [c.get("title", ""), c.get("client", "")]
-		t += "  Compenso: [color=#44ff88]€ %0.2f[/color] | Stato: [color=%s]%s[/color]\n" % [c.get("budget", 0.0), st_color, st.to_upper()]
-		t += "  Obiettivo: %s\n\n" % c.get("objective_text", "")
-		
-	# Check if any project is in progress for the IDE button
-	var has_in_progress = false
-	for c in ContractManager.active_contracts.values():
-		if c.get("status") == "in_progress":
-			has_in_progress = true
-			break
-			
-	open_webforge_btn.visible = has_in_progress
-	if has_in_progress:
-		open_webforge_btn.text = "⚡ Apri WebForge IDE (Sviluppa Software)"
-		
-	t += "[b]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/b]\n"
-	t += "[b][color=#ffcc44]MARKETPLACE FREELANCE DI TORINO (OPPORTUNITÀ B2B):[/color][/b]\n\n"
-	
+		var st := str(ContractManager.active_contracts[cid].get("status", ""))
+		if st == "in_progress" or st == "built":
+			active_ids.append(cid)
+
+	if not active_ids.is_empty():
+		var act_hdr := Label.new()
+		act_hdr.text = "🔧 INCARICHI IN LAVORAZIONE:"
+		act_hdr.add_theme_font_size_override("font_size", 13)
+		act_hdr.add_theme_color_override("font_color", Color(0.4, 0.92, 1.0))
+		freelance_cards.add_child(act_hdr)
+
+		for cid in active_ids:
+			var c: Dictionary = ContractManager.active_contracts[cid]
+			var st := str(c.get("status", "in_progress"))
+			var etype := str(c.get("execution_type", "webforge"))
+			var card := _make_hub_card(Color(0.15, 0.20, 0.28, 1.0), Color(0.30, 0.72, 0.95, 0.85))
+			var v := VBoxContainer.new()
+			v.add_theme_constant_override("separation", 6)
+			card.add_child(v)
+
+			var ttl := Label.new()
+			ttl.text = "%s — %s (€ %0.2f · +%d Rep)" % [str(c.get("title", cid)), str(c.get("client", "")), float(c.get("budget", 0.0)), int(c.get("reputation_reward", 10))]
+			ttl.add_theme_font_size_override("font_size", 13)
+			ttl.add_theme_color_override("font_color", Color(0.95, 0.96, 1.0))
+			ttl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			v.add_child(ttl)
+
+			var req := Label.new()
+			req.text = "%s | Requisiti: %s" % [str(c.get("category", "B2B")), ", ".join(c.get("requirements", []))]
+			req.add_theme_font_size_override("font_size", 11)
+			req.add_theme_color_override("font_color", Color(0.75, 0.82, 0.90))
+			req.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			v.add_child(req)
+
+			var row := HFlowContainer.new()
+			row.add_theme_constant_override("h_separation", 8)
+			row.add_theme_constant_override("v_separation", 6)
+			if st == "built":
+				var d_btn := Button.new()
+				d_btn.text = "★ Consegna & Incassa (€ %0.2f)" % float(c.get("budget", 0.0))
+				d_btn.add_theme_color_override("font_color", Color(0.35, 1.0, 0.55))
+				var cid_copy := cid
+				d_btn.pressed.connect(func(): _complete_contract_by_id(cid_copy))
+				row.add_child(d_btn)
+			elif etype == "netshield":
+				var ns_btn := Button.new()
+				ns_btn.text = "🛡 Configura su NetShield Cyber"
+				ns_btn.add_theme_color_override("font_color", Color(1.0, 0.72, 0.30))
+				var cid_copy := cid
+				ns_btn.pressed.connect(func(): _launch_netshield_for(cid_copy))
+				row.add_child(ns_btn)
+			elif etype == "hardware":
+				var req_hw: Dictionary = c.get("required_hardware", {})
+				var parts: Array[String] = []
+				var all_ok := true
+				for hw_id in req_hw:
+					var need := int(req_hw[hw_id])
+					var have := ShopManager.get_hardware_count(str(hw_id))
+					if have < need:
+						all_ok = false
+					parts.append("%s: %d/%d" % [ShopManager.get_hardware_item_name(str(hw_id)), have, need])
+				var hw_lbl := Label.new()
+				hw_lbl.custom_minimum_size = Vector2(220, 0)
+				hw_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				hw_lbl.text = "Stock: " + ", ".join(parts)
+				hw_lbl.add_theme_font_size_override("font_size", 11)
+				hw_lbl.add_theme_color_override("font_color", Color(0.45, 1.0, 0.65) if all_ok else Color(1.0, 0.78, 0.35))
+				hw_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+				row.add_child(hw_lbl)
+
+				var hw_btn := Button.new()
+				hw_btn.text = "📦 Installa & Consegna" if all_ok else "🛒 Compra Hardware"
+				var cid_copy := cid
+				if all_ok:
+					hw_btn.add_theme_color_override("font_color", Color(0.35, 1.0, 0.55))
+					hw_btn.pressed.connect(func():
+						ContractManager.deliver_hardware_contract(cid_copy)
+						_update_freelance_display()
+					)
+				else:
+					hw_btn.pressed.connect(func(): _open_window(shop_window))
+				row.add_child(hw_btn)
+			else:
+				var wf_btn := Button.new()
+				wf_btn.text = "⚡ Sviluppa su WebForge"
+				wf_btn.add_theme_color_override("font_color", Color(0.40, 0.92, 1.0))
+				var cid_copy := cid
+				wf_btn.pressed.connect(func(): _launch_webforge_for(cid_copy))
+				row.add_child(wf_btn)
+
+			v.add_child(row)
+			freelance_cards.add_child(card)
+
+	# 3. Offerte B2B Disponibili su Freelance Hub
+	var mkt_hdr := Label.new()
+	mkt_hdr.text = "💼 MARKETPLACE FREELANCE TORINO (%d OFFERTE APERTE):" % ContractManager.marketplace_contracts.size()
+	mkt_hdr.add_theme_font_size_override("font_size", 13)
+	mkt_hdr.add_theme_color_override("font_color", Color(1.0, 0.82, 0.32))
+	freelance_cards.add_child(mkt_hdr)
+
 	if ContractManager.marketplace_contracts.is_empty():
-		t += "Nessun bando aperto al momento. Nuove offerte disponibili domani mattina alle 08:00.\n"
+		var empty_card := _make_hub_card(Color(0.14, 0.16, 0.21, 0.9), Color(0.28, 0.34, 0.45, 0.7))
+		var empty_lbl := Label.new()
+		empty_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		empty_lbl.add_theme_font_size_override("font_size", 12)
+		empty_lbl.add_theme_color_override("font_color", Color(0.75, 0.80, 0.88))
+		if not ContractManager.is_contract_completed("pizzeria_da_mario"):
+			empty_lbl.text = "Consegna prima il sito alla Pizzeria Da Mario: i primi clienti B2B arriveranno dopo la tua prima referenza nel borgo!"
+		else:
+			empty_lbl.text = "Nessuna nuova richiesta in questo istante. %s" % ContractManager.get_lead_eta_text()
+		empty_card.add_child(empty_lbl)
+		freelance_cards.add_child(empty_card)
 	else:
 		for c in ContractManager.marketplace_contracts:
-			t += "• [b]%s[/b] — %s\n" % [c["title"], c["client"]]
-			t += "  Settore: %s | Compenso: [color=#44ff88]€ %0.2f[/color] | Scadenza: %d gg | Difficoltà: %s\n" % [c["category"], c["budget"], c["deadline_days"], "★".repeat(c["difficulty"])]
-			t += "  Requisiti: %s\n\n" % ", ".join(c["requirements"])
-			
-	freelance_text.text = t
+			var cid := str(c["id"])
+			var etype := str(c.get("execution_type", "webforge"))
+			var badge_col := Color(0.35, 0.88, 1.0)
+			var type_tag := "WEBFORGE"
+			if etype == "netshield":
+				badge_col = Color(1.0, 0.68, 0.25)
+				type_tag = "NETSHIELD CYBER"
+			elif etype == "hardware":
+				badge_col = Color(0.55, 1.0, 0.58)
+				type_tag = "HARDWARE B2B"
+
+			var m_card := _make_hub_card(Color(0.16, 0.19, 0.26, 1.0), badge_col * Color(1, 1, 1, 0.7))
+			var mv := VBoxContainer.new()
+			mv.add_theme_constant_override("separation", 5)
+			m_card.add_child(mv)
+
+			var top_row := HBoxContainer.new()
+			top_row.add_theme_constant_override("separation", 8)
+			var title_lbl := Label.new()
+			title_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			title_lbl.text = "[%s] %s — %s" % [type_tag, str(c["title"]), str(c["client"])]
+			title_lbl.add_theme_font_size_override("font_size", 13)
+			title_lbl.add_theme_color_override("font_color", badge_col)
+			title_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			top_row.add_child(title_lbl)
+
+			var accept_btn := Button.new()
+			accept_btn.custom_minimum_size = Vector2(145, 32)
+			accept_btn.text = "✓ Accetta (€ %0.0f)" % float(c["budget"])
+			accept_btn.add_theme_color_override("font_color", Color(0.35, 1.0, 0.58))
+			accept_btn.pressed.connect(func():
+				SoundManager.play_ui_click()
+				ContractManager.accept_marketplace_contract(cid)
+				_update_freelance_display()
+			)
+			top_row.add_child(accept_btn)
+			mv.add_child(top_row)
+
+			var meta_lbl := Label.new()
+			meta_lbl.text = "Settore: %s | Compenso: € %0.2f (+%d Rep) | Scadenza: %d gg | Difficoltà: %s\nRequisiti: %s" % [
+				str(c.get("category", "B2B")),
+				float(c.get("budget", 0.0)),
+				int(c.get("reputation_reward", 10)),
+				int(c.get("deadline_days", 3)),
+				"★".repeat(int(c.get("difficulty", 1))),
+				", ".join(c.get("requirements", []))
+			]
+			meta_lbl.add_theme_font_size_override("font_size", 11)
+			meta_lbl.add_theme_color_override("font_color", Color(0.80, 0.85, 0.92))
+			meta_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			mv.add_child(meta_lbl)
+
+			freelance_cards.add_child(m_card)
+
+	# 4. Riepilogo Missioni Storia San Carlo
+	var story_hdr := Label.new()
+	story_hdr.text = "📜 COMMISSIONI QUARTIERE BORGO SAN CARLO:"
+	story_hdr.add_theme_font_size_override("font_size", 12)
+	story_hdr.add_theme_color_override("font_color", Color(0.75, 0.82, 0.92))
+	freelance_cards.add_child(story_hdr)
+
+	for scid in ["pizzeria_da_mario", "caffe_san_carlo", "elettronica_to"]:
+		var sc = ContractManager.get_contract(scid)
+		if sc.is_empty():
+			continue
+		var sst = str(sc.get("status", "available"))
+		var s_lbl := Label.new()
+		s_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		s_lbl.add_theme_font_size_override("font_size", 11)
+		s_lbl.text = "• %s (%s) — € %0.2f [%s] — %s" % [sc.get("title", ""), sc.get("client", ""), float(sc.get("budget", 0.0)), sst.to_upper(), sc.get("objective_text", "")]
+		s_lbl.add_theme_color_override("font_color", Color(0.55, 1.0, 0.65) if sst == "completed" else Color(0.78, 0.82, 0.88))
+		freelance_cards.add_child(s_lbl)
+
+	# Pulsante veloce footer WebForge visibile solo se c'è un contratto webforge in lavorazione
+	var has_wf := false
+	for ac in ContractManager.active_contracts.values():
+		if ac.get("status") == "in_progress" and ac.get("execution_type", "webforge") == "webforge":
+			has_wf = true
+			break
+	open_webforge_btn.visible = has_wf
+	if has_wf:
+		open_webforge_btn.text = "⚡ Apri WebForge IDE (Sviluppa Sito Selezionato)"
+
+	# Mantiene freelance_text popolato per retrocompatibilità
+	if freelance_text:
+		freelance_text.text = ContractManager.get_lead_eta_text()
 
 func _launch_webforge() -> void:
 	var has_active = false
 	for c in ContractManager.active_contracts.values():
-		if c.get("status") == "in_progress":
+		if c.get("status") == "in_progress" and c.get("execution_type", "webforge") == "webforge":
 			has_active = true
 			break
-			
 	if not has_active:
 		SoundManager.play_ui_click()
 		EventBus.notification_posted.emit(
 			"WebForge Inattivo",
-			"Nessun contratto in lavorazione! Recati dai clienti in Via Po per definire e accettare i requisiti.",
+			"Nessun sito web in lavorazione! Accetta un lavoro su Freelance Hub o parla con i clienti nel Borgo.",
 			"warning"
 		)
 		return
-		
 	SoundManager.play_ui_click()
 	EventBus.minigame_started.emit("web_forge")
+
+func _launch_webforge_for(cid: String) -> void:
+	ContractManager.preferred_webforge_contract_id = cid
+	SoundManager.play_ui_click()
+	EventBus.minigame_started.emit("web_forge")
+
+func _launch_netshield_for(cid: String) -> void:
+	ContractManager.preferred_netshield_contract_id = cid
+	SoundManager.play_ui_click()
+	EventBus.minigame_started.emit("firewall_router")
 
 func _update_shop_buttons() -> void:
 	var has_monitor = "monitor_upgrade" in GameManager.studio_upgrades_installed
@@ -350,6 +686,82 @@ func _update_shop_buttons() -> void:
 		buy_server_btn.text = "Acquista (€ 450,00)"
 		server_status.text = "Disponibile"
 		server_status.add_theme_color_override("font_color", col_avail)
+
+	_rebuild_client_hardware_shop()
+
+func _rebuild_client_hardware_shop() -> void:
+	if not hw_grid:
+		return
+	for ch in hw_grid.get_children():
+		ch.queue_free()
+
+	if hw_hint_label:
+		var partner := ContractManager.is_contract_completed("elettronica_to")
+		var fame_disc := FameManager.get_discount_percent()
+		var disc_str := "Sconto Partner Davide (-20%) ATTIVO!" if partner else "Completa Elettronica TO per -20% sconto fisso."
+		if fame_disc > 0:
+			disc_str += " | Bonus Fame: -%d%%" % fame_disc
+		hw_hint_label.text = "%s | Totale pezzi in magazzino: %d" % [disc_str, ShopManager.get_hardware_count()]
+
+	var items := ShopManager.get_items("elettronica_componenti")
+	for it in items:
+		var hw_id := str(it["id"])
+		var base_p := ShopManager.get_base_price("elettronica_componenti", hw_id)
+		var price := ShopManager.get_price("elettronica_componenti", hw_id)
+		var stock := ShopManager.get_hardware_count(hw_id)
+
+		var card := _make_hub_card(Color(0.17, 0.20, 0.27, 1.0), Color(0.32, 0.45, 0.65, 0.75))
+		card.custom_minimum_size = Vector2(235, 138)
+		var v := VBoxContainer.new()
+		v.add_theme_constant_override("separation", 6)
+		card.add_child(v)
+
+		var n_lbl := Label.new()
+		n_lbl.text = str(it["name"])
+		n_lbl.add_theme_font_size_override("font_size", 14)
+		n_lbl.add_theme_color_override("font_color", Color(0.95, 0.85, 0.45))
+		n_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		v.add_child(n_lbl)
+
+		var p_lbl := Label.new()
+		if price < base_p:
+			p_lbl.text = "€ %0.2f (Listino € %0.2f)" % [price, base_p]
+		else:
+			p_lbl.text = "€ %0.2f" % price
+		p_lbl.add_theme_font_size_override("font_size", 13)
+		p_lbl.add_theme_color_override("font_color", Color(0.35, 1.0, 0.60))
+		v.add_child(p_lbl)
+
+		var d_lbl := Label.new()
+		d_lbl.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		d_lbl.text = str(it.get("desc", ""))
+		d_lbl.add_theme_font_size_override("font_size", 11)
+		d_lbl.add_theme_color_override("font_color", Color(0.76, 0.82, 0.88))
+		d_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		v.add_child(d_lbl)
+
+		var hbox := HBoxContainer.new()
+		hbox.add_theme_constant_override("separation", 6)
+		var st_lbl := Label.new()
+		st_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		st_lbl.text = "Stock: x%d" % stock
+		st_lbl.clip_text = true
+		st_lbl.add_theme_font_size_override("font_size", 12)
+		st_lbl.add_theme_color_override("font_color", Color(0.35, 1.0, 0.60) if stock > 0 else Color(0.75, 0.78, 0.85))
+		hbox.add_child(st_lbl)
+
+		var buy_btn := Button.new()
+		buy_btn.custom_minimum_size = Vector2(115, 32)
+		buy_btn.text = "Ordina (€ %0.0f)" % price
+		buy_btn.disabled = not EconomyManager.can_afford(price)
+		buy_btn.pressed.connect(func():
+			if ShopManager.buy_hardware(hw_id, 1):
+				_update_shop_buttons()
+				_update_freelance_display()
+		)
+		hbox.add_child(buy_btn)
+		v.add_child(hbox)
+		hw_grid.add_child(card)
 
 func _buy_monitor() -> void:
 	if EconomyManager.spend(350.0, "Acquisto Monitor 27\" Ultrawide"):

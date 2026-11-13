@@ -318,6 +318,14 @@ static func _build_head(head_pivot: Node3D, opts: Dictionary, origin: Vector3) -
 			Vector2(0.142, 0.0), Vector2(0.168, 0.05), Vector2(0.152, 0.105), Vector2(0.02, 0.125)
 		], stretch_x, 1.04, 18)
 		sm.ellipsoid("leather", hc + Vector3(0, 0.098, 0.114), Vector3(0.108, 0.014, 0.070), 5, 12, Vector3(0.16, 0, 0))
+	elif hat == "hardhat":
+		# Elmetto antinfortunistico giallo con nervatura centrale e visiera frontale
+		sm.lathe_oval("safety_yellow", hc + Vector3(0, 0.086, -0.004), [
+			Vector2(0.148, 0.00), Vector2(0.150, 0.035), Vector2(0.132, 0.085),
+			Vector2(0.084, 0.122), Vector2(0.004, 0.132)
+		], stretch_x * 1.04, 1.04, 20)
+		sm.ellipsoid("safety_yellow", hc + Vector3(0, 0.150, 0.002), Vector3(0.020, 0.078, 0.126), 5, 10)
+		sm.ellipsoid("safety_yellow", hc + Vector3(0, 0.092, 0.118), Vector3(0.118, 0.015, 0.068), 5, 12, Vector3(0.14, 0, 0))
 
 	var head_mi := MeshInstance3D.new()
 	head_mi.name = "HeadMesh"

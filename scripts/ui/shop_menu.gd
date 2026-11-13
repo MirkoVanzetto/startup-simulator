@@ -20,6 +20,8 @@ func _ready() -> void:
 	EventBus.funds_changed.connect(func(_b, _d, _r): if visible: _refresh_header())
 	EventBus.needs_changed.connect(func(_h, _e): if visible: _refresh_header())
 	ShopManager.fridge_changed.connect(func(): if visible and current_shop_id == "fridge": _rebuild_items())
+	if ShopManager.has_signal("hardware_changed"):
+		ShopManager.hardware_changed.connect(func(): if visible and ShopManager.is_hardware_shop(current_shop_id): _rebuild_items())
 	get_viewport().size_changed.connect(_fit_to_viewport)
 	_fit_to_viewport()
 
@@ -148,14 +150,27 @@ func _refresh_header() -> void:
 	_title_lbl.text = ShopManager.get_shop_title(current_shop_id)
 	_subtitle_lbl.text = ShopManager.get_shop_subtitle(current_shop_id)
 	_balance_lbl.text = "Saldo: € %0.2f" % EconomyManager.balance
-	_needs_lbl.text = "Fame: %d%%   Energia: %d%%" % [int(roundf(NeedsManager.get_hunger())), int(roundf(NeedsManager.get_energy()))]
-	var disc := FameManager.get_discount_percent()
-	if current_shop_id == "fridge":
-		_discount_lbl.text = "Scorte personali"
-	elif disc > 0:
-		_discount_lbl.text = "Sconto Notorietà: -%d%%" % disc
+	if ShopManager.is_hardware_shop(current_shop_id):
+		_needs_lbl.text = "Magazzino Hardware: %d pz" % ShopManager.get_hardware_count()
+		var partner := ContractManager.is_contract_completed("elettronica_to")
+		var disc := FameManager.get_discount_percent()
+		if partner and disc > 0:
+			_discount_lbl.text = "Sconto Partner Davide -20%% + Fame -%d%%" % disc
+		elif partner:
+			_discount_lbl.text = "Sconto Partner Davide: -20%%"
+		elif disc > 0:
+			_discount_lbl.text = "Sconto Notorietà: -%d%%" % disc
+		else:
+			_discount_lbl.text = ""
 	else:
-		_discount_lbl.text = ""
+		_needs_lbl.text = "Fame: %d%%   Energia: %d%%" % [int(roundf(NeedsManager.get_hunger())), int(roundf(NeedsManager.get_energy()))]
+		var disc := FameManager.get_discount_percent()
+		if current_shop_id == "fridge":
+			_discount_lbl.text = "Scorte personali"
+		elif disc > 0:
+			_discount_lbl.text = "Sconto Notorietà: -%d%%" % disc
+		else:
+			_discount_lbl.text = ""
 
 func _rebuild_items() -> void:
 	for ch in _items_box.get_children():
@@ -164,6 +179,7 @@ func _rebuild_items() -> void:
 	var items := ShopManager.get_items(current_shop_id)
 	_empty_lbl.visible = items.is_empty()
 	var is_fridge := (current_shop_id == "fridge")
+	var is_hw := ShopManager.is_hardware_shop(current_shop_id)
 	var can_stock_fridge := ShopManager.is_fridge_stockable(current_shop_id)
 	var disc_pct := FameManager.get_discount_percent()
 
@@ -186,7 +202,11 @@ func _rebuild_items() -> void:
 		row.add_child(info)
 
 		var name_lbl := Label.new()
-		var stock_suffix := " (x%d)" % int(item.get("stock", 0)) if is_fridge else ""
+		var stock_suffix := ""
+		if is_fridge:
+			stock_suffix = " (x%d)" % int(item.get("stock", 0))
+		elif is_hw:
+			stock_suffix = " (In magazzino: x%d)" % ShopManager.get_hardware_count(item_id)
 		name_lbl.text = str(item["name"]) + stock_suffix
 		name_lbl.add_theme_font_size_override("font_size", 15)
 		info.add_child(name_lbl)
@@ -194,6 +214,7 @@ func _rebuild_items() -> void:
 		var eff_lbl := Label.new()
 		eff_lbl.text = ShopManager.describe_effects(item)
 		eff_lbl.add_theme_font_size_override("font_size", 12)
+		eff_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		eff_lbl.add_theme_color_override("font_color", Color(0.68, 0.86, 0.76))
 		info.add_child(eff_lbl)
 
@@ -209,7 +230,7 @@ func _rebuild_items() -> void:
 		else:
 			var base_p := ShopManager.get_base_price(current_shop_id, item_id)
 			var final_p := ShopManager.get_price(current_shop_id, item_id)
-			if disc_pct > 0 and final_p < base_p:
+			if final_p < base_p:
 				var old_lbl := Label.new()
 				old_lbl.text = "€ %0.2f" % base_p
 				old_lbl.add_theme_font_size_override("font_size", 11)
@@ -227,7 +248,7 @@ func _rebuild_items() -> void:
 		buy_btn.pressed.connect(func():
 			ShopManager.buy(current_shop_id, item_id)
 			_refresh_header()
-			if is_fridge:
+			if is_fridge or is_hw:
 				_rebuild_items()
 		)
 		row.add_child(buy_btn)

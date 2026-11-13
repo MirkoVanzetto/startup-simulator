@@ -26,14 +26,14 @@ func save_game() -> bool:
 			"ledger": EconomyManager.ledger
 		},
 		"progression": {
+			"company_tier": GameManager.company_tier,
 			"reputation": GameManager.reputation_points,
 			"days_elapsed": GameManager.days_elapsed,
 			"upgrades": GameManager.studio_upgrades_installed
 		},
-		"contracts": {
-			"active": ContractManager.active_contracts,
-			"completed": ContractManager.completed_contracts
-		},
+		"contracts": ContractManager.serialize(),
+		"employees": EmployeeManager.serialize(),
+		"server_rack": ServerRackManager.serialize(),
 		"player": {
 			"pos_x": player_pos.x,
 			"pos_y": player_pos.y,
@@ -92,6 +92,7 @@ func load_game() -> bool:
 		
 	# Restore Progression
 	if data.has("progression"):
+		GameManager.company_tier = maxi(1, int(data["progression"].get("company_tier", 1)))
 		GameManager.reputation_points = int(data["progression"].get("reputation", 0))
 		GameManager.days_elapsed = int(data["progression"].get("days_elapsed", 1))
 		var upg_list = data["progression"].get("upgrades", [])
@@ -99,12 +100,22 @@ func load_game() -> bool:
 		for u in upg_list:
 			GameManager.studio_upgrades_installed.append(str(u))
 			
-	# Restore Contracts
-	if data.has("contracts"):
-		ContractManager.active_contracts = data["contracts"].get("active", {})
-		ContractManager.completed_contracts.clear()
-		for c in data["contracts"].get("completed", []):
-			ContractManager.completed_contracts.append(str(c))
+	# Restore Contracts (includes active, completed, marketplace, lead timer, factory_state)
+	if data.has("contracts") and data["contracts"] is Dictionary:
+		ContractManager.deserialize(data["contracts"])
+
+	# Restore Employees & Server Rack
+	if data.has("employees") and data["employees"] is Dictionary:
+		EmployeeManager.deserialize(data["employees"])
+	else:
+		EmployeeManager.reset()
+
+	if data.has("server_rack") and data["server_rack"] is Dictionary:
+		ServerRackManager.deserialize(data["server_rack"])
+	else:
+		ServerRackManager.reset()
+		if "server_rack_upgrade" in GameManager.studio_upgrades_installed:
+			ServerRackManager.unlock_server_rack()
 		
 	# Restore Player position if in world
 	if is_instance_valid(GameManager.player_node) and data.has("player"):

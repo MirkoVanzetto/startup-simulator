@@ -19,8 +19,7 @@ signal routing_completed(client_name: String, payout: float)
 
 const GRID_SIZE: int = 5
 
-var current_level_idx: int = 0
-var levels: Array[Dictionary] = [
+const BASE_LEVELS: Array[Dictionary] = [
 	{
 		"client": "Studio Notarile Cavour",
 		"title": "Firewall Perimetrale & DMZ Notarile",
@@ -62,6 +61,9 @@ var levels: Array[Dictionary] = [
 	}
 ]
 
+var current_level_idx: int = 0
+var levels: Array[Dictionary] = BASE_LEVELS.duplicate(true)
+
 var active_path: Array[Vector2i] = []
 var next_required_checkpoint: int = 1
 var is_level_completed: bool = false
@@ -76,17 +78,81 @@ func _ready() -> void:
 	undo_btn.pressed.connect(_undo_step)
 	deploy_btn.pressed.connect(_on_deploy_pressed)
 	
+	client_picker.item_selected.connect(_on_client_selected)
+	title_label.clip_text = true
+	title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	client_picker.custom_minimum_size = Vector2(170, 0)
+	_rebuild_dynamic_levels()
+	
+	_build_matrix_ui()
+
+func _rebuild_dynamic_levels() -> void:
+	levels = BASE_LEVELS.duplicate(true)
+
+	# Officina Bellini (Borgo Valdocco Est): sbloccato dopo aver montato fisicamente il Router Wi-Fi 6
+	var fac: Dictionary = ContractManager.factory_state if ("factory_state" in ContractManager) else {}
+	if bool(fac.get("wifi_hardware_mounted", false)) and not bool(fac.get("wifi_done", false)):
+		levels.append({
+			"contract_id": "factory_bellini_wifi",
+			"client": "Officina Bellini",
+			"title": "Rete Wi-Fi 6 & VLAN Industriale",
+			"payout": 350.00,
+			"checkpoints": {
+				Vector2i(0, 0): 1,
+				Vector2i(0, 3): 2,
+				Vector2i(2, 3): 3,
+				Vector2i(2, 1): 4,
+				Vector2i(4, 1): 5,
+				Vector2i(4, 4): 6
+			},
+			"max_checkpoint": 6
+		})
+
+	# Contratti NetShield presi su Freelance Hub
+	for cid in ContractManager.active_contracts:
+		var c = ContractManager.active_contracts[cid]
+		if c is Dictionary and c.get("status") == "in_progress" and c.get("execution_type", "") == "netshield":
+			var cp: Dictionary = c.get("netshield_checkpoints", c.get("checkpoints", {
+				Vector2i(0, 0): 1,
+				Vector2i(0, 4): 2,
+				Vector2i(3, 4): 3,
+				Vector2i(3, 0): 4
+			}))
+			var max_cp := int(c.get("max_checkpoint", 0))
+			if max_cp <= 0:
+				for v in cp.values():
+					max_cp = maxi(max_cp, int(v))
+			levels.append({
+				"contract_id": str(cid),
+				"client": str(c.get("client", "Cliente B2B")),
+				"title": str(c.get("title", "Configurazione NetShield")),
+				"payout": float(c.get("budget", 950.0)),
+				"checkpoints": cp,
+				"max_checkpoint": maxi(2, max_cp)
+			})
+
 	client_picker.clear()
 	for i in range(levels.size()):
 		var l = levels[i]
-		client_picker.add_item("%s (€ %0.2f)" % [l["client"], l["payout"]], i)
-	client_picker.item_selected.connect(_on_client_selected)
-	
-	_build_matrix_ui()
+		client_picker.add_item("%s (€ %0.0f)" % [l["client"], float(l["payout"])], i)
 
 func _on_minigame_started(type: String) -> void:
 	if type == "firewall_router":
 		visible = true
+		_rebuild_dynamic_levels()
+		var target_idx := 0
+		var pref := str(ContractManager.preferred_netshield_contract_id)
+		if pref != "":
+			for i in range(levels.size()):
+				if str(levels[i].get("contract_id", "")) == pref:
+					target_idx = i
+					break
+			ContractManager.preferred_netshield_contract_id = ""
+		elif levels.size() > BASE_LEVELS.size():
+			target_idx = BASE_LEVELS.size()
+		current_level_idx = clampi(target_idx, 0, levels.size() - 1)
+		if client_picker.item_count > current_level_idx:
+			client_picker.selected = current_level_idx
 		_load_level(current_level_idx)
 
 func _on_exit_pressed() -> void:
@@ -94,7 +160,7 @@ func _on_exit_pressed() -> void:
 	EventBus.computer_opened.emit()
 
 func _on_client_selected(idx: int) -> void:
-	current_level_idx = idx
+	current_level_idx = clampi(idx, 0, levels.size() - 1)
 	SoundManager.play_ui_click()
 	_load_level(current_level_idx)
 
@@ -116,11 +182,13 @@ func _build_matrix_ui() -> void:
 			cell_buttons[pos] = btn
 
 func _load_level(idx: int) -> void:
-	var lvl = levels[idx]
-	mission_label.text = "Cliente: %s | Compenso: € %0.2f" % [lvl["client"], lvl["payout"]]
+	current_level_idx = clampi(idx, 0, levels.size() - 1)
+	var lvl = levels[current_level_idx]
+	mission_label.text = "%s | € %0.2f" % [lvl["client"], float(lvl["payout"])]
 	title_label.text = "🛡 NetShield — %s" % lvl["title"]
 	
 	logs_label.text = "[color=#00ccff]Inizializzazione matrice firewall 5x5...[/color]\n"
+	logs_label.text += "[color=#ffffff]%s[/color]\n" % lvl["title"]
 	logs_label.text += "[color=#ffffff]Traccia un tunnel continuo dal nodo 1 al nodo %d senza incrociare le linee![/color]\n" % lvl["max_checkpoint"]
 	
 	_reset_path()
@@ -211,7 +279,7 @@ func _trigger_level_success() -> void:
 	
 	var lvl = levels[current_level_idx]
 	deploy_btn.disabled = false
-	deploy_btn.text = "★ Distribuisci Regole a %s (€ %0.2f)" % [lvl["client"], lvl["payout"]]
+	deploy_btn.text = "★ Distribuisci Regole a %s (€ %0.2f)" % [lvl["client"], float(lvl["payout"])]
 	status_label.text = "CIRCUITO CHIUSO CON SUCCESSO! Tutte le porte verificate."
 	
 	logs_label.text += "\n[color=#33ff77][b]★ REGOLE FIREWALL SINTETIZZATE CON SUCCESSO![/b][/color]\n"
@@ -284,18 +352,23 @@ func _on_deploy_pressed() -> void:
 		return
 		
 	var lvl = levels[current_level_idx]
+	var cid = str(lvl.get("contract_id", ""))
 	var payout = float(lvl["payout"])
 	var client = lvl["client"]
-	
-	EconomyManager.earn(payout, "Consulenza Sicurezza & Firewall: " + client)
-	GameManager.reputation_points += 20
-	SoundManager.play_ui_success()
-	
-	EventBus.notification_posted.emit(
-		"Configurazione Firewall Distribuita!",
-		"Hai completato la consulenza per %s incassando € %0.2f e +20 Reputazione!" % [client, payout],
-		"success"
-	)
+
+	if cid == "factory_bellini_wifi":
+		ContractManager.complete_factory_wifi_netshield()
+	elif cid != "":
+		ContractManager.complete_marketplace_contract(cid)
+	else:
+		EconomyManager.earn(payout, "Consulenza Sicurezza & Firewall: " + client)
+		GameManager.reputation_points += 20
+		SoundManager.play_ui_success()
+		EventBus.notification_posted.emit(
+			"Configurazione Firewall Distribuita!",
+			"Hai completato la consulenza per %s incassando € %0.2f e +20 Reputazione!" % [client, payout],
+			"success"
+		)
 	
 	routing_completed.emit(client, payout)
 	visible = false

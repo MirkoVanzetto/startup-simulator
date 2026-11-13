@@ -6,26 +6,26 @@ var candidates: Array[Dictionary] = [
 	{
 		"id": "emp_luca",
 		"name": "Luca Vianello",
-		"role": "Junior Frontend Developer",
-		"avatar_desc": "Laureato ITS ICT Torino, esperto Vue.js, Tailwind & Responsive Design.",
+		"role": "Client Scout & Business Dev",
+		"avatar_desc": "Esperto B2B outreach nel Torinese, trova clienti reali e negozia budget più alti.",
 		"daily_salary": 55.00,
 		"daily_revenue": 70.00,
 		"reputation_req": 50,
 		"hired": false,
 		"status": "In cerca di lavoro",
-		"perk": "-2.5s tempo compilazione WebForge & genera € 70/giorno passivi da micro-task"
+		"perk": "Genera nuovi incarichi Freelance ogni 2h (+2 subito), +15% budget offerte & € 70/giorno passivi"
 	},
 	{
 		"id": "emp_sara",
 		"name": "Sara Bellini",
-		"role": "DevOps & Cloud SysAdmin",
-		"avatar_desc": "Specialista Docker, Linux Server e cluster ad alta disponibilità.",
+		"role": "Full-Stack & Build Engineer",
+		"avatar_desc": "Ingegnere Full-Stack & DevOps, accelera il build WebForge e protegge i cluster server.",
 		"daily_salary": 85.00,
 		"daily_revenue": 110.00,
 		"reputation_req": 100,
 		"hired": false,
 		"status": "In cerca di lavoro",
-		"perk": "+35% ricavi SLA server rack & azzera rischio surriscaldamento hardware"
+		"perk": "-2.5s compilazione WebForge, hint debug codice, +35% ricavi Rack & zero surriscaldamento"
 	},
 	{
 		"id": "emp_marco",
@@ -37,7 +37,7 @@ var candidates: Array[Dictionary] = [
 		"reputation_req": 140,
 		"hired": false,
 		"status": "In cerca di lavoro",
-		"perk": "+20% valore su contratti marketplace & porta clienti enterprise"
+		"perk": "+20% compenso alla consegna contratti & bonus clienti enterprise"
 	}
 ]
 
@@ -45,6 +45,29 @@ var hired_employee_ids: Array[String] = []
 
 func _ready() -> void:
 	pass
+
+func reset() -> void:
+	hired_employee_ids.clear()
+	for c in candidates:
+		c["hired"] = false
+		c["status"] = "In cerca di lavoro"
+
+func serialize() -> Dictionary:
+	return {
+		"hired_employee_ids": hired_employee_ids.duplicate()
+	}
+
+func deserialize(data: Dictionary) -> void:
+	reset()
+	var ids = data.get("hired_employee_ids", [])
+	if ids is Array:
+		for raw_id in ids:
+			var eid := str(raw_id)
+			var cand := get_candidate(eid)
+			if not cand.is_empty() and not (eid in hired_employee_ids):
+				hired_employee_ids.append(eid)
+				cand["hired"] = true
+				cand["status"] = "Attivo in Studio"
 
 func get_all_candidates() -> Array[Dictionary]:
 	return candidates

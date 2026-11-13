@@ -6,8 +6,8 @@
 bg_color = Color(0.12, 0.14, 0.18, 0.98)
 border_width_bottom = 2
 border_color = Color(0.25, 0.3, 0.4, 0.8)
-content_margin_left = 16.0
-content_margin_right = 16.0
+content_margin_left = 10.0
+content_margin_right = 10.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_window"]
 bg_color = Color(0.14, 0.16, 0.22, 0.98)
@@ -60,25 +60,25 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_topbar")
 
 [node name="HBox" type="HBoxContainer" parent="TopBar"]
 layout_mode = 2
-theme_override_constants/separation = 20
+theme_override_constants/separation = 10
 
 [node name="OSLabel" type="Label" parent="TopBar/HBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
-theme_override_font_sizes/font_size = 15
-text = "❖ TO-OS 26.4 (Torino Edition)"
+theme_override_font_sizes/font_size = 14
+text = "❖ TO-OS 26.4"
 
 [node name="ClockLabel" type="Label" parent="TopBar/HBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.85, 0.9, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 12
 text = "14:28 - Lunedì"
 
 [node name="WifiLabel" type="Label" parent="TopBar/HBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.9, 0.5, 1)
-theme_override_font_sizes/font_size = 13
-text = "● Wi-Fi: FibraTorino_5G"
+theme_override_font_sizes/font_size = 12
+text = "● FibraTorino 5G"
 
 [node name="Spacer" type="Control" parent="TopBar/HBox"]
 layout_mode = 2
@@ -87,13 +87,14 @@ size_flags_horizontal = 3
 [node name="BalanceLabel" type="Label" parent="TopBar/HBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 14
 text = "Fondi: € 250.00"
 
 [node name="ExitButton" type="Button" parent="TopBar/HBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.4, 0.4, 1)
-text = "⏻ Alzati dal Laptop [ESC]"
+theme_override_font_sizes/font_size = 13
+text = "✕ Alzati [ESC]"
 
 [node name="DesktopIcons" type="MarginContainer" parent="."]
 layout_mode = 1
@@ -276,11 +277,39 @@ size_flags_horizontal = 3
 layout_mode = 2
 text = " ✕ "
 
-[node name="DetailsLabel" type="RichTextLabel" parent="Windows/FreelanceWindow/Margin/VBox"]
+[node name="LeadBanner" type="PanelContainer" parent="Windows/FreelanceWindow/Margin/VBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="LeadLabel" type="Label" parent="Windows/FreelanceWindow/Margin/VBox/LeadBanner"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.92, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "Stato Scout Lead..."
+autowrap_mode = 2
+
+[node name="FreelanceScroll" type="ScrollContainer" parent="Windows/FreelanceWindow/Margin/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="FreelanceVBox" type="VBoxContainer" parent="Windows/FreelanceWindow/Margin/VBox/FreelanceScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="CardsContainer" type="VBoxContainer" parent="Windows/FreelanceWindow/Margin/VBox/FreelanceScroll/FreelanceVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="DetailsLabel" type="RichTextLabel" parent="Windows/FreelanceWindow/Margin/VBox/FreelanceScroll/FreelanceVBox"]
+visible = false
+layout_mode = 2
 bbcode_enabled = true
 text = "Dettagli contratto..."
+fit_content = true
+scroll_active = false
 
 [node name="LaunchWebForgeButton" type="Button" parent="Windows/FreelanceWindow/Margin/VBox"]
 layout_mode = 2
@@ -314,7 +343,7 @@ layout_mode = 2
 [node name="Title" type="Label" parent="Windows/ShopWindow/Margin/VBox/Header"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
-text = "TorinoHardware - E-Commerce Ufficio & Tech"
+text = "TorinoHardware - Upgrade Studio & Hardware Clienti"
 
 [node name="Spacer" type="Control" parent="Windows/ShopWindow/Margin/VBox/Header"]
 layout_mode = 2
@@ -329,185 +358,218 @@ layout_mode = 2
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="Grid" type="GridContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll"]
+[node name="ShopVBox" type="VBoxContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll"]
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="StudioSectionTitle" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.88, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "🖥 POTENZIAMENTI STUDIO (MIGLIORA HARDWARE & VELOCITÀ)"
+
+[node name="Grid" type="GridContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
 columns = 2
 theme_override_constants/h_separation = 14
 theme_override_constants/v_separation = 14
 
-[node name="MonitorCard" type="PanelContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid"]
-custom_minimum_size = Vector2(260, 180)
+[node name="MonitorCard" type="PanelContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid"]
+custom_minimum_size = Vector2(240, 160)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="VBox" type="VBoxContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/MonitorCard"]
+[node name="VBox" type="VBoxContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/MonitorCard"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="ItemName" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/MonitorCard/VBox"]
+[node name="ItemName" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/MonitorCard/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
 theme_override_font_sizes/font_size = 16
 text = "Monitor Secondario 27\" Ultrawide"
 
-[node name="Price" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/MonitorCard/VBox"]
+[node name="Price" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/MonitorCard/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
 theme_override_font_sizes/font_size = 15
 text = "€ 350,00"
 
-[node name="Desc" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/MonitorCard/VBox"]
+[node name="Desc" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/MonitorCard/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
 text = "Braccio orientabile in alluminio, risoluzione 2K IPS. Si posiziona fisicamente sulla scrivania nel tuo studio per mostrare il codice e le metriche."
 autowrap_mode = 2
 
-[node name="HBox" type="HBoxContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/MonitorCard/VBox"]
+[node name="HBox" type="HBoxContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/MonitorCard/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="StatusLabel" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/MonitorCard/VBox/HBox"]
+[node name="StatusLabel" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/MonitorCard/VBox/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Disponibile"
 clip_text = true
 
-[node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/MonitorCard/VBox/HBox"]
+[node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/MonitorCard/VBox/HBox"]
 custom_minimum_size = Vector2(140, 34)
 layout_mode = 2
 text = "Acquista (€ 350,00)"
 
-[node name="ChairCard" type="PanelContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid"]
-custom_minimum_size = Vector2(260, 180)
+[node name="ChairCard" type="PanelContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid"]
+custom_minimum_size = Vector2(240, 160)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="VBox" type="VBoxContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ChairCard"]
+[node name="VBox" type="VBoxContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/ChairCard"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="ItemName" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ChairCard/VBox"]
+[node name="ItemName" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/ChairCard/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.4, 0.4, 1)
 theme_override_font_sizes/font_size = 16
 text = "Sedia Ergonomica Racing / Pro"
 
-[node name="Price" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ChairCard/VBox"]
+[node name="Price" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/ChairCard/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
 theme_override_font_sizes/font_size = 15
 text = "€ 220,00"
 
-[node name="Desc" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ChairCard/VBox"]
+[node name="Desc" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/ChairCard/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
 text = "Schienale alto con supporto lombare e finiture rosso fuoco. Sostituisce la sedia base del tuo studio migliorando il comfort e l'efficienza."
 autowrap_mode = 2
 
-[node name="HBox" type="HBoxContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ChairCard/VBox"]
+[node name="HBox" type="HBoxContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/ChairCard/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="StatusLabel" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ChairCard/VBox/HBox"]
+[node name="StatusLabel" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/ChairCard/VBox/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Disponibile"
 clip_text = true
 
-[node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ChairCard/VBox/HBox"]
+[node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/ChairCard/VBox/HBox"]
 custom_minimum_size = Vector2(140, 34)
 layout_mode = 2
 text = "Acquista (€ 220,00)"
 
-[node name="PlantCard" type="PanelContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid"]
-custom_minimum_size = Vector2(260, 180)
+[node name="PlantCard" type="PanelContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid"]
+custom_minimum_size = Vector2(240, 160)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="VBox" type="VBoxContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/PlantCard"]
+[node name="VBox" type="VBoxContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/PlantCard"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="ItemName" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/PlantCard/VBox"]
+[node name="ItemName" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/PlantCard/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 1, 0.5, 1)
 theme_override_font_sizes/font_size = 16
 text = "Pianta Succulenta d'Arredo"
 
-[node name="Price" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/PlantCard/VBox"]
+[node name="Price" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/PlantCard/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
 theme_override_font_sizes/font_size = 15
 text = "€ 35,00"
 
-[node name="Desc" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/PlantCard/VBox"]
+[node name="Desc" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/PlantCard/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
 text = "Vaso in ceramica con pianta d'arredo. Aumenta la vivibilità dello studio e riduce lo stress da debugging."
 autowrap_mode = 2
 
-[node name="HBox" type="HBoxContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/PlantCard/VBox"]
+[node name="HBox" type="HBoxContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/PlantCard/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="StatusLabel" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/PlantCard/VBox/HBox"]
+[node name="StatusLabel" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/PlantCard/VBox/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Disponibile"
 clip_text = true
 
-[node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/PlantCard/VBox/HBox"]
+[node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/PlantCard/VBox/HBox"]
 custom_minimum_size = Vector2(140, 34)
 layout_mode = 2
 text = "Acquista (€ 35,00)"
 
-[node name="ServerCard" type="PanelContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid"]
-custom_minimum_size = Vector2(260, 180)
+[node name="ServerCard" type="PanelContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid"]
+custom_minimum_size = Vector2(240, 160)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="VBox" type="VBoxContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ServerCard"]
+[node name="VBox" type="VBoxContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/ServerCard"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="ItemName" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ServerCard/VBox"]
+[node name="ItemName" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/ServerCard/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.8, 0.3, 1)
 theme_override_font_sizes/font_size = 16
 text = "Mini Server Rack 4U & NAS"
 
-[node name="Price" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ServerCard/VBox"]
+[node name="Price" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/ServerCard/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
 theme_override_font_sizes/font_size = 15
 text = "€ 450,00"
 
-[node name="Desc" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ServerCard/VBox"]
+[node name="Desc" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/ServerCard/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
 text = "Armadio server compatto con NAS RAID-10 e switch di rete. Installato nell'angolo dello studio per ospitare siti e generare rendita ricorrente."
 autowrap_mode = 2
 
-[node name="HBox" type="HBoxContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ServerCard/VBox"]
+[node name="HBox" type="HBoxContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/ServerCard/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="StatusLabel" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ServerCard/VBox/HBox"]
+[node name="StatusLabel" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/ServerCard/VBox/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Disponibile"
 clip_text = true
 
-[node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ServerCard/VBox/HBox"]
+[node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/ServerCard/VBox/HBox"]
 custom_minimum_size = Vector2(140, 34)
 layout_mode = 2
 text = "Acquista (€ 450,00)"
+
+[node name="HwSeparator" type="HSeparator" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox"]
+layout_mode = 2
+
+[node name="HwSectionTitle" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.82, 0.35, 1)
+theme_override_font_sizes/font_size = 14
+text = "📦 COMPONENTI HARDWARE CLIENTI (INSTALLAZIONI B2B & OFFICINA BELLINI)"
+
+[node name="HwHintLabel" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.84, 0.92, 1)
+theme_override_font_sizes/font_size = 12
+text = "Ordina Router Wi-Fi, Server Xeon, PC Workstation e Firewall da consegnare ai clienti."
+autowrap_mode = 2
+
+[node name="HwGrid" type="GridContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+columns = 2
+theme_override_constants/h_separation = 14
+theme_override_constants/v_separation = 14
 
 
 [node name="BankWindow" type="PanelContainer" parent="Windows"]

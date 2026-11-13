@@ -77,6 +77,22 @@ content_margin_top = 10.0
 content_margin_right = 10.0
 content_margin_bottom = 10.0
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_code"]
+bg_color = Color(0.05, 0.06, 0.09, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.28, 0.36, 0.52, 0.85)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 10.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_footer"]
 bg_color = Color(0.09, 0.11, 0.15, 0.98)
 border_width_top = 1
@@ -125,17 +141,15 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_header")
 
 [node name="HBox" type="HBoxContainer" parent="Main/Header"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
 
 [node name="IDELabel" type="Label" parent="Main/Header/HBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
-theme_override_font_sizes/font_size = 14
-text = "⚡ WebForge Studio 3.0 — Modular Layout & Performance Pipeline"
-
-[node name="Spacer" type="Control" parent="Main/Header/HBox"]
-layout_mode = 2
 size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "⚡ WebForge Studio 4.0 — Assembler, Preview & Code Debug"
+clip_text = true
 
 [node name="LighthouseBadge" type="PanelContainer" parent="Main/Header/HBox"]
 layout_mode = 2
@@ -155,10 +169,10 @@ text = " ✕ Chiudi IDE "
 [node name="Body" type="HSplitContainer" parent="Main"]
 layout_mode = 2
 size_flags_vertical = 3
-split_offset = 320
+split_offset = 250
 
 [node name="Toolbox" type="PanelContainer" parent="Main/Body"]
-custom_minimum_size = Vector2(300, 0)
+custom_minimum_size = Vector2(248, 0)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
@@ -176,30 +190,31 @@ layout_mode = 2
 
 [node name="BriefVBox" type="VBoxContainer" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox/BriefPanel"]
 layout_mode = 2
-theme_override_constants/separation = 2
+theme_override_constants/separation = 3
 
 [node name="ClientTitle" type="Label" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox/BriefPanel/BriefVBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.4, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 12
 text = "PROGETTO: Pizzeria Da Mario"
+autowrap_mode = 2
 
 [node name="ClientPrefs" type="Label" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox/BriefPanel/BriefVBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.75, 0.8, 0.9, 1)
+theme_override_colors/font_color = Color(0.80, 0.86, 0.94, 1)
 theme_override_font_sizes/font_size = 11
 autowrap_mode = 2
-text = "Tag: [Tradition] [Booking] | Palette: Terracotta"
+text = "Brief cliente in attesa..."
 
 [node name="SlotTabsLabel" type="Label" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.8, 1, 1)
 theme_override_font_sizes/font_size = 12
-text = "1. SLOT ATTIVO DA CONFIGURARE"
+text = "1. SLOT LAYOUT DA CONFIGURARE"
 
 [node name="SlotTabsHBox" type="HBoxContainer" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox"]
 layout_mode = 2
-theme_override_constants/separation = 4
+theme_override_constants/separation = 3
 
 [node name="TabSlot1" type="Button" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox/SlotTabsHBox"]
 layout_mode = 2
@@ -235,7 +250,7 @@ text = "Footer"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.8, 1, 1)
 theme_override_font_sizes/font_size = 12
-text = "2. COMPONENTI MODULARI"
+text = "2. MODULI & COMPONENTI UI"
 
 [node name="ComponentTrayVBox" type="VBoxContainer" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox"]
 layout_mode = 2
@@ -248,7 +263,7 @@ layout_mode = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.8, 1, 1)
 theme_override_font_sizes/font_size = 12
-text = "3. CSS BRAND PALETTE"
+text = "3. TEMA & PALETTE CSS"
 
 [node name="PalettePicker" type="OptionButton" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox"]
 layout_mode = 2
@@ -256,9 +271,10 @@ theme_override_font_sizes/font_size = 11
 
 [node name="PaletteAffinityBadge" type="Label" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.4, 1, 0.6, 1)
+theme_override_colors/font_color = Color(0.65, 0.72, 0.82, 1)
 theme_override_font_sizes/font_size = 11
-text = "★ Brand Affinity Match! (+15% Bonus)"
+autowrap_mode = 2
+text = "Scegli una palette coerente col brief del cliente."
 
 [node name="Sep2" type="HSeparator" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox"]
 layout_mode = 2
@@ -267,7 +283,7 @@ layout_mode = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.8, 1, 1)
 theme_override_font_sizes/font_size = 12
-text = "4. LINTING & OTTIMIZZAZIONI ATTIVE"
+text = "4. TICKET DEBUG & LINTING (CLICCA PER PATCH)"
 
 [node name="BadgesVBox" type="VBoxContainer" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox"]
 layout_mode = 2
@@ -276,17 +292,17 @@ theme_override_constants/separation = 4
 [node name="OptBtnMinify" type="Button" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox/BadgesVBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
-text = "⚡ Minify CSS/JS [Warning: +3.8MB]"
+text = "🐛 #1: Risolvi Bundle CSS/JS"
 
 [node name="OptBtnWebP" type="Button" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox/BadgesVBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
-text = "🖼 Comprimi WebP [Warning: PNG pesanti]"
+text = "🐛 #2: Risolvi Media & WebP"
 
 [node name="OptBtnMeta" type="Button" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox/BadgesVBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
-text = "🏷 Meta SEO & OpenGraph [Warning: Mancanti]"
+text = "🐛 #3: Risolvi Meta SEO"
 
 [node name="Sep3" type="HSeparator" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox"]
 layout_mode = 2
@@ -295,7 +311,8 @@ layout_mode = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(0.6, 0.8, 1, 1)
 theme_override_font_sizes/font_size = 11
-text = "Velocità build: Base Starter Laptop (5.0s)"
+autowrap_mode = 2
+text = "Velocità build: Base Starter Laptop (5.5s)"
 
 [node name="CompileButton" type="Button" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox"]
 custom_minimum_size = Vector2(0, 32)
@@ -316,27 +333,31 @@ theme_override_constants/separation = 6
 
 [node name="CanvasHeaderHBox" type="HBoxContainer" parent="Main/Body/Canvas/CanvasVBox"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 6
 
 [node name="CanvasTitle" type="Label" parent="Main/Body/Canvas/CanvasVBox/CanvasHeaderHBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.85, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 13
-text = "LIVE INTERACTIVE WIREFRAME CANVAS"
-
-[node name="Spacer" type="Control" parent="Main/Body/Canvas/CanvasVBox/CanvasHeaderHBox"]
-layout_mode = 2
 size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.85, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "CANVAS IDE"
+clip_text = true
 
 [node name="TabPreviewBtn" type="Button" parent="Main/Body/Canvas/CanvasVBox/CanvasHeaderHBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
-text = "🌐 Live Wireframe"
+text = "🌐 Anteprima"
+
+[node name="TabDebugBtn" type="Button" parent="Main/Body/Canvas/CanvasVBox/CanvasHeaderHBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.3, 1)
+theme_override_font_sizes/font_size = 11
+text = "🐛 Debug (0/3)"
 
 [node name="TabTerminalBtn" type="Button" parent="Main/Body/Canvas/CanvasVBox/CanvasHeaderHBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
-text = "📟 Terminal Build"
+text = "📟 Build"
 
 [node name="PreviewArea" type="PanelContainer" parent="Main/Body/Canvas/CanvasVBox"]
 layout_mode = 2
@@ -350,6 +371,92 @@ horizontal_scroll_mode = 0
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 6
+
+[node name="DebugArea" type="PanelContainer" parent="Main/Body/Canvas/CanvasVBox"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="DebugScroll" type="ScrollContainer" parent="Main/Body/Canvas/CanvasVBox/DebugArea"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="DebugVBox" type="VBoxContainer" parent="Main/Body/Canvas/CanvasVBox/DebugArea/DebugScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="TicketHeader" type="Label" parent="Main/Body/Canvas/CanvasVBox/DebugArea/DebugScroll/DebugVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.35, 1)
+theme_override_font_sizes/font_size = 13
+text = "🐛 CODE REVIEW & BUG FIXING PIPELINE"
+autowrap_mode = 2
+
+[node name="TicketSelectorRow" type="HFlowContainer" parent="Main/Body/Canvas/CanvasVBox/DebugArea/DebugScroll/DebugVBox"]
+layout_mode = 2
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 4
+
+[node name="Ticket0Btn" type="Button" parent="Main/Body/Canvas/CanvasVBox/DebugArea/DebugScroll/DebugVBox/TicketSelectorRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "#1 Bundle JS/CSS"
+
+[node name="Ticket1Btn" type="Button" parent="Main/Body/Canvas/CanvasVBox/DebugArea/DebugScroll/DebugVBox/TicketSelectorRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "#2 Media WebP"
+
+[node name="Ticket2Btn" type="Button" parent="Main/Body/Canvas/CanvasVBox/DebugArea/DebugScroll/DebugVBox/TicketSelectorRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "#3 Meta SEO"
+
+[node name="TicketProblemLabel" type="Label" parent="Main/Body/Canvas/CanvasVBox/DebugArea/DebugScroll/DebugVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.84, 0.90, 0.96, 1)
+theme_override_font_sizes/font_size = 12
+text = "Descrizione bug..."
+autowrap_mode = 2
+
+[node name="SnippetPanel" type="PanelContainer" parent="Main/Body/Canvas/CanvasVBox/DebugArea/DebugScroll/DebugVBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_code")
+
+[node name="SnippetLabel" type="RichTextLabel" parent="Main/Body/Canvas/CanvasVBox/DebugArea/DebugScroll/DebugVBox/SnippetPanel"]
+layout_mode = 2
+theme_override_font_sizes/normal_font_size = 11
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+text = "Codice sorgente..."
+
+[node name="SaraHintLabel" type="Label" parent="Main/Body/Canvas/CanvasVBox/DebugArea/DebugScroll/DebugVBox"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.35, 0.95, 0.85, 1)
+theme_override_font_sizes/font_size = 11
+text = "Hint Sara..."
+autowrap_mode = 2
+
+[node name="FixesPrompt" type="Label" parent="Main/Body/Canvas/CanvasVBox/DebugArea/DebugScroll/DebugVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "SELEZIONA LA PATCH CORRETTA DA APPLICARE:"
+
+[node name="FixesVBox" type="VBoxContainer" parent="Main/Body/Canvas/CanvasVBox/DebugArea/DebugScroll/DebugVBox"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="DebugFeedbackLabel" type="Label" parent="Main/Body/Canvas/CanvasVBox/DebugArea/DebugScroll/DebugVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
+theme_override_font_sizes/font_size = 11
+text = ""
+autowrap_mode = 2
 
 [node name="TerminalArea" type="PanelContainer" parent="Main/Body/Canvas/CanvasVBox"]
 visible = false
@@ -377,7 +484,7 @@ size_flags_vertical = 3
 theme_override_font_sizes/normal_font_size = 11
 bbcode_enabled = true
 scroll_following = true
-text = "[color=#00ccff]WebForge Toolchain v3.0 pronta per il bundling.[/color]\n"
+text = "[color=#00ccff]WebForge Toolchain v4.0 pronta per il bundling & code debug.[/color]\n"
 
 [node name="Footer" type="PanelContainer" parent="Main"]
 layout_mode = 2
@@ -385,23 +492,23 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_footer")
 
 [node name="HBox" type="HBoxContainer" parent="Main/Footer"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
 [node name="GaugesHBox" type="HBoxContainer" parent="Main/Footer/HBox"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 8
 
 [node name="PerfLabel" type="Label" parent="Main/Footer/HBox/GaugesHBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.9, 1, 1)
 theme_override_font_sizes/font_size = 11
-text = "⚡ Prestazioni: 0%"
+text = "⚡ Perf: 0%"
 
 [node name="A11yLabel" type="Label" parent="Main/Footer/HBox/GaugesHBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 1, 0.7, 1)
 theme_override_font_sizes/font_size = 11
-text = "♿ Accessibilità: 0%"
+text = "♿ A11y: 0%"
 
 [node name="SEOLabel" type="Label" parent="Main/Footer/HBox/GaugesHBox"]
 layout_mode = 2
@@ -409,20 +516,18 @@ theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
 theme_override_font_sizes/font_size = 11
 text = "🔍 SEO: 0%"
 
-[node name="Spacer" type="Control" parent="Main/Footer/HBox"]
-layout_mode = 2
-size_flags_horizontal = 3
-
 [node name="StatusLabel" type="Label" parent="Main/Footer/HBox"]
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
 theme_override_font_sizes/font_size = 11
-text = "Seleziona i moduli per ciascuno slot e applica le ottimizzazioni."
+text = "Seleziona i moduli per ciascuno slot e risolvi i ticket Debug."
+clip_text = true
 
 [node name="DeliverButton" type="Button" parent="Main/Footer/HBox"]
-custom_minimum_size = Vector2(240, 32)
+custom_minimum_size = Vector2(185, 32)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 11
 disabled = true
 text = "★ Consegna Release Finale"

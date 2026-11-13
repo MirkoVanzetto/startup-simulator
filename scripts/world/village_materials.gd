@@ -143,4 +143,10 @@ static func _spec_for(key: String) -> Dictionary:
 		"gaming_black":      return {"tint": Color("#1d2026"), "rim": 0.22, "floor": 0.42}
 		"cyan_accent":       return {"tint": Color("#2cc6e8"), "emit": Color("#1aa3c8"), "emit_e": 0.35}
 		"white":             return {"tint": Color("#e9e5dc"), "rim": 0.10}
+		# Borgo Valdocco & Officina Bellini
+		"safety_yellow":     return {"tint": Color("#e8b923"), "rim": 0.20}
+		"metal_panel":       return {"tex": "plaster_rough", "tint": Color("#8b95a3"), "uv": 0.45, "rim": 0.24}
+		"road_line":         return {"tint": Color("#ecebe4"), "rim": 0.08}
+		"wood_mid":          return {"tex": "planks_light", "tint": Color("#b8864b"), "uv": 0.50}
+		"copper":            return {"tint": Color("#c8723d"), "rim": 0.25}
 		_:                   return {"tint": Color("#cccccc")}

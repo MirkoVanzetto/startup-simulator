@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://v1exprunner01"]
+
+[ext_resource type="Script" path="res://tests/v1_expansion_tests.gd" id="1_v1t"]
+
+[node name="V1ExpansionRunner" type="Node"]
+script = ExtResource("1_v1t")

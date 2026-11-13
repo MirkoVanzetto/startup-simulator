@@ -94,6 +94,21 @@ func _on_choice_clicked(action: String) -> void:
 				{"text": "Ottimo Davide, mi metto all'opera sul codice!", "action": "accept_tech_shop"}
 			]
 			_show_next_line()
+		"open_hardware_shop":
+			_close_dialogue()
+			EventBus.shop_opened.emit("elettronica_componenti")
+		"accept_factory_bellini":
+			ContractManager.accept_factory_commission()
+			_close_dialogue()
+		"details_factory_bellini":
+			lines_queue = [
+				"Prima di ordinare materiali, perlustra tutte e 4 le zone della fabbrica: Reparto CNC (Wi-Fi), Magazzino (Server), Ufficio Tecnico (2 PC) e Vetrina Catalogo (Sito Web).",
+				"Poi potrai acquistare i componenti da Elettronica TO e installarli fisicamente qui o configurare rete e sito!"
+			]
+			active_choices = [
+				{"text": "Perfetto Ing. Bellini! Inizio subito il sopralluogo dell'officina.", "action": "accept_factory_bellini"}
+			]
+			_show_next_line()
 		"close", _:
 			_close_dialogue()
 

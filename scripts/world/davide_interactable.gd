@@ -18,10 +18,11 @@ func _on_interact(_player: Node) -> void:
 	if not ContractManager.is_contract_completed("caffe_san_carlo"):
 		lines = [
 			"Ehilà collega! Benvenuto da Elettronica TO.",
-			"Abbiamo server blade, schede di rete 10Gbps, moduli RAM e storage SAN per il tuo rack.",
+			"Abbiamo router Wi-Fi industriali, server Tower Xeon, workstation PC e firewall da installare ai tuoi clienti.",
 			"Se vuoi commissioni sistemistiche serie, fatti conoscere nel quartiere: Elena al Caffè San Carlo cercava uno sviluppatore!"
 		]
 		choices = [
+			{"text": "Acquista Componenti Hardware per Clienti (Router, Server, PC)", "action": "open_hardware_shop"},
 			{"text": "Grazie Davide, tornerò quando avrò più esperienza!", "action": "close"}
 		]
 	else:
@@ -36,7 +37,8 @@ func _on_interact(_player: Node) -> void:
 				]
 				choices = [
 					{"text": "Affare fatto Davide! Configuro subito la migrazione e i container su WebForge.", "action": "accept_tech_shop"},
-					{"text": "Quali sono i requisiti di affidabilità per il Cloud?", "action": "details_tech_shop"}
+					{"text": "Quali sono i requisiti di affidabilità per il Cloud?", "action": "details_tech_shop"},
+					{"text": "Apri catalogo Componenti Hardware (Router, Server, PC)", "action": "open_hardware_shop"}
 				]
 			"in_progress":
 				lines = [
@@ -45,6 +47,7 @@ func _on_interact(_player: Node) -> void:
 					"Apri WebForge sul tuo portatile per completare l'architettura!"
 				]
 				choices = [
+					{"text": "Apri catalogo Componenti Hardware (Router, Server, PC)", "action": "open_hardware_shop"},
 					{"text": "Ci sono quasi Davide, compilo subito la build sul laptop!", "action": "close"}
 				]
 			"built":
@@ -53,16 +56,18 @@ func _on_interact(_player: Node) -> void:
 					"Inviami la consegna tramite la tua email su TO-OS per saldare la fattura da € 1.850."
 				]
 				choices = [
+					{"text": "Apri catalogo Componenti Hardware (Router, Server, PC)", "action": "open_hardware_shop"},
 					{"text": "Vado subito a inviare la release ufficiale!", "action": "close"}
 				]
 			"completed":
 				lines = [
 					"Sistema impeccabile! Zero downtime da quando siamo live e il catalogo si aggiorna in real-time!",
-					"Hai guadagnato la stima di tutti i tecnici di Torino. I € 1.850 sono tuoi e il tuo server rack incassa ora la quota hosting fissa ogni giorno!",
-					"Continua così e la tua startup diventerà presto una delle software house più rinomate del Piemonte!"
+					"Hai il tuo sconto permanente del 20% su Router Wi-Fi, Server Xeon, PC Workstation e Firewall!",
+					"Ho sentito dire che l'Officina Bellini a Borgo Valdocco (seguendo la strada a Est della Piazzetta) cerca proprio un tecnico bravo per rifare tutta l'infrastruttura!"
 				]
 				choices = [
-					{"text": "Grazie mille Davide! Elettronica TO è il miglior fornitore della città.", "action": "close"}
+					{"text": "Acquista Componenti Hardware (-20% Sconto Partner!)", "action": "open_hardware_shop"},
+					{"text": "Ottima dritta Davide, passo presto da Borgo Valdocco!", "action": "close"}
 				]
 				
 	EventBus.dialogue_started.emit("Davide (Tecnico Elettronica TO)", lines, choices)

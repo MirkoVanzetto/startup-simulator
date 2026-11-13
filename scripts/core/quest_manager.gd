@@ -133,15 +133,40 @@ func _get_story_objective() -> String:
 	if comp_tier < 2:
 		return "Raggiungi 50 Reputazione e registra l'espansione aziendale su TO-OS per assumere personale."
 
+	# Priority 5b: Officina Bellini (Borgo Valdocco) active mission stages
+	var fac := ContractManager.get_factory_progress_summary()
+	if fac["accepted"] and not fac["completed"]:
+		if not fac["all_scouted"]:
+			return "Borgo Valdocco: perlustra le 4 zone dell'Officina Bellini (%d/4)." % fac["scouted_count"]
+		var todo: Array[String] = []
+		if not fac["wifi_done"]:
+			todo.append("VLAN NetShield" if fac["wifi_mounted"] else "Router Wi-Fi 6")
+		if not fac["server_done"]:
+			todo.append("Server Xeon")
+		if not fac["pcs_done"]:
+			todo.append("2 PC Workstation")
+		if not fac["web_done"]:
+			todo.append("Sito WebForge")
+		return "Officina Bellini (Est): completa %s (%d/4 pilastri)." % [", ".join(todo), fac["pillars_done"]]
+
 	# Priority 6: Marketplace B2B freelance projects
 	for cid in ContractManager.active_contracts:
 		if cid in ["pizzeria_da_mario", "caffe_san_carlo", "elettronica_to"]:
 			continue
 		var c = ContractManager.active_contracts[cid]
-		if c.get("status") == "in_progress":
+		var st = c.get("status", "")
+		var etype = c.get("execution_type", "webforge")
+		if st == "in_progress":
+			if etype == "hardware":
+				return "Acquista i componenti da Elettronica TO e installa '%s' da Freelance Hub (TO-OS)." % c.get("title", cid)
+			elif etype == "netshield":
+				return "Configura i nodi per '%s' su NetShield Cyber (TO-OS)." % c.get("title", cid)
 			return "Completa il progetto B2B '%s' su WebForge IDE." % c.get("title", cid)
-		elif c.get("status") == "built":
+		elif st == "built":
 			return "Consegna il progetto '%s' tramite TO-OS per riscuotere il compenso." % c.get("title", cid)
+
+	if not fac["accepted"] and not fac["completed"]:
+		return "Accetta incarichi B2B su Freelance Hub (TO-OS) o raggiungi l'Officina Bellini a Borgo Valdocco (Est)!"
 
 	return "Esplora il marketplace freelance su TO-OS per nuovi progetti B2B."
 
@@ -158,6 +183,9 @@ func get_current_category() -> String:
 	var comp_tier = GameManager.get("company_tier") if ("company_tier" in GameManager) else 1
 	if comp_tier < 2:
 		return "Espansione"
+	var fac := ContractManager.get_factory_progress_summary()
+	if fac["accepted"] and not fac["completed"]:
+		return "Appalto"
 	return "Freelance"
 
 func get_current_quest_info() -> Dictionary:

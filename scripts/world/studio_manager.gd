@@ -121,8 +121,14 @@ func update_employee_workstation() -> void:
 		employee_workstation.visible = true
 		employee_workstation.process_mode = Node.PROCESS_MODE_INHERIT
 		if employee_nametag:
-			var emp = hired[0]
-			employee_nametag.text = "%s\n★ %s ★\n[In Studio - Operativo]" % [emp["name"], emp["role"]]
+			if hired.size() == 1:
+				var emp = hired[0]
+				employee_nametag.text = "%s\n★ %s ★\n[In Studio - Operativo]" % [emp["name"], emp["role"]]
+			else:
+				var names: Array[String] = []
+				for e in hired:
+					names.append(e["name"])
+				employee_nametag.text = "%s\n★ Team Attivo (%d) ★\n[%s]" % [hired[0]["name"], hired.size(), ", ".join(names)]
 	else:
 		employee_workstation.visible = false
 		employee_workstation.process_mode = Node.PROCESS_MODE_DISABLED

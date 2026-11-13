@@ -57,6 +57,8 @@ func start_new_game() -> void:
 	NeedsManager.reset()
 	ShopManager.reset()
 	FameManager.reset()
+	EmployeeManager.reset()
+	ServerRackManager.reset()
 	EconomyManager.reset_economy(250.0) # Modest starting capital: 250 EUR
 	ContractManager.init_tutorial_contract()
 	change_state(GameState.FIRST_PERSON)

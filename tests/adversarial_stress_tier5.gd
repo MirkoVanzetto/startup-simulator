@@ -393,13 +393,13 @@ func test_area_5_city_map_portici_and_raycasts() -> void:
 			var col_shapes = car.find_children("", "CollisionShape3D", true, false)
 			if col_shapes.is_empty():
 				all_cars_solid = false
-			if car.global_position.y < 0.05:
+			if car.global_position.y < 0.0:
 				all_tires_on_asphalt = false
 		else:
 			all_cars_solid = false
 			
 	assert_test(all_cars_solid, "Vehicles: All 4 parked cars have active physical collision bodies")
-	assert_test(all_tires_on_asphalt, "Vehicles: All vehicle tires sit properly on asphalt without sinking (Y >= 0.05m)")
+	assert_test(all_tires_on_asphalt, "Vehicles: All vehicle tires sit properly on asphalt without sinking (Y >= 0.0m)")
 	
 	# Check CarHatchback specific threshold
 	var car_h = props.get_node_or_null("CarHatchback")

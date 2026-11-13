@@ -15,11 +15,25 @@ var current_target: Interactable3D = null
 var footstep_timer: float = 0.0
 var step_interval: float = 0.45
 var is_moving: bool = false
+var ground_ray: RayCast3D = null
+
+const VALID_SURFACES: Array[String] = ["grass", "stone", "wood", "tile", "asphalt"]
 
 func _ready() -> void:
 	GameManager.player_node = self
-	interaction_ray.collision_mask = 2 # Interactive layer
+	# Layer 1 (mondo) + layer 2 (interattivi): i muri bloccano il raggio di interazione
+	interaction_ray.collision_mask = 3
 	interaction_ray.enabled = true
+	
+	# Raggio verso il basso per riconoscere la superficie sotto i piedi (meta 'surface')
+	ground_ray = RayCast3D.new()
+	ground_ray.name = "GroundRay"
+	ground_ray.position = Vector3(0, 0.5, 0)
+	ground_ray.target_position = Vector3(0, -1.2, 0)
+	ground_ray.collision_mask = 1 # Solo il mondo
+	ground_ray.exclude_parent = true
+	ground_ray.enabled = true
+	add_child(ground_ray)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if GameManager.current_state != GameManager.GameState.FIRST_PERSON:
@@ -52,10 +66,12 @@ func _physics_process(delta: float) -> void:
 	var input_dir = Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
 	var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
-	var is_sprinting = Input.is_action_pressed("sprint")
-	var speed = sprint_speed if is_sprinting else walk_speed
+	var is_sprinting = Input.is_action_pressed("sprint") and NeedsManager.get_energy() > 0.0
+	var speed = (sprint_speed if is_sprinting else walk_speed) * NeedsManager.get_speed_multiplier()
 	
 	if direction:
+		if is_sprinting and is_on_floor():
+			NeedsManager.consume_sprint(delta) # lo scatto consuma un po' di energia
 		velocity.x = direction.x * speed
 		velocity.z = direction.z * speed
 		is_moving = true
@@ -80,8 +96,20 @@ func _handle_footsteps(delta: float, is_sprinting: bool) -> void:
 		footstep_timer = 0.0
 
 func _detect_surface() -> String:
-	# Check what ground the player is walking on
-	# Studio is near origin Z < 2.5 (wood), Street is Z > 2.5 (stone), Pizzeria is Z > 10.0 (terracotta/stone)
+	# 1) Meta-tag 'surface' sul collider sotto i piedi (o su un suo antenato diretto)
+	if ground_ray != null and ground_ray.is_inside_tree():
+		ground_ray.force_raycast_update()
+		if ground_ray.is_colliding():
+			var node: Node = ground_ray.get_collider() as Node
+			var depth = 0
+			while node != null and depth < 4:
+				if node.has_meta("surface"):
+					var tagged = str(node.get_meta("surface"))
+					if tagged in VALID_SURFACES:
+						return tagged
+				node = node.get_parent()
+				depth += 1
+	# 2) Fallback: Studio is near origin Z < 2.5 (wood), Street is Z > 2.5 (stone), Pizzeria is Z > 10.0 (terracotta/stone)
 	if global_position.z < 2.3:
 		return "wood"
 	return "stone"
@@ -89,6 +117,7 @@ func _detect_surface() -> String:
 func _handle_interaction_ray() -> void:
 	if interaction_ray.is_colliding():
 		var collider = interaction_ray.get_collider()
+		# Il primo collider colpito deve essere un interagibile: i muri azzerano target e prompt
 		if collider is Interactable3D and collider.is_interactable:
 			if current_target != collider:
 				current_target = collider

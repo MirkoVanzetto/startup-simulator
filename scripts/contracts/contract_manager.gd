@@ -38,6 +38,7 @@ func init_tutorial_contract() -> void:
 	
 	# Generate first batch of marketplace opportunities
 	refresh_marketplace()
+	_stamp_fame_bonus()
 	EventBus.contract_updated.emit("pizzeria_da_mario", "available")
 
 func refresh_marketplace() -> void:
@@ -97,7 +98,7 @@ func complete_story_contract(contract_id: String) -> void:
 		if c.get("status") == "completed" or (contract_id in completed_contracts):
 			return
 		c["status"] = "completed"
-		var reward = float(c["budget"])
+		var reward = float(c["budget"]) * float(c.get("fame_bonus", 1.0))
 		var rep = int(c["reputation_reward"])
 		completed_contracts.append(contract_id)
 		
@@ -119,7 +120,16 @@ func complete_story_contract(contract_id: String) -> void:
 		
 		# Unlock next story mission in sequence
 		_unlock_next_story_mission(contract_id)
+		_stamp_fame_bonus()
 		SaveManager.request_auto_save()
+
+## Notorietà: fissa il bonus compenso (FameManager) ai contratti nuovi, una sola volta (non retroattivo).
+func _stamp_fame_bonus() -> void:
+	var bonus = FameManager.get_contract_bonus()
+	for cid in active_contracts:
+		var c = active_contracts[cid]
+		if c is Dictionary and not c.has("fame_bonus") and c.get("status", "") != "completed":
+			c["fame_bonus"] = bonus
 
 func _unlock_next_story_mission(just_completed_id: String) -> void:
 	match just_completed_id:
@@ -191,6 +201,7 @@ func accept_marketplace_contract(contract_id: String) -> bool:
 		var c = marketplace_contracts[i]
 		if c["id"] == contract_id:
 			c["status"] = "in_progress"
+			c["fame_bonus"] = FameManager.get_contract_bonus()
 			active_contracts[contract_id] = c
 			marketplace_contracts.remove_at(i)
 			EventBus.contract_updated.emit(contract_id, "in_progress")
@@ -203,7 +214,7 @@ func complete_marketplace_contract(contract_id: String) -> bool:
 	if active_contracts.has(contract_id):
 		var c = active_contracts[contract_id]
 		c["status"] = "completed"
-		var reward = float(c["budget"])
+		var reward = float(c["budget"]) * float(c.get("fame_bonus", 1.0))
 		if EmployeeManager.is_employee_hired("emp_marco"):
 			reward *= 1.15
 			

@@ -150,3 +150,84 @@ theme_override_constants/margin_bottom = 16
 layout_mode = 2
 theme_override_constants/separation = 8
 alignment = 2
+
+[node name="NeedsPanelMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -230.0
+offset_top = 56.0
+offset_bottom = 120.0
+grow_horizontal = 0
+mouse_filter = 2
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 16
+
+[node name="NeedsPanel" type="PanelContainer" parent="NeedsPanelMargin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_dark")
+
+[node name="VBox" type="VBoxContainer" parent="NeedsPanelMargin/NeedsPanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="HungerRow" type="HBoxContainer" parent="NeedsPanelMargin/NeedsPanel/VBox"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="HungerLabel" type="Label" parent="NeedsPanelMargin/NeedsPanel/VBox/HungerRow"]
+custom_minimum_size = Vector2(66, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.75, 0.4, 1)
+theme_override_font_sizes/font_size = 11
+text = "● FAME"
+
+[node name="HungerBar" type="ProgressBar" parent="NeedsPanelMargin/NeedsPanel/VBox/HungerRow"]
+custom_minimum_size = Vector2(70, 10)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_filter = 2
+value = 100.0
+show_percentage = false
+
+[node name="HungerValue" type="Label" parent="NeedsPanelMargin/NeedsPanel/VBox/HungerRow"]
+custom_minimum_size = Vector2(26, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.9, 1)
+theme_override_font_sizes/font_size = 11
+text = "100"
+horizontal_alignment = 2
+
+[node name="EnergyRow" type="HBoxContainer" parent="NeedsPanelMargin/NeedsPanel/VBox"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 6
+
+[node name="EnergyLabel" type="Label" parent="NeedsPanelMargin/NeedsPanel/VBox/EnergyRow"]
+custom_minimum_size = Vector2(66, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.5, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "▲ ENERGIA"
+
+[node name="EnergyBar" type="ProgressBar" parent="NeedsPanelMargin/NeedsPanel/VBox/EnergyRow"]
+custom_minimum_size = Vector2(70, 10)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_filter = 2
+value = 100.0
+show_percentage = false
+
+[node name="EnergyValue" type="Label" parent="NeedsPanelMargin/NeedsPanel/VBox/EnergyRow"]
+custom_minimum_size = Vector2(26, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.9, 1)
+theme_override_font_sizes/font_size = 11
+text = "100"
+horizontal_alignment = 2

@@ -97,6 +97,24 @@ func _bill_daily_expenses() -> void:
 		)
 
 
+## Avanza il tempo di gioco fino al mattino successivo (default 07:00).
+## Se si attraversa la mezzanotte scatta il cambio giorno (spese giornaliere ecc.).
+## Ritorna le ore di gioco trascorse (float).
+func advance_to_next_morning(morning_hour: int = 7) -> float:
+	var start_minutes = current_hour * 60 + current_minute
+	var target_minutes = morning_hour * 60
+	var crossed_midnight = start_minutes >= target_minutes
+	var elapsed_minutes = (24 * 60 - start_minutes + target_minutes) if crossed_midnight else (target_minutes - start_minutes)
+	if crossed_midnight:
+		current_hour = 0
+		current_minute = 0
+		_advance_day()
+	current_hour = morning_hour
+	current_minute = 0
+	time_accumulator = 0.0
+	EventBus.time_tick.emit(current_hour, current_minute, current_day)
+	return float(elapsed_minutes) / 60.0
+
 func get_formatted_time() -> String:
 	return "%02d:%02d" % [current_hour, current_minute]
 

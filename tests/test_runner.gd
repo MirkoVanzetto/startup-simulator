@@ -210,9 +210,9 @@ func test_tier1_vehicle_anticlipping() -> bool:
 			passed = assert_true(not penetrates, "CarHatchback position Z=%0.2f does NOT penetrate Pizzeria entrance (Z=14.9)" % car_pos.z,
 				"CarHatchback is placed at Z=%0.2f, penetrating into Pizzeria dining room (Defect Image 2)" % car_pos.z) and passed
 			
-			# Wheel Y alignment: asphalt is at Y=0.08
-			passed = assert_true(car_pos.y >= 0.05, "CarHatchback wheel Y=%0.2f sits safely on asphalt without subterranean clipping" % car_pos.y,
-				"Car wheels sink into ground with subterranean clipping (Y=%0.2f < 0.05)" % car_pos.y) and passed
+			# Wheel Y alignment: StyleMesh tires sit flush at Y=0.0 on asphalt
+			passed = assert_true(car_pos.y >= 0.0, "CarHatchback wheel Y=%0.2f sits safely on asphalt without subterranean clipping" % car_pos.y,
+				"Car wheels sink into ground with subterranean clipping (Y=%0.2f < 0.0)" % car_pos.y) and passed
 		else:
 			passed = record_pass("CarHatchback cleanly relocated/removed from pizzeria intersection") and passed
 			

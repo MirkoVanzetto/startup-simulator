@@ -7,7 +7,8 @@ enum GameState {
 	COMPUTER = 2,
 	DIALOGUE = 3,
 	MINIGAME = 4,
-	PAUSED = 5
+	PAUSED = 5,
+	SHOP = 6
 }
 
 var current_state: GameState = GameState.MAIN_MENU
@@ -43,7 +44,7 @@ func change_state(new_state: GameState) -> void:
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		GameState.FIRST_PERSON:
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-		GameState.COMPUTER, GameState.DIALOGUE, GameState.MINIGAME, GameState.PAUSED:
+		GameState.COMPUTER, GameState.DIALOGUE, GameState.MINIGAME, GameState.PAUSED, GameState.SHOP:
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 			
 	EventBus.game_state_changed.emit(current_state, previous_state)
@@ -53,6 +54,9 @@ func start_new_game() -> void:
 	studio_upgrades_installed.clear()
 	reputation_points = 0
 	days_elapsed = 1
+	NeedsManager.reset()
+	ShopManager.reset()
+	FameManager.reset()
 	EconomyManager.reset_economy(250.0) # Modest starting capital: 250 EUR
 	ContractManager.init_tutorial_contract()
 	change_state(GameState.FIRST_PERSON)

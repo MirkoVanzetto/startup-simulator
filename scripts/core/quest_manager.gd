@@ -29,6 +29,17 @@ func _ready() -> void:
 			EventBus.contract_marketplace_refreshed.connect(_on_marketplace_refreshed)
 		if EventBus.has_signal("employee_hired"):
 			EventBus.employee_hired.connect(_on_employee_hired)
+		if EventBus.has_signal("needs_changed"):
+			EventBus.needs_changed.connect(_on_needs_changed)
+
+var _last_needs_hint: String = ""
+
+func _on_needs_changed(_hunger: float, _energy: float) -> void:
+	# Aggiorna l'obiettivo solo quando il suggerimento fame/energia cambia
+	var hint = get_needs_hint()
+	if hint != _last_needs_hint:
+		_last_needs_hint = hint
+		refresh_objective()
 
 func _on_contract_updated(_contract_id: String, _status: String) -> void:
 	refresh_objective()
@@ -48,7 +59,25 @@ func _on_employee_hired(_emp_id: String, _emp_name: String) -> void:
 	refresh_objective()
 
 ## Evaluates the active world/inventory state and returns the current objective text.
+## Dopo il tutorial aggiunge (senza bloccare la storia) un suggerimento su fame/energia.
 func get_current_objective() -> String:
+	var objective = _get_story_objective()
+	var hint = get_needs_hint()
+	if hint != "":
+		objective += "\n" + hint
+	return objective
+
+## Suggerimento non bloccante sui bisogni (solo dopo il tutorial, cioè dopo il contratto di Mario).
+func get_needs_hint() -> String:
+	if not ContractManager.is_contract_completed("pizzeria_da_mario"):
+		return ""
+	if NeedsManager.get_hunger() < 50.0:
+		return "Mangia qualcosa: la fame è sotto il 50%. Prova la Pizzeria, il Forno o l'Alimentari."
+	if NeedsManager.get_energy() < 30.0:
+		return "Riposa: bevi un caffè o dormi nel tuo studio."
+	return ""
+
+func _get_story_objective() -> String:
 	# Priority 1: Story contract 1 (pizzeria_da_mario)
 	if not ContractManager.is_contract_completed("pizzeria_da_mario"):
 		var tut = ContractManager.get_tutorial_contract()

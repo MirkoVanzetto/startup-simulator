@@ -40,7 +40,10 @@ func save_game() -> bool:
 			"pos_z": player_pos.z,
 			"rot_y": player_rot
 		},
-		"placed_furniture": FurniturePlacementManagerScript.get_placed_furniture()
+		"placed_furniture": FurniturePlacementManagerScript.get_placed_furniture(),
+		"needs": NeedsManager.serialize(),
+		"shops": ShopManager.serialize(),
+		"fame": FameManager.serialize()
 	}
 	
 	var json_string = JSON.stringify(save_dict, "\t")
@@ -114,6 +117,20 @@ func load_game() -> bool:
 		FurniturePlacementManagerScript.load_placed_furniture(data["placed_furniture"])
 	else:
 		FurniturePlacementManagerScript.load_placed_furniture([])
+		
+	# Restore Needs, Shops & Fame (vecchi salvataggi senza queste sezioni: valori di default)
+	if data.has("needs") and data["needs"] is Dictionary:
+		NeedsManager.deserialize(data["needs"])
+	else:
+		NeedsManager.reset()
+	if data.has("shops") and data["shops"] is Dictionary:
+		ShopManager.deserialize(data["shops"])
+	else:
+		ShopManager.reset()
+	if data.has("fame") and data["fame"] is Dictionary:
+		FameManager.deserialize(data["fame"])
+	else:
+		FameManager.reset()
 		
 	GameManager.change_state(GameManager.GameState.FIRST_PERSON)
 	EventBus.notification_posted.emit("Partita Caricata", "Bentornato nella tua startup!", "success")

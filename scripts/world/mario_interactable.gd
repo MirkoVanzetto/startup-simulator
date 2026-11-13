@@ -16,6 +16,8 @@ func _find_anim_player() -> void:
 		anim_player = $Model.find_child("AnimationPlayer", true, false)
 
 func _on_interact(_player: Node) -> void:
+	# Notorietà: la prima chiacchierata con un cliente dà +1 reputazione
+	FameManager.register_talk("mario")
 	if anim_player and anim_player.has_animation("Interact"):
 		anim_player.play("Interact")
 		

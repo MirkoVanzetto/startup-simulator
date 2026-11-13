@@ -7,6 +7,8 @@ func _ready() -> void:
 	prompt_message = "[E] Parla con Elena (Barista Caffè San Carlo)"
 
 func _on_interact(_player: Node) -> void:
+	# Notorietà: la prima chiacchierata con un cliente dà +1 reputazione
+	FameManager.register_talk("elena")
 	var c = ContractManager.get_contract("caffe_san_carlo")
 	var status = c.get("status", "locked")
 	

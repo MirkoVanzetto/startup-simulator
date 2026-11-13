@@ -9,6 +9,7 @@ extends Node
 @onready var web_forge: Control = $UILayer/WebForge
 @onready var firewall_router: Control = $UILayer/FirewallRouter
 @onready var pause_menu: Control = $UILayer/PauseMenu
+@onready var shop_menu: Control = $UILayer/ShopMenu
 
 func _ready() -> void:
 	EventBus.game_state_changed.connect(_on_game_state_changed)
@@ -39,6 +40,8 @@ func _handle_pause_toggle() -> void:
 			web_forge.visible = false
 			firewall_router.visible = false
 			EventBus.computer_opened.emit()
+		GameManager.GameState.SHOP:
+			shop_menu.close_shop()
 		GameManager.GameState.DIALOGUE:
 			pass
 		GameManager.GameState.MAIN_MENU:
@@ -56,6 +59,7 @@ func _on_game_state_changed(new_state: int, _old_state: int) -> void:
 			web_forge.visible = false
 			firewall_router.visible = false
 			pause_menu.visible = false
+			shop_menu.visible = false
 		GameManager.GameState.FIRST_PERSON:
 			main_menu.visible = false
 			hud.visible = true
@@ -64,6 +68,7 @@ func _on_game_state_changed(new_state: int, _old_state: int) -> void:
 			web_forge.visible = false
 			firewall_router.visible = false
 			pause_menu.visible = false
+			shop_menu.visible = false
 		GameManager.GameState.PAUSED:
 			main_menu.visible = false
 			hud.visible = false
@@ -72,6 +77,7 @@ func _on_game_state_changed(new_state: int, _old_state: int) -> void:
 			web_forge.visible = false
 			firewall_router.visible = false
 			pause_menu.visible = true
+			shop_menu.visible = false
 		GameManager.GameState.COMPUTER:
 			main_menu.visible = false
 			hud.visible = false
@@ -80,6 +86,7 @@ func _on_game_state_changed(new_state: int, _old_state: int) -> void:
 			web_forge.visible = false
 			firewall_router.visible = false
 			pause_menu.visible = false
+			shop_menu.visible = false
 		GameManager.GameState.DIALOGUE:
 			main_menu.visible = false
 			hud.visible = false
@@ -88,9 +95,20 @@ func _on_game_state_changed(new_state: int, _old_state: int) -> void:
 			web_forge.visible = false
 			firewall_router.visible = false
 			pause_menu.visible = false
+			shop_menu.visible = false
 		GameManager.GameState.MINIGAME:
 			main_menu.visible = false
 			hud.visible = false
 			computer_screen.visible = false
 			dialogue_overlay.visible = false
 			pause_menu.visible = false
+			shop_menu.visible = false
+		GameManager.GameState.SHOP:
+			main_menu.visible = false
+			hud.visible = false
+			computer_screen.visible = false
+			dialogue_overlay.visible = false
+			web_forge.visible = false
+			firewall_router.visible = false
+			pause_menu.visible = false
+			shop_menu.visible = true

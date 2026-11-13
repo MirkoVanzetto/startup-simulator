@@ -97,10 +97,10 @@ func run_probe_1_vehicle_boundaries_and_collision() -> void:
 			
 		var car_global_pos = car.global_position
 		
-		# 1. Asphalt alignment check: tires must sit on asphalt (Y between 0.05 and 0.15)
+		# 1. Asphalt alignment check: StyleMesh tires sit flush at Y=0.0
 		record_assertion(
-			car_global_pos.y >= 0.05 and car_global_pos.y <= 0.15,
-			"%s asphalt alignment (Y=%0.3f in [0.05, 0.15])" % [v_name, car_global_pos.y],
+			car_global_pos.y >= 0.0 and car_global_pos.y <= 0.15,
+			"%s asphalt alignment (Y=%0.3f in [0.0, 0.15])" % [v_name, car_global_pos.y],
 			"Car Y=%0.3f indicates subterranean wheel clipping or hovering" % car_global_pos.y
 		)
 		

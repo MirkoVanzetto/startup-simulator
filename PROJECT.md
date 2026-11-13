@@ -77,3 +77,9 @@ Key systems:
 - `scripts/world/`: 3D world controllers (`studio_manager.gd`, `furniture_placement_manager.gd`, `city_manager.gd`).
 - `tests/`: Automated unit, integration, and adversarial stress tests (`test_runner.gd`, `adversarial_workflows_challenger.gd`).
 - `build/`: Windows release artifacts (`StartupSimulator.exe`, `StartupSimulator_Windows_x86_64.zip`).
+
+## v0.9.0 — Borgo San Carlo (Rielaborazione 3D & Gameplay)
+- **Stile 3D Unificato**: `assets/shaders/toon.gdshader` (3 bande morbide + rim + `wind_sway`), 23 texture procedurali tileable in `assets/textures/village/` (`tools/generate_village_textures.py`), libreria materiali `scripts/world/village_materials.gd`, geometria + collisioni accoppiate `scripts/world/style_mesh.gd`, `scripts/world/village_props.gd`, `scripts/world/village_builder.gd`.
+- **Negozi & Cibo**: `ShopManager` (`pizzeria`, `cafe`, `panificio`, `alimentari`, `edicola`, `fridge`), `ShopMenu` (`scenes/ui/shop_menu.tscn`, responsive su tutti i viewport), `ShopInteractable`, `FridgeInteractable`, `RestInteractable`.
+- **Fame & Energia**: `NeedsManager` con decay reale, malus velocità sotto 30%/10%, barre HUD, superficie passi dinamica (`wood`, `stone`, `grass`, `tile`, `asphalt`), salvataggio in `SaveManager`.
+- **Notorietà**: `FameManager` con 6 livelli di fama, sconti negozi 0%–20%, bonus contratti 1.0x–1.25x, +1 Rep ogni € 25 spesi nei negozi locali e al primo dialogo con i clienti.

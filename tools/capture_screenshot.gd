@@ -18,24 +18,24 @@ func _process(_delta: float) -> void:
 		GameManager.studio_upgrades_installed.append("plant_aloe")
 		GameManager.studio_upgrades_installed.append("server_rack_upgrade")
 		ServerRackManager.unlock_server_rack()
-		GameManager.reputation_points = 35
+		GameManager.company_tier = 2
+		GameManager.reputation_points = 55
 		EconomyManager.balance = 1200.0
 		EmployeeManager.hire_employee("emp_luca")
 		
 		var studio_mgr = get_tree().root.find_child("Studio", true, false)
 		if studio_mgr and studio_mgr.has_method("update_installed_upgrades"):
 			studio_mgr.update_installed_upgrades()
-
 			studio_mgr.update_employee_workstation()
 			
 		player = get_tree().root.find_child("PlayerCharacter", true, false)
 		if player:
-			# Look across studio to see player desk with monitor & employee workstation with Luca
-			player.global_position = Vector3(1.4, 0.1, 0.8)
-			player.rotation_degrees = Vector3(0, 50, 0) # Look toward (-1.8, 0, 0.6)
+			# Frame across expanded 7.4x5.8m Studio from SE toward Player Desk, Cabinet, and Luca Workstation
+			player.global_position = Vector3(2.1, 0.12, 1.45)
+			player.rotation_degrees = Vector3(0, 44, 0)
 			var neck = player.get_node_or_null("Neck")
 			if neck:
-				neck.rotation_degrees = Vector3(-6, 0, 0)
+				neck.rotation_degrees = Vector3(-11, 0, 0)
 		print("State: In Studio 3D with Hired Employee & Server Rack.")
 		
 	if frame_count == 20:
@@ -59,14 +59,14 @@ func _process(_delta: float) -> void:
 			image.save_png("/home/antigravity/startup_simulator_street_3d.png")
 			print("✔ Via Po Boulevard & Porticoes Screen Captured.")
 			
-		# Teleport player into Piazza San Carlo facing the civic square and equestrian monument
+		# Teleport player into Piazza San Carlo facing Fontana, Edicola, Cafe, TechShop & Pizzeria
 		if player:
-			player.global_position = Vector3(0.0, 0.16, 26.0)
-			player.rotation_degrees = Vector3(0, 180, 0)
+			player.global_position = Vector3(-1.8, 0.1, 13.5)
+			player.rotation_degrees = Vector3(0, 168, 0)
 			var neck = player.get_node_or_null("Neck")
 			if neck:
-				neck.rotation_degrees = Vector3(-5, 0, 0)
-		print("State: In Piazza San Carlo facing Monument & Dehors.")
+				neck.rotation_degrees = Vector3(-6, 0, 0)
+		print("State: In Piazza San Carlo facing Fontana & Borgo.")
 		
 	if frame_count == 50:
 		var image = get_viewport().get_texture().get_image()
@@ -74,10 +74,9 @@ func _process(_delta: float) -> void:
 			image.save_png("/home/antigravity/startup_simulator_piazza_san_carlo.png")
 			print("✔ Piazza San Carlo Screen Captured.")
 			
-		# Teleport player inside Pizzeria Da Mario facing Mario NPC upright at Y=0.0
-		# Pizzeria is at (0, 0, 18) rotated 180 deg
+		# Teleport player inside Pizzeria Da Mario (at Z=30.8 rot 180) facing Mario NPC
 		if player:
-			player.global_position = Vector3(0.0, 0.1, 16.5)
+			player.global_position = Vector3(0.0, 0.1, 29.2)
 			player.rotation_degrees = Vector3(0, 180, 0)
 			var neck = player.get_node_or_null("Neck")
 			if neck:
@@ -90,9 +89,9 @@ func _process(_delta: float) -> void:
 			image.save_png("/home/antigravity/startup_simulator_pizzeria_3d.png")
 			print("✔ Pizzeria Da Mario Screen Captured.")
 			
-		# Teleport player inside Elettronica TO facing Davide behind counter
+		# Teleport player inside Elettronica TO (+13.8, 0, 20.5) facing Davide
 		if player:
-			player.global_position = Vector3(-5.0, 0.1, 8.4)
+			player.global_position = Vector3(11.8, 0.1, 20.5)
 			player.rotation_degrees = Vector3(0, -90, 0)
 			var neck = player.get_node_or_null("Neck")
 			if neck:
@@ -105,9 +104,9 @@ func _process(_delta: float) -> void:
 			image.save_png("/home/antigravity/startup_simulator_tech_shop_3d.png")
 			print("✔ Elettronica TO Tech Shop Screen Captured.")
 			
-		# Teleport player inside Caffè San Carlo facing Elena behind bar
+		# Teleport player inside Caffè San Carlo (-13.8, 0, 20.5) facing Elena
 		if player:
-			player.global_position = Vector3(5.0, 0.1, 8.4)
+			player.global_position = Vector3(-11.8, 0.1, 20.5)
 			player.rotation_degrees = Vector3(0, 90, 0)
 			var neck = player.get_node_or_null("Neck")
 			if neck:
@@ -119,6 +118,16 @@ func _process(_delta: float) -> void:
 		if image:
 			image.save_png("/home/antigravity/startup_simulator_cafe_3d.png")
 			print("✔ Caffè San Carlo Screen Captured.")
+			
+		# Open Borgo ShopMenu (Alimentari Rosa)
+		EventBus.shop_opened.emit("alimentari")
+		print("State: ShopMenu Alimentari Rosa.")
+
+	if frame_count == 103:
+		var image = get_viewport().get_texture().get_image()
+		if image:
+			image.save_png("/home/antigravity/startup_simulator_shop_menu.png")
+			print("✔ Borgo ShopMenu Screen Captured.")
 			
 		# Open TO-OS Desktop and display RackManager
 		EventBus.computer_opened.emit()

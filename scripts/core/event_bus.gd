@@ -41,3 +41,8 @@ signal contract_marketplace_refreshed()
 signal employee_hired(employee_id: String, employee_name: String)
 signal employee_fired(employee_id: String)
 
+# Needs, shops & fame signals
+signal needs_changed(hunger: float, energy: float)
+signal shop_opened(shop_id: String)
+signal shop_closed()
+signal fame_tier_changed(tier_index: int, tier_name: String)

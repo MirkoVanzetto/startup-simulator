@@ -7,6 +7,8 @@ func _ready() -> void:
 	prompt_message = "[E] Parla con Davide (Elettronica TO)"
 
 func _on_interact(_player: Node) -> void:
+	# Notorietà: la prima chiacchierata con un cliente dà +1 reputazione
+	FameManager.register_talk("davide")
 	var c = ContractManager.get_contract("elettronica_to")
 	var status = c.get("status", "locked")
 	

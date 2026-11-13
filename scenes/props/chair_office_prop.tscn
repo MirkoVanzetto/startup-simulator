@@ -1,17 +1,49 @@
 [gd_scene load_steps=3 format=3 uid="uid://bchairoffice01"]
 
-[ext_resource type="PackedScene" path="res://assets/models/furniture/chair_A.gltf" id="1_chr"]
+[sub_resource type="GDScript" id="GDScript_office_chair"]
+script/source = "extends Node3D
+
+func _ready() -> void:
+	if get_child_count() > 0:
+		return
+	var sm := StyleMesh.new()
+	# Base girevole a 5 razze con ruote e pistone (schienale su -Z, fronte aperto su +Z)
+	for i in range(5):
+		var a := float(i) * TAU / 5.0
+		var dir := Vector3(sin(a), 0.0, cos(a))
+		sm.capsule_seg(\"iron\", Vector3(0, 0.07, 0), dir * 0.25 + Vector3(0, 0.042, 0), 0.018, 0.015, 8)
+		sm.cyl(\"tire\", dir * 0.25, 0.024, 0.024, 0.036, 8)
+	sm.cyl(\"iron\", Vector3(0, 0.065, 0), 0.032, 0.028, 0.29, 10)
+	# Sedile imbottito blu (top a Y=0.425m)
+	sm.ellipsoid(\"fabric_blue\", Vector3(0, 0.388, 0.02), Vector3(0.23, 0.040, 0.22), 7, 16)
+	sm.ellipsoid(\"wood_dark\", Vector3(0, 0.355, 0.02), Vector3(0.22, 0.018, 0.21), 6, 14)
+	# Braccioli snelli
+	for sx in [-0.245, 0.245]:
+		sm.capsule_seg(\"iron\", Vector3(sx, 0.36, 0.02), Vector3(sx, 0.56, 0.02), 0.015, 0.015, 8)
+		sm.ellipsoid(\"wood_dark\", Vector3(sx, 0.575, 0.04), Vector3(0.030, 0.018, 0.13), 5, 10)
+	# Supporto schienale e pannello lombare curvo su -Z (non occlude la figura seduta)
+	sm.capsule_seg(\"iron\", Vector3(0, 0.36, -0.02), Vector3(0, 0.36, -0.22), 0.024, 0.020, 8)
+	sm.capsule_seg(\"iron\", Vector3(0, 0.36, -0.22), Vector3(0, 0.68, -0.23), 0.022, 0.018, 8)
+	sm.ellipsoid(\"fabric_blue\", Vector3(0, 0.69, -0.195), Vector3(0.21, 0.21, 0.042), 7, 16, Vector3(0.08, 0, 0))
+	sm.ellipsoid(\"wood_dark\", Vector3(0, 0.69, -0.225), Vector3(0.20, 0.19, 0.025), 6, 14, Vector3(0.08, 0, 0))
+
+	var mi := MeshInstance3D.new()
+	mi.name = \"OfficeChairMesh\"
+	mi.mesh = sm.to_mesh(Callable(VillageMaterials, \"mat\"))
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	add_child(mi)
+"
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_chair"]
-size = Vector3(0.65, 1.0, 0.65)
+size = Vector3(0.60, 1.05, 0.65)
 
 [node name="ChairOfficeProp" type="StaticBody3D"]
 collision_layer = 1
 collision_mask = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.525, 0)
 shape = SubResource("BoxShape3D_chair")
 
-[node name="Model" parent="." instance=ExtResource("1_chr")]
-transform = Transform3D(0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 0, 0, 0)
+[node name="Model" type="Node3D" parent="."]
+script = SubResource("GDScript_office_chair")

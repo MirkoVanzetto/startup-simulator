@@ -8,6 +8,13 @@ extends Control
 @onready var reputation_label: Label = $TopRight/HBox/ReputationPanel/ReputationLabel
 @onready var objective_label: Label = $TopLeft/ObjectivePanel/VBox/ObjectiveText
 @onready var toast_container: VBoxContainer = $BottomLeft/ToastContainer
+@onready var hunger_bar: ProgressBar = $NeedsPanelMargin/NeedsPanel/VBox/HungerRow/HungerBar
+@onready var hunger_value: Label = $NeedsPanelMargin/NeedsPanel/VBox/HungerRow/HungerValue
+@onready var energy_bar: ProgressBar = $NeedsPanelMargin/NeedsPanel/VBox/EnergyRow/EnergyBar
+@onready var energy_value: Label = $NeedsPanelMargin/NeedsPanel/VBox/EnergyRow/EnergyValue
+
+var _rep_refresh_accum: float = 0.0
+var _last_rep_text: String = ""
 
 const QuestManagerClass = preload("res://scripts/core/quest_manager.gd")
 var quest_manager: Node = null
@@ -27,8 +34,51 @@ func _ready() -> void:
 	EventBus.item_purchased.connect(_on_item_purchased)
 	EventBus.notification_posted.connect(_on_notification_posted)
 	EventBus.game_state_changed.connect(_on_game_state_changed)
+	EventBus.needs_changed.connect(_on_needs_changed)
+	EventBus.fame_tier_changed.connect(func(_i, _n): _update_reputation_label())
 	
+	if reputation_label:
+		reputation_label.add_theme_font_size_override("font_size", 14)
+	_setup_need_bar(hunger_bar, Color(1.0, 0.65, 0.25))
+	_setup_need_bar(energy_bar, Color(0.4, 0.75, 1.0))
 	_update_hud_display()
+
+func _process(delta: float) -> void:
+	# La reputazione cambia anche fuori dai contratti (negozi, chiacchierate): aggiorna in modo leggero
+	_rep_refresh_accum += delta
+	if _rep_refresh_accum >= 0.4:
+		_rep_refresh_accum = 0.0
+		_update_reputation_label()
+
+func _setup_need_bar(bar: ProgressBar, color: Color) -> void:
+	var bg = StyleBoxFlat.new()
+	bg.bg_color = Color(0.2, 0.22, 0.28, 0.9)
+	bg.set_corner_radius_all(3)
+	bar.add_theme_stylebox_override("background", bg)
+	_set_bar_fill(bar, color)
+
+func _set_bar_fill(bar: ProgressBar, color: Color) -> void:
+	var fill = StyleBoxFlat.new()
+	fill.bg_color = color
+	fill.set_corner_radius_all(3)
+	bar.add_theme_stylebox_override("fill", fill)
+
+func _on_needs_changed(hunger: float, energy: float) -> void:
+	_update_needs_display(hunger, energy)
+
+func _update_needs_display(hunger: float, energy: float) -> void:
+	hunger_bar.value = hunger
+	energy_bar.value = energy
+	hunger_value.text = str(int(roundf(hunger)))
+	energy_value.text = str(int(roundf(energy)))
+	_set_bar_fill(hunger_bar, Color(0.95, 0.3, 0.25) if hunger < 30.0 else Color(1.0, 0.65, 0.25))
+	_set_bar_fill(energy_bar, Color(0.95, 0.85, 0.3) if energy < 25.0 else Color(0.4, 0.75, 1.0))
+
+func _update_reputation_label() -> void:
+	var txt = FameManager.get_hud_label()
+	if txt != _last_rep_text:
+		_last_rep_text = txt
+		reputation_label.text = txt
 
 func _on_prompt_changed(text: String) -> void:
 	prompt_container.visible = (text != "")
@@ -41,7 +91,7 @@ func _on_contract_updated(_contract_id: String, _status: String) -> void:
 	_update_objective_display()
 
 func _on_contract_completed(_id: String, _reward: float, _rep: int) -> void:
-	reputation_label.text = "★ %d Rep" % GameManager.reputation_points
+	_update_reputation_label()
 	_update_objective_display()
 
 func _on_item_purchased(_item_id: String, _cost: float) -> void:
@@ -88,7 +138,8 @@ func _update_objective_display() -> void:
 
 func _update_hud_display() -> void:
 	balance_label.text = "€ %0.2f" % EconomyManager.balance
-	reputation_label.text = "★ %d Rep" % GameManager.reputation_points
+	_update_reputation_label()
+	_update_needs_display(NeedsManager.get_hunger(), NeedsManager.get_energy())
 	_update_objective_display()
 	prompt_container.visible = false
 

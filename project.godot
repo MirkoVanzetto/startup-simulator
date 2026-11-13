@@ -25,6 +25,9 @@ SaveManager="*res://scripts/core/save_manager.gd"
 SoundManager="*res://scripts/core/sound_manager.gd"
 CalendarSystem="*res://scripts/core/calendar_system.gd"
 EventSystem="*res://scripts/core/event_system.gd"
+NeedsManager="*res://scripts/core/needs_manager.gd"
+ShopManager="*res://scripts/core/shop_manager.gd"
+FameManager="*res://scripts/core/fame_manager.gd"
 
 [display]
 

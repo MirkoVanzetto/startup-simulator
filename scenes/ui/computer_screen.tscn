@@ -327,18 +327,18 @@ text = " ✕ "
 [node name="ShopScroll" type="ScrollContainer" parent="Windows/ShopWindow/Margin/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
-horizontal_scroll_mode = 1
+horizontal_scroll_mode = 0
 
 [node name="Grid" type="GridContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 columns = 2
-theme_override_constants/h_separation = 16
-theme_override_constants/v_separation = 16
+theme_override_constants/h_separation = 14
+theme_override_constants/v_separation = 14
 
 [node name="MonitorCard" type="PanelContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid"]
-custom_minimum_size = Vector2(380, 190)
+custom_minimum_size = Vector2(260, 180)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
@@ -373,14 +373,15 @@ theme_override_constants/separation = 8
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Disponibile"
+clip_text = true
 
 [node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/MonitorCard/VBox/HBox"]
-custom_minimum_size = Vector2(160, 36)
+custom_minimum_size = Vector2(140, 34)
 layout_mode = 2
 text = "Acquista (€ 350,00)"
 
 [node name="ChairCard" type="PanelContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid"]
-custom_minimum_size = Vector2(380, 190)
+custom_minimum_size = Vector2(260, 180)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
@@ -415,14 +416,15 @@ theme_override_constants/separation = 8
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Disponibile"
+clip_text = true
 
 [node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ChairCard/VBox/HBox"]
-custom_minimum_size = Vector2(160, 36)
+custom_minimum_size = Vector2(140, 34)
 layout_mode = 2
 text = "Acquista (€ 220,00)"
 
 [node name="PlantCard" type="PanelContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid"]
-custom_minimum_size = Vector2(380, 190)
+custom_minimum_size = Vector2(260, 180)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
@@ -457,14 +459,15 @@ theme_override_constants/separation = 8
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Disponibile"
+clip_text = true
 
 [node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/PlantCard/VBox/HBox"]
-custom_minimum_size = Vector2(160, 36)
+custom_minimum_size = Vector2(140, 34)
 layout_mode = 2
 text = "Acquista (€ 35,00)"
 
 [node name="ServerCard" type="PanelContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid"]
-custom_minimum_size = Vector2(380, 190)
+custom_minimum_size = Vector2(260, 180)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
@@ -499,9 +502,10 @@ theme_override_constants/separation = 8
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Disponibile"
+clip_text = true
 
 [node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/Grid/ServerCard/VBox/HBox"]
-custom_minimum_size = Vector2(160, 36)
+custom_minimum_size = Vector2(140, 34)
 layout_mode = 2
 text = "Acquista (€ 450,00)"
 

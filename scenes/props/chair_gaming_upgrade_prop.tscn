@@ -1,17 +1,49 @@
 [gd_scene load_steps=3 format=3 uid="uid://bchairgaming01"]
 
-[ext_resource type="PackedScene" path="res://assets/models/furniture/armchair.gltf" id="1_arm"]
+[sub_resource type="GDScript" id="GDScript_gaming_chair"]
+script/source = "extends Node3D
+
+func _ready() -> void:
+	if get_child_count() > 0:
+		return
+	var sm := StyleMesh.new()
+	# Base a 5 razze con ruote e pistone idraulico (orientamento locale: schienale su -Z, fronte su +Z)
+	for i in range(5):
+		var a := float(i) * TAU / 5.0
+		var dir := Vector3(sin(a), 0.0, cos(a))
+		sm.capsule_seg(\"iron\", Vector3(0, 0.075, 0), dir * 0.27 + Vector3(0, 0.045, 0), 0.022, 0.018, 8)
+		sm.cyl(\"tire\", dir * 0.27, 0.026, 0.026, 0.040, 8)
+	sm.cyl(\"iron\", Vector3(0, 0.07, 0), 0.036, 0.032, 0.28, 10)
+	# Sedile ergonomico avvolgente (piano a Y=0.43)
+	sm.ellipsoid(\"gaming_black\", Vector3(0, 0.39, 0.02), Vector3(0.24, 0.045, 0.23), 7, 16)
+	sm.ellipsoid(\"cyan_accent\", Vector3(0, 0.425, 0.03), Vector3(0.18, 0.018, 0.17), 5, 14)
+	# Braccioli sagomati
+	for sx in [-0.265, 0.265]:
+		sm.capsule_seg(\"iron\", Vector3(sx, 0.37, 0.02), Vector3(sx, 0.57, 0.02), 0.018, 0.018, 8)
+		sm.ellipsoid(\"gaming_black\", Vector3(sx, 0.59, 0.05), Vector3(0.036, 0.022, 0.14), 5, 10)
+	# Schienale alto da gaming su -Z (inclinato leggermente indietro)
+	sm.capsule_seg(\"gaming_black\", Vector3(0, 0.42, -0.21), Vector3(0, 1.06, -0.26), 0.21, 0.17, 14)
+	sm.ellipsoid(\"gaming_black\", Vector3(0, 0.78, -0.21), Vector3(0.24, 0.30, 0.055), 8, 16, Vector3(0.08, 0, 0))
+	sm.ellipsoid(\"cyan_accent\", Vector3(0, 0.99, -0.18), Vector3(0.11, 0.055, 0.040), 6, 12)
+	sm.ellipsoid(\"cyan_accent\", Vector3(0, 0.52, -0.155), Vector3(0.13, 0.055, 0.040), 6, 12)
+
+	var mi := MeshInstance3D.new()
+	mi.name = \"GamingChairMesh\"
+	mi.mesh = sm.to_mesh(Callable(VillageMaterials, \"mat\"))
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	add_child(mi)
+"
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_chairg"]
-size = Vector3(0.8, 1.1, 0.8)
+size = Vector3(0.62, 1.16, 0.60)
 
 [node name="ChairGamingUpgradeProp" type="StaticBody3D"]
 collision_layer = 1
 collision_mask = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.58, 0)
 shape = SubResource("BoxShape3D_chairg")
 
-[node name="Model" parent="." instance=ExtResource("1_arm")]
-transform = Transform3D(0.85, 0, 0, 0, 0.85, 0, 0, 0, 0.85, 0, 0, 0)
+[node name="Model" type="Node3D" parent="."]
+script = SubResource("GDScript_gaming_chair")

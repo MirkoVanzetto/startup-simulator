@@ -28,6 +28,7 @@ var ghost_valid_mat: StandardMaterial3D = null
 var ghost_invalid_mat: StandardMaterial3D = null
 
 func _ready() -> void:
+	VillageBuilder.build_studio(self)
 	if not placed_container:
 		placed_container = Node3D.new()
 		placed_container.name = "PlacedFurniture"
@@ -402,5 +403,5 @@ func _commit_placement() -> void:
 func is_player_in_studio() -> bool:
 	if is_instance_valid(GameManager.player_node):
 		var p_pos = GameManager.player_node.global_position
-		return abs(p_pos.x) <= 3.5 and p_pos.z <= 2.8 and p_pos.z >= -3.0
+		return abs(p_pos.x) <= 3.8 and p_pos.z <= 2.8 and p_pos.z >= -3.4
 	return true

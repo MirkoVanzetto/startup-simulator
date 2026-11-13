@@ -302,44 +302,54 @@ func _launch_webforge() -> void:
 func _update_shop_buttons() -> void:
 	var has_monitor = "monitor_upgrade" in GameManager.studio_upgrades_installed
 	var has_chair = "chair_gaming_upgrade" in GameManager.studio_upgrades_installed
-	var has_plant = "plant_aloe" in GameManager.studio_upgrades_installed
+	var has_plant = "plant_aloe" in GameManager.studio_upgrades_installed or "plant_aloe_upgrade" in GameManager.studio_upgrades_installed
 	var has_server = "server_rack_upgrade" in GameManager.studio_upgrades_installed
+	var col_ok := Color(0.27, 1.0, 0.53)
+	var col_avail := Color(0.75, 0.78, 0.85)
 	
 	if has_monitor:
 		buy_monitor_btn.disabled = true
-		buy_monitor_btn.text = "GIA' INSTALLATO"
-		monitor_status.text = "[color=#44ff88]Installato sulla scrivania[/color]"
+		buy_monitor_btn.text = "GIÀ INSTALLATO"
+		monitor_status.text = "Installato sulla scrivania"
+		monitor_status.add_theme_color_override("font_color", col_ok)
 	else:
 		buy_monitor_btn.disabled = not EconomyManager.can_afford(350.0)
 		buy_monitor_btn.text = "Acquista (€ 350,00)"
-		monitor_status.text = "Disponibile per l'ordine"
+		monitor_status.text = "Disponibile"
+		monitor_status.add_theme_color_override("font_color", col_avail)
 		
 	if has_chair:
 		buy_chair_btn.disabled = true
-		buy_chair_btn.text = "GIA' INSTALLATA"
-		chair_status.text = "[color=#44ff88]Installata alla postazione[/color]"
+		buy_chair_btn.text = "GIÀ INSTALLATA"
+		chair_status.text = "Installata alla postazione"
+		chair_status.add_theme_color_override("font_color", col_ok)
 	else:
 		buy_chair_btn.disabled = not EconomyManager.can_afford(220.0)
 		buy_chair_btn.text = "Acquista (€ 220,00)"
-		chair_status.text = "Disponibile per l'ordine"
+		chair_status.text = "Disponibile"
+		chair_status.add_theme_color_override("font_color", col_avail)
 
 	if has_plant:
 		buy_plant_btn.disabled = true
-		buy_plant_btn.text = "GIA' POSIZIONATA"
-		plant_status.text = "[color=#44ff88]Posizionata in studio[/color]"
+		buy_plant_btn.text = "GIÀ POSIZIONATA"
+		plant_status.text = "Posizionata in studio"
+		plant_status.add_theme_color_override("font_color", col_ok)
 	else:
 		buy_plant_btn.disabled = not EconomyManager.can_afford(35.0)
 		buy_plant_btn.text = "Acquista (€ 35,00)"
-		plant_status.text = "Disponibile per l'ordine"
+		plant_status.text = "Disponibile"
+		plant_status.add_theme_color_override("font_color", col_avail)
 
 	if has_server:
 		buy_server_btn.disabled = true
-		buy_server_btn.text = "GIA' INSTALLATO"
-		server_status.text = "[color=#44ff88]Attivo in studio (Hosting ON)[/color]"
+		buy_server_btn.text = "GIÀ INSTALLATO"
+		server_status.text = "Attivo (Hosting ON)"
+		server_status.add_theme_color_override("font_color", col_ok)
 	else:
 		buy_server_btn.disabled = not EconomyManager.can_afford(450.0)
 		buy_server_btn.text = "Acquista (€ 450,00)"
-		server_status.text = "Disponibile per l'ordine"
+		server_status.text = "Disponibile"
+		server_status.add_theme_color_override("font_color", col_avail)
 
 func _buy_monitor() -> void:
 	if EconomyManager.spend(350.0, "Acquisto Monitor 27\" Ultrawide"):

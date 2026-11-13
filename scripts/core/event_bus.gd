@@ -46,3 +46,8 @@ signal needs_changed(hunger: float, energy: float)
 signal shop_opened(shop_id: String)
 signal shop_closed()
 signal fame_tier_changed(tier_index: int, tier_name: String)
+
+# Inventory & World Map signals
+signal backpack_updated()
+signal waypoint_changed(waypoint: Dictionary)
+

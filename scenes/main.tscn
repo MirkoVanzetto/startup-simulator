@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://mn8mainmaster01"]
+[gd_scene load_steps=13 format=3 uid="uid://mn8mainmaster01"]
 
 [ext_resource type="Script" path="res://scripts/core/main_controller.gd" id="1_mnc"]
 [ext_resource type="PackedScene" path="res://scenes/world/game_world.tscn" id="2_gwd"]
@@ -11,6 +11,8 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/intro_monologue.tscn" id="9_int"]
 [ext_resource type="PackedScene" path="res://scenes/ui/minigames/firewall_router.tscn" id="10_fwr"]
 [ext_resource type="PackedScene" path="res://scenes/ui/shop_menu.tscn" id="11_shp"]
+[ext_resource type="PackedScene" path="res://scenes/ui/inventory_menu.tscn" id="12_inv"]
+[ext_resource type="PackedScene" path="res://scenes/ui/world_map_menu.tscn" id="13_map"]
 
 [node name="Main" type="Node"]
 script = ExtResource("1_mnc")
@@ -40,6 +42,12 @@ visible = false
 visible = false
 
 [node name="ShopMenu" parent="UILayer" instance=ExtResource("11_shp")]
+visible = false
+
+[node name="InventoryMenu" parent="UILayer" instance=ExtResource("12_inv")]
+visible = false
+
+[node name="WorldMapMenu" parent="UILayer" instance=ExtResource("13_map")]
 visible = false
 
 [node name="MainMenu" parent="UILayer" instance=ExtResource("7_mnu")]

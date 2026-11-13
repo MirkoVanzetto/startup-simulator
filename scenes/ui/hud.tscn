@@ -13,6 +13,33 @@ content_margin_top = 8.0
 content_margin_right = 12.0
 content_margin_bottom = 8.0
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_waypoint"]
+bg_color = Color(0.06, 0.12, 0.19, 0.90)
+border_width_left = 2
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.28, 0.88, 1.0, 0.85)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 12.0
+content_margin_top = 5.0
+content_margin_right = 12.0
+content_margin_bottom = 5.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hints"]
+bg_color = Color(0.07, 0.09, 0.13, 0.82)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 10.0
+content_margin_top = 6.0
+content_margin_right = 10.0
+content_margin_bottom = 6.0
+
 [node name="HUD" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -79,15 +106,18 @@ anchor_right = 1.0
 offset_left = -280.0
 offset_bottom = 60.0
 grow_horizontal = 0
+mouse_filter = 2
 theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
 
 [node name="HBox" type="HBoxContainer" parent="TopRight"]
 layout_mode = 2
+mouse_filter = 2
 theme_override_constants/separation = 12
 
 [node name="BalancePanel" type="PanelContainer" parent="TopRight/HBox"]
 layout_mode = 2
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_dark")
 
 [node name="BalanceLabel" type="Label" parent="TopRight/HBox/BalancePanel"]
@@ -98,6 +128,7 @@ text = "€ 250.00"
 
 [node name="ReputationPanel" type="PanelContainer" parent="TopRight/HBox"]
 layout_mode = 2
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_dark")
 
 [node name="ReputationLabel" type="Label" parent="TopRight/HBox/ReputationPanel"]
@@ -108,48 +139,111 @@ text = "★ 0 Rep"
 
 [node name="TopLeft" type="MarginContainer" parent="."]
 layout_mode = 1
-offset_right = 360.0
-offset_bottom = 100.0
+offset_right = 340.0
+offset_bottom = 170.0
+mouse_filter = 2
 theme_override_constants/margin_left = 16
 theme_override_constants/margin_top = 16
 
-[node name="ObjectivePanel" type="PanelContainer" parent="TopLeft"]
+[node name="TopLeftVBox" type="VBoxContainer" parent="TopLeft"]
 layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
+
+[node name="ObjectivePanel" type="PanelContainer" parent="TopLeft/TopLeftVBox"]
+layout_mode = 2
+mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_dark")
 
-[node name="VBox" type="VBoxContainer" parent="TopLeft/ObjectivePanel"]
+[node name="VBox" type="VBoxContainer" parent="TopLeft/TopLeftVBox/ObjectivePanel"]
 layout_mode = 2
+mouse_filter = 2
 theme_override_constants/separation = 4
 
-[node name="ObjectiveHeader" type="Label" parent="TopLeft/ObjectivePanel/VBox"]
+[node name="ObjectiveHeader" type="Label" parent="TopLeft/TopLeftVBox/ObjectivePanel/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
 theme_override_font_sizes/font_size = 13
 text = "OBIETTIVO ATTUALE"
 
-[node name="ObjectiveText" type="Label" parent="TopLeft/ObjectivePanel/VBox"]
-custom_minimum_size = Vector2(300, 0)
+[node name="ObjectiveText" type="Label" parent="TopLeft/TopLeftVBox/ObjectivePanel/VBox"]
+custom_minimum_size = Vector2(280, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.9, 0.95, 1)
 theme_override_font_sizes/font_size = 14
 text = "Controlla il laptop sul tuo banco di lavoro."
 autowrap_mode = 3
 
+[node name="WaypointPanel" type="PanelContainer" parent="TopLeft/TopLeftVBox"]
+visible = false
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_waypoint")
+
+[node name="VBox" type="VBoxContainer" parent="TopLeft/TopLeftVBox/WaypointPanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 2
+
+[node name="WaypointHeader" type="Label" parent="TopLeft/TopLeftVBox/WaypointPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.32, 0.92, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "SEGNAVIA BUSSOLA"
+
+[node name="WaypointText" type="Label" parent="TopLeft/TopLeftVBox/WaypointPanel/VBox"]
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.98, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "⚑ Destinazione · 0 m ↑"
+autowrap_mode = 3
+
 [node name="BottomLeft" type="MarginContainer" parent="."]
+clip_contents = true
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_top = -240.0
-offset_right = 350.0
+offset_top = -16.0
+offset_right = 340.0
 grow_vertical = 0
+mouse_filter = 2
 theme_override_constants/margin_left = 16
 theme_override_constants/margin_bottom = 16
 
 [node name="ToastContainer" type="VBoxContainer" parent="BottomLeft"]
 layout_mode = 2
-theme_override_constants/separation = 8
+mouse_filter = 2
+theme_override_constants/separation = 5
 alignment = 2
+
+[node name="BottomRight" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -430.0
+offset_top = -48.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="HintsPanel" type="PanelContainer" parent="BottomRight"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_hints")
+
+[node name="HintsLabel" type="Label" parent="BottomRight/HintsPanel"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.84, 0.9, 0.98, 0.95)
+theme_override_font_sizes/font_size = 11
+text = "[TAB] Zaino (2) · [CAPS/M] Mappa · [B] Arreda · [ESC] Pausa"
+horizontal_alignment = 2
 
 [node name="NeedsPanelMargin" type="MarginContainer" parent="."]
 layout_mode = 1

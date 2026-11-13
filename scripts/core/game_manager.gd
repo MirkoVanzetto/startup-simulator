@@ -8,13 +8,16 @@ enum GameState {
 	DIALOGUE = 3,
 	MINIGAME = 4,
 	PAUSED = 5,
-	SHOP = 6
+	SHOP = 6,
+	INVENTORY = 7,
+	MAP = 8
 }
 
 var current_state: GameState = GameState.MAIN_MENU
 var previous_state: GameState = GameState.FIRST_PERSON
 var player_node: Node = null
 var current_interactive_target: Node = null
+var active_waypoint: Dictionary = {} # {"id": String, "name": String, "pos": Vector3}
 
 # Startup progression flags
 var company_tier: int = 1 # 1: Freelance nel Garage, 2: Startup Emergente, 3: Software House Strutturata, 4: Tech Company & Server Room
@@ -44,25 +47,95 @@ func change_state(new_state: GameState) -> void:
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 		GameState.FIRST_PERSON:
 			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-		GameState.COMPUTER, GameState.DIALOGUE, GameState.MINIGAME, GameState.PAUSED, GameState.SHOP:
+		GameState.COMPUTER, GameState.DIALOGUE, GameState.MINIGAME, GameState.PAUSED, GameState.SHOP, GameState.INVENTORY, GameState.MAP:
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 			
 	EventBus.game_state_changed.emit(current_state, previous_state)
+
+func set_waypoint(poi_id: String, poi_name: String, world_pos: Vector3) -> void:
+	active_waypoint = {
+		"id": poi_id,
+		"name": poi_name,
+		"pos": world_pos
+	}
+	EventBus.waypoint_changed.emit(active_waypoint.duplicate())
+
+func clear_waypoint() -> void:
+	active_waypoint = {}
+	EventBus.waypoint_changed.emit({})
+
+func serialize_waypoint() -> Dictionary:
+	if active_waypoint.is_empty():
+		return {}
+	var p: Vector3 = active_waypoint.get("pos", Vector3.ZERO)
+	return {
+		"id": str(active_waypoint.get("id", "")),
+		"name": str(active_waypoint.get("name", "")),
+		"pos": [p.x, p.y, p.z]
+	}
+
+func deserialize_waypoint(data: Dictionary) -> void:
+	if data.is_empty() or not data.has("id") or str(data.get("id", "")) == "":
+		clear_waypoint()
+		return
+	var arr: Array = data.get("pos", [0.0, 0.0, 0.0])
+	var pos := Vector3(
+		float(arr[0]) if arr.size() > 0 else 0.0,
+		float(arr[1]) if arr.size() > 1 else 0.0,
+		float(arr[2]) if arr.size() > 2 else 0.0
+	)
+	set_waypoint(str(data.get("id", "")), str(data.get("name", "")), pos)
+
+func get_recommended_quest_poi_id() -> String:
+	if not ContractManager.is_contract_completed("pizzeria_da_mario"):
+		var tut := ContractManager.get_tutorial_contract()
+		return "pizzeria_mario" if tut.get("status", "available") == "available" else "studio"
+	if studio_upgrades_installed.is_empty():
+		return "studio"
+	if not ContractManager.is_contract_completed("caffe_san_carlo"):
+		var cs := ContractManager.get_contract("caffe_san_carlo")
+		return "caffe_san_carlo" if cs.get("status", "available") == "available" else "studio"
+	if not ContractManager.is_contract_completed("elettronica_to"):
+		var et := ContractManager.get_contract("elettronica_to")
+		return "elettronica_to" if et.get("status", "available") == "available" else "studio"
+	if company_tier < 2:
+		return "studio"
+	var fac := ContractManager.get_factory_progress_summary()
+	if not bool(fac["accepted"]) and not bool(fac["completed"]):
+		return "officina_bellini"
+	if bool(fac["accepted"]) and not bool(fac["completed"]):
+		if not bool(fac["all_scouted"]):
+			return "officina_bellini"
+		if bool(fac["wifi_mounted"]) and not bool(fac["wifi_done"]):
+			return "studio"
+		if not bool(fac["wifi_done"]) and not ShopManager.has_hardware("hw_wifi_router", 1):
+			return "elettronica_to"
+		if not bool(fac["server_done"]) and not ShopManager.has_hardware("hw_server_tower", 1):
+			return "elettronica_to"
+		if not bool(fac["pcs_done"]) and not ShopManager.has_hardware("hw_workstation_pc", 2):
+			return "elettronica_to"
+		if not bool(fac["wifi_done"]) or not bool(fac["server_done"]) or not bool(fac["pcs_done"]):
+			return "officina_bellini"
+		return "studio"
+	return "studio"
 
 func start_new_game() -> void:
 	company_tier = 1
 	studio_upgrades_installed.clear()
 	reputation_points = 0
 	days_elapsed = 1
+	active_waypoint.clear()
 	NeedsManager.reset()
 	ShopManager.reset()
+	ShopManager.grant_starter_kit()
 	FameManager.reset()
 	EmployeeManager.reset()
 	ServerRackManager.reset()
 	EconomyManager.reset_economy(250.0) # Modest starting capital: 250 EUR
 	ContractManager.init_tutorial_contract()
 	change_state(GameState.FIRST_PERSON)
-	EventBus.notification_posted.emit("Nuova Avventura", "Benvenuto nel tuo studio a Torino! Controlla il laptop.", "info")
+	EventBus.waypoint_changed.emit({})
+	EventBus.notification_posted.emit("Nuova Avventura", "Benvenuto nel tuo studio a Torino! Controlla il laptop ([TAB] Zaino · [CAPS] Mappa).", "info")
 
 func _on_computer_opened() -> void:
 	change_state(GameState.COMPUTER)

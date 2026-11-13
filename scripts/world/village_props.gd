@@ -365,8 +365,10 @@ static func add_factory_building(sm: StyleMesh, center: Vector3, w: float = 12.0
 	var side_w := (w - door_w) * 0.5
 
 	var m := StyleMesh.new()
-	# Pavimento industriale top Y = 0.04 + rampa/soglia dolce verso la piazza
+	# Pavimento industriale top Y = 0.04 + pedana metallica zona CNC/Server + rampa dolce verso la piazza
 	m.box("tile_gray", Vector3(0, 0.02, 0), Vector3(w, 0.04, d), {"col": true, "surface": "tile"})
+	m.box("steel", Vector3(-0.8, 0.022, -3.25), Vector3(1.85, 0.04, 1.55), {"col": true, "surface": "metal"})
+	m.box("steel", Vector3(-3.0, 0.022, -2.2), Vector3(1.70, 0.04, 1.90), {"col": true, "surface": "metal"})
 	m.box("stone_trim", Vector3(0, 0.02, d * 0.5 + 0.18), Vector3(door_w + 0.2, 0.04, 0.36), {"col": true, "surface": "stone"})
 	# Soffitto e tetto a capanna industriale
 	m.box("metal_panel", Vector3(0, h + 0.06, 0), Vector3(w, 0.12, d), {"col": true})

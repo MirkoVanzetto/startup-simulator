@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://v11gprunner01"]
+
+[ext_resource type="Script" path="res://tests/v1_1_gameplay_tests.gd" id="1_v11"]
+
+[node name="V11GameplayRunner" type="Node"]
+script = ExtResource("1_v11")

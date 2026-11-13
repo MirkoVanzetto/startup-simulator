@@ -341,6 +341,8 @@ func complete_marketplace_contract(contract_id: String) -> bool:
 		var reward = float(c["budget"]) * float(c.get("fame_bonus", 1.0))
 		if EmployeeManager.is_employee_hired("emp_marco"):
 			reward *= 1.20
+		if c.get("execution_type", "") == "netshield" and ShopManager.has_gadget("gadget_scanner_wifi"):
+			reward *= 1.10
 
 		var rep = int(c["reputation_reward"])
 		completed_contracts.append(contract_id)
@@ -449,7 +451,8 @@ func scout_factory_zone(zone_id: String, zone_title: String = "") -> bool:
 	GameManager.reputation_points += 2
 	var label := zone_title if zone_title != "" else zone_id
 	if is_factory_all_scouted():
-		GameManager.reputation_points += 4
+		var rep_bonus: int = 5 if ShopManager.has_gadget("gadget_scanner_wifi") else 4
+		GameManager.reputation_points += rep_bonus
 		EventBus.notification_posted.emit(
 			"Sopralluogo Officina Completo (4/4)!",
 			"Rilievo terminato (%s). Puoi ora installare Router Wi-Fi, Server Xeon e 2 PC da Elettronica TO!" % label,
@@ -496,6 +499,8 @@ func complete_factory_wifi_netshield() -> bool:
 	var pay := 350.0
 	if EmployeeManager.is_employee_hired("emp_marco"):
 		pay *= 1.20
+	if ShopManager.has_gadget("gadget_scanner_wifi"):
+		pay *= 1.10
 	EconomyManager.earn(pay, "Officina Bellini: Configurazione Wi-Fi 6 & VLAN")
 	GameManager.reputation_points += 12
 	EventBus.contract_completed.emit("factory_bellini_wifi", pay, 12)

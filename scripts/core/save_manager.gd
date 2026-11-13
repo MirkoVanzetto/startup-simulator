@@ -43,7 +43,8 @@ func save_game() -> bool:
 		"placed_furniture": FurniturePlacementManagerScript.get_placed_furniture(),
 		"needs": NeedsManager.serialize(),
 		"shops": ShopManager.serialize(),
-		"fame": FameManager.serialize()
+		"fame": FameManager.serialize(),
+		"waypoint": GameManager.serialize_waypoint()
 	}
 	
 	var json_string = JSON.stringify(save_dict, "\t")
@@ -142,6 +143,10 @@ func load_game() -> bool:
 		FameManager.deserialize(data["fame"])
 	else:
 		FameManager.reset()
+	if data.has("waypoint") and data["waypoint"] is Dictionary:
+		GameManager.deserialize_waypoint(data["waypoint"])
+	else:
+		GameManager.clear_waypoint()
 		
 	GameManager.change_state(GameManager.GameState.FIRST_PERSON)
 	EventBus.notification_posted.emit("Partita Caricata", "Bentornato nella tua startup!", "success")

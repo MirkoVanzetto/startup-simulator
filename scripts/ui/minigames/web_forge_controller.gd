@@ -489,6 +489,10 @@ func _calculate_compilation_speed() -> void:
 		duration -= 2.5
 		boosts.append("Sara Dev (-2.5s)")
 		
+	if ShopManager and ShopManager.has_gadget("gadget_scanner_wifi"):
+		duration -= 0.6
+		boosts.append("Scanner Wi-Fi 6 (-0.6s)")
+		
 	compile_target_duration = maxf(1.2, duration)
 	
 	if boosts.is_empty():

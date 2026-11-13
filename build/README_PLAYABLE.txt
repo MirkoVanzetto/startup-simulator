@@ -1,5 +1,5 @@
 ================================================================================
-STARTUP SIMULATOR — v1.0.0 "BORGO VALDOCCO & WEBFORGE 4.0"
+STARTUP SIMULATOR — v1.1.0 "ZAINO, MAPPA & FOLEY EDITION"
 Release Windows x86_64
 ================================================================================
 
@@ -7,54 +7,51 @@ Benvenuto in STARTUP SIMULATOR!
 Un simulatore gestionale e di vita in prima persona 3D ambientato tra Borgo
 San Carlo e Borgo Valdocco a Torino.
 
-NOVITA' DELLA VERSIONE 1.0.0:
+NOVITA' DELLA VERSIONE 1.1.0:
 --------------------------------------------------------------------------------
-1. ESPANSIONE 3D VERSO EST: BORGO VALDOCCO E OFFICINA MECCANICA BELLINI:
-   - Nuove indicazioni e strada carrabile verso Est dal Borgo San Carlo oltre
-     il portale in pietra, con furgone delle consegne, pozzo, alberi e case.
-   - Nuovo maxicliente visitabile in prima persona: Officina Meccanica Bellini.
-   - Parla con l'Ing. Gianluca Bellini, perlustra le 4 zone del capannone
-     (Ingresso, Magazzino, Ufficio, Vetrina) e installa fisicamente Router
-     Wi-Fi 6 + VLAN NetShield, Portale B2B WebForge, Server Xeon e 2x PC CAD
-     per riscuotere il maxibonus finale (+€ 1.500 e +40 Reputazione).
+1. INVENTARIO PERSONALE & DOTAZIONI [TAB]:
+   - Nuovo pannello Zaino & Dotazioni accessibile ovunque premendo TAB.
+   - Nuova Partita include un Kit Colazione iniziale nello zaino (1x Cornetto
+     e 1x Espresso) per iniziare subito in borgo.
+   - Nuovo pulsante '+ Zaino' nei negozi di Borgo San Carlo (Pizzeria, Forno,
+     Alimentari, Caffe', Edicola, Frigo studio) e nuovi snack da viaggio
+     (Thermos Bicerin, Barretta Proteica Tech) consumabili sul campo in
+     qualsiasi momento.
+   - Sezione Hardware B2B integrata (scorte in magazzino vs componenti
+     richiesti dalle commesse attive + segnavia rapido per Elettronica TO o
+     Officina Bellini).
+   - Due nuovi Gadget Permanenti da Elettronica TO (Davide):
+     * Sneakers Tech Antiscivolo (+18% velocita' di camminata e scatto).
+     * Analizzatore Spettro Wi-Fi 6 (-0.6s build WebForge, +10% premi
+       NetShield e +1 Reputazione extra al rilievo completo in Officina).
 
-2. ACQUISTO COMPONENTI HARDWARE E CONSEGNE B2B:
-   - Da Elettronica TO (banco in borgo) e su TorinoHardware (TO-OS) ora puoi
-     acquistare Router Wi-Fi 6, Server Tower Xeon, Workstation PC e Firewall UTM.
-   - Sconto Partner permanente del -20% da Davide dopo la sua quest storia.
-   - Freelance Hub completamente interattivo: esamina i bandi B2B, accetta i
-     contratti, lancia WebForge / NetShield direttamente oppure consegna
-     l'hardware acquistato in magazzino.
+2. MAPPA DEL TERRITORIO & BUSSOLA SEGNAVIA [CAPS LOCK / M]:
+   - Nuova mappa interattiva 2D di Borgo San Carlo, Viale Est, Borgo Valdocco
+     e Officina Meccanica Bellini apribile con CAPS LOCK (o M).
+   - Cursore live con posizione e direzione del giocatore (cono visivo), filtri
+     vista (Tutto / San Carlo / Valdocco) e anello pulsante sull'obiettivo
+     raccomandato della storia.
+   - Sistema Waypoint / Segnavia: clicca un edificio (o "Segna Obiettivo
+     Attuale") per fissare la meta nella nuova Bussola HUD con distanza in
+     metri, freccia direzionale dinamica e notifica automatica all'arrivo.
 
-3. WEBFORGE 4.0 REINVENTATO DA ZERO:
-   - Niente spunte gratis ne' suggerimenti spoiler sui match: interpreta il brief
-     naturale del cliente (oppure assumi Sara per avere consigli mirati).
-   - Palette neutra iniziale, tab Anteprima Desktop/Mobile interattiva e nuova
-     tab "Code Debug" con 3 ticket reali (Bundle CSS/JS, Pipeline WebP, SEO).
-   - Compilazione basata su timer reale velocizzabile con gli upgrade Studio e
-     con Sara Bellini in team.
-
-4. LEAD PERIODICI E RUOLI REALI DEI DIPENDENTI:
-   - Flusso offerte Freelance Hub bilanciato nel tempo (nessun affollamento al
-     Day 1; ricerca periodica ogni 12h -> 6h -> 2h avanzando nel gioco).
-   - Luca Vianello (Client Scout): trova nuovi clienti su Freelance Hub ogni 2h,
-     porta la bacheca a 5 slot, scopre subito +2 bandi e negozia budget +15%.
-   - Sara Bellini (Full-Stack & DevOps): -2.5s su ogni build WebForge, hint
-     nei ticket di debug, +35% ricavi Rack e protezione zero-surriscaldamento.
-   - Marco Ferri (B2B Account Closer): +20% compenso finale alla consegna.
-
-5. FIX GRAFICI E STABILITA':
-   - Risolto il difetto della fascia sulla porta esterna dello Studio Tech.
-   - Interfaccia TO-OS e WebForge interamente contenute anche a 800x600 e
-     1024x520 senza sbordamenti laterali.
+3. REVISIONE TOTALE SUONI DEI PASSI E FOLEY 44.1 KHZ:
+   - Passi procedurali multi-stadio ad alta fedelta' (44.1 kHz): attacco tallone,
+     rullata punta, attrito suola e micro-grana distinta per 6 superfici
+     (erba, acciottolato/pietra, legno Studio, piastrelle negozi/capannone,
+     asfalto Viale Est e pedane metalliche Officina), con 6 varianti ciascuna.
+   - Doppio lettore audio alternato per zero tagli durante la corsa, falcate
+     legate alla distanza reale percorsa e nuovi suoni per salto e atterraggio.
 
 COMANDI:
 --------------------------------------------------------------------------------
-- WASD / Frecce : Movimento
-- Shift         : Corsa
-- Spazio        : Salto
-- E / Click SX  : Interagisci (laptop, letto, frigo, negozi, clienti, stazioni)
-- B             : Modalita' Arredo in Studio
-- ESC           : Pausa / Chiudi menu
+- WASD / Frecce     : Movimento
+- Shift             : Corsa
+- Spazio            : Salto
+- E / Click SX      : Interagisci (laptop, letto, frigo, negozi, clienti, stazioni)
+- TAB               : Apri / Chiudi Zaino & Dotazioni (in Decor Mode [B] cicla arredi)
+- CAPS LOCK / M     : Apri / Chiudi Mappa del Territorio & Segnavia
+- B                 : Modalita' Arredo in Studio
+- ESC               : Pausa / Chiudi menu
 
 Avvia StartupSimulator.exe per giocare!

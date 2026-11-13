@@ -22,6 +22,12 @@ func _ready() -> void:
 	ShopManager.fridge_changed.connect(func(): if visible and current_shop_id == "fridge": _rebuild_items())
 	if ShopManager.has_signal("hardware_changed"):
 		ShopManager.hardware_changed.connect(func(): if visible and ShopManager.is_hardware_shop(current_shop_id): _rebuild_items())
+	if ShopManager.has_signal("backpack_changed"):
+		ShopManager.backpack_changed.connect(func():
+			if visible:
+				_refresh_header()
+				_rebuild_items()
+		)
 	get_viewport().size_changed.connect(_fit_to_viewport)
 	_fit_to_viewport()
 
@@ -79,7 +85,7 @@ func _build_ui() -> void:
 	_close_btn.pressed.connect(close_shop)
 	header.add_child(_close_btn)
 
-	# Status bar (Saldo, Sconto, Fame/Energia)
+	# Status bar (Saldo, Sconto, Fame/Energia/Zaino)
 	var status_bar := HBoxContainer.new()
 	status_bar.add_theme_constant_override("separation", 12)
 	root_vbox.add_child(status_bar)
@@ -127,8 +133,8 @@ func _fit_to_viewport() -> void:
 	var vp := get_viewport_rect().size
 	if vp.x <= 0 or vp.y <= 0:
 		vp = Vector2(1280, 720)
-	var w := clampf(vp.x - 40.0, 320.0, 740.0)
-	var h := clampf(vp.y - 40.0, 260.0, 500.0)
+	var w := clampf(vp.x - 40.0, 320.0, 760.0)
+	var h := clampf(vp.y - 40.0, 260.0, 520.0)
 	_panel.custom_minimum_size = Vector2(w, h)
 	_panel.size = Vector2(w, h)
 
@@ -151,7 +157,7 @@ func _refresh_header() -> void:
 	_subtitle_lbl.text = ShopManager.get_shop_subtitle(current_shop_id)
 	_balance_lbl.text = "Saldo: € %0.2f" % EconomyManager.balance
 	if ShopManager.is_hardware_shop(current_shop_id):
-		_needs_lbl.text = "Magazzino Hardware: %d pz" % ShopManager.get_hardware_count()
+		_needs_lbl.text = "Hardware: %d pz · Gadget: %d/2" % [ShopManager.get_hardware_count(), ShopManager.owned_gadgets.size()]
 		var partner := ContractManager.is_contract_completed("elettronica_to")
 		var disc := FameManager.get_discount_percent()
 		if partner and disc > 0:
@@ -163,7 +169,11 @@ func _refresh_header() -> void:
 		else:
 			_discount_lbl.text = ""
 	else:
-		_needs_lbl.text = "Fame: %d%%   Energia: %d%%" % [int(roundf(NeedsManager.get_hunger())), int(roundf(NeedsManager.get_energy()))]
+		_needs_lbl.text = "Fame: %d%% · Energia: %d%% · Zaino: %d pz" % [
+			int(roundf(NeedsManager.get_hunger())),
+			int(roundf(NeedsManager.get_energy())),
+			ShopManager.get_backpack_count()
+		]
 		var disc := FameManager.get_discount_percent()
 		if current_shop_id == "fridge":
 			_discount_lbl.text = "Scorte personali"
@@ -181,10 +191,10 @@ func _rebuild_items() -> void:
 	var is_fridge := (current_shop_id == "fridge")
 	var is_hw := ShopManager.is_hardware_shop(current_shop_id)
 	var can_stock_fridge := ShopManager.is_fridge_stockable(current_shop_id)
-	var disc_pct := FameManager.get_discount_percent()
 
 	for item in items:
 		var item_id: String = str(item["id"])
+		var is_gadget: bool = bool(item.get("is_gadget", false))
 		var row_panel := PanelContainer.new()
 		var rs := StyleBoxFlat.new()
 		rs.bg_color = Color(0.16, 0.19, 0.25, 0.95)
@@ -194,7 +204,7 @@ func _rebuild_items() -> void:
 		_items_box.add_child(row_panel)
 
 		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 10)
+		row.add_theme_constant_override("separation", 8)
 		row_panel.add_child(row)
 
 		var info := VBoxContainer.new()
@@ -205,8 +215,14 @@ func _rebuild_items() -> void:
 		var stock_suffix := ""
 		if is_fridge:
 			stock_suffix = " (x%d)" % int(item.get("stock", 0))
+		elif is_gadget:
+			stock_suffix = " (Posseduto ✔)" if ShopManager.has_gadget(item_id) else " (Dotazione)"
 		elif is_hw:
 			stock_suffix = " (In magazzino: x%d)" % ShopManager.get_hardware_count(item_id)
+		else:
+			var bp_q := ShopManager.get_backpack_count(item_id)
+			if bp_q > 0:
+				stock_suffix = " (Zaino: x%d)" % bp_q
 		name_lbl.text = str(item["name"]) + stock_suffix
 		name_lbl.add_theme_font_size_override("font_size", 15)
 		info.add_child(name_lbl)
@@ -238,25 +254,51 @@ func _rebuild_items() -> void:
 				price_box.add_child(old_lbl)
 			var p_lbl := Label.new()
 			p_lbl.text = "€ %0.2f" % final_p
-			p_lbl.add_theme_font_size_override("font_size", 15)
+			p_lbl.add_theme_font_size_override("font_size", 14)
 			p_lbl.add_theme_color_override("font_color", Color(1.0, 0.86, 0.42))
 			price_box.add_child(p_lbl)
 
+		var is_portable_only: bool = bool(item.get("portable", false))
 		var buy_btn := Button.new()
-		buy_btn.text = "Consuma" if is_fridge else "Compra"
-		buy_btn.custom_minimum_size = Vector2(88, 34)
-		buy_btn.pressed.connect(func():
-			ShopManager.buy(current_shop_id, item_id)
-			_refresh_header()
-			if is_fridge or is_hw:
+		if is_gadget and ShopManager.has_gadget(item_id):
+			buy_btn.text = "Posseduto"
+			buy_btn.disabled = true
+			buy_btn.custom_minimum_size = Vector2(96, 34)
+		elif is_portable_only:
+			buy_btn.text = "+ Zaino"
+			buy_btn.custom_minimum_size = Vector2(82, 34)
+			buy_btn.pressed.connect(func():
+				ShopManager.buy_to_backpack(current_shop_id, item_id)
+				_refresh_header()
 				_rebuild_items()
-		)
+			)
+		else:
+			buy_btn.text = "Consuma" if is_fridge else ("Compra" if not is_hw else "Compra")
+			buy_btn.custom_minimum_size = Vector2(82, 34)
+			buy_btn.pressed.connect(func():
+				ShopManager.buy(current_shop_id, item_id)
+				_refresh_header()
+				if is_fridge or is_hw:
+					_rebuild_items()
+			)
 		row.add_child(buy_btn)
+
+		if not is_hw and not is_gadget and not is_portable_only:
+			var bp_btn := Button.new()
+			bp_btn.text = "+ Zaino"
+			bp_btn.tooltip_text = "Conserva nello Zaino [TAB] per consumarlo ovunque"
+			bp_btn.custom_minimum_size = Vector2(78, 34)
+			bp_btn.pressed.connect(func():
+				ShopManager.buy_to_backpack(current_shop_id, item_id)
+				_refresh_header()
+				_rebuild_items()
+			)
+			row.add_child(bp_btn)
 
 		if can_stock_fridge:
 			var fridge_btn := Button.new()
 			fridge_btn.text = "+ Frigo"
-			fridge_btn.custom_minimum_size = Vector2(78, 34)
+			fridge_btn.custom_minimum_size = Vector2(72, 34)
 			fridge_btn.pressed.connect(func():
 				ShopManager.buy_for_fridge(current_shop_id, item_id)
 				_refresh_header()

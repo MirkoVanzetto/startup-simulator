@@ -17,7 +17,14 @@ var step_interval: float = 0.45
 var is_moving: bool = false
 var ground_ray: RayCast3D = null
 
-const VALID_SURFACES: Array[String] = ["grass", "stone", "wood", "tile", "asphalt"]
+var _step_distance: float = 0.0
+var _left_foot_next: bool = true
+var _was_on_floor: bool = true
+var _peak_fall_speed: float = 0.0
+
+const VALID_SURFACES: Array[String] = ["grass", "stone", "wood", "tile", "asphalt", "metal"]
+const WALK_STRIDE_METERS: float = 1.68
+const SPRINT_STRIDE_METERS: float = 2.15
 
 func _ready() -> void:
 	GameManager.player_node = self
@@ -55,19 +62,24 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 		
-	# Gravity
+	# Gravity & jump
 	if not is_on_floor():
 		velocity.y -= gravity * delta
+		_peak_fall_speed = maxf(_peak_fall_speed, -velocity.y)
 	else:
 		if Input.is_action_just_pressed("jump"):
 			velocity.y = jump_velocity
+			SoundManager.play_jump()
+			_was_on_floor = false
+			_peak_fall_speed = 0.0
 			
 	# Movement input
 	var input_dir = Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
 	var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
 	var is_sprinting = Input.is_action_pressed("sprint") and NeedsManager.get_energy() > 0.0
-	var speed = (sprint_speed if is_sprinting else walk_speed) * NeedsManager.get_speed_multiplier()
+	var gadget_mult: float = 1.18 if ShopManager.has_gadget("gadget_scarpe_pro") else 1.0
+	var speed = (sprint_speed if is_sprinting else walk_speed) * NeedsManager.get_speed_multiplier() * gadget_mult
 	
 	if direction:
 		if is_sprinting and is_on_floor():
@@ -81,19 +93,30 @@ func _physics_process(delta: float) -> void:
 		is_moving = false
 		
 	move_and_slide()
+
+	var grounded_now := is_on_floor()
+	if grounded_now and not _was_on_floor and _peak_fall_speed > 2.2:
+		SoundManager.play_land(_detect_surface(), _peak_fall_speed)
+		_step_distance = 0.0
+	_peak_fall_speed = 0.0 if grounded_now else maxf(_peak_fall_speed, -velocity.y)
+	_was_on_floor = grounded_now
+
 	_handle_footsteps(delta, is_sprinting)
 	_handle_interaction_ray()
 
 func _handle_footsteps(delta: float, is_sprinting: bool) -> void:
-	if is_on_floor() and is_moving and velocity.length() > 0.8:
-		var current_interval = 0.36 if is_sprinting else 0.52
-		footstep_timer += delta
-		if footstep_timer >= current_interval:
-			footstep_timer = 0.0
-			var surface = _detect_surface()
-			SoundManager.play_footstep(surface)
+	var horiz_speed := Vector2(velocity.x, velocity.z).length()
+	if is_on_floor() and is_moving and horiz_speed > 0.8:
+		var stride := SPRINT_STRIDE_METERS if is_sprinting else WALK_STRIDE_METERS
+		_step_distance += horiz_speed * delta
+		if _step_distance >= stride:
+			_step_distance = fmod(_step_distance, stride)
+			var surface := _detect_surface()
+			SoundManager.play_footstep(surface, is_sprinting, _left_foot_next)
+			_left_foot_next = not _left_foot_next
 	else:
-		footstep_timer = 0.0
+		# Precarica 65% della falcata così appena ricominci a camminare il primo passo è reattivo
+		_step_distance = WALK_STRIDE_METERS * 0.65
 
 func _detect_surface() -> String:
 	# 1) Meta-tag 'surface' sul collider sotto i piedi (o su un suo antenato diretto)
@@ -109,9 +132,13 @@ func _detect_surface() -> String:
 						return tagged
 				node = node.get_parent()
 				depth += 1
-	# 2) Fallback: Studio is near origin Z < 2.5 (wood), Street is Z > 2.5 (stone), Pizzeria is Z > 10.0 (terracotta/stone)
-	if global_position.z < 2.3:
+	# 2) Fallback spaziale accurato (Studio legno, Negozi piastrelle, Viale Est asfalto, Borghi pietra)
+	if global_position.z < 2.3 and absf(global_position.x) < 4.0:
 		return "wood"
+	if global_position.x > 79.0 and global_position.x < 91.5 and absf(global_position.z - 27.5) < 6.0:
+		return "tile"
+	if global_position.x > 24.0 and global_position.x < 62.0 and absf(global_position.z - 28.0) < 2.8:
+		return "asphalt"
 	return "stone"
 
 func _handle_interaction_ray() -> void:

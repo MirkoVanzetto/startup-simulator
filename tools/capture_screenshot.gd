@@ -104,12 +104,44 @@ func _process(_delta: float) -> void:
 		EventBus.shop_opened.emit("alimentari")
 
 	if frame_count == 138:
-		_cap("startup_simulator_shop_menu.png", "Borgo ShopMenu Alimentari")
+		_cap("startup_simulator_shop_menu.png", "Borgo ShopMenu Alimentari (+ Zaino)")
+		# Stock backpack & gadgets, then capture Inventory [Tab]
+		ShopManager.buy_to_backpack("cafe", "thermos_bicerin")
+		ShopManager.buy_to_backpack("edicola", "barretta_tech")
+		ShopManager.buy_hardware("hw_wifi_router", 1)
+		ShopManager.buy_gadget("elettronica_componenti", "gadget_scarpe_pro")
+		ShopManager.buy_gadget("elettronica_componenti", "gadget_scanner_wifi")
+		var inv = get_tree().root.find_child("InventoryMenu", true, false)
+		if inv:
+			inv.open_inventory()
+
+	if frame_count == 148:
+		_cap("startup_simulator_inventory.png", "Zaino & Dotazioni Startup [Tab]")
+		var inv = get_tree().root.find_child("InventoryMenu", true, false)
+		if inv:
+			inv.visible = false
+		_set_cam(Vector3(15.5, 1.85, 28.0), Vector3(0, -90, 0), Vector3(-5, 0, 0))
+		var wmap = get_tree().root.find_child("WorldMapMenu", true, false)
+		if wmap:
+			wmap.open_map()
+			wmap.select_poi("officina_bellini")
+			wmap._on_set_waypoint_pressed()
+
+	if frame_count == 158:
+		_cap("startup_simulator_world_map.png", "Mappa del Territorio [CapsLock / M]")
+		var wmap = get_tree().root.find_child("WorldMapMenu", true, false)
+		if wmap:
+			wmap.close_map()
+		_set_cam(Vector3(15.5, 1.85, 28.0), Vector3(0, -90, 0), Vector3(-5, 0, 0))
+
+	if frame_count == 168:
+		_cap("startup_simulator_hud_waypoint.png", "HUD Segnavia Bussola & Comandi Rapidi")
+		GameManager.clear_waypoint()
 		# Also capture Hardware Shop Menu (Elettronica TO Componenti)
 		ShopManager.buy_hardware("hw_wifi_router", 1)
 		EventBus.shop_opened.emit("elettronica_componenti")
 
-	if frame_count == 148:
+	if frame_count == 178:
 		_cap("startup_simulator_shop_hardware.png", "Borgo Hardware Component ShopMenu")
 		# Populate realistic mid-game Freelance Hub state before TO-OS captures
 		ContractManager.advance_tutorial_to_in_progress()
@@ -125,25 +157,25 @@ func _process(_delta: float) -> void:
 		if comp:
 			comp._open_window(comp.freelance_window)
 
-	if frame_count == 158:
+	if frame_count == 188:
 		_cap("startup_simulator_freelance_hub.png", "TO-OS Freelance Hub Cards & Officina Tracker")
 		var comp = get_tree().root.find_child("ComputerScreen", true, false)
 		if comp:
 			comp._open_window(comp.rack_window)
 
-	if frame_count == 168:
+	if frame_count == 198:
 		_cap("startup_simulator_rack_manager.png", "TO-OS Rack Manager")
 		var comp = get_tree().root.find_child("ComputerScreen", true, false)
 		if comp:
 			comp._open_window(comp.shop_window)
 
-	if frame_count == 178:
+	if frame_count == 208:
 		_cap("startup_simulator_shop.png", "TorinoHardware & Client Hardware Grid")
 		var comp = get_tree().root.find_child("ComputerScreen", true, false)
 		if comp:
 			comp._open_window(comp.talent_window)
 
-	if frame_count == 188:
+	if frame_count == 218:
 		_cap("startup_simulator_talent_hub.png", "Talent Hub HR")
 		# Open WebForge 4.0 on Officina Bellini Web project + Sara Debug hints
 		EmployeeManager.fire_employee("emp_luca")
@@ -151,7 +183,7 @@ func _process(_delta: float) -> void:
 		ContractManager.preferred_webforge_contract_id = "factory_bellini_web"
 		EventBus.minigame_started.emit("web_forge")
 
-	if frame_count == 198:
+	if frame_count == 228:
 		var wf = get_tree().root.find_child("WebForge", true, false)
 		if wf:
 			wf._on_palette_selected(5)
@@ -159,21 +191,21 @@ func _process(_delta: float) -> void:
 			wf._on_component_chosen("hero", "hero_officina")
 			wf._on_component_chosen("body", "body_officina")
 
-	if frame_count == 206:
+	if frame_count == 236:
 		_cap("startup_simulator_webforge.png", "WebForge 4.0 Spoiler-Free & Responsive Preview")
 		var wf = get_tree().root.find_child("WebForge", true, false)
 		if wf:
 			wf._on_opt_minify_pressed()
 
-	if frame_count == 216:
+	if frame_count == 246:
 		_cap("startup_simulator_webforge_debug.png", "WebForge 4.0 Code Debug Tickets")
 		# Firewall Router (should show Officina Bellini VLAN too!)
 		EventBus.minigame_started.emit("firewall_router")
 
-	if frame_count == 228:
+	if frame_count == 258:
 		_cap("startup_simulator_firewall.png", "NetShield Firewall Router")
 		EventBus.computer_opened.emit()
 
-	if frame_count == 240:
+	if frame_count == 270:
 		_cap("startup_simulator_to_os.png", "TO-OS Desktop")
 		get_tree().quit(0)

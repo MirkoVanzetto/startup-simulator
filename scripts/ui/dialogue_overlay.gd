@@ -64,7 +64,7 @@ func _on_choice_clicked(action: String) -> void:
 		"details":
 			lines_queue = [
 				"Nel dettaglio: voglio che il cliente veda il logo della nostra Mole Antonelliana in alto, la lista delle nostre specialità come la Margherita DOC e la pizza al Tartufo, i nostri orari di apertura e un bel pulsante per prenotare un tavolo online!",
-				"Se il sito è completo ed elegante, i € 650 sono tuoi all'istante!"
+				"Se il sito è completo ed elegante, i € 260 sono tuoi all'istante!"
 			]
 			active_choices = [
 				{"text": "Chiarissimo Mario, mi metto subito al lavoro!", "action": "accept"}
@@ -88,7 +88,7 @@ func _on_choice_clicked(action: String) -> void:
 		"details_tech_shop":
 			lines_queue = [
 				"La nostra architettura richiede: cluster database replicato in tempo reale, catalogo componenti hardware sincronizzato, e backup incrementale notturno sul tuo rack server.",
-				"Consegnata la migrazione, avrai € 1.850 e il 20% di sconto fisso su tutto l'hardware per sempre!"
+				"Consegnata la migrazione, avrai € 860 e il 20% di sconto fisso su tutto l'hardware per sempre!"
 			]
 			active_choices = [
 				{"text": "Ottimo Davide, mi metto all'opera sul codice!", "action": "accept_tech_shop"}
@@ -103,12 +103,27 @@ func _on_choice_clicked(action: String) -> void:
 		"details_factory_bellini":
 			lines_queue = [
 				"Prima di ordinare materiali, perlustra tutte e 4 le zone della fabbrica: Reparto CNC (Wi-Fi), Magazzino (Server), Ufficio Tecnico (2 PC) e Vetrina Catalogo (Sito Web).",
-				"Poi potrai acquistare i componenti da Elettronica TO e installarli fisicamente qui o configurare rete e sito!"
+				"Dopo il sopralluogo vedrai gli ologrammi ciano dei componenti in officina e potrai installarli o configurare rete e sito!"
 			]
 			active_choices = [
 				{"text": "Perfetto Ing. Bellini! Inizio subito il sopralluogo dell'officina.", "action": "accept_factory_bellini"}
 			]
 			_show_next_line()
+		"start_sidejob_volantinaggio":
+			_close_dialogue()
+			SideJobManager.start_job("volantinaggio")
+		"start_sidejob_corriere_espresso":
+			_close_dialogue()
+			SideJobManager.start_job("corriere_espresso")
+		"start_sidejob_riparazione_rapida":
+			_close_dialogue()
+			SideJobManager.start_job("riparazione_rapida")
+		"start_sidejob_logistica_merci":
+			_close_dialogue()
+			SideJobManager.start_job("logistica_merci")
+		"cancel_sidejob":
+			_close_dialogue()
+			SideJobManager.cancel_active_job()
 		"close", _:
 			_close_dialogue()
 

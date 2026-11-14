@@ -53,23 +53,23 @@ func get_prompt() -> String:
 			if bool(fac["wifi_mounted"]):
 				return "⚡ Router montato — Configura VLAN su NetShield (TO-OS)"
 			if not bool(fac["all_scouted"]):
-				return "[E] Router Wi-Fi 6 (Prima perlustra 4/4 zone: %d/4)" % int(fac["scouted_count"])
+				return "[E] Ologramma Router Wi-Fi 6 (Perlustra prima 4/4 zone: %d/4)" % int(fac["scouted_count"])
 			var qty := ShopManager.get_hardware_count("hw_wifi_router")
-			return "[E] Monta Router Wi-Fi 6 (In stock: %d/1)" % qty
+			return "[E] Installa Router Wi-Fi 6 sull'Ologramma (Stock: %d/1 · Premio € 290)" % qty
 		"server":
 			if bool(fac["server_done"]):
 				return "✔ Server Xeon RAID-10 Attivo"
 			if not bool(fac["all_scouted"]):
-				return "[E] Banco Server (Prima perlustra 4/4 zone: %d/4)" % int(fac["scouted_count"])
+				return "[E] Ologramma Banco Server (Perlustra prima 4/4 zone: %d/4)" % int(fac["scouted_count"])
 			var sqty := ShopManager.get_hardware_count("hw_server_tower")
-			return "[E] Installa Server Tower Xeon (Stock: %d/1 · € 820)" % sqty
+			return "[E] Installa Server Tower Xeon sull'Ologramma (Stock: %d/1 · Premio € 740)" % sqty
 		"pcs":
 			if bool(fac["pcs_done"]):
 				return "✔ 2 Workstation PC CAD Operative"
 			if not bool(fac["all_scouted"]):
-				return "[E] Ufficio PC (Prima perlustra 4/4 zone: %d/4)" % int(fac["scouted_count"])
+				return "[E] Ologramma Ufficio PC (Perlustra prima 4/4 zone: %d/4)" % int(fac["scouted_count"])
 			var pqty := ShopManager.get_hardware_count("hw_workstation_pc")
-			return "[E] Installa 2x Workstation PC (Stock: %d/2 · € 960)" % pqty
+			return "[E] Installa 2x Workstation PC sull'Ologramma (Stock: %d/2 · Premio € 820)" % pqty
 		_:
 			return prompt_message
 

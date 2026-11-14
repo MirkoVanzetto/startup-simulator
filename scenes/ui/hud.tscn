@@ -40,6 +40,22 @@ content_margin_top = 6.0
 content_margin_right = 10.0
 content_margin_bottom = 6.0
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sidejob"]
+bg_color = Color(0.08, 0.14, 0.10, 0.90)
+border_width_left = 2
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.32, 0.95, 0.56, 0.85)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 10.0
+content_margin_top = 4.0
+content_margin_right = 10.0
+content_margin_bottom = 4.0
+
 [node name="HUD" type="Control"]
 layout_mode = 3
 anchors_preset = 15
@@ -124,7 +140,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_dark")
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.95, 0.55, 1)
 theme_override_font_sizes/font_size = 17
-text = "€ 250.00"
+text = "€ 120.00"
 
 [node name="ReputationPanel" type="PanelContainer" parent="TopRight/HBox"]
 layout_mode = 2
@@ -139,16 +155,16 @@ text = "★ 0 Rep"
 
 [node name="TopLeft" type="MarginContainer" parent="."]
 layout_mode = 1
-offset_right = 340.0
+offset_right = 330.0
 offset_bottom = 170.0
 mouse_filter = 2
 theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
+theme_override_constants/margin_top = 14
 
 [node name="TopLeftVBox" type="VBoxContainer" parent="TopLeft"]
 layout_mode = 2
 mouse_filter = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 6
 
 [node name="ObjectivePanel" type="PanelContainer" parent="TopLeft/TopLeftVBox"]
 layout_mode = 2
@@ -158,19 +174,19 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_dark")
 [node name="VBox" type="VBoxContainer" parent="TopLeft/TopLeftVBox/ObjectivePanel"]
 layout_mode = 2
 mouse_filter = 2
-theme_override_constants/separation = 4
+theme_override_constants/separation = 3
 
 [node name="ObjectiveHeader" type="Label" parent="TopLeft/TopLeftVBox/ObjectivePanel/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 12
 text = "OBIETTIVO ATTUALE"
 
 [node name="ObjectiveText" type="Label" parent="TopLeft/TopLeftVBox/ObjectivePanel/VBox"]
-custom_minimum_size = Vector2(280, 0)
+custom_minimum_size = Vector2(276, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.9, 0.95, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 13
 text = "Controlla il laptop sul tuo banco di lavoro."
 autowrap_mode = 3
 
@@ -188,15 +204,40 @@ theme_override_constants/separation = 2
 [node name="WaypointHeader" type="Label" parent="TopLeft/TopLeftVBox/WaypointPanel/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.32, 0.92, 1, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 10
 text = "SEGNAVIA BUSSOLA"
 
 [node name="WaypointText" type="Label" parent="TopLeft/TopLeftVBox/WaypointPanel/VBox"]
-custom_minimum_size = Vector2(280, 0)
+custom_minimum_size = Vector2(276, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 0.98, 1, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 11
 text = "⚑ Destinazione · 0 m ↑"
+autowrap_mode = 3
+
+[node name="SideJobPanel" type="PanelContainer" parent="TopLeft/TopLeftVBox"]
+visible = false
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_sidejob")
+
+[node name="VBox" type="VBoxContainer" parent="TopLeft/TopLeftVBox/SideJobPanel"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 2
+
+[node name="SideJobHeader" type="Label" parent="TopLeft/TopLeftVBox/SideJobPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.36, 0.96, 0.58, 1)
+theme_override_font_sizes/font_size = 10
+text = "LAVORETTO RAPIDO (0/5)"
+
+[node name="SideJobText" type="Label" parent="TopLeft/TopLeftVBox/SideJobPanel/VBox"]
+custom_minimum_size = Vector2(276, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92, 0.98, 0.94, 1)
+theme_override_font_sizes/font_size = 11
+text = "Vai al prossimo punto indicato."
 autowrap_mode = 3
 
 [node name="BottomLeft" type="MarginContainer" parent="."]

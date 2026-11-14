@@ -19,7 +19,7 @@ func save_game() -> bool:
 		player_rot = GameManager.player_node.rotation.y
 		
 	var save_dict: Dictionary = {
-		"version": "1.0.0",
+		"version": "1.2.0",
 		"timestamp": Time.get_datetime_string_from_system(),
 		"economy": {
 			"balance": EconomyManager.balance,
@@ -44,6 +44,7 @@ func save_game() -> bool:
 		"needs": NeedsManager.serialize(),
 		"shops": ShopManager.serialize(),
 		"fame": FameManager.serialize(),
+		"side_jobs": SideJobManager.serialize(),
 		"waypoint": GameManager.serialize_waypoint()
 	}
 	
@@ -84,7 +85,7 @@ func load_game() -> bool:
 	
 	# Restore Economy
 	if data.has("economy"):
-		EconomyManager.balance = float(data["economy"].get("balance", 250.0))
+		EconomyManager.balance = float(data["economy"].get("balance", 120.0))
 		EconomyManager.ledger.clear()
 		for item in data["economy"].get("ledger", []):
 			if item is Dictionary:
@@ -147,6 +148,10 @@ func load_game() -> bool:
 		GameManager.deserialize_waypoint(data["waypoint"])
 	else:
 		GameManager.clear_waypoint()
+	if data.has("side_jobs") and data["side_jobs"] is Dictionary:
+		SideJobManager.deserialize(data["side_jobs"])
+	else:
+		SideJobManager.reset()
 		
 	GameManager.change_state(GameManager.GameState.FIRST_PERSON)
 	EventBus.notification_posted.emit("Partita Caricata", "Bentornato nella tua startup!", "success")

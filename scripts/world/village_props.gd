@@ -140,6 +140,12 @@ static func add_house(sm: StyleMesh, center: Vector3, w: float, d: float, floors
 	# Zoccolo in pietra + corpo principale
 	m.box("ashlar", Vector3(0, 0.28, 0), Vector3(w + 0.06, 0.56, d + 0.06))
 	m.box(wall_key, Vector3(0, 0.56 + (h - 0.56) * 0.5, 0), Vector3(w, h - 0.56, d), {"col": true})
+	# Bugnato d'angolo in pietra chiaro (dettaglio architettonico torinese)
+	for qx in [-w * 0.5 + 0.04, w * 0.5 - 0.04]:
+		for qz in [-d * 0.5 + 0.04, d * 0.5 - 0.04]:
+			for qi in range(int(floor((h - 0.7) / 0.65))):
+				var qy := 0.85 + float(qi) * 0.65
+				m.box("stone_trim", Vector3(qx, qy, qz), Vector3(0.24, 0.30, 0.24))
 	# Cornicione sottotetto
 	m.box("stone_trim", Vector3(0, h + 0.07, 0), Vector3(w + 0.22, 0.14, d + 0.22))
 	# Tetto a capanna
@@ -149,7 +155,7 @@ static func add_house(sm: StyleMesh, center: Vector3, w: float, d: float, floors
 	# Porta frontale (+Z)
 	m.box("wood_dark", Vector3(0, 1.05, d * 0.5 + 0.03), Vector3(1.08, 2.1, 0.08))
 	m.box("stone_trim", Vector3(0, 2.16, d * 0.5 + 0.05), Vector3(1.28, 0.14, 0.10))
-	# Finestre su ogni piano
+	# Finestre su ogni piano con fioriere
 	var cols: int = clampi(int(floor(w / 2.6)), 1, 3)
 	for f in range(floors):
 		var wy := 1.45 + float(f) * 2.75
@@ -157,17 +163,23 @@ static func add_house(sm: StyleMesh, center: Vector3, w: float, d: float, floors
 			var wx := (float(ci) - float(cols - 1) * 0.5) * 2.3
 			if f == 0 and absf(wx) < 0.9:
 				continue
-			_add_window(m, Vector3(wx, wy, d * 0.5), 0.0, shutter_key)
-			_add_window(m, Vector3(wx, wy, -d * 0.5), PI, shutter_key)
+			var flw := "flower_red" if (ci + f) % 2 == 0 else "flower_yellow"
+			_add_window(m, Vector3(wx, wy, d * 0.5), 0.0, shutter_key, flw)
+			_add_window(m, Vector3(wx, wy, -d * 0.5), PI, shutter_key, "")
 	_merge_transformed(sm, m, center, rot)
 
-static func _add_window(m: StyleMesh, pos: Vector3, rot: float, shutter_key: String) -> void:
+static func _add_window(m: StyleMesh, pos: Vector3, rot: float, shutter_key: String, flower_key: String = "") -> void:
 	var wm := StyleMesh.new()
 	wm.box("wood_dark", Vector3(0, 0, 0.02), Vector3(0.92, 1.14, 0.06))
 	wm.box("glass_warm", Vector3(0, 0, 0.04), Vector3(0.78, 0.98, 0.03))
 	wm.box("stone_trim", Vector3(0, -0.60, 0.08), Vector3(1.06, 0.10, 0.16))
 	wm.box(shutter_key, Vector3(-0.62, 0, 0.05), Vector3(0.28, 1.10, 0.05))
 	wm.box(shutter_key, Vector3(0.62, 0, 0.05), Vector3(0.28, 1.10, 0.05))
+	if flower_key != "":
+		wm.box("wood_dark", Vector3(0, -0.49, 0.12), Vector3(0.78, 0.14, 0.16))
+		wm.blob("leaves", Vector3(0, -0.39, 0.12), Vector3(0.32, 0.08, 0.08), 3, 6, 0.1, 3)
+		wm.blob(flower_key, Vector3(-0.18, -0.34, 0.13), Vector3(0.07, 0.06, 0.07), 3, 5, 0.08, 5)
+		wm.blob(flower_key, Vector3(0.16, -0.34, 0.13), Vector3(0.07, 0.06, 0.07), 3, 5, 0.08, 7)
 	_merge_transformed(m, wm, pos, rot)
 
 # ------------------------------------------------------------------ Bottega / Negozio accessibile (+Z fronte)
@@ -246,14 +258,20 @@ static func add_edicola(sm: StyleMesh, pos: Vector3, rot: float = 0.0) -> void:
 
 # ------------------------------------------------------------------ Fontana del Borgo
 static func add_fountain(sm: StyleMesh, pos: Vector3) -> void:
-	# Vasca ottagonale con collisione cilindrica
-	sm.cyl("stone_trim", pos, 2.15, 2.22, 0.58, 8, {"smooth": false})
-	sm.cyl("water", pos + Vector3(0, 0.42, 0), 1.88, 1.88, 0.06, 8, {"smooth": true})
+	# Vasca ottagonale con collisione cilindrica, specchio d'acqua visibile e bordo perimetrale
+	sm.cyl("stone_trim", pos, 2.15, 2.22, 0.36, 8, {"smooth": false})
+	for k in range(8):
+		var a := TAU * (float(k) + 0.5) / 8.0
+		var bp := pos + Vector3(cos(a) * 1.98, 0.46, sin(a) * 1.98)
+		var seg := StyleMesh.new()
+		seg.box("stone_trim", Vector3.ZERO, Vector3(0.36, 0.24, 1.62))
+		_merge_transformed(sm, seg, bp, -a)
+	sm.cyl("water", pos + Vector3(0, 0.40, 0), 1.84, 1.84, 0.07, 8, {"smooth": true})
 	sm.cyl("stone_trim", pos + Vector3(0, 0.45, 0), 0.52, 0.42, 0.85, 8, {"smooth": false})
-	sm.cyl("stone_trim", pos + Vector3(0, 1.25, 0), 0.88, 0.96, 0.18, 8, {"smooth": false})
-	sm.cyl("water", pos + Vector3(0, 1.40, 0), 0.72, 0.72, 0.05, 8, {"smooth": true})
-	sm.cyl("stone_trim", pos + Vector3(0, 1.42, 0), 0.22, 0.14, 0.55, 8, {"smooth": false})
-	sm.cyl("water", pos + Vector3(0, 1.92, 0), 0.10, 0.24, 0.35, 8, {"smooth": true})
+	sm.cyl("stone_trim", pos + Vector3(0, 1.25, 0), 0.88, 0.96, 0.16, 8, {"smooth": false})
+	sm.cyl("water", pos + Vector3(0, 1.42, 0), 0.72, 0.72, 0.05, 8, {"smooth": true})
+	sm.cyl("stone_trim", pos + Vector3(0, 1.45, 0), 0.22, 0.14, 0.55, 8, {"smooth": false})
+	sm.cyl("water", pos + Vector3(0, 1.95, 0), 0.10, 0.24, 0.35, 8, {"smooth": true})
 	sm.add_collider_cyl(pos + Vector3(0, 0.55, 0), 2.25, 1.1)
 
 # ------------------------------------------------------------------ Natura & Arredo Urbano
@@ -357,7 +375,7 @@ static func add_road_sign(sm: StyleMesh, pos: Vector3, rot: float = 0.0) -> void
 	_merge_transformed(sm, m, pos, rot)
 
 # ------------------------------------------------------------------ Officina Meccanica Bellini (accessibile, +Z fronte)
-## Costruisce uno stabilimento industriale accessibile 12.0 x 9.6m con reparto CNC, banco server e ufficio CAD.
+## Costruisce uno stabilimento industriale accessibile 12.0 x 9.6m con reparto CNC, banco server, capriate in acciaio e canaline.
 static func add_factory_building(sm: StyleMesh, center: Vector3, w: float = 12.0, d: float = 9.6, rot: float = 0.0) -> void:
 	var h := 3.8
 	var wt := 0.28
@@ -370,8 +388,23 @@ static func add_factory_building(sm: StyleMesh, center: Vector3, w: float = 12.0
 	m.box("steel", Vector3(-0.8, 0.022, -3.25), Vector3(1.85, 0.04, 1.55), {"col": true, "surface": "metal"})
 	m.box("steel", Vector3(-3.0, 0.022, -2.2), Vector3(1.70, 0.04, 1.90), {"col": true, "surface": "metal"})
 	m.box("stone_trim", Vector3(0, 0.02, d * 0.5 + 0.18), Vector3(door_w + 0.2, 0.04, 0.36), {"col": true, "surface": "stone"})
-	# Soffitto e tetto a capanna industriale
+	# Strisce gialle di sicurezza lungo il corridoio centrale interno
+	m.box("safety_yellow", Vector3(-1.68, 0.043, 0.35), Vector3(0.10, 0.006, 7.6))
+	m.box("safety_yellow", Vector3(1.68, 0.043, 0.35), Vector3(0.10, 0.006, 7.6))
+	m.box("safety_yellow", Vector3(0.0, 0.043, -3.45), Vector3(3.46, 0.006, 0.10))
+
+	# Soffitto, capriate strutturali in acciaio e tetto a capanna industriale
 	m.box("metal_panel", Vector3(0, h + 0.06, 0), Vector3(w, 0.12, d), {"col": true})
+	for tz in [-2.8, 0.0, 2.8]:
+		m.box("iron", Vector3(0, h - 0.18, tz), Vector3(w - wt * 2.0, 0.14, 0.16))
+		for sx in [-4.0, -1.6, 1.6, 4.0]:
+			m.box("iron", Vector3(sx, h - 0.06, tz), Vector3(0.10, 0.14, 0.12))
+	# Canaline passacavi a soffitto che collegano Quadro Wi-Fi, Server Xeon e scrivanie CAD
+	m.box("steel", Vector3(-1.62, 3.34, 0.0), Vector3(0.24, 0.06, 8.2))
+	m.box("cyan_accent", Vector3(-1.62, 3.38, 0.0), Vector3(0.08, 0.02, 8.1))
+	m.box("steel", Vector3(1.52, 3.34, -3.55), Vector3(6.3, 0.06, 0.22))
+	m.box("cyan_accent", Vector3(1.52, 3.38, -3.55), Vector3(6.2, 0.02, 0.07))
+
 	m.gable("roof_slate", "metal_panel", Vector3(0, h + 0.12, 0), w + 0.6, d + 0.6, 1.65, w >= d)
 	# Camini / lucernari industriali sul tetto
 	for cx in [-2.6, 2.6]:
@@ -483,9 +516,213 @@ static func add_workstation_pc_prop(sm: StyleMesh, pos: Vector3, rot: float = 0.
 	m.box("cyan_accent", Vector3(0.52, 0.32, -0.175), Vector3(0.04, 0.16, 0.02))
 	_merge_transformed(sm, m, pos, rot)
 
+# ------------------------------------------------------------------ Ologrammi Blueprint 3D Officina (semi-trasparenti, ZERO collider!)
+static func add_factory_ghost_wifi(sm: StyleMesh, pos: Vector3, ghost_key: String = "ghost_ready") -> void:
+	sm.box(ghost_key, pos, Vector3(0.46, 0.18, 0.26))
+	sm.cyl(ghost_key, pos + Vector3(-0.15, 0.08, 0.02), 0.02, 0.012, 0.30, 6)
+	sm.cyl(ghost_key, pos + Vector3(0.15, 0.08, 0.02), 0.02, 0.012, 0.30, 6)
+	if ghost_key == "ghost_ready":
+		sm.box("ghost_pad", Vector3(pos.x, 0.055, pos.z - 0.42), Vector3(0.95, 0.025, 0.95))
+
+static func add_factory_ghost_server(sm: StyleMesh, pos: Vector3, ghost_key: String = "ghost_ready") -> void:
+	sm.box(ghost_key, pos + Vector3(0, 0.78, 0), Vector3(0.88, 1.60, 0.76))
+	for ry in [0.35, 0.70, 1.05, 1.35]:
+		sm.box(ghost_key, pos + Vector3(0, ry, 0.39), Vector3(0.62, 0.05, 0.03))
+	if ghost_key == "ghost_ready":
+		sm.box("ghost_pad", Vector3(pos.x, 0.055, pos.z + 0.85), Vector3(1.15, 0.025, 0.85))
+
+static func add_factory_ghost_pcs(sm: StyleMesh, pos1: Vector3, pos2: Vector3, rot: float = PI * 0.5, ghost_key: String = "ghost_ready") -> void:
+	for p in [pos1, pos2]:
+		var m := StyleMesh.new()
+		m.box(ghost_key, Vector3(0, 0.06, 0.14), Vector3(0.18, 0.12, 0.14))
+		m.box(ghost_key, Vector3(0, 0.28, 0.16), Vector3(0.70, 0.42, 0.07))
+		m.box(ghost_key, Vector3(0, 0.018, -0.14), Vector3(0.38, 0.03, 0.14))
+		m.box(ghost_key, Vector3(0.52, 0.23, 0.04), Vector3(0.24, 0.46, 0.44))
+		_merge_transformed(sm, m, p, rot)
+	if ghost_key == "ghost_ready":
+		sm.box("ghost_pad", Vector3(3.15, 0.055, -1.02), Vector3(0.90, 0.025, 2.25))
+
+# ------------------------------------------------------------------ Arredi Attività Ripetibili & Nuovi Quartieri v1.2
+static func add_bacheca(sm: StyleMesh, pos: Vector3, rot: float = 0.0) -> void:
+	var m := StyleMesh.new()
+	m.box("wood_dark", Vector3(-0.72, 1.02, 0), Vector3(0.12, 2.04, 0.12), {"col": true})
+	m.box("wood_dark", Vector3(0.72, 1.02, 0), Vector3(0.12, 2.04, 0.12), {"col": true})
+	m.box("wood_dark", Vector3(0, 1.48, 0), Vector3(1.56, 1.04, 0.10), {"col": true})
+	m.box("wood_light", Vector3(0, 1.48, 0.05), Vector3(1.36, 0.84, 0.04))
+	# Foglietti e bandi affissi
+	m.box("awning_yellow", Vector3(-0.38, 1.62, 0.08), Vector3(0.30, 0.34, 0.02))
+	m.box("white", Vector3(0.0, 1.64, 0.08), Vector3(0.28, 0.32, 0.02))
+	m.box("cyan_accent", Vector3(0.38, 1.60, 0.08), Vector3(0.30, 0.36, 0.02))
+	m.box("fabric_red", Vector3(-0.22, 1.24, 0.08), Vector3(0.34, 0.24, 0.02))
+	m.box("white", Vector3(0.24, 1.24, 0.08), Vector3(0.34, 0.24, 0.02))
+	m.gable("roof_terracotta", "wood_dark", Vector3(0, 2.06, 0), 1.84, 0.42, 0.34, true)
+	_merge_transformed(sm, m, pos, rot)
+
+static func add_mailbox(sm: StyleMesh, pos: Vector3, rot: float = 0.0) -> void:
+	var m := StyleMesh.new()
+	m.box("iron", Vector3(0, 0.48, 0), Vector3(0.14, 0.96, 0.14), {"col": true})
+	m.box("fabric_red", Vector3(0, 1.18, 0), Vector3(0.42, 0.56, 0.32), {"col": true})
+	m.box("iron", Vector3(0, 1.36, 0.17), Vector3(0.28, 0.06, 0.04))
+	m.box("white", Vector3(0, 1.12, 0.17), Vector3(0.22, 0.14, 0.02))
+	_merge_transformed(sm, m, pos, rot)
+
+static func add_fiber_cabinet(sm: StyleMesh, pos: Vector3, rot: float = 0.0) -> void:
+	var m := StyleMesh.new()
+	m.box("ashlar", Vector3(0, 0.08, 0), Vector3(0.76, 0.16, 0.46), {"col": true})
+	m.box("metal_panel", Vector3(0, 0.84, 0), Vector3(0.68, 1.36, 0.40), {"col": true})
+	m.box("fabric_red", Vector3(0, 1.56, 0), Vector3(0.70, 0.12, 0.42))
+	m.box("iron", Vector3(0, 0.84, 0.21), Vector3(0.54, 1.08, 0.02))
+	m.box("cyan_accent", Vector3(0.18, 1.26, 0.22), Vector3(0.08, 0.08, 0.02))
+	_merge_transformed(sm, m, pos, rot)
+
+static func add_cargo_pallet(sm: StyleMesh, pos: Vector3, rot: float = 0.0, is_drop_zone: bool = false) -> void:
+	var m := StyleMesh.new()
+	m.box("wood_dark", Vector3(0, 0.06, 0), Vector3(1.15, 0.12, 0.95), {"col": true})
+	if is_drop_zone:
+		m.box("safety_yellow", Vector3(0, 0.13, 0), Vector3(1.02, 0.02, 0.82))
+		m.box("wood_light", Vector3(-0.24, 0.34, 0.0), Vector3(0.42, 0.40, 0.56), {"col": true})
+	else:
+		m.box("wood_mid", Vector3(-0.22, 0.38, 0.06), Vector3(0.50, 0.52, 0.52), {"col": true})
+		m.box("wood_light", Vector3(0.28, 0.33, -0.06), Vector3(0.42, 0.42, 0.48), {"col": true})
+		m.box("wood_light", Vector3(-0.04, 0.82, 0.02), Vector3(0.44, 0.36, 0.42), {"col": true})
+	_merge_transformed(sm, m, pos, rot)
+
+static func add_park_pond(sm: StyleMesh, pos: Vector3, r_x: float = 4.6, r_z: float = 3.4) -> void:
+	# Laghetto naturalistico con fondale ribassato, specchio d'acqua azzurro visibile, bordo in pietra, pontile e anatre
+	sm.cyl("ashlar", pos, r_x + 0.42, r_x + 0.48, 0.14, 14, {"smooth": false})
+	sm.cyl("water", pos + Vector3(0, 0.14, 0), r_x - 0.02, r_x - 0.02, 0.10, 14, {"smooth": true})
+	for k in range(14):
+		var a := TAU * (float(k) + 0.5) / 14.0
+		var rp := pos + Vector3(cos(a) * (r_x + 0.14), 0.22, sin(a) * (r_x + 0.14))
+		var rseg := StyleMesh.new()
+		rseg.box("stone_trim", Vector3.ZERO, Vector3(0.42, 0.20, TAU * (r_x + 0.14) / 14.0 + 0.12))
+		_merge_transformed(sm, rseg, rp, -a)
+	sm.add_collider_cyl(pos + Vector3(0, 0.35, 0), r_x * 0.88, 0.8)
+	# Pontile lato est (+X)
+	for px in [r_x - 0.9, r_x + 0.3, r_x + 1.4]:
+		sm.box("wood_dark", pos + Vector3(px, 0.22, -0.75), Vector3(0.14, 0.44, 0.14))
+		sm.box("wood_dark", pos + Vector3(px, 0.22, 0.75), Vector3(0.14, 0.44, 0.14))
+	sm.box("wood_light", pos + Vector3(r_x + 0.25, 0.42, 0), Vector3(2.9, 0.10, 1.75), {"col": true, "surface": "wood"})
+	# Anatre decorative posate sullo specchio d'acqua
+	for dp in [pos + Vector3(-1.1, 0.33, -0.5), pos + Vector3(0.8, 0.33, 0.85)]:
+		sm.ellipsoid("white", dp, Vector3(0.24, 0.15, 0.16), 4, 7)
+		sm.ellipsoid("white", dp + Vector3(0.18, 0.14, 0), Vector3(0.10, 0.10, 0.10), 4, 6)
+		sm.box("orange", dp + Vector3(0.29, 0.13, 0), Vector3(0.10, 0.04, 0.07))
+	# Note: keep elliptical aesthetic via slight stone boulders around rim
+	for bp in [Vector3(-r_x - 0.1, 0.28, 1.2), Vector3(-r_x * 0.5, 0.24, -r_z - 0.5), Vector3(1.5, 0.25, -r_z - 0.6)]:
+		sm.blob("stone_dark", pos + bp, Vector3(0.48, 0.32, 0.44), 3, 6, 0.2, int(absf(bp.x) * 7) + 3)
+
+static func add_gazebo(sm: StyleMesh, pos: Vector3, r: float = 2.6) -> void:
+	# Gazebo torinese in ferro battuto + basamento ottagonale accessibile
+	sm.cyl("stone_trim", pos, r + 0.2, r + 0.1, 0.22, 8, {"smooth": false})
+	sm.box("stone_trim", pos + Vector3(0, 0.11, 0), Vector3(r * 1.65, 0.22, r * 1.65), {"col": true, "surface": "stone"})
+	for k in range(6):
+		var ang := TAU * float(k) / 6.0
+		var col_p := pos + Vector3(cos(ang) * (r - 0.18), 0.22, sin(ang) * (r - 0.18))
+		sm.cyl("iron", col_p, 0.07, 0.06, 2.55, 6)
+		sm.add_collider_cyl(col_p + Vector3(0, 1.25, 0), 0.14, 2.5)
+	sm.cyl("copper", pos + Vector3(0, 2.75, 0), r + 0.28, 0.12, 1.05, 8, {"smooth": false})
+	sm.cyl("brass", pos + Vector3(0, 3.80, 0), 0.08, 0.02, 0.28, 6)
+	sm.cyl("wood_dark", pos + Vector3(0, 0.22, 0), 0.42, 0.08, 0.72, 8)
+	sm.cyl("wood_light", pos + Vector3(0, 0.94, 0), 0.65, 0.65, 0.07, 10)
+	sm.add_collider_cyl(pos + Vector3(0, 0.6, 0), 0.65, 1.0)
+
+static func add_market_stall(sm: StyleMesh, pos: Vector3, rot: float = 0.0, awning_key: String = "awning_red", goods_kind: String = "fruit") -> void:
+	var m := StyleMesh.new()
+	# Banco vendita + tendone a strisce
+	m.box("wood_dark", Vector3(0, 0.45, 0.35), Vector3(2.8, 0.88, 0.78), {"col": true})
+	m.box("wood_light", Vector3(0, 0.92, 0.35), Vector3(2.96, 0.06, 0.88))
+	for px in [-1.32, 1.32]:
+		m.box("wood_dark", Vector3(px, 1.22, -0.58), Vector3(0.10, 2.44, 0.10), {"col": true})
+		m.box("wood_dark", Vector3(px, 1.22, 0.65), Vector3(0.10, 2.44, 0.10), {"col": true})
+	m.box(awning_key, Vector3(0, 2.48, 0.06), Vector3(3.2, 0.16, 1.85), {"rot": 0.0})
+	m.gable(awning_key, "wood_light", Vector3(0, 2.56, 0.06), 3.2, 1.85, 0.48, true)
+	# Esposizione merci sul banco
+	if goods_kind == "fruit":
+		for bx in [-0.9, 0.0, 0.9]:
+			m.box("wood_mid", Vector3(bx, 1.02, 0.42), Vector3(0.68, 0.14, 0.52))
+		m.blob("apple", Vector3(-0.9, 1.15, 0.42), Vector3(0.22, 0.13, 0.18), 3, 6, 0.1, 1)
+		m.blob("orange", Vector3(0.0, 1.15, 0.42), Vector3(0.22, 0.13, 0.18), 3, 6, 0.1, 2)
+		m.blob("lemon", Vector3(0.9, 1.15, 0.42), Vector3(0.22, 0.13, 0.18), 3, 6, 0.1, 3)
+	elif goods_kind == "books":
+		for i in range(5):
+			var k: String = ["fabric_blue", "fabric_red", "awning_yellow", "fabric_green", "cyan_accent"][i]
+			m.box(k, Vector3(-1.0 + float(i) * 0.5, 1.01, 0.36), Vector3(0.36, 0.10, 0.46))
+	else:
+		m.box("steel", Vector3(-0.65, 1.08, 0.35), Vector3(0.62, 0.24, 0.42))
+		m.box("gaming_black", Vector3(0.45, 1.10, 0.35), Vector3(0.75, 0.30, 0.44))
+		m.box("cyan_accent", Vector3(0.45, 1.12, 0.58), Vector3(0.62, 0.18, 0.03))
+	_merge_transformed(sm, m, pos, rot)
+
+static func add_post_office(sm: StyleMesh, center: Vector3, rot: float = 0.0) -> void:
+	# Ufficio Postale Torino Nord (fronte +Z)
+	var m := StyleMesh.new()
+	var w := 7.6
+	var d := 5.6
+	var h := 4.4
+	m.box("ashlar", Vector3(0, 0.32, 0), Vector3(w + 0.12, 0.64, d + 0.12))
+	m.box("plaster_ochre", Vector3(0, 0.64 + (h - 0.64) * 0.5, 0), Vector3(w, h - 0.64, d), {"col": true})
+	m.box("stone_trim", Vector3(0, h + 0.08, 0), Vector3(w + 0.24, 0.16, d + 0.24))
+	m.hip_roof("roof_slate", Vector3(0, h + 0.16, 0), w + 0.45, d + 0.45, 1.35)
+	# Fascia istituzionale blu/gialla + portale vetrato
+	m.box("fabric_blue", Vector3(0, 2.75, d * 0.5 + 0.05), Vector3(w - 0.6, 0.55, 0.08))
+	m.box("safety_yellow", Vector3(0, 2.50, d * 0.5 + 0.06), Vector3(w - 0.6, 0.14, 0.09))
+	m.box("iron", Vector3(0, 1.25, d * 0.5 + 0.04), Vector3(2.2, 2.30, 0.08))
+	m.box("glass_cool", Vector3(0, 1.25, d * 0.5 + 0.06), Vector3(1.9, 2.05, 0.04))
+	m.box("stone_trim", Vector3(0, 0.08, d * 0.5 + 0.35), Vector3(2.8, 0.16, 0.70), {"col": true, "surface": "stone"})
+	for wx in [-2.35, 2.35]:
+		_add_window(m, Vector3(wx, 1.55, d * 0.5), 0.0, "fabric_blue", "")
+	_merge_transformed(sm, m, center, rot)
+
+static func add_ogr_building(sm: StyleMesh, center: Vector3, rot: float = 0.0) -> void:
+	# Coworking OGR Torino — Loft industriale mattoni rossi e grandi vetrate (fronte -X verso piazza)
+	var m := StyleMesh.new()
+	var w := 6.6
+	var d := 10.6
+	var h := 5.2
+	m.box("ashlar", Vector3(0, 0.35, 0), Vector3(w + 0.10, 0.70, d + 0.10))
+	m.box("brick_ogr", Vector3(0, 0.70 + (h - 0.70) * 0.5, 0), Vector3(w, h - 0.70, d), {"col": true})
+	m.box("iron", Vector3(0, h + 0.08, 0), Vector3(w + 0.25, 0.16, d + 0.25))
+	m.gable("roof_slate", "brick_ogr", Vector3(0, h + 0.16, 0), w + 0.35, d + 0.35, 1.55, false)
+	# Lucernario a nastro sul colmo
+	m.box("iron", Vector3(0, h + 1.50, 0), Vector3(1.25, 0.45, d * 0.65))
+	m.box("glass_cool", Vector3(0, h + 1.68, 0), Vector3(1.05, 0.16, d * 0.60))
+	# Pilastri + 3 grandi vetrate loft verso piazza (-X)
+	for gz in [-3.2, 0.0, 3.2]:
+		m.box("iron", Vector3(0, 2.25, gz), Vector3(w + 0.10, 2.60, 2.15))
+		m.box("glass_cool", Vector3(0, 2.25, gz), Vector3(w + 0.14, 2.34, 1.88))
+	m.box("steel", Vector3(-w * 0.5 - 0.55, 2.75, 0), Vector3(1.10, 0.12, 3.2))
+	m.box("cyan_accent", Vector3(-w * 0.5 - 0.08, 3.35, 0), Vector3(0.08, 0.42, 4.4))
+	_merge_transformed(sm, m, center, rot)
+
+static func add_alpine_backdrop(sm: StyleMesh) -> void:
+	# Corona lontana delle Alpi Piemontesi (Nord & Ovest) e collina di Superga (Est) — nessuna collisione!
+	var peaks := [
+		[Vector3(-68.0, -0.5, -52.0), 34.0, 26.0, 24.0, true],
+		[Vector3(-28.0, -0.5, -58.0), 42.0, 28.0, 30.0, true],
+		[Vector3(16.0, -0.5, -56.0), 40.0, 26.0, 27.0, true],
+		[Vector3(58.0, -0.5, -60.0), 46.0, 30.0, 33.0, true],
+		[Vector3(106.0, -0.5, -54.0), 38.0, 26.0, 25.0, true],
+		[Vector3(-92.0, -0.5, -10.0), 28.0, 38.0, 22.0, true],
+		[Vector3(-96.0, -0.5, 34.0), 28.0, 40.0, 20.0, true],
+		[Vector3(132.0, -0.5, 16.0), 28.0, 44.0, 14.0, false],
+		[Vector3(128.0, -0.5, 58.0), 30.0, 36.0, 12.0, false]
+	]
+	for pk in peaks:
+		var pos: Vector3 = pk[0]
+		var w: float = pk[1]
+		var d: float = pk[2]
+		var h: float = pk[3]
+		var snow: bool = pk[4]
+		var mat_k := "mountain_rock" if snow else "leaves_dark"
+		sm.hip_roof(mat_k, pos, w, d, h)
+		if snow:
+			sm.hip_roof("mountain_snow", pos + Vector3(0, h * 0.56, 0), w * 0.44, d * 0.44, h * 0.44)
+
 # ------------------------------------------------------------------ NPC stilizzati unificati (scolpiti)
 static func add_npc_model(parent: Node3D, opts: Dictionary = {}) -> Node3D:
 	return VillageCharacters.build(parent, opts)
+
 
 # ------------------------------------------------------------------ Helper transform merge
 static func _merge_transformed(dst: StyleMesh, src: StyleMesh, pos: Vector3, rot: float) -> void:

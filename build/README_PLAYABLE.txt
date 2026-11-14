@@ -1,54 +1,61 @@
 ================================================================================
-STARTUP SIMULATOR — v1.1.0 "ZAINO, MAPPA & FOLEY EDITION"
+STARTUP SIMULATOR — v1.2.0 "QUARTIERI, WEBFORGE 5 & FARMING EDITION"
 Release Windows x86_64
 ================================================================================
 
 Benvenuto in STARTUP SIMULATOR!
-Un simulatore gestionale e di vita in prima persona 3D ambientato tra Borgo
-San Carlo e Borgo Valdocco a Torino.
+Un simulatore gestionale e di vita in prima persona 3D ambientato tra i quattro
+quartieri di Torino: Borgo San Carlo, Parco Valentino Ovest, Borgo Valdocco e
+Mercato Nord / Coworking OGR.
 
-NOVITA' DELLA VERSIONE 1.1.0:
+NOVITA' DELLA VERSIONE 1.2.0:
 --------------------------------------------------------------------------------
-1. INVENTARIO PERSONALE & DOTAZIONI [TAB]:
-   - Nuovo pannello Zaino & Dotazioni accessibile ovunque premendo TAB.
-   - Nuova Partita include un Kit Colazione iniziale nello zaino (1x Cornetto
-     e 1x Espresso) per iniziare subito in borgo.
-   - Nuovo pulsante '+ Zaino' nei negozi di Borgo San Carlo (Pizzeria, Forno,
-     Alimentari, Caffe', Edicola, Frigo studio) e nuovi snack da viaggio
-     (Thermos Bicerin, Barretta Proteica Tech) consumabili sul campo in
-     qualsiasi momento.
-   - Sezione Hardware B2B integrata (scorte in magazzino vs componenti
-     richiesti dalle commesse attive + segnavia rapido per Elettronica TO o
-     Officina Bellini).
-   - Due nuovi Gadget Permanenti da Elettronica TO (Davide):
-     * Sneakers Tech Antiscivolo (+18% velocita' di camminata e scatto).
-     * Analizzatore Spettro Wi-Fi 6 (-0.6s build WebForge, +10% premi
-       NetShield e +1 Reputazione extra al rilievo completo in Officina).
+1. ECONOMIA SIMULATOR PIU' LENTA & SOSTENIBILE:
+   - Capitale iniziale realistico (€ 120.00) e compensi iniziali ribilanciati
+     (Da Mario € 260, San Carlo € 540, Elettronica TO € 860, Officina Bellini
+     € 2.530 + € 950 bonus).
+   - Bollette giornaliere automatiche alle 08:00 (€ 48/giorno = affitto € 30 +
+     utenze € 10 + fibra € 8) con addebito parziale anti-softlock fino a € 0.
+   - Espansione Tier 2 (65 Rep, € 1.800 capitale, costo € 950) e cadenza lead
+     B2B piu' graduale (780m -> 420m -> 150m assumendo Luca Vianello).
 
-2. MAPPA DEL TERRITORIO & BUSSOLA SEGNAVIA [CAPS LOCK / M]:
-   - Nuova mappa interattiva 2D di Borgo San Carlo, Viale Est, Borgo Valdocco
-     e Officina Meccanica Bellini apribile con CAPS LOCK (o M).
-   - Cursore live con posizione e direzione del giocatore (cono visivo), filtri
-     vista (Tutto / San Carlo / Valdocco) e anello pulsante sull'obiettivo
-     raccomandato della storia.
-   - Sistema Waypoint / Segnavia: clicca un edificio (o "Segna Obiettivo
-     Attuale") per fissare la meta nella nuova Bussola HUD con distanza in
-     metri, freccia direzionale dinamica e notifica automatica all'arrivo.
+2. 4 ATTIVITA' RIPETIBILI PER FARMARE CAPITALE ("BACHECA LAVORI RAPIDI"):
+   - Interagisci con BachecaSanCarlo (Piazzetta) o BachecaMercato (Nord):
+     * Volantinaggio Quartiere (5 cassette postali — € 42 + bonus velocità/Sneakers)
+     * Corriere Espresso Quartiere (ritiro pizzeria/caffè + 3 consegne — € 58 + bonus)
+     * Ripristino Quadri Fibra & POS (3 armadi — € 72 + bonus Analizzatore Wi-Fi 6)
+     * Scarico Merci & Logistica (navetta Poste/Furgone/Mercato/Officina — € 68 + bonus)
+   - Nuovo tracciamento attivo nell'HUD con Beacon 3D sui bersagli, bussola
+     automatica e salvataggio/ripristino completo in JSON.
 
-3. REVISIONE TOTALE SUONI DEI PASSI E FOLEY 44.1 KHZ:
-   - Passi procedurali multi-stadio ad alta fedelta' (44.1 kHz): attacco tallone,
-     rullata punta, attrito suola e micro-grana distinta per 6 superfici
-     (erba, acciottolato/pietra, legno Studio, piastrelle negozi/capannone,
-     asfalto Viale Est e pedane metalliche Officina), con 6 varianti ciascuna.
-   - Doppio lettore audio alternato per zero tagli durante la corsa, falcate
-     legate alla distanza reale percorsa e nuovi suoni per salto e atterraggio.
+3. WEBFORGE 5.0 RIPENSATO DA ZERO:
+   - Visual Block Composer: riordina le 5 sezioni (▲/▼) o svuota gli slot (✕)
+     con verifica DOM semantica in tempo reale.
+   - Switcher Architettura Grid: Classica (1-Col), Vetrina (2-Col) o Bento Grid
+     con adattamento responsive Mobile 390x844 (1-Col Stack).
+   - Slider Media KB Budget (140..960 KB) con impatto reale su Lighthouse Perf
+     e qualita' A11y.
+   - Code Inspector Click-to-Patch AST: ispeziona la riga buggata prima di
+     applicare la Git Patch corretta.
+
+4. OLOGRAMMI 3D BLUEPRINT IN OFFICINA BELLINI:
+   - Dopo aver completato le 4 zone di sopralluogo, le postazioni Wi-Fi 6, Server
+     Xeon e 2x PC CAD mostrano ologrammi 3D blueprint ciano semi-trasparenti
+     (prima in ambra bloccata) fino al montaggio dell'hardware fisico.
+
+5. DUE NUOVI QUARTIERI ESPLORABILI & UPGRADE GRAFICO:
+   - Parco Valentino Ovest (laghetto delle anatre, pontile, gazebo e ville)
+     raggiungibile dall'Arco Ovest di Piazzetta Sud.
+   - Mercato Rionale Nord, Ufficio Postale e Coworking OGR oltre il Varco Nord
+     di Borgo Valdocco, con corona delle Alpi Piemontesi sullo sfondo.
+   - Mappa del Territorio [CAPS LOCK / M] estesa a 14 POI e 5 filtri quartiere.
 
 COMANDI:
 --------------------------------------------------------------------------------
 - WASD / Frecce     : Movimento
 - Shift             : Corsa
 - Spazio            : Salto
-- E / Click SX      : Interagisci (laptop, letto, frigo, negozi, clienti, stazioni)
+- E / Click SX      : Interagisci (laptop, letto, frigo, bacheche, negozi, clienti)
 - TAB               : Apri / Chiudi Zaino & Dotazioni (in Decor Mode [B] cicla arredi)
 - CAPS LOCK / M     : Apri / Chiudi Mappa del Territorio & Segnavia
 - B                 : Modalita' Arredo in Studio

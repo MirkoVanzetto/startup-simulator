@@ -200,7 +200,7 @@ func _setup_emails() -> void:
 	emails.append({
 		"from": "Mario Esposito <mario@pizzeriadamario-to.it>",
 		"subject": "Richiesta Realizzazione Sito Web - Pizzeria Da Mario (Via Po)",
-		"body": "Gentile Dottore,\n\nHo visto il suo annuncio su Freelance Hub Torino. Cerchiamo qualcuno che crei il nostro sito web ufficiale per attirare turisti e clienti a Torino.\n\nBudget concordato: € 650,00 netti.\n\nPassi a trovarmi direttamente di persona in bottega in Via Po 18 (esca dal suo studio e segua la via fino all'insegna luminosa).\n\nMario Esposito - Titolare",
+		"body": "Gentile Dottore,\n\nHo visto il suo annuncio su Freelance Hub Torino. Cerchiamo qualcuno che crei il nostro sito web ufficiale per attirare turisti e clienti a Torino.\n\nBudget concordato: € 260,00 netti (+ eventuale mancia qualità).\n\nPassi a trovarmi direttamente di persona in bottega in Via Po 18 (esca dal suo studio e segua la via fino all'insegna luminosa).\n\nMario Esposito - Titolare",
 		"contract_id": "pizzeria_da_mario"
 	})
 	
@@ -209,7 +209,7 @@ func _setup_emails() -> void:
 		emails.append({
 			"from": "Elena Rossi <elena@caffesancarlo.to.it>",
 			"subject": "Richiesta Touch Web POS Cassa & Ordini - Caffè San Carlo",
-			"body": "Gentile Sviluppatore,\n\nMario mi ha mostrato il nuovo sito web e ne sono rimasta affascinata!\nQui al Caffè San Carlo abbiamo code al bancone nelle ore di punta. Ci serve un sistema Web POS moderno per velocizzare le ordinazioni di caffè e bicerin.\n\nBudget: € 1.250,00 netti + Hosting mensile sul suo server rack!\nPassi al bancone del Caffè in Piazzetta per definire i dettagli.\n\nCordiali saluti,\nElena - Store Manager",
+			"body": "Gentile Sviluppatore,\n\nMario mi ha mostrato il nuovo sito web e ne sono rimasta affascinata!\nQui al Caffè San Carlo abbiamo code al bancone nelle ore di punta. Ci serve un sistema Web POS moderno per velocizzare le ordinazioni di caffè e bicerin.\n\nBudget: € 540,00 netti + Hosting mensile sul suo server rack!\nPassi al bancone del Caffè in Piazzetta per definire i dettagli.\n\nCordiali saluti,\nElena - Store Manager",
 			"contract_id": "caffe_san_carlo"
 		})
 		
@@ -218,7 +218,7 @@ func _setup_emails() -> void:
 		emails.append({
 			"from": "Davide Ferrero <davide@elettronicato.com>",
 			"subject": "Proposta Migrazione Cloud & Catalogo - Elettronica TO",
-			"body": "Ciao collega,\n\nHo saputo del Web POS installato al Caffè San Carlo, lavoro eccellente!\nDa Elettronica TO dobbiamo dismettere il nostro vecchio server locale e migrare a un'architettura cloud con database ridondato e backup sul tuo server rack.\n\nBudget stanziato: € 1.850,00 netti + 20% di sconto permanente sui componenti hardware (Router Wi-Fi, Server Xeon, PC & Firewall)!\nVieni in negozio in Piazzetta per iniziare.\n\nA presto,\nDavide - Tecnico Elettronica TO",
+			"body": "Ciao collega,\n\nHo saputo del Web POS installato al Caffè San Carlo, lavoro eccellente!\nDa Elettronica TO dobbiamo dismettere il nostro vecchio server locale e migrare a un'architettura cloud con database ridondato e backup sul tuo server rack.\n\nBudget stanziato: € 860,00 netti + 20% di sconto permanente sui componenti hardware (Router Wi-Fi, Server Xeon, PC & Firewall)!\nVieni in negozio in Piazzetta per iniziare.\n\nA presto,\nDavide - Tecnico Elettronica TO",
 			"contract_id": "elettronica_to"
 		})
 
@@ -280,7 +280,7 @@ func _display_email(index: int) -> void:
 			var status = c.get("status", "available")
 			if status == "built" and not ContractManager.is_contract_completed(cid):
 				deliver_project_btn.visible = true
-				deliver_project_btn.text = "★ Consegna Progetto a %s (€ %0.2f)" % [c.get("client", "Cliente"), c.get("budget", 650.0)]
+				deliver_project_btn.text = "★ Consegna Progetto a %s (€ %0.2f)" % [c.get("client", "Cliente"), c.get("budget", 260.0)]
 				return
 		deliver_project_btn.visible = false
 
@@ -380,20 +380,21 @@ func _update_freelance_display() -> void:
 			f_actions.add_theme_constant_override("v_separation", 6)
 			var web_c := ContractManager.get_contract("factory_bellini_web")
 			var web_st := str(web_c.get("status", ""))
+			var web_bgt := float(web_c.get("budget", 680.0))
 			if web_st == "in_progress":
 				var b_wf := Button.new()
-				b_wf.text = "⚡ Sito WebForge (€ 950)"
+				b_wf.text = "⚡ Sito WebForge (€ %0.0f)" % web_bgt
 				b_wf.pressed.connect(func(): _launch_webforge_for("factory_bellini_web"))
 				f_actions.add_child(b_wf)
 			elif web_st == "built":
 				var b_del := Button.new()
-				b_del.text = "★ Consegna Sito (€ 950)"
+				b_del.text = "★ Consegna Sito (€ %0.0f)" % web_bgt
 				b_del.add_theme_color_override("font_color", Color(0.35, 1.0, 0.55))
 				b_del.pressed.connect(func(): _complete_contract_by_id("factory_bellini_web"))
 				f_actions.add_child(b_del)
 			if fac["wifi_mounted"] and not fac["wifi_done"]:
 				var b_ns := Button.new()
-				b_ns.text = "🛡 VLAN NetShield (€ 350)"
+				b_ns.text = "🛡 VLAN NetShield (€ 290)"
 				b_ns.add_theme_color_override("font_color", Color(1.0, 0.72, 0.3))
 				b_ns.pressed.connect(func(): _launch_netshield_for("factory_bellini_wifi"))
 				f_actions.add_child(b_ns)
@@ -952,8 +953,8 @@ func _update_talent_display() -> void:
 		exp_vbox.add_child(exp_desc)
 		
 		var exp_req = Label.new()
-		var cost_val = exp_check.get("cost", 0.0)
-		exp_req.text = "Costo Espansione: € %0.2f | Reputazione Richiesta: %s" % [cost_val, "50" if target_tier == 2 else ("120" if target_tier == 3 else "250")]
+		var cost_val = float(exp_check.get("cost", 950.0 if target_tier == 2 else (3500.0 if target_tier == 3 else 8000.0)))
+		exp_req.text = "Costo Espansione: € %0.2f | Reputazione Richiesta: %s" % [cost_val, "65" if target_tier == 2 else ("120" if target_tier == 3 else "250")]
 		exp_req.add_theme_font_size_override("font_size", 11)
 		exp_req.add_theme_color_override("font_color", Color(0.4, 0.9, 0.6, 1))
 		exp_vbox.add_child(exp_req)

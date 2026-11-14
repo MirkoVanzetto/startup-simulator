@@ -131,7 +131,7 @@ func _get_story_objective() -> String:
 	# Priority 5: Startup Expansion
 	var comp_tier = GameManager.get("company_tier") if ("company_tier" in GameManager) else 1
 	if comp_tier < 2:
-		return "Raggiungi 50 Reputazione e registra l'espansione aziendale su TO-OS per assumere personale."
+		return "Raggiungi 65 Reputazione (€ 1.800) e registra l'espansione aziendale su TO-OS."
 
 	# Priority 5b: Officina Bellini (Borgo Valdocco) active mission stages
 	var fac := ContractManager.get_factory_progress_summary()

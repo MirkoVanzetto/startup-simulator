@@ -88,7 +88,7 @@ size_flags_horizontal = 3
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
 theme_override_font_sizes/font_size = 14
-text = "Fondi: € 250.00"
+text = "Fondi: € 120.00"
 
 [node name="ExitButton" type="Button" parent="TopBar/HBox"]
 layout_mode = 2
@@ -238,7 +238,7 @@ text = "Testo della mail selezionata..."
 visible = false
 layout_mode = 2
 theme_override_colors/font_color = Color(0.2, 1, 0.5, 1)
-text = "★ Consegna Progetto WebForge a Mario (€ 650,00)"
+text = "★ Consegna Progetto WebForge a Mario (€ 260,00)"
 
 [node name="FreelanceWindow" type="PanelContainer" parent="Windows"]
 visible = false
@@ -396,7 +396,7 @@ text = "Monitor Secondario 27\" Ultrawide"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
 theme_override_font_sizes/font_size = 15
-text = "€ 350,00"
+text = "€ 280,00"
 
 [node name="Desc" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/MonitorCard/VBox"]
 layout_mode = 2
@@ -417,7 +417,7 @@ clip_text = true
 [node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/MonitorCard/VBox/HBox"]
 custom_minimum_size = Vector2(140, 34)
 layout_mode = 2
-text = "Acquista (€ 350,00)"
+text = "Acquista (€ 280,00)"
 
 [node name="ChairCard" type="PanelContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid"]
 custom_minimum_size = Vector2(240, 160)
@@ -439,7 +439,7 @@ text = "Sedia Ergonomica Racing / Pro"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
 theme_override_font_sizes/font_size = 15
-text = "€ 220,00"
+text = "€ 190,00"
 
 [node name="Desc" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/ChairCard/VBox"]
 layout_mode = 2
@@ -460,7 +460,7 @@ clip_text = true
 [node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/ChairCard/VBox/HBox"]
 custom_minimum_size = Vector2(140, 34)
 layout_mode = 2
-text = "Acquista (€ 220,00)"
+text = "Acquista (€ 190,00)"
 
 [node name="PlantCard" type="PanelContainer" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid"]
 custom_minimum_size = Vector2(240, 160)
@@ -525,7 +525,7 @@ text = "Mini Server Rack 4U & NAS"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
 theme_override_font_sizes/font_size = 15
-text = "€ 450,00"
+text = "€ 420,00"
 
 [node name="Desc" type="Label" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/ServerCard/VBox"]
 layout_mode = 2
@@ -546,7 +546,7 @@ clip_text = true
 [node name="BuyButton" type="Button" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox/Grid/ServerCard/VBox/HBox"]
 custom_minimum_size = Vector2(140, 34)
 layout_mode = 2
-text = "Acquista (€ 450,00)"
+text = "Acquista (€ 420,00)"
 
 [node name="HwSeparator" type="HSeparator" parent="Windows/ShopWindow/Margin/VBox/ShopScroll/ShopVBox"]
 layout_mode = 2

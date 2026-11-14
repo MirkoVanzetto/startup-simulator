@@ -53,8 +53,8 @@ func init_tutorial_contract() -> void:
 		"category": "Web Development",
 		"execution_type": "webforge",
 		"location": "Via Po 18, Torino",
-		"budget": 650.00,
-		"reputation_reward": 15,
+		"budget": 260.00,
+		"reputation_reward": 12,
 		"difficulty": 1,
 		"deadline_days": 2,
 		"status": "available", # "available" -> "in_progress" -> "built" -> "completed"
@@ -82,10 +82,10 @@ func get_lead_interval_minutes() -> int:
 	if not is_contract_completed("pizzeria_da_mario"):
 		return 0 # Durante il tutorial iniziale i lead B2B restano in pausa
 	if EmployeeManager.is_employee_hired("emp_luca"):
-		return 120 # Luca Vianello (Client Scout) trova un nuovo lead ogni 2 ore di gioco!
+		return 150 # Luca Vianello (Client Scout) trova un nuovo lead ogni 2h 30m di gioco!
 	if is_contract_completed("elettronica_to"):
-		return 360 # Ogni 6 ore senza scout dedicato
-	return 720 # Dopo Mario ma prima di Davide: un'occasione occasionale ogni 12 ore
+		return 420 # Ogni 7 ore senza scout dedicato
+	return 780 # Dopo Mario ma prima di Davide: un'occasione occasionale ogni 13 ore
 
 func get_max_marketplace_pool() -> int:
 	if not is_contract_completed("pizzeria_da_mario"):
@@ -254,8 +254,8 @@ func _unlock_next_story_mission(just_completed_id: String) -> void:
 				"category": "Web Application / POS",
 				"execution_type": "webforge",
 				"location": "Via Po 12, Torino (Lato Est)",
-				"budget": 1250.00,
-				"reputation_reward": 25,
+				"budget": 540.00,
+				"reputation_reward": 20,
 				"difficulty": 2,
 				"deadline_days": 3,
 				"status": "available",
@@ -285,8 +285,8 @@ func _unlock_next_story_mission(just_completed_id: String) -> void:
 				"category": "Cloud Infrastructure & Backend",
 				"execution_type": "webforge",
 				"location": "Via Po 6, Torino (Lato Ovest)",
-				"budget": 1850.00,
-				"reputation_reward": 35,
+				"budget": 860.00,
+				"reputation_reward": 28,
 				"difficulty": 3,
 				"deadline_days": 4,
 				"status": "available",
@@ -404,8 +404,8 @@ func accept_factory_commission() -> void:
 		"brief": "Portale industriale con listino lavorazioni CNC, richiesta preventivi B2B, orari di carico/scarico e stile tecnico robusto.",
 		"preferred_tags": ["Tech", "Booking"],
 		"preferred_palette": "amber",
-		"budget": 950.00,
-		"reputation_reward": 22,
+		"budget": 680.00,
+		"reputation_reward": 18,
 		"difficulty": 3,
 		"deadline_days": 5,
 		"status": "in_progress",
@@ -455,7 +455,7 @@ func scout_factory_zone(zone_id: String, zone_title: String = "") -> bool:
 		GameManager.reputation_points += rep_bonus
 		EventBus.notification_posted.emit(
 			"Sopralluogo Officina Completo (4/4)!",
-			"Rilievo terminato (%s). Puoi ora installare Router Wi-Fi, Server Xeon e 2 PC da Elettronica TO!" % label,
+			"Rilievo terminato (%s). Segui gli ologrammi ciano in reparto per installare Wi-Fi, Server e 2 PC!" % label,
 			"success"
 		)
 	else:
@@ -496,7 +496,7 @@ func complete_factory_wifi_netshield() -> bool:
 	if not bool(factory_state.get("wifi_hardware_mounted", false)) or bool(factory_state.get("wifi_done", false)):
 		return false
 	factory_state["wifi_done"] = true
-	var pay := 350.0
+	var pay := 290.0
 	if EmployeeManager.is_employee_hired("emp_marco"):
 		pay *= 1.20
 	if ShopManager.has_gadget("gadget_scanner_wifi"):
@@ -522,7 +522,7 @@ func install_factory_server() -> bool:
 		return false
 	ShopManager.consume_hardware("hw_server_tower", 1)
 	factory_state["server_done"] = true
-	var pay := 820.0
+	var pay := 740.0
 	if EmployeeManager.is_employee_hired("emp_marco"):
 		pay *= 1.20
 	EconomyManager.earn(pay, "Officina Bellini: Installazione Server Xeon RAID-10")
@@ -548,7 +548,7 @@ func install_factory_pcs() -> bool:
 		return false
 	ShopManager.consume_hardware("hw_workstation_pc", 2)
 	factory_state["pcs_done"] = true
-	var pay := 960.0
+	var pay := 820.0
 	if EmployeeManager.is_employee_hired("emp_marco"):
 		pay *= 1.20
 	EconomyManager.earn(pay, "Officina Bellini: Installazione 2 Workstation CAD")
@@ -573,15 +573,15 @@ func _check_factory_grand_completion() -> void:
 		factory_state["completed"] = true
 		if not ("factory_bellini" in completed_contracts):
 			completed_contracts.append("factory_bellini")
-		var bonus := 1500.0
+		var bonus := 950.0
 		EconomyManager.earn(bonus, "Premio Maxi-Appalto Completato: Officina Bellini")
-		GameManager.reputation_points += 40
+		GameManager.reputation_points += 35
 		SoundManager.play_ui_success()
-		EventBus.contract_completed.emit("factory_bellini", bonus, 40)
+		EventBus.contract_completed.emit("factory_bellini", bonus, 35)
 		EventBus.contract_updated.emit("factory_bellini", "completed")
 		EventBus.notification_posted.emit(
 			"MAXI-APPALTO OFFICINA BELLINI COMPLETATO!",
-			"Wi-Fi, Server, 2 PC & Sito Web consegnati! Bonus finale +€ 1.500,00 & +40 Reputazione!",
+			"Wi-Fi, Server, 2 PC & Sito Web consegnati! Bonus finale +€ 950,00 & +35 Reputazione!",
 			"success"
 		)
 

@@ -51,3 +51,8 @@ signal fame_tier_changed(tier_index: int, tier_name: String)
 signal backpack_updated()
 signal waypoint_changed(waypoint: Dictionary)
 
+# Side Jobs / Repeatable Activities signals
+signal side_job_started(job_id: String, job_data: Dictionary)
+signal side_job_progressed(job_id: String, step: int, total: int, detail: String)
+signal side_job_completed(job_id: String, reward: float, rep_gain: int)
+signal side_job_cancelled(job_id: String)

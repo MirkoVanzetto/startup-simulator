@@ -129,13 +129,14 @@ func start_new_game() -> void:
 	ShopManager.reset()
 	ShopManager.grant_starter_kit()
 	FameManager.reset()
+	SideJobManager.reset()
 	EmployeeManager.reset()
 	ServerRackManager.reset()
-	EconomyManager.reset_economy(250.0) # Modest starting capital: 250 EUR
+	EconomyManager.reset_economy(120.0) # Tight realistic starting capital: 120 EUR
 	ContractManager.init_tutorial_contract()
 	change_state(GameState.FIRST_PERSON)
 	EventBus.waypoint_changed.emit({})
-	EventBus.notification_posted.emit("Nuova Avventura", "Benvenuto nel tuo studio a Torino! Controlla il laptop ([TAB] Zaino · [CAPS] Mappa).", "info")
+	EventBus.notification_posted.emit("Nuova Avventura", "Benvenuto a Torino! Capitale iniziale € 120: cerca Mario o i Lavoretti Rapidi alla Bacheca.", "info")
 
 func _on_computer_opened() -> void:
 	change_state(GameState.COMPUTER)
@@ -200,9 +201,9 @@ func can_upgrade_company_tier() -> Dictionary:
 		
 	match target_tier:
 		2:
-			var req_rep = 50
-			var req_cap = 2500.0
-			var cost = 1200.0
+			var req_rep = 65
+			var req_cap = 1800.0
+			var cost = 950.0
 			if reputation_points < req_rep:
 				return {
 					"allowed": false,

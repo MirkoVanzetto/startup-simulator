@@ -65,7 +65,7 @@ func run_challenge_workflow_1_turin_founder() -> void:
 	
 	# Step 1: Initialize New Game
 	GameManager.start_new_game()
-	record_assertion(EconomyManager.balance == 250.0, "W1.1: Starting capital is exactly € 250.00")
+	record_assertion(EconomyManager.balance == 120.0, "W1.1: Starting capital is exactly € 120.00")
 	record_assertion(GameManager.company_tier == 1, "W1.1: Starting company tier is 1 (Freelance nel Garage)")
 	record_assertion(GameManager.studio_upgrades_installed.is_empty(), "W1.1: No studio upgrades pre-installed at start")
 	
@@ -111,7 +111,7 @@ func run_challenge_workflow_1_turin_founder() -> void:
 	var obj_in_progress = qm.get_current_objective()
 	record_assertion("WebForge" in obj_in_progress or "studio" in obj_in_progress, "W1.4: Quest objective updates to WebForge studio development", "Got: '%s'" % obj_in_progress)
 	
-	# Step 5: WebForge 3.0 Modular Assembly & Compilation
+	# Step 5: WebForge 5.0 Modular Assembly & Compilation
 	var wf_scene = load("res://scenes/ui/minigames/web_forge.tscn") as PackedScene
 	record_assertion(wf_scene != null, "W1.5: WebForge scene loaded")
 	var wf = wf_scene.instantiate()
@@ -150,8 +150,8 @@ func run_challenge_workflow_1_turin_founder() -> void:
 	wf._on_deliver_pressed()
 	
 	record_assertion(ContractManager.is_contract_completed("pizzeria_da_mario"), "W1.6: Pizzeria Da Mario contract completed")
-	record_assertion(EconomyManager.balance >= bal_before_delivery + 650.0 + wf.last_calculated_tip, "W1.6: Base payment (€650) + Tip (€%0.2f) credited (Balance: €%0.2f)" % [wf.last_calculated_tip, EconomyManager.balance])
-	record_assertion(GameManager.reputation_points >= 15, "W1.6: Reputation reward credited (Rep: %d)" % GameManager.reputation_points)
+	record_assertion(EconomyManager.balance >= bal_before_delivery + 260.0 + wf.last_calculated_tip, "W1.6: Base payment (€260) + Tip (€%0.2f) credited (Balance: €%0.2f)" % [wf.last_calculated_tip, EconomyManager.balance])
+	record_assertion(GameManager.reputation_points >= 12, "W1.6: Reputation reward credited (Rep: %d)" % GameManager.reputation_points)
 	
 	# Step 7: Objective advances to Studio Hardware Upgrade
 	var obj_upgrade = qm.get_current_objective()

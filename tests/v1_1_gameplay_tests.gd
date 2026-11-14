@@ -353,9 +353,9 @@ func test_world_map_and_hud_waypoint_compass() -> void:
 	GameManager.start_new_game()
 	await get_tree().process_frame
 
-	# 1. Verify all 10 POIs sit inside WORLD_BOUNDS and canvas projection bounds
+	# 1. Verify all 14 POIs sit inside WORLD_BOUNDS and canvas projection bounds
 	var pois: Array[Dictionary] = MapData.get_pois()
-	check(pois.size() == 10, "WorldMapData provides all 10 Borgo San Carlo & Borgo Valdocco POIs")
+	check(pois.size() == 14, "WorldMapData provides all 14 Torino district POIs (San Carlo, Valdocco, Parco Valentino, Mercato Nord)")
 	main.world_map_menu.open_map()
 	await get_tree().process_frame
 	var canvas: Control = main.world_map_menu._map_canvas

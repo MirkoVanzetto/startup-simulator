@@ -32,7 +32,7 @@ func _on_interact(_player: Node) -> void:
 					"Ciao! Elena mi ha fatto vedere il Web POS che hai installato al bar, roba da professionisti veri!",
 					"Ascolta, qui da Elettronica TO abbiamo un grosso problema: il nostro gestionale interno gira su un vecchio PC locale che si blocca ogni due giorni.",
 					"Dobbiamo migrare tutto su architettura Cloud con backup automatico sul tuo rack server, catalogo live e API protette.",
-					"Il budget approvato dalla direzione è di € 1.850,00 netti, più uno sconto permanente del 20% su tutti i nostri componenti hardware!",
+					"Il budget approvato dalla direzione è di € 860,00 netti, più uno sconto permanente del 20% su tutti i nostri componenti hardware!",
 					"Ti andrebbe di occuparti dell'infrastruttura?"
 				]
 				choices = [
@@ -53,7 +53,7 @@ func _on_interact(_player: Node) -> void:
 			"built":
 				lines = [
 					"Vedo dai log di sistema che l'architettura cloud ha superato gli stress test!",
-					"Inviami la consegna tramite la tua email su TO-OS per saldare la fattura da € 1.850."
+					"Inviami la consegna tramite la tua email su TO-OS per saldare la fattura da € 860."
 				]
 				choices = [
 					{"text": "Apri catalogo Componenti Hardware (Router, Server, PC)", "action": "open_hardware_shop"},

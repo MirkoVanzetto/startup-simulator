@@ -132,13 +132,15 @@ func _detect_surface() -> String:
 						return tagged
 				node = node.get_parent()
 				depth += 1
-	# 2) Fallback spaziale accurato (Studio legno, Negozi piastrelle, Viale Est asfalto, Borghi pietra)
+	# 2) Fallback spaziale accurato (Studio legno, Officina piastrelle, Viale Est asfalto, Borghi/Parco/Mercato pietra)
 	if global_position.z < 2.3 and absf(global_position.x) < 4.0:
 		return "wood"
 	if global_position.x > 79.0 and global_position.x < 91.5 and absf(global_position.z - 27.5) < 6.0:
 		return "tile"
 	if global_position.x > 24.0 and global_position.x < 62.0 and absf(global_position.z - 28.0) < 2.8:
 		return "asphalt"
+	if global_position.x < -24.0 and global_position.z < 33.5 and global_position.x > -42.0:
+		return "stone"
 	return "stone"
 
 func _handle_interaction_ray() -> void:

@@ -740,7 +740,7 @@ func test_tier4_the_turin_founder_workflow() -> bool:
 	
 	# 1. New game
 	GameManager.start_new_game()
-	passed = assert_true(EconomyManager.balance == 250.0, "Step 1: Started new journey with € 250.00") and passed
+	passed = assert_true(EconomyManager.balance == 120.0, "Step 1: Started new journey with € 120.00") and passed
 	
 	# 2. Check Mario contract available
 	ContractManager.init_tutorial_contract()
@@ -759,7 +759,7 @@ func test_tier4_the_turin_founder_workflow() -> bool:
 	# 5. Deliver website & receive payment
 	var bal_before = EconomyManager.balance
 	ContractManager.complete_tutorial_contract()
-	passed = assert_true(EconomyManager.balance == bal_before + 650.0, "Step 5: Payment of € 650.00 credited (Balance: € %0.2f)" % EconomyManager.balance) and passed
+	passed = assert_true(EconomyManager.balance == bal_before + 260.0, "Step 5: Payment of € 260.00 credited (Balance: € %0.2f)" % EconomyManager.balance) and passed
 	
 	# 6. Purchase monitor from TorinoHardware
 	var bought = EconomyManager.spend(350.0, "TorinoHardware Monitor")

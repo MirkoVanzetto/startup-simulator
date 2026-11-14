@@ -96,7 +96,7 @@ func _rebuild_dynamic_levels() -> void:
 			"contract_id": "factory_bellini_wifi",
 			"client": "Officina Bellini",
 			"title": "Rete Wi-Fi 6 & VLAN Industriale",
-			"payout": 350.00,
+			"payout": 290.00,
 			"checkpoints": {
 				Vector2i(0, 0): 1,
 				Vector2i(0, 3): 2,

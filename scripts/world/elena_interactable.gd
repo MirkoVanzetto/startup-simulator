@@ -32,7 +32,7 @@ func _on_interact(_player: Node) -> void:
 					"Vedi, qui al Caffè San Carlo la mattina tra marocchini, bicerin e croissant torinesi c'è il caos totale al bancone.",
 					"Il nostro vecchio registratore di cassa è lentissimo. Vorrei un sistema touch Web POS moderno:",
 					"Menu veloce, gestione comande tavoli e pagamenti digitali contactless integrati.",
-					"Il mio budget per questo lavoro è di € 1.250,00 netti. Inoltre, possiamo ospitare il sito sui tuoi server!"
+					"Il mio budget per questo lavoro è di € 540,00 netti. Inoltre, possiamo ospitare il sito sui tuoi server!"
 				]
 				choices = [
 					{"text": "Accetto con piacere Elena! Torno in studio a programmare il tuo Web POS.", "action": "accept_cafe"},
@@ -58,7 +58,7 @@ func _on_interact(_player: Node) -> void:
 			"completed":
 				lines = [
 					"Il Web POS è una meraviglia! I tempi di attesa per i clienti si sono dimezzati!",
-					"I € 1.250 sono tutti meritati, e continueremo a pagare l'abbonamento mensile per il cloud hosting sul tuo rack server!",
+					"I € 540 sono tutti meritati, e continueremo a pagare l'abbonamento mensile per il cloud hosting sul tuo rack server!",
 					"Se hai bisogno di nuovo hardware o server blade, Davide di 'Elettronica TO' proprio qui di fronte cercava un sistemista!"
 				]
 				choices = [

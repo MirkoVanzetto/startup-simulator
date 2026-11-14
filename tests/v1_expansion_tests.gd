@@ -64,34 +64,34 @@ func test_paced_leads_and_luca_role() -> void:
 
 	check(ContractManager.marketplace_contracts.size() == 1, "Finishing Mario spawns 1 starter B2B lead")
 	check(ContractManager.get_max_marketplace_pool() == 2, "Post-Mario marketplace cap is 2")
-	check(ContractManager.get_lead_interval_minutes() == 720, "Post-Mario pre-Davide lead interval is 720m (12h)")
+	check(ContractManager.get_lead_interval_minutes() == 780, "Post-Mario pre-Davide lead interval is 780m (13h)")
 
-	for _t in range(720):
+	for _t in range(780):
 		ContractManager._on_time_tick(14, 0, 1)
-	check(ContractManager.marketplace_contracts.size() == 2, "720 in-game ticks discover 2nd lead (cap 2)")
+	check(ContractManager.marketplace_contracts.size() == 2, "780 in-game ticks discover 2nd lead (cap 2)")
 
 	for _t in range(900):
 		ContractManager._on_time_tick(15, 0, 2)
 	check(ContractManager.marketplace_contracts.size() == 2, "Paced pool respects cap 2 without flooding")
 
-	# Complete Elena + Davide -> interval 360m, cap 3
+	# Complete Elena + Davide -> interval 420m, cap 3
 	ContractManager.advance_contract_to_in_progress("caffe_san_carlo")
 	ContractManager.complete_story_contract("caffe_san_carlo")
 	ContractManager.advance_contract_to_in_progress("elettronica_to")
 	ContractManager.complete_story_contract("elettronica_to")
 
-	check(ContractManager.get_lead_interval_minutes() == 360, "Post-Davide interval improves to 360m (6h)")
+	check(ContractManager.get_lead_interval_minutes() == 420, "Post-Davide interval improves to 420m (7h)")
 	check(ContractManager.get_max_marketplace_pool() == 3, "Post-Davide marketplace cap improves to 3")
 	ContractManager._on_day_passed(3)
 	check(ContractManager.marketplace_contracts.size() == 3, "Day pass overnight discovery fills up to cap 3")
 
-	# Hire Luca -> +2 immediate leads, 2h interval, cap 5, +15% budget
+	# Hire Luca -> +2 immediate leads, 2.5h interval, cap 5, +15% budget
 	GameManager.company_tier = 2
 	GameManager.reputation_points = 80
 	EconomyManager.balance = 3000.0
 	var hired_luca := EmployeeManager.hire_employee("emp_luca")
 	check(hired_luca, "Luca Vianello hired at Tier 2 with Rep >= 50")
-	check(ContractManager.get_lead_interval_minutes() == 120, "Luca lowers lead interval to 120m (2h)")
+	check(ContractManager.get_lead_interval_minutes() == 150, "Luca lowers lead interval to 150m (2h30m)")
 	check(ContractManager.get_max_marketplace_pool() == 5, "Luca increases marketplace cap to 5")
 	check(ContractManager.marketplace_contracts.size() == 5, "Hiring Luca immediately scouts +2 leads (3 -> 5)")
 
@@ -242,6 +242,15 @@ func test_webforge_v4_reinvention() -> void:
 	await get_tree().process_frame
 	check(wf.debug_area.visible and not wf.opt_minify, "Clicking opt shortcut opens Code Debug ticket #1 rather than free checkmark")
 
+	# Verify Click-to-Patch AST line inspection inside CodeLinesVBox
+	check(wf.code_lines_vbox.get_child_count() >= 4, "WebForge 5.0 Inspector populates interactive clickable code lines")
+	for ln_btn in wf.code_lines_vbox.get_children():
+		if ln_btn is Button and "[BUG]" in ln_btn.text:
+			ln_btn.pressed.emit()
+			await get_tree().process_frame
+			break
+	check(wf.inspected_bug_line, "Clicking [BUG] code line hooks AST inspection highlight")
+
 	# Try wrong fix first -> rejected; then pick the correct fix for each of 3 tickets
 	for tidx in range(3):
 		wf._select_debug_ticket(tidx)
@@ -267,6 +276,14 @@ func test_webforge_v4_reinvention() -> void:
 
 	check(wf.opt_minify and wf.opt_webp and wf.opt_meta, "All 3 debug optimizations activated via Code Debug tickets")
 
+	# Test Visual Composer block reordering & DOM validity + Grid Architecture switch
+	wf.move_block("hero", -1)
+	check(not wf.is_dom_order_valid(), "Moving hero above header fails semantic DOM audit")
+	wf.move_block("hero", 1)
+	check(wf.is_dom_order_valid(), "Restoring header at top and footer at bottom passes DOM audit")
+	wf.set_grid_layout_mode("bento")
+	check(wf.grid_layout_mode == "bento", "WebForge 5.0 switches layout architecture to Bento Grid")
+
 	# Pick Amber industrial palette & Officina components + toggle Mobile preview
 	wf._on_palette_selected(5)
 	wf._on_component_chosen("header", "header_officina")
@@ -280,7 +297,7 @@ func test_webforge_v4_reinvention() -> void:
 	await get_tree().process_frame
 
 	var audit: Dictionary = wf.calculate_lighthouse_score()
-	check(int(audit["total"]) == 100 and str(audit["grade"]) == "A+", "Officina Bellini Amber + Officina slots + 3 Debug patches = 100/100 (A+)")
+	check(int(audit["total"]) == 100 and str(audit["grade"]) == "A+", "Officina Bellini Amber + Bento + Officina slots + 3 Debug patches = 100/100 (A+)")
 	check(wf.preview_vbox.get_child_count() >= 2, "Mobile responsive wireframe rendered inside PreviewVBox")
 
 	# Run real _process(delta) timer compilation
@@ -297,7 +314,7 @@ func test_webforge_v4_reinvention() -> void:
 	wf._on_deliver_pressed()
 	check(ContractManager.is_contract_completed("factory_bellini_web"), "Delivering WebForge build completes contract")
 	check(bool(ContractManager.factory_state.get("web_done", false)), "Officina Bellini Web pillar marked done on delivery")
-	check(EconomyManager.balance > bal_pre + 950.0, "Delivery paid base budget + Lighthouse 20%% tip")
+	check(EconomyManager.balance > bal_pre + 680.0, "Delivery paid v1.2 base budget (€680) + Lighthouse 20%% tip")
 
 	wf.queue_free()
 	await get_tree().process_frame
@@ -502,11 +519,11 @@ func test_world_expansion_and_officina_bellini() -> void:
 	await get_tree().process_frame
 	check(bool(ContractManager.factory_state.get("pcs_done", false)) and vis_pcs.visible, "2x PCs pillar complete and InstalledPCs 3D mesh visible")
 
-	# Verify Grand Completion bonus (+960 PCs +1500 bonus, +18+40 Rep)
+	# Verify Grand Completion bonus (+820 PCs +950 bonus, +18+35 Rep)
 	check(bool(ContractManager.factory_state.get("completed", false)), "Officina Bellini grand appalto marked completed")
 	check(ContractManager.is_contract_completed("factory_bellini"), "factory_bellini added to completed_contracts")
-	check(EconomyManager.balance >= bal_pre_grand + 960.0 + 1500.0 - 0.1, "Grand completion awarded both PC payout and € 1.500 final bonus")
-	check(GameManager.reputation_points >= rep_pre_grand + 58, "Grand completion awarded +18 (PCs) and +40 grand Rep bonus")
+	check(EconomyManager.balance >= bal_pre_grand + 820.0 + 950.0 - 0.1, "Grand completion awarded both PC payout (€820) and € 950 final bonus")
+	check(GameManager.reputation_points >= rep_pre_grand + 53, "Grand completion awarded +18 (PCs) and +35 grand Rep bonus")
 
 	world.queue_free()
 	await get_tree().process_frame

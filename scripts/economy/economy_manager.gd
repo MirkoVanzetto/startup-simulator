@@ -1,13 +1,13 @@
 extends Node
 ## EconomyManager - Authoritative financial engine for Startup Simulator
 
-var balance: float = 250.00
+var balance: float = 120.00
 var ledger: Array[Dictionary] = []
 
 func _ready() -> void:
 	pass
 
-func reset_economy(initial_funds: float = 250.00) -> void:
+func reset_economy(initial_funds: float = 120.00) -> void:
 	balance = initial_funds
 	ledger.clear()
 	_record_entry(initial_funds, "Capitale Iniziale")

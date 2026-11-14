@@ -25,7 +25,7 @@ static var web_gig_variants = [
 			"Modulo Prenotazione o Carrello Online",
 			"Ottimizzazione Bundle CSS/JS e Immagini WebP"
 		],
-		"budget_range": [920.0, 1480.0],
+		"budget_range": [440.0, 690.0],
 		"difficulty": 2,
 		"deadline_days": 3
 	},
@@ -40,7 +40,7 @@ static var web_gig_variants = [
 			"Griglia Servizi & Tabella Capacità",
 			"Pulsante Richiesta Preventivo Rapido"
 		],
-		"budget_range": [1050.0, 1620.0],
+		"budget_range": [520.0, 780.0],
 		"difficulty": 3,
 		"deadline_days": 4
 	},
@@ -55,7 +55,7 @@ static var web_gig_variants = [
 			"Controllo Accessi & Export Report PDF",
 			"Pipeline Ottimizzazione & Meta SEO"
 		],
-		"budget_range": [1100.0, 1680.0],
+		"budget_range": [560.0, 820.0],
 		"difficulty": 3,
 		"deadline_days": 4
 	},
@@ -70,7 +70,7 @@ static var web_gig_variants = [
 			"Pagamento Digitale & Satispay Webhook",
 			"Bundle Compresso senza Asset Pesanti"
 		],
-		"budget_range": [860.0, 1340.0],
+		"budget_range": [420.0, 640.0],
 		"difficulty": 2,
 		"deadline_days": 3
 	}
@@ -79,7 +79,7 @@ static var web_gig_variants = [
 static var cyber_gig_variants = [
 	{
 		"title": "Audit Firewall Perimetrale & Segmentazione DMZ",
-		"budget_range": [950.0, 1450.0],
+		"budget_range": [480.0, 740.0],
 		"difficulty": 3,
 		"deadline_days": 4,
 		"checkpoints": {
@@ -97,7 +97,7 @@ static var cyber_gig_variants = [
 	},
 	{
 		"title": "Hardening VPN & Tunneling Crittografato PMI",
-		"budget_range": [1250.0, 1850.0],
+		"budget_range": [620.0, 890.0],
 		"difficulty": 4,
 		"deadline_days": 5,
 		"checkpoints": {
@@ -120,7 +120,7 @@ static var hardware_gig_variants = [
 	{
 		"title": "Installazione Rete Wi-Fi 6 Mesh & Access Point",
 		"required_hardware": {"hw_wifi_router": 1},
-		"budget": 380.0,
+		"budget": 310.0,
 		"difficulty": 1,
 		"deadline_days": 3,
 		"requirements": [
@@ -131,7 +131,7 @@ static var hardware_gig_variants = [
 	{
 		"title": "Fornitura & Setup 2 Workstation CAD/Ufficio",
 		"required_hardware": {"hw_workstation_pc": 2},
-		"budget": 980.0,
+		"budget": 860.0,
 		"difficulty": 2,
 		"deadline_days": 4,
 		"requirements": [
@@ -142,7 +142,7 @@ static var hardware_gig_variants = [
 	{
 		"title": "Installazione Server Tower Xeon RAID-10 Locale",
 		"required_hardware": {"hw_server_tower": 1},
-		"budget": 860.0,
+		"budget": 740.0,
 		"difficulty": 3,
 		"deadline_days": 4,
 		"requirements": [
@@ -153,7 +153,7 @@ static var hardware_gig_variants = [
 	{
 		"title": "Kit Sicurezza Rete: Router Wi-Fi + Firewall UTM",
 		"required_hardware": {"hw_wifi_router": 1, "hw_firewall_appliance": 1},
-		"budget": 590.0,
+		"budget": 490.0,
 		"difficulty": 2,
 		"deadline_days": 4,
 		"requirements": [

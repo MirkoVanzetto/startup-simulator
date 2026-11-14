@@ -1,11 +1,11 @@
-[gd_scene load_steps=8 format=3 uid="uid://wbf8webforge01"]
+[gd_scene load_steps=9 format=3 uid="uid://wbf8webforge01"]
 
 [ext_resource type="Script" path="res://scripts/ui/minigames/web_forge_controller.gd" id="1_wfc"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_header"]
-bg_color = Color(0.09, 0.11, 0.15, 0.98)
+bg_color = Color(0.08, 0.10, 0.14, 0.98)
 border_width_bottom = 2
-border_color = Color(0.2, 0.45, 0.8, 0.8)
+border_color = Color(0.22, 0.56, 0.88, 0.88)
 corner_radius_top_left = 6
 corner_radius_top_right = 6
 content_margin_left = 14.0
@@ -14,12 +14,12 @@ content_margin_right = 14.0
 content_margin_bottom = 6.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_badge"]
-bg_color = Color(0.12, 0.16, 0.22, 1)
+bg_color = Color(0.11, 0.16, 0.22, 1)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0.2, 0.7, 0.5, 0.8)
+border_color = Color(0.22, 0.78, 0.54, 0.85)
 corner_radius_top_left = 12
 corner_radius_top_right = 12
 corner_radius_bottom_right = 12
@@ -30,36 +30,47 @@ content_margin_right = 12.0
 content_margin_bottom = 4.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
-bg_color = Color(0.11, 0.13, 0.18, 1)
+bg_color = Color(0.10, 0.12, 0.17, 1)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0.18, 0.22, 0.3, 0.8)
+border_color = Color(0.18, 0.24, 0.34, 0.85)
 corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 content_margin_left = 10.0
-content_margin_top = 10.0
+content_margin_top = 8.0
 content_margin_right = 10.0
-content_margin_bottom = 10.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_brief"]
+bg_color = Color(0.14, 0.17, 0.24, 1)
+border_width_left = 3
+border_color = Color(0.95, 0.76, 0.30, 0.9)
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+content_margin_left = 10.0
+content_margin_top = 7.0
+content_margin_right = 8.0
+content_margin_bottom = 7.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_canvas"]
-bg_color = Color(0.08, 0.09, 0.13, 1)
+bg_color = Color(0.07, 0.09, 0.13, 1)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0.25, 0.3, 0.42, 0.8)
+border_color = Color(0.24, 0.32, 0.45, 0.85)
 corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
-content_margin_left = 12.0
-content_margin_top = 10.0
-content_margin_right = 12.0
-content_margin_bottom = 10.0
+content_margin_left = 10.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_terminal"]
 bg_color = Color(0.05, 0.06, 0.08, 1)
@@ -67,7 +78,7 @@ border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0.2, 0.75, 0.45, 0.8)
+border_color = Color(0.2, 0.75, 0.45, 0.85)
 corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
@@ -83,20 +94,20 @@ border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0.28, 0.36, 0.52, 0.85)
+border_color = Color(0.28, 0.38, 0.56, 0.85)
 corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
-content_margin_left = 10.0
+content_margin_left = 8.0
 content_margin_top = 8.0
-content_margin_right = 10.0
+content_margin_right = 8.0
 content_margin_bottom = 8.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_footer"]
-bg_color = Color(0.09, 0.11, 0.15, 0.98)
+bg_color = Color(0.08, 0.10, 0.14, 0.98)
 border_width_top = 1
-border_color = Color(0.2, 0.25, 0.35, 0.8)
+border_color = Color(0.2, 0.25, 0.35, 0.85)
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 content_margin_left = 12.0
@@ -120,7 +131,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.06, 0.07, 0.09, 1)
+color = Color(0.05, 0.06, 0.09, 1)
 
 [node name="Main" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -146,9 +157,9 @@ theme_override_constants/separation = 10
 [node name="IDELabel" type="Label" parent="Main/Header/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
+theme_override_colors/font_color = Color(0.32, 0.88, 1, 1)
 theme_override_font_sizes/font_size = 13
-text = "⚡ WebForge Studio 4.0 — Assembler, Preview & Code Debug"
+text = "⚡ WebForge Studio 5.0 — Visual Composer, Code Patcher & Performance Audit"
 clip_text = true
 
 [node name="LighthouseBadge" type="PanelContainer" parent="Main/Header/HBox"]
@@ -169,10 +180,10 @@ text = " ✕ Chiudi IDE "
 [node name="Body" type="HSplitContainer" parent="Main"]
 layout_mode = 2
 size_flags_vertical = 3
-split_offset = 250
+split_offset = 278
 
 [node name="Toolbox" type="PanelContainer" parent="Main/Body"]
-custom_minimum_size = Vector2(248, 0)
+custom_minimum_size = Vector2(266, 0)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
@@ -187,6 +198,7 @@ theme_override_constants/separation = 6
 
 [node name="BriefPanel" type="PanelContainer" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox"]
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_brief")
 
 [node name="BriefVBox" type="VBoxContainer" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox/BriefPanel"]
 layout_mode = 2
@@ -201,16 +213,16 @@ autowrap_mode = 2
 
 [node name="ClientPrefs" type="Label" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox/BriefPanel/BriefVBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.80, 0.86, 0.94, 1)
+theme_override_colors/font_color = Color(0.84, 0.90, 0.97, 1)
 theme_override_font_sizes/font_size = 11
 autowrap_mode = 2
 text = "Brief cliente in attesa..."
 
 [node name="SlotTabsLabel" type="Label" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.3, 0.8, 1, 1)
-theme_override_font_sizes/font_size = 12
-text = "1. SLOT LAYOUT DA CONFIGURARE"
+theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "1. SEZIONI PAGINA (SELEZIONA SLOT)"
 
 [node name="SlotTabsHBox" type="HBoxContainer" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox"]
 layout_mode = 2
@@ -248,9 +260,9 @@ text = "Footer"
 
 [node name="ComponentTrayLabel" type="Label" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.3, 0.8, 1, 1)
-theme_override_font_sizes/font_size = 12
-text = "2. MODULI & COMPONENTI UI"
+theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "2. MODULI UI DISPONIBILI"
 
 [node name="ComponentTrayVBox" type="VBoxContainer" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox"]
 layout_mode = 2
@@ -259,11 +271,39 @@ theme_override_constants/separation = 4
 [node name="Sep1" type="HSeparator" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox"]
 layout_mode = 2
 
+[node name="ArchitectureLabel" type="Label" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "3. ARCHITETTURA GRID & DENSITÀ"
+
+[node name="LayoutModeHBox" type="HBoxContainer" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ClassicLayoutBtn" type="Button" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox/LayoutModeHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 10
+text = "▭ 1-Col"
+
+[node name="SplitLayoutBtn" type="Button" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox/LayoutModeHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 10
+text = "▥ 2-Col"
+
+[node name="BentoLayoutBtn" type="Button" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox/LayoutModeHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 10
+text = "⊞ Bento"
+
 [node name="PaletteLabel" type="Label" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.3, 0.8, 1, 1)
-theme_override_font_sizes/font_size = 12
-text = "3. TEMA & PALETTE CSS"
+theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "4. TEMA & PALETTE CSS"
 
 [node name="PalettePicker" type="OptionButton" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox"]
 layout_mode = 2
@@ -271,19 +311,43 @@ theme_override_font_sizes/font_size = 11
 
 [node name="PaletteAffinityBadge" type="Label" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.65, 0.72, 0.82, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.68, 0.80, 0.92, 1)
+theme_override_font_sizes/font_size = 10
 autowrap_mode = 2
 text = "Scegli una palette coerente col brief del cliente."
+
+[node name="AssetBudgetBox" type="VBoxContainer" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="AssetBudgetTitle" type="Label" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox/AssetBudgetBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "5. PESO MEDIA / BUNDLE BUDGET (KB)"
+
+[node name="BudgetSlider" type="HSlider" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox/AssetBudgetBox"]
+layout_mode = 2
+min_value = 140.0
+max_value = 960.0
+step = 20.0
+value = 440.0
+
+[node name="BudgetStatusLabel" type="Label" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox/AssetBudgetBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.92, 0.72, 1)
+theme_override_font_sizes/font_size = 10
+autowrap_mode = 2
+text = "Asset 440 KB · Nitidezza Retina & 4G veloce"
 
 [node name="Sep2" type="HSeparator" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox"]
 layout_mode = 2
 
 [node name="OptTitle" type="Label" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.3, 0.8, 1, 1)
-theme_override_font_sizes/font_size = 12
-text = "4. TICKET DEBUG & LINTING (CLICCA PER PATCH)"
+theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "6. ISPETTORE CODICE (APRI & PATCHA)"
 
 [node name="BadgesVBox" type="VBoxContainer" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox"]
 layout_mode = 2
@@ -291,28 +355,28 @@ theme_override_constants/separation = 4
 
 [node name="OptBtnMinify" type="Button" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox/BadgesVBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 11
-text = "🐛 #1: Risolvi Bundle CSS/JS"
+theme_override_font_sizes/font_size = 10
+text = "🐛 #1: Bundle CSS/JS"
 
 [node name="OptBtnWebP" type="Button" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox/BadgesVBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 11
-text = "🐛 #2: Risolvi Media & WebP"
+theme_override_font_sizes/font_size = 10
+text = "🐛 #2: Media & WebP"
 
 [node name="OptBtnMeta" type="Button" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox/BadgesVBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 11
-text = "🐛 #3: Risolvi Meta SEO"
+theme_override_font_sizes/font_size = 10
+text = "🐛 #3: Meta SEO"
 
 [node name="Sep3" type="HSeparator" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox"]
 layout_mode = 2
 
 [node name="BuildSpeedInfo" type="Label" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.6, 0.8, 1, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.6, 0.82, 1, 1)
+theme_override_font_sizes/font_size = 10
 autowrap_mode = 2
-text = "Velocità build: Base Starter Laptop (5.5s)"
+text = "Toolchain: Base Starter Laptop (5.5s)"
 
 [node name="CompileButton" type="Button" parent="Main/Body/Toolbox/ToolboxScroll/ToolboxVBox"]
 custom_minimum_size = Vector2(0, 32)
@@ -320,7 +384,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
 theme_override_font_sizes/font_size = 12
 disabled = true
-text = "⚡ Compila & Esegui Build (0/5 Slot)"
+text = "⚡ Compila & Esegui Build (0/5)"
 
 [node name="Canvas" type="PanelContainer" parent="Main/Body"]
 layout_mode = 2
@@ -338,21 +402,21 @@ theme_override_constants/separation = 6
 [node name="CanvasTitle" type="Label" parent="Main/Body/Canvas/CanvasVBox/CanvasHeaderHBox"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.85, 0.9, 1, 1)
+theme_override_colors/font_color = Color(0.85, 0.92, 1, 1)
 theme_override_font_sizes/font_size = 12
-text = "CANVAS IDE"
+text = "VISUAL PAGE COMPOSER & CODE INSPECTOR"
 clip_text = true
 
 [node name="TabPreviewBtn" type="Button" parent="Main/Body/Canvas/CanvasVBox/CanvasHeaderHBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 11
-text = "🌐 Anteprima"
+text = "🧩 Composer & Preview"
 
 [node name="TabDebugBtn" type="Button" parent="Main/Body/Canvas/CanvasVBox/CanvasHeaderHBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.8, 0.3, 1)
+theme_override_colors/font_color = Color(1, 0.82, 0.3, 1)
 theme_override_font_sizes/font_size = 11
-text = "🐛 Debug (0/3)"
+text = "🐛 Ispettore Codice (0/3)"
 
 [node name="TabTerminalBtn" type="Button" parent="Main/Body/Canvas/CanvasVBox/CanvasHeaderHBox"]
 layout_mode = 2
@@ -385,13 +449,13 @@ horizontal_scroll_mode = 0
 [node name="DebugVBox" type="VBoxContainer" parent="Main/Body/Canvas/CanvasVBox/DebugArea/DebugScroll"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 8
+theme_override_constants/separation = 7
 
 [node name="TicketHeader" type="Label" parent="Main/Body/Canvas/CanvasVBox/DebugArea/DebugScroll/DebugVBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.35, 1)
 theme_override_font_sizes/font_size = 13
-text = "🐛 CODE REVIEW & BUG FIXING PIPELINE"
+text = "🔍 ISPETTORE CODICE INTERATTIVO — CLICCA LE RIGHE CON BUG"
 autowrap_mode = 2
 
 [node name="TicketSelectorRow" type="HFlowContainer" parent="Main/Body/Canvas/CanvasVBox/DebugArea/DebugScroll/DebugVBox"]
@@ -425,13 +489,22 @@ autowrap_mode = 2
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_code")
 
-[node name="SnippetLabel" type="RichTextLabel" parent="Main/Body/Canvas/CanvasVBox/DebugArea/DebugScroll/DebugVBox/SnippetPanel"]
+[node name="SnippetVBox" type="VBoxContainer" parent="Main/Body/Canvas/CanvasVBox/DebugArea/DebugScroll/DebugVBox/SnippetPanel"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="SnippetLabel" type="RichTextLabel" parent="Main/Body/Canvas/CanvasVBox/DebugArea/DebugScroll/DebugVBox/SnippetPanel/SnippetVBox"]
+visible = false
 layout_mode = 2
 theme_override_font_sizes/normal_font_size = 11
 bbcode_enabled = true
 fit_content = true
 scroll_active = false
 text = "Codice sorgente..."
+
+[node name="CodeLinesVBox" type="VBoxContainer" parent="Main/Body/Canvas/CanvasVBox/DebugArea/DebugScroll/DebugVBox/SnippetPanel/SnippetVBox"]
+layout_mode = 2
+theme_override_constants/separation = 3
 
 [node name="SaraHintLabel" type="Label" parent="Main/Body/Canvas/CanvasVBox/DebugArea/DebugScroll/DebugVBox"]
 visible = false
@@ -445,7 +518,7 @@ autowrap_mode = 2
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
 theme_override_font_sizes/font_size = 11
-text = "SELEZIONA LA PATCH CORRETTA DA APPLICARE:"
+text = "SELEZIONA UNA RIGA DEL CODICE O SCEGLI LA GIT PATCH:"
 
 [node name="FixesVBox" type="VBoxContainer" parent="Main/Body/Canvas/CanvasVBox/DebugArea/DebugScroll/DebugVBox"]
 layout_mode = 2
@@ -484,7 +557,7 @@ size_flags_vertical = 3
 theme_override_font_sizes/normal_font_size = 11
 bbcode_enabled = true
 scroll_following = true
-text = "[color=#00ccff]WebForge Toolchain v4.0 pronta per il bundling & code debug.[/color]\n"
+text = "[color=#00ccff]WebForge Toolchain v5.0 pronta per Visual Composer & bundling.[/color]\n"
 
 [node name="Footer" type="PanelContainer" parent="Main"]
 layout_mode = 2
@@ -521,7 +594,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 1)
 theme_override_font_sizes/font_size = 11
-text = "Seleziona i moduli per ciascuno slot e risolvi i ticket Debug."
+text = "Componi le sezioni, scegli il layout grid e patcha i bug nel codice."
 clip_text = true
 
 [node name="DeliverButton" type="Button" parent="Main/Footer/HBox"]

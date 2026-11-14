@@ -6,10 +6,10 @@ extends Node
 @export var current_minute: int = 0
 @export var current_day: int = 1
 
-# Daily operating expenses
-const DAILY_RENT: float = 25.00
-const DAILY_UTILITIES: float = 8.00
-const DAILY_INTERNET: float = 5.00
+# Daily operating expenses (48.00 EUR / day realistic simulator overhead)
+const DAILY_RENT: float = 30.00
+const DAILY_UTILITIES: float = 10.00
+const DAILY_INTERNET: float = 8.00
 
 var time_accumulator: float = 0.0
 
@@ -58,13 +58,31 @@ func _bill_daily_expenses() -> void:
 		"total": total_overhead
 	}
 	
-	EconomyManager.spend(total_overhead, "Spese Fisse Giornaliere (Affitto, Luce, Fibra)")
-	EventBus.daily_expenses_billed.emit(total_overhead, breakdown)
-	EventBus.notification_posted.emit(
-		"Rendiconto Spese Giornaliere",
-		"Addebitati € %0.2f (Affitto €25, Utenze €8, Fibra €5) per il Giorno %d." % [total_overhead, current_day],
-		"warning"
-	)
+	var billed_amount := 0.0
+	if EconomyManager.can_afford(total_overhead):
+		EconomyManager.spend(total_overhead, "Spese Fisse Giornaliere (Affitto, Luce, Fibra)")
+		billed_amount = total_overhead
+		EventBus.notification_posted.emit(
+			"Rendiconto Spese Giornaliere",
+			"Addebitati € %0.2f (Affitto €30, Utenze €10, Fibra €8) per il Giorno %d." % [total_overhead, current_day],
+			"warning"
+		)
+	elif EconomyManager.balance > 0.01:
+		var partial := snappedf(EconomyManager.balance, 0.01)
+		EconomyManager.spend(partial, "Acconto Spese Giornaliere (Cassa Parziale)")
+		billed_amount = partial
+		EventBus.notification_posted.emit(
+			"Cassa in Rosso Scongiurato",
+			"Pagati € %0.2f su € %0.2f di spese fisse. Fai lavoretti rapidi alla Bacheca per fare cassa!" % [partial, total_overhead],
+			"warning"
+		)
+	else:
+		EventBus.notification_posted.emit(
+			"Avviso Affitto (€ 0 in Cassa)",
+			"Conto a zero: proroga concessa per oggi. Vai alla Bacheca Lavori Rapidi in paese per guadagnare subito!",
+			"warning"
+		)
+	EventBus.daily_expenses_billed.emit(billed_amount, breakdown)
 	
 	# Milestone 5 - Dynamic Hosting Revenue from ServerRackManager
 	if ServerRackManager.is_rack_unlocked or ("server_rack_upgrade" in GameManager.studio_upgrades_installed):
@@ -80,12 +98,16 @@ func _bill_daily_expenses() -> void:
 	# Milestone 6 - Employee Payroll & Productivity
 	var payroll = EmployeeManager.calculate_daily_payroll()
 	if payroll > 0.0:
-		EconomyManager.spend(payroll, "Stipendi & Buste Paga Dipendenti (Giorno %d)" % current_day)
-		EventBus.notification_posted.emit(
-			"Buste Paga Pagate",
-			"Liquidati € %0.2f per gli stipendi giornalieri del tuo team." % payroll,
-			"warning"
-		)
+		if EconomyManager.can_afford(payroll):
+			EconomyManager.spend(payroll, "Stipendi & Buste Paga Dipendenti (Giorno %d)" % current_day)
+			EventBus.notification_posted.emit(
+				"Buste Paga Pagate",
+				"Liquidati € %0.2f per gli stipendi giornalieri del tuo team." % payroll,
+				"warning"
+			)
+		elif EconomyManager.balance > 0.01:
+			var p_part := snappedf(EconomyManager.balance, 0.01)
+			EconomyManager.spend(p_part, "Acconto Buste Paga (Giorno %d)" % current_day)
 		
 	var emp_revenue = EmployeeManager.calculate_employee_revenue()
 	if emp_revenue > 0.0:

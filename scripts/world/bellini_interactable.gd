@@ -17,7 +17,7 @@ func _on_interact(_player: Node) -> void:
 			"Benvenuto all'Officina Meccanica Bellini qui a Borgo Valdocco!",
 			"Stiamo ampliando il reparto CNC e dobbiamo modernizzare da zero l'intera infrastruttura IT dell'azienda.",
 			"Servono: copertura Wi-Fi 6 & VLAN sicura, un Portale Catalogo WebForge B2B, 1 Server Tower Xeon RAID e 2 Workstation PC CAD.",
-			"Prima di ordinare i materiali da Elettronica TO, fai un sopralluogo nelle 4 zone chiave dell'officina. Valore totale oltre € 3.080 + € 1.500 di premio finale!"
+			"Prima di ordinare i materiali, fai il sopralluogo delle 4 zone: compariranno gli ologrammi ciano delle installazioni (€ 2.530 + € 950 di premio finale)!"
 		]
 		choices = [
 			{"text": "Accetto la maxi-commessa! Inizio il sopralluogo delle 4 zone.", "action": "accept_factory_bellini"},

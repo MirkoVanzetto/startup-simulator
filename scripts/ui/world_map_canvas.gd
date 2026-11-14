@@ -16,8 +16,12 @@ func set_view_bounds(view_id: String) -> void:
 	match view_id:
 		"sancarlo":
 			_view_bounds = MapData.SAN_CARLO_BOUNDS
+		"parco":
+			_view_bounds = MapData.PARCO_BOUNDS
 		"valdocco":
 			_view_bounds = MapData.VALDOCCO_BOUNDS
+		"mercato":
+			_view_bounds = MapData.MERCATO_BOUNDS
 		_:
 			_view_bounds = MapData.WORLD_BOUNDS
 	queue_redraw()
@@ -144,21 +148,29 @@ func _draw() -> void:
 		draw_arc(cpos, cr + 2.0, 0.0, TAU, 24, Color(0.60, 0.88, 1.0, 0.7), 1.2)
 
 	# 7. District Watermarks
-	_draw_label_centered(font, world_to_canvas(Vector2(-1.0, -5.5)), "BORGO SAN CARLO", 12, Color(0.65, 0.78, 0.88, 0.65))
+	_draw_label_centered(font, world_to_canvas(Vector2(-40.0, 44.0)), "PARCO VALENTINO", 11, Color(0.55, 0.90, 0.65, 0.75))
+	_draw_label_centered(font, world_to_canvas(Vector2(-1.0, -11.4)), "BORGO SAN CARLO", 12, Color(0.65, 0.78, 0.88, 0.72))
 	_draw_label_centered(font, world_to_canvas(Vector2(43.0, 20.8)), "VIALE EST", 11, Color(0.75, 0.78, 0.84, 0.6))
-	_draw_label_centered(font, world_to_canvas(Vector2(76.0, 16.0)), "BORGO VALDOCCO", 12, Color(0.95, 0.84, 0.45, 0.7))
+	_draw_label_centered(font, world_to_canvas(Vector2(76.0, 16.2)), "BORGO VALDOCCO", 12, Color(0.95, 0.84, 0.45, 0.7))
+	_draw_label_centered(font, world_to_canvas(Vector2(78.5, -12.0)), "MERCATO NORD · OGR", 11, Color(0.98, 0.76, 0.48, 0.78))
 
 	# 8. Waypoint path from player
 	var wp := GameManager.active_waypoint
 	var wp_id := str(wp.get("id", ""))
-	if not wp.is_empty() and is_instance_valid(GameManager.player_node):
-		var pp3: Vector3 = GameManager.player_node.global_position
+	if not wp.is_empty():
 		var wp3: Vector3 = wp.get("pos", Vector3.ZERO)
-		draw_dashed_line(
-			world_to_canvas(Vector2(pp3.x, pp3.z)),
-			world_to_canvas(Vector2(wp3.x, wp3.z)),
-			Color(0.32, 0.92, 1.0, 0.82), 2.0, 6.0
-		)
+		var wp2 := world_to_canvas(Vector2(wp3.x, wp3.z))
+		if is_instance_valid(GameManager.player_node):
+			var pp3: Vector3 = GameManager.player_node.global_position
+			draw_dashed_line(
+				world_to_canvas(Vector2(pp3.x, pp3.z)),
+				wp2,
+				Color(0.32, 0.92, 1.0, 0.82), 2.0, 6.0
+			)
+		if wp_id.begins_with("sidejob_"):
+			draw_circle(wp2, 5.5, Color(0.24, 0.96, 0.84, 0.9))
+			draw_arc(wp2, 9.5, 0.0, TAU, 24, Color(0.24, 0.96, 0.84, 0.85), 2.0)
+			_draw_label_centered(font, wp2 + Vector2(0, -14.0), "⚑ " + str(wp.get("name", "Tappa")), 10, Color(0.55, 1.0, 0.90))
 
 	# 9. Interactive POIs
 	var rec_id := GameManager.get_recommended_quest_poi_id()

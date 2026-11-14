@@ -33,7 +33,7 @@ func _on_interact(_player: Node) -> void:
 				"Ciao ragazzo! Ti manda l'annuncio su Freelance Hub? Finalmente un giovane in gamba!",
 				"Vedi, qui alla Pizzeria Da Mario sforniamo la vera pizza a Torino da trent'anni, ma sul web siamo invisibili. I clienti cercano su Google Maps e finiscono nei fast food!",
 				"Ho bisogno di un sito web chiaro e moderno: il nostro logo, il menu delle nostre pizze speciali, orari e un sistema per ordinare.",
-				"Il mio budget per questo lavoro è di € 350,00 netti. Ci stai?"
+				"Il mio budget per questo lavoro è di € 260,00 netti. Ci stai?"
 			]
 			choices = [
 				{"text": "Affare fatto Mario! Torno al mio studio e inizio subito lo sviluppo.", "action": "accept"},

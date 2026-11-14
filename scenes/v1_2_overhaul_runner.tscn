@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://v12ovr01run"]
+
+[ext_resource type="Script" path="res://tests/v1_2_overhaul_tests.gd" id="1_v12"]
+
+[node name="V12OverhaulRunner" type="Node"]
+script = ExtResource("1_v12")

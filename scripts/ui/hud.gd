@@ -9,6 +9,9 @@ extends Control
 @onready var objective_label: Label = $TopLeft/TopLeftVBox/ObjectivePanel/VBox/ObjectiveText
 @onready var waypoint_panel: PanelContainer = $TopLeft/TopLeftVBox/WaypointPanel
 @onready var waypoint_label: Label = $TopLeft/TopLeftVBox/WaypointPanel/VBox/WaypointText
+@onready var side_job_panel: PanelContainer = $TopLeft/TopLeftVBox/SideJobPanel
+@onready var side_job_header: Label = $TopLeft/TopLeftVBox/SideJobPanel/VBox/SideJobHeader
+@onready var side_job_label: Label = $TopLeft/TopLeftVBox/SideJobPanel/VBox/SideJobText
 @onready var toast_container: VBoxContainer = $BottomLeft/ToastContainer
 @onready var hints_label: Label = $BottomRight/HintsPanel/HintsLabel
 @onready var hunger_bar: ProgressBar = $NeedsPanelMargin/NeedsPanel/VBox/HungerRow/HungerBar
@@ -44,6 +47,10 @@ func _ready() -> void:
 	EventBus.fame_tier_changed.connect(func(_i, _n): _update_reputation_label())
 	EventBus.waypoint_changed.connect(_on_waypoint_changed)
 	EventBus.backpack_updated.connect(_update_hints_label)
+	EventBus.side_job_started.connect(func(_j, _d): _update_side_job_panel())
+	EventBus.side_job_progressed.connect(func(_j, _s, _t, _d): _update_side_job_panel())
+	EventBus.side_job_completed.connect(func(_j, _r, _rep): _update_side_job_panel())
+	EventBus.side_job_cancelled.connect(func(_j): _update_side_job_panel())
 	if ShopManager.has_signal("hardware_changed"):
 		ShopManager.hardware_changed.connect(_update_hints_label)
 	get_viewport().size_changed.connect(_update_hints_label)
@@ -126,6 +133,7 @@ func _update_waypoint_tracker() -> void:
 		return
 
 	waypoint_panel.visible = true
+	_trim_toasts_to_budget()
 	var wp_name := str(wp.get("name", "Destinazione"))
 	var wp_pos: Vector3 = wp.get("pos", Vector3.ZERO)
 
@@ -170,9 +178,29 @@ func _update_hints_label() -> void:
 
 const MAX_TOASTS := 3
 
-func _on_notification_posted(title: String, message: String, _icon_type: String) -> void:
+func _get_max_visible_toasts() -> int:
 	var vp_h := get_viewport_rect().size.y
-	var max_visible := 2 if (vp_h > 0.0 and vp_h < 590.0) else MAX_TOASTS
+	if vp_h <= 0.0:
+		return MAX_TOASTS
+	var sj_vis := is_instance_valid(side_job_panel) and side_job_panel.visible
+	var wp_vis := is_instance_valid(waypoint_panel) and waypoint_panel.visible
+	if vp_h < 560.0:
+		return 1 if (sj_vis or wp_vis) else 2
+	if vp_h < 650.0:
+		return 2
+	return MAX_TOASTS
+
+func _trim_toasts_to_budget() -> void:
+	if not is_instance_valid(toast_container):
+		return
+	var limit := _get_max_visible_toasts()
+	while toast_container.get_child_count() > limit:
+		var oldest := toast_container.get_child(0)
+		toast_container.remove_child(oldest)
+		oldest.queue_free()
+
+func _on_notification_posted(title: String, message: String, _icon_type: String) -> void:
+	var max_visible := _get_max_visible_toasts()
 	while toast_container.get_child_count() >= max_visible:
 		var oldest := toast_container.get_child(0)
 		toast_container.remove_child(oldest)
@@ -216,6 +244,21 @@ func _on_game_state_changed(new_state: int, _old_state: int) -> void:
 	if visible:
 		_update_hints_label()
 		_update_waypoint_tracker()
+		_update_side_job_panel()
+
+func _update_side_job_panel() -> void:
+	if not is_instance_valid(side_job_panel):
+		return
+	if SideJobManager == null or not SideJobManager.has_active_job():
+		side_job_panel.visible = false
+		return
+	var aj: Dictionary = SideJobManager.active_job
+	side_job_panel.visible = true
+	_trim_toasts_to_budget()
+	var step := int(aj.get("step", 0))
+	var total := int(aj.get("total", 1))
+	side_job_header.text = "⚡ %s (%d/%d)" % [str(aj.get("title", "Lavoretto")).to_upper(), step, total]
+	side_job_label.text = SideJobManager.get_active_step_instruction()
 
 func _update_objective_display() -> void:
 	if objective_label and quest_manager and quest_manager.has_method("get_current_objective"):
@@ -228,5 +271,6 @@ func _update_hud_display() -> void:
 	_update_objective_display()
 	_update_hints_label()
 	_update_waypoint_tracker()
+	_update_side_job_panel()
 	prompt_container.visible = false
 

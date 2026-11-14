@@ -102,15 +102,18 @@ func _build_ui() -> void:
 	# View Filter buttons
 	var views := [
 		["all", "Tutto"],
-		["sancarlo", "San Carlo"],
-		["valdocco", "Valdocco"]
+		["parco", "Parco"],
+		["sancarlo", "S.Carlo"],
+		["valdocco", "Valdocco"],
+		["mercato", "Mercato"]
 	]
 	for v in views:
 		var vid: String = v[0]
 		var vb := Button.new()
 		vb.text = v[1]
 		vb.toggle_mode = true
-		vb.custom_minimum_size = Vector2(76, 30)
+		vb.custom_minimum_size = Vector2(58, 30)
+		vb.add_theme_font_size_override("font_size", 11)
 		vb.pressed.connect(func(): _set_view(vid))
 		header.add_child(vb)
 		_view_buttons[vid] = vb
@@ -118,7 +121,8 @@ func _build_ui() -> void:
 
 	_close_btn = Button.new()
 	_close_btn.text = "Chiudi [Caps]"
-	_close_btn.custom_minimum_size = Vector2(102, 30)
+	_close_btn.custom_minimum_size = Vector2(92, 30)
+	_close_btn.add_theme_font_size_override("font_size", 11)
 	_close_btn.pressed.connect(close_map)
 	header.add_child(_close_btn)
 

@@ -191,7 +191,8 @@ func _build_ui() -> void:
 		["parco", "Parco"],
 		["sancarlo", "S.Carlo"],
 		["valdocco", "Valdocco"],
-		["mercato", "Mercato & OGR"]
+		["mercato", "Mercato"],
+		["borgopo", "Borgo Po"]
 	]
 	for v in views:
 		var vid: String = v[0]

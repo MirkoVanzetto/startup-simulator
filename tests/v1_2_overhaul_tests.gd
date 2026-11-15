@@ -123,7 +123,7 @@ func test_economy_bills_and_tier2_gate() -> void:
 # 2. SIDE JOBS (4 REPEATABLES, WORLD NODES, BONUSES, COOLDOWNS, COMPASS & SAVE)
 # ------------------------------------------------------------------------------
 func test_side_jobs_bacheche_world_and_saveload() -> void:
-	print("\n[Suite 2] SideJobManager (4 Activities), Bacheche & 20 World Spots, Beacons & Save/Load")
+	print("\n[Suite 2] SideJobManager (4 Activities), Bacheche & 24 World Spots, Beacons & Save/Load")
 	GameManager.start_new_game()
 	var world := GameWorldScene.instantiate()
 	add_child(world)
@@ -135,10 +135,10 @@ func test_side_jobs_bacheche_world_and_saveload() -> void:
 	var b1 := world.find_child("BachecaSanCarlo", true, false)
 	var b2 := world.find_child("BachecaMercato", true, false)
 	check(b1 != null and b2 != null, "Both BachecaSanCarlo & BachecaMercato interactables exist")
-	check(SideJobManager.registered_spots.size() == 20,
-		"All 20 SideSpot interactables registered in SideJobManager (got %d)" % SideJobManager.registered_spots.size())
+	check(SideJobManager.registered_spots.size() == 24,
+		"All 24 SideSpot interactables registered in SideJobManager (got %d)" % SideJobManager.registered_spots.size())
 
-	# Check all 20 beacons hidden initially
+	# Check all 24 beacons hidden initially
 	var any_beacon_init := false
 	for sid in SideJobManager.DEFAULT_SPOTS.keys():
 		var spot := world.find_child("SideSpot_" + str(sid), true, false)
@@ -146,7 +146,7 @@ func test_side_jobs_bacheche_world_and_saveload() -> void:
 			var beacon := spot.get_node_or_null("Beacon") as Node3D
 			if beacon and beacon.visible:
 				any_beacon_init = true
-	check(not any_beacon_init, "All 20 SideSpot Beacons hidden when no job active")
+	check(not any_beacon_init, "All 24 SideSpot Beacons hidden when no job active")
 
 	# Test cancellation safety
 	check(SideJobManager.start_job("volantinaggio"), "Started Volantinaggio Quartiere")
@@ -533,7 +533,7 @@ func test_expanded_districts_clearance_and_ui_4res() -> void:
 		wmap.visible = true
 		wmap.open_map()
 		await get_tree().process_frame
-		for vid in ["all", "parco", "sancarlo", "valdocco", "mercato"]:
+		for vid in ["all", "parco", "sancarlo", "valdocco", "mercato", "borgopo"]:
 			wmap._set_view(vid)
 			await get_tree().process_frame
 			var wm_off: Array[String] = []

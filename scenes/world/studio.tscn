@@ -224,32 +224,6 @@ transform = Transform3D(0.48, 0, 0, 0, 0.48, 0, 0, 0, 0.48, 0, 0.743, -0.06)
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 0.38)
 script = SubResource("GDScript_luca_sculpted")
 
-[node name="LucaPortraitKey" type="SpotLight3D" parent="EmployeeWorkstation" groups=["npc_portrait_light"]]
-transform = Transform3D(-0.76221, 0, -0.64732, -0.50259, 0.63018, 0.59180, 0.40795, 0.77642, -0.48033, 0.62, 2.30, -0.35)
-light_color = Color(0.92, 0.96, 1, 1)
-light_energy = 0.82
-shadow_enabled = true
-shadow_bias = 0.008
-shadow_normal_bias = 0.04
-distance_fade_enabled = true
-distance_fade_begin = 8.0
-distance_fade_shadow = 7.0
-distance_fade_length = 2.5
-spot_range = 2.15
-spot_attenuation = 2.10
-spot_angle = 25.0
-
-[node name="LucaPortraitRim" type="SpotLight3D" parent="EmployeeWorkstation" groups=["npc_portrait_light"]]
-transform = Transform3D(0.75616, 0, 0.65437, 0.53920, 0.56664, -0.62308, -0.37080, 0.82400, 0.42848, -0.45, 2.24, 0.90)
-light_color = Color(1, 0.89, 0.72, 1)
-light_energy = 0.56
-distance_fade_enabled = true
-distance_fade_begin = 8.0
-distance_fade_length = 2.5
-spot_range = 2.05
-spot_attenuation = 1.95
-spot_angle = 26.0
-
 [node name="EmployeeNameTag" type="Label3D" parent="EmployeeWorkstation"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.95, 0.1)
 billboard = 1

@@ -20,6 +20,7 @@ extends Control
 @onready var rack_window: PanelContainer = $Windows/RackWindow
 @onready var talent_window: PanelContainer = $Windows/TalentWindow
 var upgrades_window: PanelContainer = null
+var knowledge_window: PanelContainer = null
 var ogr_window: PanelContainer = null
 
 # Desktop & Dock (TO-OS 26.4)
@@ -79,9 +80,12 @@ var dock_row: HBoxContainer = null
 @onready var candidates_list: VBoxContainer = $Windows/TalentWindow/Margin/VBox/CandidatesScroll/CandidatesList
 @onready var firewall_icon: Button = $DesktopIcons/Scroll/VBox/FirewallIcon
 
-# Upgrades ★ & OGR Enterprise dynamic sub-nodes
+# Upgrades ★, Conoscenza R&D & OGR Enterprise dynamic sub-nodes
 var upgrades_stars_banner_label: Label = null
 var upgrades_grid: GridContainer = null
+var knowledge_banner_label: Label = null
+var knowledge_banner_actions: HFlowContainer = null
+var knowledge_grid: GridContainer = null
 var ogr_banner_label: Label = null
 var ogr_banner_actions: HFlowContainer = null
 var ogr_content_vbox: VBoxContainer = null
@@ -104,7 +108,8 @@ const APP_CATALOG: Array[Dictionary] = [
 	{"id": "rack", "icon": "🖥", "title": "Rack Manager", "sub": "Cluster 19\" Cloud", "dock_s": "🖥 Rack", "dock_w": "🖥 Rack 19\"", "accent": Color(0.38, 0.85, 1.0)},
 	{"id": "talent", "icon": "👥", "title": "Talent Hub HR", "sub": "Team & Sede", "dock_s": "👥 HR", "dock_w": "👥 Talent HR", "accent": Color(0.84, 0.70, 1.0)},
 	{"id": "firewall", "icon": "🛡", "title": "NetShield Cyber", "sub": "Reti, VLAN & DMZ", "dock_s": "🛡 Net", "dock_w": "🛡 NetShield", "accent": Color(1.0, 0.62, 0.25)},
-	{"id": "upgrades", "icon": "★", "title": "Potenziamenti ★", "sub": "Albero Abilità", "dock_s": "★ Skill", "dock_w": "★ Skill Tree", "accent": Color(1.0, 0.86, 0.30)},
+	{"id": "upgrades", "icon": "★", "title": "Potenziamenti ★", "sub": "Albero Abilità", "dock_s": "★ Skill", "dock_w": "★ Skill", "accent": Color(1.0, 0.86, 0.30)},
+	{"id": "knowledge", "icon": "📘", "title": "Conoscenza R&D", "sub": "Ricerca Post-Bellini", "dock_s": "📘 R&D", "dock_w": "📘 Ricerca", "accent": Color(0.52, 0.88, 1.0)},
 	{"id": "ogr", "icon": "🏢", "title": "OGR Enterprise", "sub": "Appalti Corporate", "dock_s": "🏢 OGR", "dock_w": "🏢 OGR Corp", "accent": Color(0.40, 0.95, 0.92)}
 ]
 
@@ -122,6 +127,7 @@ func _ready() -> void:
 		_update_shop_buttons()
 		_setup_emails()
 		_update_rack_display()
+		_update_knowledge_display()
 		_update_ogr_display()
 		_refresh_desktop_badges()
 	)
@@ -138,7 +144,16 @@ func _ready() -> void:
 		_update_rack_display()
 		_refresh_desktop_badges()
 	)
+	EventBus.knowledge_upgraded.connect(func(_tid, _rk):
+		_update_top_bar()
+		_update_knowledge_display()
+		_update_freelance_display()
+		_update_rack_display()
+		_update_ogr_display()
+		_refresh_desktop_badges()
+	)
 	EventBus.ogr_hub_unlocked.connect(func():
+		_update_knowledge_display()
 		_update_ogr_display()
 		_refresh_desktop_badges()
 	)
@@ -204,6 +219,7 @@ func _ready() -> void:
 	_update_shop_buttons()
 	_update_freelance_display()
 	_update_upgrades_display()
+	_update_knowledge_display()
 	_update_ogr_display()
 	_update_top_bar()
 	_show_desktop()
@@ -226,6 +242,8 @@ func _all_windows() -> Array[PanelContainer]:
 	var arr: Array[PanelContainer] = [mail_window, freelance_window, shop_window, bank_window, rack_window, talent_window]
 	if upgrades_window:
 		arr.append(upgrades_window)
+	if knowledge_window:
+		arr.append(knowledge_window)
 	if ogr_window:
 		arr.append(ogr_window)
 	return arr
@@ -397,8 +415,8 @@ func _build_to_os_desktop_and_apps() -> void:
 	var dock_panel := PanelContainer.new()
 	dock_panel.name = "DockPanel"
 	var dock_sb := _make_frosted_style(Color(0.05, 0.085, 0.14, 0.90), Color(0.32, 0.72, 0.92, 0.42), 12, 1)
-	dock_sb.content_margin_left = 8
-	dock_sb.content_margin_right = 8
+	dock_sb.content_margin_left = 5
+	dock_sb.content_margin_right = 5
 	dock_sb.content_margin_top = 4
 	dock_sb.content_margin_bottom = 4
 	dock_panel.add_theme_stylebox_override("panel", dock_sb)
@@ -406,15 +424,16 @@ func _build_to_os_desktop_and_apps() -> void:
 
 	dock_row = HBoxContainer.new()
 	dock_row.name = "DockRow"
-	dock_row.add_theme_constant_override("separation", 4)
+	dock_row.add_theme_constant_override("separation", 2)
 	dock_panel.add_child(dock_row)
 
 	_add_dock_button("desktop", "❖ OS", "❖ Desktop", "Torna al Desktop TO-OS", Color(0.55, 0.92, 1.0))
 	for app in APP_CATALOG:
 		_add_dock_button(str(app["id"]), str(app["dock_s"]), str(app["dock_w"]), str(app["title"]), app["accent"])
 
-	# 3. Finestre procedurali: Potenziamenti ★ e OGR Enterprise
+	# 3. Finestre procedurali: Potenziamenti ★, Conoscenza R&D e OGR Enterprise
 	_build_upgrades_window()
+	_build_knowledge_window()
 	_build_ogr_window()
 
 func _add_dock_button(app_id: String, short_lbl: String, wide_lbl: String, tip: String, accent: Color) -> void:
@@ -423,8 +442,9 @@ func _add_dock_button(app_id: String, short_lbl: String, wide_lbl: String, tip: 
 	btn.text = short_lbl
 	btn.tooltip_text = tip
 	btn.focus_mode = Control.FOCUS_NONE
+	btn.clip_text = true
 	btn.custom_minimum_size = Vector2(54, 34)
-	btn.add_theme_font_size_override("font_size", 11)
+	btn.add_theme_font_size_override("font_size", 10)
 	btn.add_theme_color_override("font_color", accent)
 	btn.pressed.connect(func():
 		if app_id == "desktop":
@@ -515,6 +535,48 @@ func _build_upgrades_window() -> void:
 	upgrades_grid.add_theme_constant_override("h_separation", 12)
 	upgrades_grid.add_theme_constant_override("v_separation", 12)
 	sc.add_child(upgrades_grid)
+
+func _build_knowledge_window() -> void:
+	var shell := _create_window_shell("KnowledgeWindow", "CONOSCENZA R&D — RICERCA TECNOLOGICA TORINO", Color(0.52, 0.88, 1.0))
+	knowledge_window = shell["win"]
+	var vbox: VBoxContainer = shell["vbox"]
+
+	var banner := PanelContainer.new()
+	banner.add_theme_stylebox_override("panel", _make_frosted_style(Color(0.105, 0.165, 0.245, 0.90), Color(0.45, 0.85, 1.0, 0.50), 8, 1))
+	var bm := MarginContainer.new()
+	bm.add_theme_constant_override("margin_left", 10)
+	bm.add_theme_constant_override("margin_right", 10)
+	bm.add_theme_constant_override("margin_top", 8)
+	bm.add_theme_constant_override("margin_bottom", 8)
+	banner.add_child(bm)
+
+	var bv := VBoxContainer.new()
+	bv.add_theme_constant_override("separation", 6)
+	bm.add_child(bv)
+
+	knowledge_banner_label = Label.new()
+	knowledge_banner_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	knowledge_banner_label.add_theme_font_size_override("font_size", 12)
+	knowledge_banner_label.add_theme_color_override("font_color", Color(0.84, 0.95, 1.0))
+	bv.add_child(knowledge_banner_label)
+
+	knowledge_banner_actions = HFlowContainer.new()
+	knowledge_banner_actions.add_theme_constant_override("h_separation", 8)
+	knowledge_banner_actions.add_theme_constant_override("v_separation", 6)
+	bv.add_child(knowledge_banner_actions)
+	vbox.add_child(banner)
+
+	var sc := ScrollContainer.new()
+	sc.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	vbox.add_child(sc)
+
+	knowledge_grid = GridContainer.new()
+	knowledge_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	knowledge_grid.columns = 2
+	knowledge_grid.add_theme_constant_override("h_separation", 12)
+	knowledge_grid.add_theme_constant_override("v_separation", 12)
+	sc.add_child(knowledge_grid)
 
 func _build_ogr_window() -> void:
 	var shell := _create_window_shell("OgrWindow", "OGR TECH HUB TORINO — APPALTI ENTERPRISE", Color(0.42, 0.94, 1.0))
@@ -624,15 +686,20 @@ func _update_responsive_layout() -> void:
 			var tbtn := _app_tiles[aid]["btn"] as Button
 			if tbtn:
 				tbtn.custom_minimum_size = Vector2(tile_w, tile_h)
+	var u_avail := w - 72.0
 	if upgrades_grid:
-		var u_avail := w - 72.0
 		upgrades_grid.columns = 2 if u_avail >= 560.0 else 1
+	if knowledge_grid:
+		knowledge_grid.columns = 2 if u_avail >= 560.0 else 1
 	var use_wide_dock := (w >= 1120.0)
+	if dock_row:
+		dock_row.add_theme_constant_override("separation", 4 if use_wide_dock else 2)
 	for aid in _dock_buttons:
 		var db := _dock_buttons[aid] as Button
 		if db:
 			db.text = _dock_wide_labels[aid] if use_wide_dock else _dock_short_labels[aid]
 			db.custom_minimum_size = Vector2(82 if use_wide_dock else 54, 34)
+			db.add_theme_font_size_override("font_size", 11 if use_wide_dock else 10)
 
 func _show_desktop() -> void:
 	_active_app_id = "desktop"
@@ -663,6 +730,8 @@ func open_app(app_id: String) -> void:
 			_launch_firewall()
 		"upgrades":
 			_open_window(upgrades_window)
+		"knowledge":
+			_open_window(knowledge_window)
 		"ogr":
 			_open_window(ogr_window)
 		_:
@@ -676,6 +745,7 @@ func _window_to_app_id(win: PanelContainer) -> String:
 	if win == rack_window: return "rack"
 	if win == talent_window: return "talent"
 	if win == upgrades_window: return "upgrades"
+	if win == knowledge_window: return "knowledge"
 	if win == ogr_window: return "ogr"
 	return "desktop"
 
@@ -686,8 +756,8 @@ func _sync_dock_highlight() -> void:
 			continue
 		if aid == _active_app_id:
 			var hi := _make_frosted_style(Color(0.14, 0.30, 0.45, 0.96), Color(0.45, 0.92, 1.0, 0.95), 7, 1)
-			hi.content_margin_left = 6
-			hi.content_margin_right = 6
+			hi.content_margin_left = 4
+			hi.content_margin_right = 4
 			btn.add_theme_stylebox_override("normal", hi)
 		else:
 			btn.remove_theme_stylebox_override("normal")
@@ -698,8 +768,9 @@ func _refresh_desktop_badges() -> void:
 	if desktop_hero_sub:
 		var tier_n := GameManager.get_company_tier_name() if GameManager.has_method("get_company_tier_name") else "Studio"
 		var ogr_s := "OGR Sbloccata ✔" if ogr_open else "OGR 🔒 (Completa Via Po & Bellini)"
-		desktop_hero_sub.text = "Sede: %s · Rep: %d · Stelle: %d ★ · Lead Marketplace: %d · %s" % [
-			tier_n, GameManager.reputation_points, stars_count, ContractManager.marketplace_contracts.size(), ogr_s
+		var rd_s := ("R&D %d/%d" % [KnowledgeManager.get_total_rank(), KnowledgeManager.TRACK_ORDER.size() * KnowledgeManager.MAX_RANK]) if (is_instance_valid(KnowledgeManager) and KnowledgeManager.is_unlocked()) else "R&D 🔒"
+		desktop_hero_sub.text = "Sede: %s · Rep: %d · Stelle: %d ★ · Lead: %d · %s · %s" % [
+			tier_n, GameManager.reputation_points, stars_count, ContractManager.marketplace_contracts.size(), rd_s, ogr_s
 		]
 
 	if _app_tiles.has("mail"):
@@ -721,6 +792,14 @@ func _refresh_desktop_badges() -> void:
 					buyable += 1
 		(_app_tiles["upgrades"]["badge"] as Label).text = "%d ★ (%d ok)" % [stars_count, buyable] if buyable > 0 else "%d ★" % stars_count
 
+	if _app_tiles.has("knowledge"):
+		if is_instance_valid(KnowledgeManager) and KnowledgeManager.is_unlocked():
+			var tot_r := KnowledgeManager.get_total_rank()
+			var max_r := KnowledgeManager.TRACK_ORDER.size() * KnowledgeManager.MAX_RANK
+			(_app_tiles["knowledge"]["badge"] as Label).text = "Lv.%d/%d" % [tot_r, max_r]
+		else:
+			(_app_tiles["knowledge"]["badge"] as Label).text = "🔒 Bellini"
+
 	if _app_tiles.has("ogr"):
 		(_app_tiles["ogr"]["badge"] as Label).text = ("Tier %d (%d)" % [UpgradeManager.get_enterprise_tier() if is_instance_valid(UpgradeManager) else 1, ContractManager.enterprise_contracts.size()]) if ogr_open else "🔒 Bloccato"
 
@@ -735,6 +814,7 @@ func _on_computer_opened() -> void:
 	_update_rack_display()
 	_update_talent_display()
 	_update_upgrades_display()
+	_update_knowledge_display()
 	_update_ogr_display()
 	_update_responsive_layout()
 	_show_desktop()
@@ -757,12 +837,14 @@ func _on_funds_changed(new_balance: float, _delta: float, _reason: String) -> vo
 	_update_shop_buttons()
 	_update_bank_display()
 	_update_rack_display()
+	_update_knowledge_display()
 	_update_ogr_display()
 	if freelance_window.visible:
 		_update_freelance_display()
 
 func _on_contract_updated(_id: String, _status: String) -> void:
 	_update_freelance_display()
+	_update_knowledge_display()
 	_update_ogr_display()
 	_setup_emails()
 	_refresh_desktop_badges()
@@ -791,6 +873,8 @@ func _open_window(target_window: PanelContainer) -> void:
 		_update_talent_display()
 	elif target_window == upgrades_window:
 		_update_upgrades_display()
+	elif target_window == knowledge_window:
+		_update_knowledge_display()
 	elif target_window == ogr_window:
 		_update_ogr_display()
 
@@ -885,6 +969,137 @@ func _update_upgrades_display() -> void:
 			)
 		cv.add_child(act_btn)
 		upgrades_grid.add_child(card)
+
+# ==============================================================================
+# CONOSCENZA R&D UI (SBLOCCATA DOPO OFFICINA BELLINI)
+# ==============================================================================
+func _update_knowledge_display() -> void:
+	if not knowledge_window or not knowledge_grid or not is_instance_valid(KnowledgeManager):
+		return
+	for ch in knowledge_grid.get_children():
+		ch.queue_free()
+	if knowledge_banner_actions:
+		for ch in knowledge_banner_actions.get_children():
+			ch.queue_free()
+
+	var unlocked := KnowledgeManager.is_unlocked()
+	var fac := ContractManager.get_factory_progress_summary()
+	var tracks := KnowledgeManager.get_all_tracks()
+	var tot_rk := KnowledgeManager.get_total_rank()
+	var max_tot := tracks.size() * KnowledgeManager.MAX_RANK
+
+	if knowledge_banner_label:
+		if not unlocked:
+			knowledge_banner_label.text = "🔒 RICERCA R&D BLOCCATA — Completa prima il Maxi-Appalto Officina Bellini (Borgo Valdocco Est: Sopralluogo %d/4, Wi-Fi %s, Web %s, Server %s, PC %s)." % [
+				int(fac.get("scouted_count", 0)),
+				"✔" if bool(fac.get("wifi_done", false)) else "○",
+				"✔" if bool(fac.get("web_done", false)) else "○",
+				"✔" if bool(fac.get("server_done", false)) else "○",
+				"✔" if bool(fac.get("pcs_done", false)) else "○"
+			]
+		else:
+			knowledge_banner_label.text = "📘 RICERCA & CONOSCENZA ATTIVA — Padronanza: %d / %d | Fondi: € %0.2f | Reputazione: %d — Ogni livello sblocca commesse specialistiche su Freelance Hub e bonus dominio permanenti." % [
+				tot_rk, max_tot, EconomyManager.balance, GameManager.reputation_points
+			]
+
+	if knowledge_banner_actions:
+		var hub_btn := Button.new()
+		hub_btn.text = "💼 Apri Freelance Hub"
+		hub_btn.focus_mode = Control.FOCUS_NONE
+		hub_btn.pressed.connect(func(): _open_window(freelance_window))
+		knowledge_banner_actions.add_child(hub_btn)
+		if unlocked:
+			var wf_btn := Button.new()
+			wf_btn.text = "⚡ Apri WebForge"
+			wf_btn.focus_mode = Control.FOCUS_NONE
+			wf_btn.pressed.connect(_launch_webforge)
+			knowledge_banner_actions.add_child(wf_btn)
+
+	for tr in tracks:
+		var tid := str(tr["id"])
+		var rk := int(tr["rank"])
+		var max_rk := int(tr["max_rank"])
+		var next_cost := float(tr["next_cost"])
+		var next_rep := int(tr["next_rep_req"])
+		var can_study := bool(tr["can_study"])
+		var block_reason := str(tr.get("block_reason", ""))
+		var labels: Array = tr.get("effect_labels", [])
+
+		var border_col := Color(0.45, 0.52, 0.62, 0.50) if not unlocked else (Color(0.35, 1.0, 0.58, 0.78) if rk >= max_rk else (Color(0.42, 0.90, 1.0, 0.88) if can_study else Color(0.32, 0.50, 0.72, 0.65)))
+		var card := _make_hub_card(Color(0.11, 0.16, 0.24, 0.94), border_col)
+		card.custom_minimum_size = Vector2(220, 152)
+
+		var cv := VBoxContainer.new()
+		cv.add_theme_constant_override("separation", 5)
+		card.add_child(cv)
+
+		var top := HBoxContainer.new()
+		var t_lbl := Label.new()
+		t_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		t_lbl.text = "%s %s" % [str(tr["icon"]), str(tr["title"])]
+		t_lbl.add_theme_font_size_override("font_size", 14)
+		t_lbl.add_theme_color_override("font_color", Color(0.55, 0.92, 1.0) if unlocked else Color(0.68, 0.75, 0.84))
+		t_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		top.add_child(t_lbl)
+
+		var rk_badge := Label.new()
+		rk_badge.text = "Lv.%d/%d" % [rk, max_rk] if unlocked else "🔒 Lv.0/3"
+		rk_badge.add_theme_font_size_override("font_size", 12)
+		rk_badge.add_theme_color_override("font_color", Color(0.42, 0.94, 1.0) if unlocked else Color(1.0, 0.72, 0.35))
+		top.add_child(rk_badge)
+		cv.add_child(top)
+
+		var sum_lbl := Label.new()
+		sum_lbl.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		sum_lbl.text = str(tr["summary"])
+		sum_lbl.add_theme_font_size_override("font_size", 11)
+		sum_lbl.add_theme_color_override("font_color", Color(0.78, 0.85, 0.92))
+		sum_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		cv.add_child(sum_lbl)
+
+		var cur_eff := str(labels[rk]) if rk < labels.size() else "Attivo"
+		var eff_lbl := Label.new()
+		eff_lbl.add_theme_font_size_override("font_size", 11)
+		eff_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		if not unlocked:
+			eff_lbl.text = "Sblocco al completamento di Officina Bellini (Borgo Valdocco)"
+			eff_lbl.add_theme_color_override("font_color", Color(1.0, 0.78, 0.42))
+		elif rk < max_rk and (rk + 1) < labels.size():
+			eff_lbl.text = "Attuale: %s  ➔  Prossimo: %s" % [cur_eff, str(labels[rk + 1])]
+			eff_lbl.add_theme_color_override("font_color", Color(0.60, 0.95, 0.72))
+		else:
+			eff_lbl.text = "Attuale: %s (Padronanza Massima)" % cur_eff
+			eff_lbl.add_theme_color_override("font_color", Color(0.38, 1.0, 0.62))
+		cv.add_child(eff_lbl)
+
+		var act_btn := Button.new()
+		act_btn.custom_minimum_size = Vector2(0, 32)
+		act_btn.focus_mode = Control.FOCUS_NONE
+		act_btn.clip_text = true
+		if not unlocked:
+			act_btn.text = "🔒 Richiede Officina Bellini Completata"
+			act_btn.disabled = true
+		elif rk >= max_rk:
+			act_btn.text = "✔ RICERCA AL MASSIMO (Lv.3/3)"
+			act_btn.disabled = true
+		else:
+			if can_study:
+				act_btn.text = "📘 Studia Lv.%d/%d — € %0.0f · %d Rep" % [rk + 1, max_rk, next_cost, next_rep]
+				act_btn.add_theme_color_override("font_color", Color(0.42, 0.96, 1.0))
+			else:
+				act_btn.text = "📘 € %0.0f · %d Rep (%s)" % [next_cost, next_rep, "Rep insuff." if GameManager.reputation_points < next_rep else "Fondi insuff."]
+				act_btn.tooltip_text = block_reason
+			act_btn.disabled = not can_study
+			var tid_copy := tid
+			act_btn.pressed.connect(func():
+				if KnowledgeManager.study(tid_copy):
+					_update_knowledge_display()
+					_update_freelance_display()
+					_update_top_bar()
+					_refresh_desktop_badges()
+			)
+		cv.add_child(act_btn)
+		knowledge_grid.add_child(card)
 
 # ==============================================================================
 # OGR ENTERPRISE UI
@@ -985,9 +1200,12 @@ func _update_ogr_display() -> void:
 			v.add_theme_constant_override("separation", 6)
 			card.add_child(v)
 
+			var rd_pct := roundi((KnowledgeManager.get_contract_payout_mult(c) - 1.0) * 100.0) if is_instance_valid(KnowledgeManager) else 0
+			var rd_note := " · +%d%% R&D 📘" % rd_pct if rd_pct > 0 else ""
+
 			var ttl := Label.new()
-			ttl.text = "[TIER %d] %s — %s (€ %0.2f · +%d★)" % [
-				int(c.get("tier", 1)), str(c.get("title", cid)), str(c.get("client", "")), float(c.get("budget", 0.0)), int(c.get("star_reward", 3))
+			ttl.text = "[TIER %d] %s — %s (€ %0.2f · +%d★%s)" % [
+				int(c.get("tier", 1)), str(c.get("title", cid)), str(c.get("client", "")), float(c.get("budget", 0.0)), int(c.get("star_reward", 3)), rd_note
 			]
 			ttl.add_theme_font_size_override("font_size", 13)
 			ttl.add_theme_color_override("font_color", Color(0.95, 0.97, 1.0))
@@ -1075,6 +1293,7 @@ func _update_ogr_display() -> void:
 		var cid := str(c["id"])
 		var tier_n := int(c.get("tier", 1))
 		var etype := str(c.get("execution_type", "webforge"))
+		var rd_pct := roundi((KnowledgeManager.get_contract_payout_mult(c) - 1.0) * 100.0) if is_instance_valid(KnowledgeManager) else 0
 		var card := _make_hub_card(Color(0.13, 0.17, 0.25, 0.92), Color(0.38, 0.72, 0.95, 0.65))
 		var v := VBoxContainer.new()
 		v.add_theme_constant_override("separation", 5)
@@ -1087,7 +1306,7 @@ func _update_ogr_display() -> void:
 		var tl := Label.new()
 		tl.custom_minimum_size = Vector2(220, 0)
 		tl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		tl.text = "[TIER %d · %s] %s — %s" % [tier_n, etype.to_upper(), str(c["title"]), str(c["client"])]
+		tl.text = "[TIER %d · %s%s] %s — %s" % [tier_n, etype.to_upper(), " · 📘 R&D" if rd_pct > 0 else "", str(c["title"]), str(c["client"])]
 		tl.add_theme_font_size_override("font_size", 13)
 		tl.add_theme_color_override("font_color", Color(0.55, 0.94, 1.0))
 		tl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -1106,8 +1325,9 @@ func _update_ogr_display() -> void:
 		v.add_child(row)
 
 		var ml := Label.new()
-		ml.text = "Premio: € %0.2f (+%d★ · +%d Rep) | %s\nRequisiti: %s" % [
-			float(c["budget"]), int(c.get("star_reward", 3)), int(c.get("reputation_reward", 40)),
+		var rd_txt := " · +%d%% Conoscenza" % rd_pct if rd_pct > 0 else ""
+		ml.text = "Premio: € %0.2f (+%d★ · +%d Rep%s) | %s\nRequisiti: %s" % [
+			float(c["budget"]), int(c.get("star_reward", 3)), int(c.get("reputation_reward", 40)), rd_txt,
 			str(c.get("category", "Enterprise")), ", ".join(c.get("requirements", []))
 		]
 		ml.add_theme_font_size_override("font_size", 11)
@@ -1354,8 +1574,14 @@ func _update_freelance_display() -> void:
 			v.add_theme_constant_override("separation", 6)
 			card.add_child(v)
 
+			var rd_pct := roundi((KnowledgeManager.get_contract_payout_mult(c) - 1.0) * 100.0) if is_instance_valid(KnowledgeManager) else 0
+			var is_spec := bool(c.get("is_knowledge_specialty", false))
+			var rd_tag := ""
+			if is_spec or rd_pct > 0:
+				rd_tag = " · ★ R&D +%d%%" % rd_pct if rd_pct > 0 else " · ★ R&D"
+
 			var ttl := Label.new()
-			ttl.text = "%s — %s (€ %0.2f · +%d Rep)" % [str(c.get("title", cid)), str(c.get("client", "")), float(c.get("budget", 0.0)), int(c.get("reputation_reward", 10))]
+			ttl.text = "%s — %s (€ %0.2f · +%d Rep%s)" % [str(c.get("title", cid)), str(c.get("client", "")), float(c.get("budget", 0.0)), int(c.get("reputation_reward", 10)), rd_tag]
 			ttl.add_theme_font_size_override("font_size", 13)
 			ttl.add_theme_color_override("font_color", Color(0.95, 0.96, 1.0))
 			ttl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -1461,6 +1687,8 @@ func _update_freelance_display() -> void:
 		for c in ContractManager.marketplace_contracts:
 			var cid := str(c["id"])
 			var etype := str(c.get("execution_type", "webforge"))
+			var rd_pct := roundi((KnowledgeManager.get_contract_payout_mult(c) - 1.0) * 100.0) if is_instance_valid(KnowledgeManager) else 0
+			var is_spec := bool(c.get("is_knowledge_specialty", false))
 			var badge_col := Color(0.35, 0.88, 1.0)
 			var type_tag := "WEBFORGE"
 			if etype == "netshield":
@@ -1469,6 +1697,8 @@ func _update_freelance_display() -> void:
 			elif etype == "hardware":
 				badge_col = Color(0.55, 1.0, 0.58)
 				type_tag = "HARDWARE B2B"
+			if is_spec:
+				type_tag += " ★ R&D"
 
 			var m_card := _make_hub_card(Color(0.14, 0.18, 0.26, 0.94), badge_col * Color(1, 1, 1, 0.7))
 			var mv := VBoxContainer.new()
@@ -1500,9 +1730,11 @@ func _update_freelance_display() -> void:
 			mv.add_child(top_row)
 
 			var meta_lbl := Label.new()
-			meta_lbl.text = "Settore: %s | Compenso: € %0.2f (+%d Rep) | Scadenza: %d gg | Difficoltà: %s\nRequisiti: %s" % [
+			var rd_bonus_txt := " (+%d%% Conoscenza 📘)" % rd_pct if rd_pct > 0 else ""
+			meta_lbl.text = "Settore: %s | Compenso: € %0.2f%s (+%d Rep) | Scadenza: %d gg | Difficoltà: %s\nRequisiti: %s" % [
 				str(c.get("category", "B2B")),
 				float(c.get("budget", 0.0)),
+				rd_bonus_txt,
 				int(c.get("reputation_reward", 10)),
 				int(c.get("deadline_days", 3)),
 				"★".repeat(int(c.get("difficulty", 1))),
@@ -1774,6 +2006,9 @@ func _update_rack_display() -> void:
 		if is_instance_valid(UpgradeManager) and UpgradeManager.get_rank("hosting") > 0:
 			var pct := roundi((UpgradeManager.get_hosting_bonus_mult() - 1.0) * 100.0)
 			dt += " [color=#ffd655](+%d%% Cluster Cloud ★)[/color]" % pct
+		if is_instance_valid(KnowledgeManager) and KnowledgeManager.get_rank("cloud_devops") > 0:
+			var kpct := roundi((KnowledgeManager.get_rack_hosting_mult() - 1.0) * 100.0)
+			dt += " [color=#7ad8ff](+%d%% Cloud R&D 📘)[/color]" % kpct
 
 	domains_text.text = dt
 

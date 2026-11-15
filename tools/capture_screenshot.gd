@@ -1,8 +1,10 @@
 extends Node
-## Multi-screen capture utility for v1.2.0 Visual QA (fast 4-frame cadence for Mesa llvmpipe)
+## Multi-screen capture utility for Visual QA (fast cadence for Mesa llvmpipe)
 ## Covers: Borgo San Carlo, Parco Valentino Ovest, Viale Est, Borgo Valdocco,
-## Mercato Nord / OGR / Poste, Officina Bellini 3D Holograms vs Installed Hardware,
-## SideJob HUD + Beacon, WorldMap 14 POIs, WebForge 5.0 Bento & AST Click-to-Patch.
+## Mercato Nord / OGR / Poste, Borgo Po / Viale Lungo Po / Molo sul Po / I3P / Lab Droni,
+## Officina Bellini 3D Holograms vs Installed Hardware, MakeHuman CC0 NPCs + light PBR,
+## Pizzeria oven CPUParticles3D smoke, SideJob HUD + Beacon, WorldMap 19 POIs,
+## TO-OS Conoscenza R&D & WebForge 5.0.
 
 var frame_count: int = 0
 var player = null
@@ -110,7 +112,7 @@ func _process(_delta: float) -> void:
 
 	if frame_count == 70:
 		_cap("startup_simulator_factory_interior.png", "Officina Bellini Interior & Hardware Installed")
-		# Complete all 4 initial missions so OGR physical gate unlocks!
+		# Complete all 4 initial missions so OGR physical gate & Conoscenza R&D unlock!
 		ContractManager.advance_tutorial_to_in_progress()
 		ContractManager.complete_tutorial_contract()
 		ContractManager.advance_contract_to_in_progress("caffe_san_carlo")
@@ -125,28 +127,33 @@ func _process(_delta: float) -> void:
 
 	if frame_count == 78:
 		_cap("startup_simulator_ogr_hall_3d.png", "OGR Tech Hub Unlocked Interior & Bay 01")
-		# Semi-realistic Character Closeup: Ing. Andrea Viale inside sunlit OGR hall
+		# MakeHuman Character Closeup: Ing. Andrea Viale inside sunlit OGR hall
 		_look_at_flat(Vector3(103.35, -0.14, 2.52), Vector3(104.8, 1.45, 2.2), -5.0)
 
 	if frame_count == 85:
-		_cap("startup_simulator_character_closeup.png", "Semi-Realistic NPC Sculpt Closeup (Ing. Andrea Viale)")
-		# Pizzeria Da Mario v1.4 interior: domed wood-fired brick oven & red pedestal tables
-		_look_at_flat(Vector3(-2.6, 0.05, 28.55), Vector3(1.15, 0.9, 32.3), -10.5)
+		_cap("startup_simulator_character_closeup.png", "MakeHuman CC0 NPC & Light PBR Closeup (Ing. Andrea Viale)")
+		# Pizzeria Da Mario interior: domed wood-fired brick oven with CPUParticles3D smoke & Mario MakeHuman rig
+		_look_at_flat(Vector3(-0.65, 0.06, 27.95), Vector3(1.55, 1.48, 32.65), -1.0)
 
-	if frame_count == 92:
-		_cap("startup_simulator_pizzeria_3d.png", "Pizzeria Da Mario Interior (Oven & Red Tables)")
-		# Alimentari Rosa v1.4 interior: loaded jar/fruit shelves, crates, kraft bags & tile_bw floor
+	if frame_count == 93:
+		_cap("startup_simulator_pizzeria_3d.png", "Pizzeria Da Mario Interior (Oven CPUParticles3D Smoke)")
+		# Alimentari Rosa interior: loaded jar/fruit shelves, crates, kraft bags & tile_bw floor
 		_look_at_flat(Vector3(5.95, 0.05, 7.8), Vector3(10.2, 0.95, 7.8), -10.0)
 
-	if frame_count == 99:
+	if frame_count == 100:
 		_cap("startup_simulator_alimentari_3d.png", "Alimentari Rosa Interior (Shelves, Crates & B/W Tiles)")
+		# Borgo Po / Viale Lungo Po / Molo sul Po / Fiume Po panoramic view
+		_look_at_flat(Vector3(11.8, 0.90, 61.6), Vector3(17.8, 0.15, 69.2), -7.0)
+
+	if frame_count == 107:
+		_cap("startup_simulator_borgopo_3d.png", "Borgo Po, Viale Lungo Po, Lab Droni & Molo sul Fiume Po")
 		# Night Sky & Streetlamps across Borgo San Carlo (22:30 starry Torino night + moon)
 		var dnc = get_tree().root.find_child("DayNightController", true, false)
 		if dnc:
 			dnc.set_debug_hour(22.5)
 		_look_at_flat(Vector3(2.8, 0.08, 25.5), Vector3(-5.0, 2.0, 8.0), 11.5)
 
-	if frame_count == 107:
+	if frame_count == 114:
 		_cap("startup_simulator_night_3d.png", "Borgo San Carlo Night Cycle (22:30 Stars, Moon & Streetlamps)")
 		var dnc = get_tree().root.find_child("DayNightController", true, false)
 		if dnc:
@@ -158,27 +165,27 @@ func _process(_delta: float) -> void:
 		EventBus.side_job_started.emit("volantinaggio", SideJobManager.active_job.duplicate(true))
 		_look_at_flat(Vector3(6.8, 1.45, 24.8), Vector3(8.5, 0.85, 16.5), -6.0)
 
-	if frame_count == 114:
+	if frame_count == 121:
 		_cap("startup_simulator_sidejob_hud.png", "Active SideJob HUD + Waypoint + 3D Beacon")
 		SideJobManager.cancel_active_job()
 		# Elettronica TO facing Davide
 		_set_cam(Vector3(11.6, 0.1, 20.5), Vector3(0, -90, 0), Vector3(-6, 0, 0))
 
-	if frame_count == 120:
+	if frame_count == 127:
 		_cap("startup_simulator_tech_shop_3d.png", "Elettronica TO Interior")
 		# Caffe San Carlo facing Elena
 		_set_cam(Vector3(-11.8, 0.1, 20.5), Vector3(0, 90, 0), Vector3(-5, 0, 0))
 
-	if frame_count == 126:
+	if frame_count == 133:
 		_cap("startup_simulator_cafe_3d.png", "Caffe San Carlo Interior")
 		# Forno Bruno facing marble counter, scored loaves, wicker baskets & flour sack
 		_look_at_flat(Vector3(-5.80, 0.12, 7.72), Vector3(-9.60, 0.0, 7.82), -10.5)
 
-	if frame_count == 132:
+	if frame_count == 139:
 		_cap("startup_simulator_forno_3d.png", "Forno Bruno Interior")
 		EventBus.shop_opened.emit("alimentari")
 
-	if frame_count == 138:
+	if frame_count == 145:
 		_cap("startup_simulator_shop_menu.png", "Borgo ShopMenu Alimentari (+ Zaino)")
 		ShopManager.buy_to_backpack("cafe", "thermos_bicerin")
 		ShopManager.buy_to_backpack("edicola", "barretta_tech")
@@ -189,7 +196,7 @@ func _process(_delta: float) -> void:
 		if inv:
 			inv.open_inventory()
 
-	if frame_count == 144:
+	if frame_count == 151:
 		_cap("startup_simulator_inventory.png", "Zaino & Dotazioni Startup [Tab]")
 		var inv = get_tree().root.find_child("InventoryMenu", true, false)
 		if inv:
@@ -202,52 +209,62 @@ func _process(_delta: float) -> void:
 			wmap.select_poi("coworking_ogr")
 			wmap.zoom_in()
 
-	if frame_count == 150:
-		_cap("startup_simulator_world_map.png", "World Map Zoomed on OGR & 14 POIs")
+	if frame_count == 157:
+		_cap("startup_simulator_world_map.png", "World Map Zoomed on OGR & 19 POIs (incl. Borgo Po)")
 		var wmap = get_tree().root.find_child("WorldMapMenu", true, false)
 		if wmap:
 			wmap.close_map()
 		EventBus.shop_opened.emit("elettronica_componenti")
 
-	if frame_count == 156:
+	if frame_count == 163:
 		_cap("startup_simulator_shop_hardware.png", "Borgo Hardware Component ShopMenu")
+		EconomyManager.balance = 6000.0
+		GameManager.reputation_points = 120
+		KnowledgeManager.study("web_architecture")
+		KnowledgeManager.study("cloud_devops")
 		ContractManager.discover_new_lead(false)
 		ContractManager.discover_new_lead(false)
 		UpgradeManager.add_stars(4, "")
 		EventBus.computer_opened.emit()
 
-	if frame_count == 162:
-		_cap("startup_simulator_to_os_desktop.png", "TO-OS 26.4 Desktop Workspace & App Grid")
+	if frame_count == 169:
+		_cap("startup_simulator_to_os_desktop.png", "TO-OS 26.4 Desktop Workspace & 11-App Grid")
 		var comp = get_tree().root.find_child("ComputerScreen", true, false)
 		if comp:
 			UpgradeManager.purchase("agility")
 			comp.open_app("upgrades")
 
-	if frame_count == 168:
+	if frame_count == 175:
 		_cap("startup_simulator_upgrades.png", "TO-OS Potenziamenti ★ Skill Tree")
+		var comp = get_tree().root.find_child("ComputerScreen", true, false)
+		if comp:
+			comp.open_app("knowledge")
+
+	if frame_count == 181:
+		_cap("startup_simulator_knowledge.png", "TO-OS Conoscenza R&D Unlocked (4 Tracks)")
 		var comp = get_tree().root.find_child("ComputerScreen", true, false)
 		if comp:
 			comp.open_app("ogr")
 
-	if frame_count == 174:
+	if frame_count == 187:
 		_cap("startup_simulator_ogr_enterprise.png", "TO-OS OGR Enterprise Tenders")
 		var comp = get_tree().root.find_child("ComputerScreen", true, false)
 		if comp:
 			comp.open_app("freelance")
 
-	if frame_count == 180:
-		_cap("startup_simulator_freelance_hub.png", "TO-OS Freelance Hub Cards")
+	if frame_count == 193:
+		_cap("startup_simulator_freelance_hub.png", "TO-OS Freelance Hub Cards (+ R&D Specialty)")
 		var comp = get_tree().root.find_child("ComputerScreen", true, false)
 		if comp:
 			comp.open_app("rack")
 
-	if frame_count == 186:
-		_cap("startup_simulator_rack_manager.png", "TO-OS Rack Manager")
+	if frame_count == 199:
+		_cap("startup_simulator_rack_manager.png", "TO-OS Rack Manager (+ Cloud R&D)")
 		var comp = get_tree().root.find_child("ComputerScreen", true, false)
 		if comp:
 			comp.open_app("mail")
 
-	if frame_count == 192:
+	if frame_count == 205:
 		_cap("startup_simulator_to_os.png", "TO-OS Mail Over Wallpaper")
 		var web_cid := ""
 		for mc in ContractManager.marketplace_contracts:
@@ -264,7 +281,7 @@ func _process(_delta: float) -> void:
 		ContractManager.preferred_webforge_contract_id = web_cid
 		EventBus.minigame_started.emit("web_forge")
 
-	if frame_count == 198:
+	if frame_count == 211:
 		var wf = get_tree().root.find_child("WebForge", true, false)
 		if wf:
 			wf.set_grid_layout_mode("bento")
@@ -276,10 +293,10 @@ func _process(_delta: float) -> void:
 			wf._on_component_chosen("widget", "widget_officina")
 			wf._on_component_chosen("footer", "footer_officina")
 
-	if frame_count == 204:
+	if frame_count == 217:
 		_cap("startup_simulator_webforge.png", "WebForge 5.0 Bento Grid & 5-Block Composer")
 		EventBus.minigame_started.emit("firewall_router")
 
-	if frame_count == 210:
+	if frame_count == 223:
 		_cap("startup_simulator_firewall.png", "NetShield Firewall Router")
 		get_tree().quit(0)

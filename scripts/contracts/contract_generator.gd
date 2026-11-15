@@ -163,14 +163,243 @@ static var hardware_gig_variants = [
 	}
 ]
 
+static var specialty_gig_variants: Array[Dictionary] = [
+	{
+		"knowledge_track": "web_architecture",
+		"category": "Web Architecture & UX",
+		"title": "Portale Configuratore 3D & Design System Showroom",
+		"brief": "Architettura frontend ad alte prestazioni con configuratore catalogo interattivo, prenotazione appuntamento e stile editoriale pulito.",
+		"execution_type": "webforge",
+		"preferred_tags": ["E-Commerce", "Tech"],
+		"preferred_palette": "monochrome",
+		"requirements": [
+			"Design System Atomico & Bento Grid",
+			"Configuratore Prodotto & Prenotazione Live",
+			"Bundle Compresso + WebP + Meta SEO"
+		],
+		"budget_range": [980.0, 1380.0],
+		"difficulty": 4,
+		"star_reward": 2,
+		"deadline_days": 4
+	},
+	{
+		"knowledge_track": "web_architecture",
+		"category": "Web Architecture & UX",
+		"title": "Piattaforma Ticketing & Booking Eventi Torino",
+		"brief": "Portali ad alta concorrenza per musei e rassegne torinesi: caricamento istantaneo, checkout prenotazioni e alta accessibilità.",
+		"execution_type": "webforge",
+		"preferred_tags": ["Booking", "Speed"],
+		"preferred_palette": "amber",
+		"requirements": [
+			"Layout Split / Responsive Zero-Latency",
+			"Flusso Ticketing & QR Pass",
+			"Lighthouse A11y >= 90 & Asset < 380KB"
+		],
+		"budget_range": [1080.0, 1480.0],
+		"difficulty": 4,
+		"star_reward": 2,
+		"deadline_days": 4
+	},
+	{
+		"knowledge_track": "cloud_devops",
+		"category": "Cloud & DevOps",
+		"title": "Migrazione Microservizi Cloud & Disaster Recovery PMI",
+		"brief": "Console cloud ad alta affidabilità per monitorare replica multi-nodo, telemetria container e deployment zero-downtime.",
+		"execution_type": "webforge",
+		"preferred_tags": ["Tech", "Speed"],
+		"preferred_palette": "cyan",
+		"requirements": [
+			"Dashboard Telemetria Microservizi",
+			"Backup Multi-Zone & SLA Monitor",
+			"Pipeline Build & Asset Ottimizzati"
+		],
+		"budget_range": [1120.0, 1540.0],
+		"difficulty": 4,
+		"star_reward": 2,
+		"deadline_days": 5
+	},
+	{
+		"knowledge_track": "cloud_devops",
+		"category": "Cloud & Infrastruttura",
+		"title": "Cluster Ibrido: 2x Server Xeon + Firewall UTM Pro",
+		"brief": "Fornitura completa di infrastruttura ridondata locale + gateway protetto per azienda manifatturiera torinese.",
+		"execution_type": "hardware",
+		"required_hardware": {"hw_server_tower": 2, "hw_firewall_appliance": 1},
+		"requirements": [
+			"Fornitura 2x Server Tower Xeon RAID-10",
+			"Fornitura 1x Firewall Hardware UTM",
+			"Consegna & Collaudo da Freelance Hub"
+		],
+		"budget": 1440.0,
+		"difficulty": 4,
+		"star_reward": 2,
+		"deadline_days": 5
+	},
+	{
+		"knowledge_track": "cyber_governance",
+		"category": "Cybersecurity & NIS2",
+		"title": "Audit Compliance NIS2 & Segmentazione Zero-Trust",
+		"brief": "Adeguamento normativo NIS2 con instradamento segmentato a 6 nodi su NetShield Cyber e isolamento sottoreti critiche.",
+		"execution_type": "netshield",
+		"checkpoints": {
+			Vector2i(0, 0): 1,
+			Vector2i(0, 4): 2,
+			Vector2i(3, 4): 3,
+			Vector2i(3, 1): 4,
+			Vector2i(1, 1): 5,
+			Vector2i(4, 3): 6
+		},
+		"requirements": [
+			"Circuito NetShield 6 Nodi NIS2 Zero-Trust",
+			"Isolamento Reparti Produzione & Amministrazione",
+			"Report Audit Porte & Regole Firewall"
+		],
+		"budget_range": [1180.0, 1620.0],
+		"difficulty": 5,
+		"star_reward": 2,
+		"deadline_days": 5
+	},
+	{
+		"knowledge_track": "cyber_governance",
+		"category": "Cybersecurity & NIS2",
+		"title": "Rete Crittografata Multi-Sede & SOC Monitoring",
+		"brief": "Interconnessione cifrata tra stabilimento e uffici direzionali con doppio livello IPSec su NetShield Cyber.",
+		"execution_type": "netshield",
+		"checkpoints": {
+			Vector2i(1, 0): 1,
+			Vector2i(1, 3): 2,
+			Vector2i(4, 3): 3,
+			Vector2i(4, 1): 4,
+			Vector2i(2, 1): 5,
+			Vector2i(0, 4): 6
+		},
+		"requirements": [
+			"Dorsale NetShield 6 Nodi Ridondata",
+			"Tunnel VPN Multi-Sede TLS 1.3",
+			"Protezione Anti-Intrusione Perimetrale"
+		],
+		"budget_range": [1080.0, 1460.0],
+		"difficulty": 4,
+		"star_reward": 2,
+		"deadline_days": 4
+	},
+	{
+		"knowledge_track": "ai_automation",
+		"category": "AI & Automazione Industriale",
+		"title": "Dashboard AI Vision & Telemetria Robotica Linea Auto",
+		"brief": "Interfaccia industriale intelligente con controllo qualità visione AI, alert predittivi e integrazione ordini automatici.",
+		"execution_type": "webforge",
+		"preferred_tags": ["Tech", "E-Commerce"],
+		"preferred_palette": "emerald",
+		"requirements": [
+			"Console AI Predittiva & Sensoristica",
+			"Integrazione Webhook Automazione Magazzino",
+			"Ottimizzazione Bundle & Responsive Pro"
+		],
+		"budget_range": [1280.0, 1760.0],
+		"difficulty": 5,
+		"star_reward": 3,
+		"deadline_days": 5
+	},
+	{
+		"knowledge_track": "ai_automation",
+		"category": "AI & Automazione Industriale",
+		"title": "Edge AI Node: Server Xeon + 2x Workstation + Firewall",
+		"brief": "Installazione nodo di calcolo locale per addestramento modelli industriali e protezione dati on-premise.",
+		"execution_type": "hardware",
+		"required_hardware": {"hw_server_tower": 1, "hw_workstation_pc": 2, "hw_firewall_appliance": 1},
+		"requirements": [
+			"1x Server Tower Xeon RAID-10 + 2x PC Workstation",
+			"1x Firewall Hardware UTM Perimetrale",
+			"Setup & Consegna da Freelance Hub"
+		],
+		"budget": 1590.0,
+		"difficulty": 5,
+		"star_reward": 3,
+		"deadline_days": 5
+	}
+]
+
 static var _seq_counter: int = 0
 
-static func generate_random_contract(seed_index: int = 0, budget_mult: float = 1.0) -> Dictionary:
+static func generate_specialty_contract(track_id: String, seed_index: int = 0, budget_mult: float = 1.0) -> Dictionary:
 	var rng = RandomNumberGenerator.new()
 	if seed_index != 0:
 		rng.seed = seed_index
 	else:
 		rng.randomize()
+
+	var matching: Array[Dictionary] = []
+	for sv in specialty_gig_variants:
+		if str(sv.get("knowledge_track", "")) == track_id:
+			matching.append(sv)
+	if matching.is_empty():
+		return generate_random_contract(seed_index, budget_mult)
+
+	_seq_counter += 1
+	var spec: Dictionary = matching[rng.randi_range(0, matching.size() - 1)]
+	var client: String = client_names[rng.randi_range(0, client_names.size() - 1)]
+	var short_client: String = client.split("(")[0].strip_edges()
+	var contract_id: String = "contract_rd_" + str(Time.get_ticks_msec()) + "_" + str(_seq_counter) + "_" + str(rng.randi_range(100, 999))
+	var etype := str(spec.get("execution_type", "webforge"))
+
+	var raw_budget: float = 0.0
+	if spec.has("budget_range"):
+		raw_budget = rng.randf_range(float(spec["budget_range"][0]), float(spec["budget_range"][1])) * budget_mult
+	else:
+		raw_budget = float(spec.get("budget", 1200.0)) * budget_mult
+	var budget: float = round(raw_budget / 10.0) * 10.0
+	var rep_reward: int = int(budget / 45.0) + rng.randi_range(10, 18)
+
+	var gig := {
+		"id": contract_id,
+		"title": str(spec["title"]),
+		"client": client,
+		"category": str(spec["category"]),
+		"execution_type": etype,
+		"knowledge_track": track_id,
+		"is_knowledge_specialty": true,
+		"budget": budget,
+		"reputation_reward": rep_reward,
+		"star_reward": int(spec.get("star_reward", 2)),
+		"difficulty": int(spec.get("difficulty", 4)),
+		"deadline_days": int(spec.get("deadline_days", 4)),
+		"status": "available",
+		"requirements": (spec.get("requirements", []) as Array).duplicate()
+	}
+	if etype == "webforge":
+		gig["brief"] = str(spec.get("brief", ""))
+		gig["preferred_tags"] = (spec.get("preferred_tags", ["Tech"]) as Array).duplicate()
+		gig["preferred_palette"] = str(spec.get("preferred_palette", "cyan"))
+		gig["objective_text"] = "Progetto R&D Avanzato: sviluppa '%s' su WebForge per %s." % [gig["title"], short_client]
+	elif etype == "netshield":
+		gig["netshield_checkpoints"] = (spec.get("checkpoints", {}) as Dictionary).duplicate()
+		gig["objective_text"] = "Progetto R&D Cyber: configura la matrice NetShield per %s." % short_client
+	else:
+		gig["required_hardware"] = (spec.get("required_hardware", {}) as Dictionary).duplicate()
+		gig["objective_text"] = "Progetto R&D Infrastruttura: procurati e installa l'hardware per %s." % short_client
+	return gig
+
+static func generate_random_contract(seed_index: int = 0, budget_mult: float = 1.0, unlocked_specialties: Array = []) -> Dictionary:
+	var rng = RandomNumberGenerator.new()
+	if seed_index != 0:
+		rng.seed = seed_index
+	else:
+		rng.randomize()
+
+	if not unlocked_specialties.is_empty():
+		var valid_tracks: Array[String] = []
+		for t in unlocked_specialties:
+			var ts := str(t)
+			for sv in specialty_gig_variants:
+				if str(sv.get("knowledge_track", "")) == ts:
+					if not (ts in valid_tracks):
+						valid_tracks.append(ts)
+					break
+		if not valid_tracks.is_empty() and rng.randi_range(0, 99) < 48:
+			var picked_track := valid_tracks[rng.randi_range(0, valid_tracks.size() - 1)]
+			var next_seed := (seed_index + 7919) if seed_index != 0 else 0
+			return generate_specialty_contract(picked_track, next_seed, budget_mult)
 
 	_seq_counter += 1
 	var client: String = client_names[rng.randi_range(0, client_names.size() - 1)]
@@ -243,10 +472,10 @@ static func generate_random_contract(seed_index: int = 0, budget_mult: float = 1
 			"requirements": wv["requirements"].duplicate()
 		}
 
-static func generate_initial_marketplace_pool(count: int = 2, budget_mult: float = 1.0) -> Array[Dictionary]:
+static func generate_initial_marketplace_pool(count: int = 2, budget_mult: float = 1.0, unlocked_specialties: Array = []) -> Array[Dictionary]:
 	var pool: Array[Dictionary] = []
 	for i in range(count):
-		pool.append(generate_random_contract(i + 1, budget_mult))
+		pool.append(generate_random_contract(i + 1, budget_mult, unlocked_specialties))
 	return pool
 
 const ENTERPRISE_CONTRACTS: Array[Dictionary] = [

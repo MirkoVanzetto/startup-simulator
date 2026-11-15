@@ -239,7 +239,11 @@ func calculate_daily_hosting_revenue() -> float:
 	# Bonus Cluster Hosting Pro (UpgradeManager)
 	if is_instance_valid(UpgradeManager):
 		total *= UpgradeManager.get_hosting_bonus_mult()
-		
+
+	# Bonus Ricerca Cloud & DevOps (KnowledgeManager, 1.0x a Rank 0)
+	if is_instance_valid(KnowledgeManager):
+		total *= KnowledgeManager.get_rack_hosting_mult()
+
 	return total
 
 func _on_contract_completed(contract_id: String, _reward: float, _rep: int) -> void:

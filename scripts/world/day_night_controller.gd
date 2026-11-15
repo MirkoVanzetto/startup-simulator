@@ -137,7 +137,7 @@ func apply_hour(hour_f: float) -> void:
 	var yaw_deg := 30.0
 	if hour_f >= 5.2 and hour_f <= 20.0:
 		var day_t := clampf((hour_f - 5.2) / 14.8, 0.0, 1.0)
-		var elev := lerpf(14.0, 62.0, sin(day_t * PI))
+		var elev := lerpf(24.0, 62.0, sin(day_t * PI))
 		pitch_deg = -elev
 		yaw_deg = lerpf(62.0, -58.0, day_t)
 	else:

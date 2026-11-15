@@ -1,15 +1,18 @@
 extends Node
-## v1.4.0 Comprehensive Overhaul Test Suite:
+## v1.4.0–v1.5.0 Comprehensive Overhaul Test Suite:
 ## UpgradeManager ★ (6 alberi, moltiplicatori neutri a Rank 0, spese/hosting/bandi, Save/Load),
 ## Ciclo Giorno/Notte (DayNightController + lampioni + cielo stellato),
-## Anatomia NPC scolpiti (VillageCharacters),
+## MakeHuman CC0 (.glb) NPCs + PBR Leggero (zero SSS/Heightmap/Detail, zero luci extra, forno fumo CPUParticles3D, Borgo Po/Molo sul Po),
 ## Officina Bellini clearance interazioni 3D (raycast mask 3 su stazioni, zone & Bellini),
 ## OGR Tech Hub gate fisico, corridor raycasts, Bay 01 vs Pod chiusi, Appalti Enterprise Tier I-IV,
-## WorldMap zoom/pan/resize continuo senza blocco e TO-OS 26.4 UI Containment su 4 risoluzioni.
+## WorldMap zoom/pan/resize continuo senza blocco (19 POI), TO-OS 26.4 UI Containment su 4 risoluzioni,
+## e KnowledgeManager R&D (4 rami post-Bellini, sblocco progressivo, commesse specialistiche, Save/Load).
 
 const GameWorldScene := preload("res://scenes/world/game_world.tscn")
 const WorldMapMenuScene := preload("res://scenes/ui/world_map_menu.tscn")
 const ComputerScreenScene := preload("res://scenes/ui/computer_screen.tscn")
+const WebForgeScene := preload("res://scenes/ui/minigames/web_forge.tscn")
+const ContractGenerator := preload("res://scripts/contracts/contract_generator.gd")
 const MapData := preload("res://scripts/world/world_map_data.gd")
 
 const RESOLUTIONS: Array[Vector2] = [
@@ -25,7 +28,7 @@ var failed_count: int = 0
 func _ready() -> void:
 	await get_tree().process_frame
 	print("======================================================================")
-	print("=== v1.4.0 OVERHAUL SUITE: TO-OS 26.4, STARS, OGR, DAY/NIGHT & MAP ===")
+	print("=== v1.4.0–v1.5.0 OVERHAUL SUITE: MAKEHUMAN, BORGO PO, KNOWLEDGE & OGR ===")
 	print("======================================================================")
 
 	test_upgrade_manager_math_and_saveload()
@@ -34,6 +37,7 @@ func _ready() -> void:
 	await test_ogr_gate_corridors_and_enterprise()
 	await test_world_map_zoom_pan_and_resize()
 	await test_to_os_desktop_and_ui_4res()
+	await test_knowledge_manager_and_specialty_contracts()
 
 	print("======================================================================")
 	print("  ✔ PASSED: %d" % passed_count)
@@ -260,78 +264,101 @@ func test_officina_clearance_and_character_anatomy() -> void:
 				str(t["node"]), str(hit_node.name) if hit_node else "null"
 			])
 
-	# Verifica gerarchia anatomica VillageCharacters, materiali StandardMaterial3D PBR, SSS solo su pelle e NoiseTexture2D
-	var skin_keys: Array[String] = ["skin", "skin_warm", "skin_cheek", "skin_crevice", "lip_warm", "lip_rose"]
-	var eye_keys: Array[String] = ["eye_white", "iris_brown", "iris_blue", "iris_green", "limbal_dark", "eye_glint", "badge_cyan"]
+	# Verifica gerarchia MakeHuman CC0 (.glb), PBR leggero (#10): zero SSS/Heightmap/Detail, normal condivisa solo su tessuti, rim volume, zero luci extra
+	var no_tex_surfaces: Array[String] = ["skin", "lip", "hair", "eyebrow", "hat"]
+	var cloth_surfaces: Array[String] = ["shirt", "pants", "apron", "vest", "tie", "ribbon"]
+	var eye_surfaces: Array[String] = ["eye_white", "iris", "limbal_dark"]
+	var shared_fabric_tex := VillageMaterials.FABRIC_NORMAL_TEX as NoiseTexture2D
+	check(shared_fabric_tex != null and shared_fabric_tex.width <= 256 and shared_fabric_tex.noise != null and shared_fabric_tex.noise.frequency <= 0.025,
+		"Shared fabric_normal.tres loaded once (%s, freq=%.3f <= 0.025)" % [
+			str(shared_fabric_tex.width) if shared_fabric_tex else "null",
+			shared_fabric_tex.noise.frequency if (shared_fabric_tex and shared_fabric_tex.noise) else -1.0
+		])
+
 	var standing_npcs: Array[String] = ["MarioNPC", "BrunoNPC", "RosaNPC", "ElenaNPC", "DavideNPC", "SabrinaNPC", "BelliniNPC", "AndreaVialeNPC"]
 	for nname in standing_npcs:
 		var npc: Node = world.find_child(nname, true, false)
 		var model: Node = npc.get_node_or_null("Model") if npc else null
-		var body_mi: MeshInstance3D = model.get_node_or_null("BodyMesh") as MeshInstance3D if model else null
-		var head_mi: MeshInstance3D = model.get_node_or_null("HeadPivot/HeadMesh") as MeshInstance3D if model else null
-		var arml_mi: MeshInstance3D = model.get_node_or_null("ArmLPivot/Mesh") as MeshInstance3D if model else null
-		var armr_mi: MeshInstance3D = model.get_node_or_null("ArmRPivot/Mesh") as MeshInstance3D if model else null
-		var ap: AnimationPlayer = model.get_node_or_null("AnimationPlayer") as AnimationPlayer if model else null
-		var face_count: int = 0
-		var all_char_pbr: bool = true
-		var sss_rule_ok: bool = true
-		var noise_tex_ok: bool = true
+		var skel: Skeleton3D = model.find_child("Skeleton3D", true, false) as Skeleton3D if model else null
+		var head_pivot: BoneAttachment3D = skel.get_node_or_null("HeadPivot") as BoneAttachment3D if skel else null
+		var body_mi: MeshInstance3D = model.find_child("BodyMesh", true, false) as MeshInstance3D if model else null
+		var ap: AnimationPlayer = model.find_child("AnimationPlayer", true, false) as AnimationPlayer if model else null
+		var has_legacy_parts: bool = model != null and (model.get_node_or_null("ArmLPivot") != null or model.get_node_or_null("HeadPivot/HeadMesh") != null)
+		var face_len: int = body_mi.mesh.get_faces().size() if (body_mi and body_mi.mesh) else 0
+		var pbr_ok: bool = body_mi != null and body_mi.mesh != null and body_mi.mesh.get_surface_count() >= 4
 		var bad_detail := ""
-		var rig_meshes: Array[MeshInstance3D] = [body_mi, head_mi, arml_mi, armr_mi]
-		for mi in rig_meshes:
-			if mi == null or mi.mesh == null:
-				continue
-			if mi == body_mi or mi == head_mi:
-				face_count += mi.mesh.get_faces().size()
-			for si in range(mi.mesh.get_surface_count()):
-				var sname: String = mi.mesh.surface_get_name(si)
-				var smat: Material = mi.mesh.surface_get_material(si)
+
+		if pbr_ok:
+			for si in range(body_mi.mesh.get_surface_count()):
+				var sname: String = body_mi.mesh.surface_get_name(si)
+				var smat: Material = body_mi.mesh.surface_get_material(si)
 				if not (smat is StandardMaterial3D):
-					all_char_pbr = false
-					bad_detail = "%s:%s not StandardMaterial3D" % [mi.name, sname]
+					pbr_ok = false
+					bad_detail = "%s not StandardMaterial3D" % sname
 					break
 				var pbr: StandardMaterial3D = smat as StandardMaterial3D
-				var is_skin: bool = sname in skin_keys
-				var is_eye: bool = sname in eye_keys
-				if is_skin:
-					if not pbr.subsurf_scatter_enabled or not pbr.subsurf_scatter_skin_mode:
-						sss_rule_ok = false
-						bad_detail = "%s:%s missing SSS" % [mi.name, sname]
+				if pbr.subsurf_scatter_enabled or pbr.subsurf_scatter_skin_mode or pbr.heightmap_enabled or pbr.detail_enabled or pbr.roughness_texture != null:
+					pbr_ok = false
+					bad_detail = "%s has SSS/Height/Detail/RoughTex enabled" % sname
+					break
+				if sname in eye_surfaces:
+					if not pbr.clearcoat_enabled or pbr.normal_enabled or pbr.normal_texture != null or pbr.rim_enabled:
+						pbr_ok = false
+						bad_detail = "%s eye rule mismatch" % sname
+						break
+				elif sname in cloth_surfaces:
+					if (not pbr.normal_enabled) or pbr.normal_texture != VillageMaterials.FABRIC_NORMAL_TEX or pbr.uv1_scale != Vector3.ONE or not is_equal_approx(pbr.normal_scale, 0.15) or not is_equal_approx(pbr.roughness, 0.75) or not pbr.rim_enabled or not is_equal_approx(pbr.rim, 0.25) or not is_equal_approx(pbr.rim_tint, 0.5):
+						pbr_ok = false
+						bad_detail = "%s cloth PBR rule mismatch" % sname
+						break
+				elif sname in no_tex_surfaces:
+					if pbr.normal_enabled or pbr.normal_texture != null or not is_equal_approx(pbr.roughness, 0.75) or not pbr.rim_enabled or not is_equal_approx(pbr.rim, 0.25) or not is_equal_approx(pbr.rim_tint, 0.5):
+						pbr_ok = false
+						bad_detail = "%s skin/hair/hat PBR rule mismatch" % sname
+						break
 				else:
-					if pbr.subsurf_scatter_enabled:
-						sss_rule_ok = false
-						bad_detail = "%s:%s has SSS enabled on non-skin" % [mi.name, sname]
-				if is_eye:
-					if not pbr.clearcoat_enabled:
-						noise_tex_ok = false
-						bad_detail = "%s:%s missing eye clearcoat" % [mi.name, sname]
-				else:
-					var nt := pbr.normal_texture as NoiseTexture2D
-					var rt := pbr.roughness_texture as NoiseTexture2D
-					if nt == null or rt == null or nt.width > 512 or rt.width > 512:
-						noise_tex_ok = false
-						bad_detail = "%s:%s invalid NoiseTexture2D" % [mi.name, sname]
-		check(model != null and body_mi != null and head_mi != null and arml_mi != null and armr_mi != null and ap != null and face_count > 3500,
-			"%s uses high-detail sculpted VillageCharacters rig (%d tri vertices, rig complete)" % [nname, face_count / 3])
-		check(all_char_pbr and sss_rule_ok and noise_tex_ok,
-			"%s uses 100%% StandardMaterial3D PBR, skin-only SSS & <=512 NoiseTexture2D (%s)" % [nname, bad_detail if bad_detail != "" else "ok"])
+					if pbr.normal_enabled or not pbr.rim_enabled or not is_equal_approx(pbr.rim, 0.25) or not is_equal_approx(pbr.rim_tint, 0.5):
+						pbr_ok = false
+						bad_detail = "%s accessory PBR rule mismatch" % sname
+						break
+
+		check(model != null and skel != null and head_pivot != null and head_pivot.bone_name == "head" and ap != null and ap.has_animation("Idle") and not has_legacy_parts and face_len >= 7500 and face_len < 36000,
+			"%s uses lightweight rigged MakeHuman .glb (%d tris, Skeleton3D+HeadPivot, Idle)" % [nname, face_len / 3])
+		check(pbr_ok,
+			"%s follows Request #10 light PBR rules (zero SSS/Height/Detail, shared fabric normal, rim=0.25) (%s)" % [nname, bad_detail if bad_detail != "" else "ok"])
 
 	var cw_seated: Node = world.find_child("CoworkerSeated", true, false)
-	var cw_ap: AnimationPlayer = cw_seated.get_node_or_null("Model/AnimationPlayer") as AnimationPlayer if cw_seated else null
+	var cw_ap: AnimationPlayer = cw_seated.find_child("AnimationPlayer", true, false) as AnimationPlayer if cw_seated else null
 	check(cw_seated != null and cw_ap != null and cw_ap.has_animation("Sit_Chair_Idle"),
-		"OGR CoworkerSeated uses seated VillageCharacters rig with Sit_Chair_Idle")
+		"OGR CoworkerSeated uses MakeHuman seated .glb rig with Sit_Chair_Idle")
 
 	var luca_emp: Node = world.find_child("EmployeeModel", true, false)
-	var luca_body: MeshInstance3D = luca_emp.get_node_or_null("Model/BodyMesh") as MeshInstance3D if luca_emp else null
+	var luca_body: MeshInstance3D = luca_emp.find_child("BodyMesh", true, false) as MeshInstance3D if luca_emp else null
 	check(luca_body != null and luca_body.mesh != null and luca_body.mesh.get_surface_count() >= 4,
-		"Studio Luca Workstation EmployeeModel built with sculpted multi-surface PBR rig")
+		"Studio Luca Workstation EmployeeModel built with MakeHuman multi-surface PBR rig")
 
 	var portrait_lights: Array[Node] = get_tree().get_nodes_in_group("npc_portrait_light")
-	var spot_cnt: int = 0
-	for pl in portrait_lights:
-		if pl is SpotLight3D:
-			spot_cnt += 1
-	check(spot_cnt >= 18, "At least 18 portrait Key/Rim SpotLight3Ds configured across Borgo/Studio/OGR NPCs (got %d)" % spot_cnt)
+	check(portrait_lights.is_empty(), "Zero extra npc_portrait_light spotlights spawned on NPCs (got %d)" % portrait_lights.size())
+
+	# Pizzeria Da Mario: fumo forno a legna con CPUParticles3D morbide (nessuna sfera mesh statica smoke_soft!)
+	var oven_smoke: CPUParticles3D = world.find_child("OvenSmokeParticles", true, false) as CPUParticles3D
+	var piz_mesh: MeshInstance3D = world.find_child("BorgoPizzeriaMesh", true, false) as MeshInstance3D
+	var has_smoke_blob: bool = false
+	if piz_mesh and piz_mesh.mesh:
+		for si in range(piz_mesh.mesh.get_surface_count()):
+			if piz_mesh.mesh.surface_get_name(si) == "smoke_soft":
+				has_smoke_blob = true
+	check(oven_smoke != null and oven_smoke.emitting and oven_smoke.amount >= 10 and not has_smoke_blob,
+		"Pizzeria oven uses emitting CPUParticles3D volumetric smoke without static sphere blobs")
+
+	# Borgo Po / Lungo Po / Molo sul Po: corridoio arco sud libero + pavimento legno sul Molo
+	var borgopo_arch_hit: Dictionary = _ray_hit(space, Vector3(8.2, 1.0, 34.0), Vector3(8.2, 1.0, 56.0), 1)
+	check(borgopo_arch_hit.is_empty(),
+		"Borgo Po South Archway & promenade corridor clear (hit: %s)" % (str(borgopo_arch_hit["collider"].name) if not borgopo_arch_hit.is_empty() else "none"))
+	var molo_hit: Dictionary = _ray_hit(space, Vector3(16.0, 1.5, 68.5), Vector3(16.0, -0.5, 68.5), 1)
+	var molo_surf: String = str(molo_hit["collider"].get_meta("surface", "")) if not molo_hit.is_empty() and molo_hit["collider"].has_meta("surface") else ""
+	check(not molo_hit.is_empty() and molo_surf == "wood",
+		"Molo sul Po pier has walkable 'wood' footstep collider (got '%s')" % molo_surf)
 
 	world.queue_free()
 	await get_tree().process_frame
@@ -459,7 +486,7 @@ func test_ogr_gate_corridors_and_enterprise() -> void:
 func test_world_map_zoom_pan_and_resize() -> void:
 	print("\n[Suite 5] WorldMap Zoom, Pan Clamp, District Selection & Viewport Resize Fix")
 	GameManager.start_new_game()
-	check(MapData.get_pois().size() == 14, "WorldMapData defines all 14 POIs incl. OGR Tech Hub")
+	check(MapData.get_pois().size() == 19, "WorldMapData defines all 19 POIs incl. OGR Tech Hub & Borgo Po")
 
 	var vp := SubViewport.new()
 	vp.size = Vector2i(1280, 720)
@@ -478,10 +505,13 @@ func test_world_map_zoom_pan_and_resize() -> void:
 		var btn: Button = wmap._view_buttons[k] as Button
 		if btn.focus_mode != Control.FOCUS_NONE:
 			all_focus_none = false
-	check(all_focus_none and wmap._zoom_in_btn.focus_mode == Control.FOCUS_NONE and wmap._close_btn.focus_mode == Control.FOCUS_NONE,
-		"All WorldMap filter tabs & toolbar buttons use FOCUS_NONE")
+	check(all_focus_none and wmap._view_buttons.has("borgopo") and wmap._zoom_in_btn.focus_mode == Control.FOCUS_NONE and wmap._close_btn.focus_mode == Control.FOCUS_NONE,
+		"All 6 WorldMap filter tabs (incl. 'borgopo') & toolbar buttons use FOCUS_NONE")
 
-	# Seleziona un distretto (bug riportato: dopo aver selezionato una zona non si poteva ridimensionare!)
+	# Seleziona distretti (Borgo Po + Mercato OGR) prima e dopo il resize
+	wmap._set_view("borgopo")
+	wmap.select_poi("molo_po")
+	check(wmap.selected_poi_id == "molo_po", "Borgo Po view & 'molo_po' POI selectable cleanly")
 	wmap._set_view("mercato")
 	wmap.select_poi("coworking_ogr")
 	await get_tree().process_frame
@@ -528,7 +558,7 @@ func test_world_map_zoom_pan_and_resize() -> void:
 # 6. TO-OS 26.4 DESKTOP, WINDOW CHROME & 4-RESOLUTION UI CONTAINMENT
 # ------------------------------------------------------------------------------
 func test_to_os_desktop_and_ui_4res() -> void:
-	print("\n[Suite 6] TO-OS 26.4 Desktop Grid, Window Chrome & 4-Res Strict UI Containment")
+	print("\n[Suite 6] TO-OS 26.4 Desktop Grid (11 Apps incl. Knowledge), Window Chrome & 4-Res Strict UI Containment")
 	GameManager.start_new_game()
 	EconomyManager.balance = 12000.0
 	UpgradeManager.add_stars(8, "")
@@ -556,14 +586,14 @@ func test_to_os_desktop_and_ui_4res() -> void:
 		check(min_sz.x <= 800.0 and min_sz.y <= 520.0,
 			"TO-OS ComputerScreen combined_minimum_size (%s) fits small viewports at %dx%d" % [str(min_sz), int(res.x), int(res.y)])
 
-		# 1) Desktop Grid & Dock
+		# 1) Desktop Grid & 12-button Dock
 		var desk_off: Array[String] = []
 		_walk_ui_bounds(comp, Vector2.ZERO, res, desk_off)
-		check(comp.desktop_area.visible and comp.desktop_apps_grid.get_child_count() == 10 and desk_off.is_empty(),
-			"TO-OS Desktop 10-app grid + BottomDock strictly contained at %dx%d (%s)" % [int(res.x), int(res.y), ", ".join(desk_off)])
+		check(comp.desktop_area.visible and comp.desktop_apps_grid.get_child_count() == 11 and desk_off.is_empty(),
+			"TO-OS Desktop 11-app grid + BottomDock strictly contained at %dx%d (%s)" % [int(res.x), int(res.y), ", ".join(desk_off)])
 
-		# 2) Finestre TO-OS (incluse Upgrades ★, OGR Enterprise, Freelance, Shop, Rack, Talent, Mail, Bank)
-		for app_id in ["upgrades", "ogr", "freelance", "shop", "rack", "talent", "mail", "bank"]:
+		# 2) Finestre TO-OS (incluse Upgrades ★, Conoscenza R&D, OGR Enterprise, Freelance, Shop, Rack, Talent, Mail, Bank)
+		for app_id in ["upgrades", "knowledge", "ogr", "freelance", "shop", "rack", "talent", "mail", "bank"]:
 			comp.open_app(app_id)
 			await get_tree().process_frame
 			await get_tree().process_frame
@@ -572,7 +602,7 @@ func test_to_os_desktop_and_ui_4res() -> void:
 			check(win_off.is_empty(),
 				"TO-OS app '%s' strictly contained at %dx%d (%s)" % [app_id, int(res.x), int(res.y), ", ".join(win_off)])
 
-		# 3) Test Window Chrome MaxBtn (Compact toggle) at 1280x720
+		# 3) Test Window Chrome MaxBtn (Compact toggle) at 1280x720 + Knowledge Unlocked containment
 		if int(res.x) == 1280:
 			comp.open_app("upgrades")
 			await get_tree().process_frame
@@ -586,9 +616,134 @@ func test_to_os_desktop_and_ui_4res() -> void:
 			check(compact_w < full_w - 40.0 and is_equal_approx(restored_w, full_w),
 				"Window chrome MaxBtn toggles compact mode (%.0f -> %.0f -> %.0f)" % [full_w, compact_w, restored_w])
 
+			ContractManager.completed_contracts.append("factory_bellini")
+			ContractManager.factory_state["completed"] = true
+			GameManager.reputation_points = 120
+			KnowledgeManager.study("web_architecture")
+			comp.open_app("knowledge")
+			await get_tree().process_frame
+			await get_tree().process_frame
+			var k_off: Array[String] = []
+			_walk_ui_bounds(comp, Vector2.ZERO, res, k_off)
+			check(comp.knowledge_window.visible and k_off.is_empty(),
+				"TO-OS unlocked Conoscenza R&D window strictly contained at 1280x720 (%s)" % ", ".join(k_off))
+
 		comp.queue_free()
 		vp.queue_free()
 		await get_tree().process_frame
+
+# ------------------------------------------------------------------------------
+# 7. KNOWLEDGE MANAGER (POST-BELLINI R&D, SPECIALTY CONTRACTS, BONUSES & SAVE/LOAD)
+# ------------------------------------------------------------------------------
+func test_knowledge_manager_and_specialty_contracts() -> void:
+	print("\n[Suite 7] KnowledgeManager R&D (Pre-Bellini Lock, Rank 0 Neutrality, Specialty Contracts, WebForge/Rack/Payout & Save/Load)")
+	GameManager.start_new_game()
+	EconomyManager.balance = 5000.0
+	GameManager.reputation_points = 100
+
+	# 1) Blocco rigoroso prima di completare Officina Bellini + neutralità totale a Rank 0
+	check(not KnowledgeManager.is_unlocked(), "KnowledgeManager locked cleanly before Officina Bellini completion")
+	check(KnowledgeManager.get_unlocked_specialties().is_empty(), "Rank 0 returns empty unlocked specialties")
+	check(is_equal_approx(KnowledgeManager.get_webforge_speed_bonus(), 0.0), "Rank 0 WebForge speed bonus == 0.0")
+	check(is_equal_approx(KnowledgeManager.get_rack_hosting_mult(), 1.0), "Rank 0 Rack hosting mult == 1.0")
+	check(is_equal_approx(KnowledgeManager.get_contract_payout_mult({"execution_type": "webforge"}), 1.0), "Rank 0 contract payout mult == 1.0")
+	check(not KnowledgeManager.study("web_architecture"), "Cannot study R&D track before Bellini completion even with funds & Rep")
+
+	# 2) Completa tutti e 4 i pilastri di Officina Bellini -> Sblocco Conoscenza R&D!
+	ContractManager.accept_factory_commission()
+	for zid in ContractManager.FACTORY_SCOUT_ZONES:
+		ContractManager.scout_factory_zone(zid, zid)
+	ShopManager.buy_hardware("hw_wifi_router", 1)
+	ShopManager.buy_hardware("hw_server_tower", 1)
+	ShopManager.buy_hardware("hw_workstation_pc", 2)
+	ContractManager.mount_factory_wifi_hardware()
+	ContractManager.complete_factory_wifi_netshield()
+	ContractManager.install_factory_server()
+	ContractManager.install_factory_pcs()
+	ContractManager.mark_contract_built("factory_bellini_web", {"score": 96})
+	ContractManager.complete_marketplace_contract("factory_bellini_web")
+	check(KnowledgeManager.is_unlocked(), "Completing Officina Bellini unlocks KnowledgeManager R&D!")
+
+	# 3) Verifica soglie Reputazione & EUR
+	GameManager.reputation_points = 10
+	EconomyManager.balance = 5000.0
+	check(not KnowledgeManager.study("web_architecture"), "R&D study rejected when Reputation < rep_req (10 < 40)")
+
+	GameManager.reputation_points = 160
+	EconomyManager.balance = 50.0
+	check(not KnowledgeManager.study("web_architecture"), "R&D study rejected when balance < cost (50 < 380)")
+
+	# 4) Studio progressivo & verifica moltiplicatori (WebForge speed, Rack hosting, Payout specialistico)
+	EconomyManager.balance = 10000.0
+	ServerRackManager.unlock_server_rack()
+	ServerRackManager.rack_tier = 2
+	ServerRackManager.hosted_domains.clear()
+	ServerRackManager.add_hosted_client("test.it", "Client Test", 100.0)
+	var base_rack_rev: float = ServerRackManager.calculate_daily_hosting_revenue()
+	check(is_equal_approx(base_rack_rev, 100.0), "Baseline Rack hosting revenue before cloud_devops == € 100.00 (got %.2f)" % base_rack_rev)
+
+	var bal_pre_study: float = EconomyManager.balance
+	check(KnowledgeManager.study("web_architecture") and KnowledgeManager.get_rank("web_architecture") == 1,
+		"Studied web_architecture Lv.1 (cost €380)")
+	check(is_equal_approx(bal_pre_study - EconomyManager.balance, 380.0), "EconomyManager deducted €380 for web_architecture Lv.1")
+	check(is_equal_approx(KnowledgeManager.get_webforge_speed_bonus(), 0.30), "web_architecture Lv.1 grants -0.30s WebForge speed bonus")
+
+	ContractManager.advance_tutorial_to_in_progress()
+	var wf: Control = WebForgeScene.instantiate() as Control
+	add_child(wf)
+	await get_tree().process_frame
+	EventBus.minigame_started.emit("web_forge")
+	await get_tree().process_frame
+	check(is_equal_approx(wf.compile_target_duration, 5.2),
+		"WebForge compile duration reduced from 5.5s to 5.2s with web_architecture Lv.1 (got %.2fs)" % wf.compile_target_duration)
+	wf.queue_free()
+	await get_tree().process_frame
+
+	check(KnowledgeManager.study("cloud_devops") and KnowledgeManager.get_rank("cloud_devops") == 1,
+		"Studied cloud_devops Lv.1 (cost €420)")
+	var rack_rev_rd: float = ServerRackManager.calculate_daily_hosting_revenue()
+	check(is_equal_approx(rack_rev_rd, 110.0),
+		"cloud_devops Lv.1 boosts ServerRackManager hosting revenue +10%% (€100 -> €110, got %.2f)" % rack_rev_rd)
+
+	check(KnowledgeManager.study("cyber_governance") and KnowledgeManager.study("ai_automation"),
+		"Studied cyber_governance Lv.1 & ai_automation Lv.1")
+
+	# 5) Generazione commessa specialistica AI & Payout R&D (+12% a Lv.1)
+	var spec_c: Dictionary = ContractGenerator.generate_specialty_contract("ai_automation", 77, 1.0)
+	check(bool(spec_c.get("is_knowledge_specialty", false)) and str(spec_c.get("knowledge_track", "")) == "ai_automation",
+		"ContractGenerator creates tagged specialty contract for unlocked 'ai_automation' track")
+	check(is_equal_approx(KnowledgeManager.get_contract_payout_mult(spec_c), 1.12),
+		"Matching AI contract receives 1.12x R&D payout multiplier at Lv.1")
+
+	var has_spec_in_pool: bool = false
+	for mc in ContractManager.marketplace_contracts:
+		if mc is Dictionary and bool(mc.get("is_knowledge_specialty", false)):
+			has_spec_in_pool = true
+			break
+	check(has_spec_in_pool, "Studying R&D auto-injects specialty contracts into Freelance Marketplace pool")
+
+	spec_c["id"] = "test_rd_ai_spec"
+	spec_c["budget"] = 1000.0
+	spec_c["fame_bonus"] = 1.0
+	spec_c["status"] = "in_progress"
+	ContractManager.active_contracts["test_rd_ai_spec"] = spec_c
+	var bal_pre_pay: float = EconomyManager.balance
+	check(ContractManager.complete_marketplace_contract("test_rd_ai_spec"), "Completed specialty AI contract")
+	check(is_equal_approx(EconomyManager.balance - bal_pre_pay, 1120.0),
+		"Completed specialty AI contract paid €1120.00 (1000 * 1.12x R&D, got %.2f)" % (EconomyManager.balance - bal_pre_pay))
+
+	# 6) Save/Load Roundtrip + New Game Reset
+	var saved_rd: Dictionary = KnowledgeManager.ranks.duplicate()
+	check(SaveManager.save_game(), "Saved game with active KnowledgeManager R&D ranks")
+	KnowledgeManager.reset()
+	check(KnowledgeManager.get_total_rank() == 0, "KnowledgeManager.reset() zeroes all ranks before Load")
+	check(SaveManager.load_game(), "Loaded saved game with KnowledgeManager R&D ranks")
+	check(KnowledgeManager.ranks == saved_rd and KnowledgeManager.get_total_rank() == 4,
+		"KnowledgeManager ranks cleanly restored across Save/Load (total=%d)" % KnowledgeManager.get_total_rank())
+
+	GameManager.start_new_game()
+	check(KnowledgeManager.get_total_rank() == 0 and not KnowledgeManager.is_unlocked(),
+		"GameManager.start_new_game() resets KnowledgeManager ranks to 0 and locks R&D cleanly")
 
 func _walk_ui_bounds(node: Node, sc_x_bounds: Vector2, vp_size: Vector2, offenders: Array[String]) -> void:
 	if node is Control and not (node as Control).visible:
@@ -613,4 +768,3 @@ func _walk_ui_bounds(node: Node, sc_x_bounds: Vector2, vp_size: Vector2, offende
 				offenders.append("%s(%.0f..%.0f, %.0f..%.0f)" % [c.name, r.position.x, r.end.x, r.position.y, r.end.y])
 	for ch in node.get_children():
 		_walk_ui_bounds(ch, sc_x_bounds, vp_size, offenders)
-

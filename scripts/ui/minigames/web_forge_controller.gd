@@ -552,7 +552,13 @@ func _calculate_compilation_speed() -> void:
 		if pipe_bonus > 0.01:
 			duration -= pipe_bonus
 			boosts.append("Pipeline CI/CD ★ (-%0.1fs)" % pipe_bonus)
-		
+
+	if is_instance_valid(KnowledgeManager):
+		var k_bonus := KnowledgeManager.get_webforge_speed_bonus()
+		if k_bonus > 0.01:
+			duration -= k_bonus
+			boosts.append("Conoscenza Web (-%0.2fs)" % k_bonus)
+
 	compile_target_duration = maxf(1.0, duration)
 	
 	if boosts.is_empty():

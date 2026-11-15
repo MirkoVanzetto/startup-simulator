@@ -137,6 +137,7 @@ func start_new_game() -> void:
 	FameManager.reset()
 	SideJobManager.reset()
 	UpgradeManager.reset()
+	KnowledgeManager.reset()
 	EmployeeManager.reset()
 	ServerRackManager.reset()
 	EconomyManager.reset_economy(120.0) # Tight realistic starting capital: 120 EUR

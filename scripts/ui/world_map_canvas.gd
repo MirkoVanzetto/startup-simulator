@@ -40,6 +40,8 @@ func set_view_bounds(view_id: String, preserve_zoom: bool = false) -> void:
 			_view_bounds = MapData.VALDOCCO_BOUNDS
 		"mercato":
 			_view_bounds = MapData.MERCATO_BOUNDS
+		"borgopo":
+			_view_bounds = MapData.BORGOPO_BOUNDS
 		_:
 			_view_bounds = MapData.WORLD_BOUNDS
 	if not preserve_zoom:
@@ -230,6 +232,18 @@ func _draw() -> void:
 			draw_rect(sr, Color(0.28, 0.31, 0.36, 0.92), true)
 			draw_rect(sr, Color(0.46, 0.56, 0.66, 0.85), false, 1.1)
 
+	# 2c. Po River & Wooden Molo Pier
+	if geo.has("rivers"):
+		for rv in geo["rivers"]:
+			var rr := world_rect_to_canvas(rv)
+			draw_rect(rr, Color(0.10, 0.36, 0.58, 0.88), true)
+			draw_rect(rr, Color(0.28, 0.64, 0.88, 0.85), false, 1.3)
+	if geo.has("wood_piers"):
+		for wp_r in geo["wood_piers"]:
+			var pr_w := world_rect_to_canvas(wp_r)
+			draw_rect(pr_w, Color(0.48, 0.33, 0.20, 0.96), true)
+			draw_rect(pr_w, Color(0.76, 0.58, 0.38, 0.9), false, 1.2)
+
 	# 3. Asphalt roads & centerline
 	for asp in geo["asphalt"]:
 		var ar := world_rect_to_canvas(asp)
@@ -239,6 +253,12 @@ func _draw() -> void:
 		var a := world_to_canvas(Vector2(float(rx), 28.0))
 		var b := world_to_canvas(Vector2(float(rx) + 2.0, 28.0))
 		draw_line(a, b, Color(0.95, 0.88, 0.55, 0.65), maxf(1.5, 0.22 * sc))
+	for rx_s in range(-19, 53, 4):
+		if rx_s >= 5 and rx_s <= 11:
+			continue
+		var a_s := world_to_canvas(Vector2(float(rx_s), 58.0))
+		var b_s := world_to_canvas(Vector2(float(rx_s) + 1.9, 58.0))
+		draw_line(a_s, b_s, Color(0.95, 0.88, 0.55, 0.65), maxf(1.5, 0.22 * sc))
 
 	# 4. Houses (residential context blocks)
 	for hr in geo["houses"]:
@@ -282,6 +302,8 @@ func _draw() -> void:
 	_draw_label_centered(font, world_to_canvas(Vector2(43.0, 20.8)), "VIALE EST", 11, Color(0.75, 0.78, 0.84, 0.6))
 	_draw_label_centered(font, world_to_canvas(Vector2(76.0, 16.2)), "BORGO VALDOCCO", 12, Color(0.95, 0.84, 0.45, 0.7))
 	_draw_label_centered(font, world_to_canvas(Vector2(92.0, -12.0)), "MERCATO NORD · OGR TECH HUB", 11, Color(0.62, 0.92, 1.0, 0.82))
+	_draw_label_centered(font, world_to_canvas(Vector2(36.0, 62.8)), "BORGO PO · LUNGO PO", 11, Color(0.60, 0.92, 1.0, 0.80))
+	_draw_label_centered(font, world_to_canvas(Vector2(-6.0, 71.5)), "FIUME PO", 12, Color(0.72, 0.92, 1.0, 0.88))
 
 	# 8. Waypoint path from player
 	var wp := GameManager.active_waypoint

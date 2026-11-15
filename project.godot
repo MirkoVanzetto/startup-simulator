@@ -30,6 +30,7 @@ ShopManager="*res://scripts/core/shop_manager.gd"
 FameManager="*res://scripts/core/fame_manager.gd"
 SideJobManager="*res://scripts/core/side_job_manager.gd"
 UpgradeManager="*res://scripts/core/upgrade_manager.gd"
+KnowledgeManager="*res://scripts/core/knowledge_manager.gd"
 
 [display]
 

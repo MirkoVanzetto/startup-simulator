@@ -41,6 +41,7 @@ func _ready() -> void:
 		if uid == "enterprise" and is_ogr_unlocked():
 			refresh_enterprise_contracts(true)
 	)
+	EventBus.knowledge_upgraded.connect(_on_knowledge_upgraded)
 
 func is_ogr_unlocked() -> bool:
 	return is_contract_completed("pizzeria_da_mario") \
@@ -97,7 +98,8 @@ func init_tutorial_contract() -> void:
 
 func refresh_marketplace() -> void:
 	var budget_mult := 1.15 if EmployeeManager.is_employee_hired("emp_luca") else 1.0
-	marketplace_contracts = ContractGenerator.generate_initial_marketplace_pool(2, budget_mult)
+	var specialties: Array = KnowledgeManager.get_unlocked_specialties() if is_instance_valid(KnowledgeManager) else []
+	marketplace_contracts = ContractGenerator.generate_initial_marketplace_pool(2, budget_mult, specialties)
 	EventBus.contract_marketplace_refreshed.emit()
 
 func get_lead_interval_minutes() -> int:
@@ -139,7 +141,8 @@ func discover_new_lead(force_notify: bool = true) -> Dictionary:
 	if marketplace_contracts.size() >= pool_cap:
 		return {}
 	var budget_mult := 1.15 if EmployeeManager.is_employee_hired("emp_luca") else 1.0
-	var gig := ContractGenerator.generate_random_contract(0, budget_mult)
+	var specialties: Array = KnowledgeManager.get_unlocked_specialties() if is_instance_valid(KnowledgeManager) else []
+	var gig := ContractGenerator.generate_random_contract(0, budget_mult, specialties)
 	marketplace_contracts.append(gig)
 	EventBus.contract_marketplace_refreshed.emit()
 	if force_notify:
@@ -150,6 +153,24 @@ func discover_new_lead(force_notify: bool = true) -> Dictionary:
 			"contract"
 		)
 	return gig
+
+func _on_knowledge_upgraded(track_id: String, _new_rank: int) -> void:
+	var pool_cap := maxi(3, get_max_marketplace_pool())
+	var budget_mult := 1.15 if EmployeeManager.is_employee_hired("emp_luca") else 1.0
+	var spec_gig := ContractGenerator.generate_specialty_contract(track_id, 0, budget_mult)
+	if marketplace_contracts.size() < pool_cap:
+		marketplace_contracts.append(spec_gig)
+	else:
+		var replaced := false
+		for i in range(marketplace_contracts.size()):
+			var cur = marketplace_contracts[i]
+			if cur is Dictionary and not bool(cur.get("is_knowledge_specialty", false)):
+				marketplace_contracts[i] = spec_gig
+				replaced = true
+				break
+		if not replaced and not marketplace_contracts.is_empty():
+			marketplace_contracts[0] = spec_gig
+	EventBus.contract_marketplace_refreshed.emit()
 
 func _on_time_tick(_h: int, _m: int, _d: int) -> void:
 	var interval := get_lead_interval_minutes()
@@ -427,6 +448,8 @@ func complete_marketplace_contract(contract_id: String) -> bool:
 		var reward = float(c["budget"]) * float(c.get("fame_bonus", 1.0))
 		if is_instance_valid(UpgradeManager):
 			reward *= UpgradeManager.get_enterprise_payout_mult() if is_ent else UpgradeManager.get_contract_payout_mult()
+		if is_instance_valid(KnowledgeManager):
+			reward *= KnowledgeManager.get_contract_payout_mult(c)
 		if EmployeeManager.is_employee_hired("emp_marco"):
 			reward *= 1.20
 		if c.get("execution_type", "") == "netshield" and ShopManager.has_gadget("gadget_scanner_wifi"):
@@ -686,6 +709,11 @@ func _check_factory_grand_completion() -> void:
 			"MAXI-APPALTO OFFICINA BELLINI COMPLETATO!",
 			"Wi-Fi, Server, 2 PC & Sito Web consegnati! Bonus finale +€ 950,00 & +35 Reputazione!",
 			"success"
+		)
+		EventBus.notification_posted.emit(
+			"📘 Conoscenza R&D Sbloccata!",
+			"Ora puoi studiare nuove competenze in 'Conoscenza R&D' su TO-OS per sbloccare commesse avanzate!",
+			"info"
 		)
 		if not was_ogr and is_ogr_unlocked():
 			_notify_ogr_unlocked()

@@ -272,32 +272,32 @@ def make_slabs():
 
     stone = col("#a39c92") * tones[tid % 64][..., None] * (0.90 + n * 0.15 + (nf - 0.5) * 0.09)[..., None]
     albedo = np.where(joint[..., None], col("#56524b"), stone * (0.91 + 0.09 * chamfer[..., None]))
-    height = np.where(joint, 0.12, 0.58 + 0.30 * chamfer + 0.10 * nf)
-    rough = np.where(joint, 0.94, 0.78 + (nf - 0.5) * 0.08)
-    ao = np.where(joint, 0.42, 0.74 + 0.26 * chamfer)
-    save_mat("slabs", albedo, height, rough, ao, 3.2)
+    height = np.where(joint, 0.26, 0.64 + 0.20 * chamfer + 0.06 * nf)
+    rough = np.where(joint, 0.94, 0.80 + (nf - 0.5) * 0.06)
+    ao = np.where(joint, 0.48, 0.78 + 0.22 * chamfer)
+    save_mat("slabs", albedo, height, rough, ao, 1.35)
 
 
 def make_asphalt():
-    # Asfalto ruvido con crepe realistiche & micro-sassolini (Ref 5 Viale Est)
+    # Asfalto urbano naturale e regolare senza aliasing a bassa inclinazione
     n_macro = fbm(2.2, 8)
-    n_grit = fbm(0.45, 9)
-    n_pebble = fbm(0.25, 19)
+    n_grit = fbm(0.85, 9)
+    n_pebble = fbm(0.55, 19)
     base = col("#44474d")
-    albedo = base * (0.84 + 0.24 * n_macro + (n_grit - 0.5) * 0.22)[..., None]
-    speck = (n_pebble > 0.76).astype(np.float32) * 0.10
+    albedo = base * (0.88 + 0.16 * n_macro + (n_grit - 0.5) * 0.12)[..., None]
+    speck = (n_pebble > 0.78).astype(np.float32) * 0.06
     albedo += speck[..., None]
 
     c1 = fbm(2.9, 10)
     c2 = fbm(2.8, 11)
     crack = np.clip(1.0 - np.abs(c1 - 0.50) / 0.011, 0.0, 1.0)
-    crack = np.maximum(crack, np.clip(1.0 - np.abs(c2 - 0.48) / 0.008, 0.0, 1.0) * 0.75)
-    albedo = albedo * (1.0 - crack[..., None] * 0.48)
+    crack = np.maximum(crack, np.clip(1.0 - np.abs(c2 - 0.48) / 0.008, 0.0, 1.0) * 0.65)
+    albedo = albedo * (1.0 - crack[..., None] * 0.36)
 
-    height = 0.55 + (n_grit - 0.5) * 0.30 + speck * 0.5 - crack * 0.42
-    rough = np.clip(0.84 + (n_macro - 0.5) * 0.12 + crack * 0.10, 0.65, 0.98)
-    ao = np.clip(0.88 - crack * 0.45 + (n_grit - 0.5) * 0.14, 0.36, 1.0)
-    save_mat("asphalt", albedo, height, rough, ao, 3.0)
+    height = 0.55 + (n_macro - 0.5) * 0.14 + (n_grit - 0.5) * 0.08 - crack * 0.22
+    rough = np.clip(0.88 + (n_macro - 0.5) * 0.08 + crack * 0.08, 0.76, 0.98)
+    ao = np.clip(0.90 - crack * 0.32 + (n_grit - 0.5) * 0.08, 0.48, 1.0)
+    save_mat("asphalt", albedo, height, rough, ao, 0.95)
 
 
 def make_gravel():
@@ -316,37 +316,37 @@ def make_gravel():
 
     n_low = fbm(2.2, 60)
     n_mid = fbm(0.75, 61)
-    n_fine = fbm(0.35, 62)
+    n_fine = fbm(0.45, 62)
     edge = np.clip((second - best) / 5.4, 0.0, 1.0)
     dome = edge ** 0.62
     soil = col("#826d51") * (0.82 + 0.28 * n_low[..., None])
-    peb = peb_lut[idx] * (0.85 + 0.26 * n_mid + (n_fine - 0.5) * 0.14)[..., None]
+    peb = peb_lut[idx] * (0.86 + 0.22 * n_mid + (n_fine - 0.5) * 0.10)[..., None]
     peb_blend = np.clip(0.38 + dome * 0.62, 0.0, 1.0)[..., None]
 
     albedo = soil * (1.0 - peb_blend * 0.78) + peb * (peb_blend * 0.78)
-    height = 0.14 + 0.70 * dome + (n_mid - 0.5) * 0.20 + (n_fine - 0.5) * 0.10
-    rough = np.clip(0.90 + (1.0 - dome) * 0.07, 0.76, 0.98)
-    ao = np.clip(0.42 + 0.58 * dome, 0.32, 1.0)
-    save_mat("gravel", albedo, height, rough, ao, 4.6)
+    height = 0.24 + 0.56 * dome + (n_mid - 0.5) * 0.14
+    rough = np.clip(0.92 + (1.0 - dome) * 0.06, 0.80, 0.98)
+    ao = np.clip(0.50 + 0.50 * dome, 0.38, 1.0)
+    save_mat("gravel", albedo, height, rough, ao, 2.2)
 
 
 def make_grass():
-    # Prato naturale italiano profondo e ricco (toni oliva/bosco realistici come Ref 1/Ref 5, mai neon!)
+    # Prato naturale italiano uniforme e privo di righe di Moire a lunga distanza
     n1 = fbm(2.3, 13)
     n2 = fbm(1.1, 14)
-    n3 = fbm(0.38, 15)
+    n3 = fbm(0.65, 15)
     c_deep = col("#375222")
     c_warm = col("#536e2f")
     c_dry = col("#6b7039")
     img = c_deep * (1.0 - n1[..., None]) + c_warm * n1[..., None]
-    dry_m = np.clip((n2 - 0.58) * 2.3, 0.0, 0.46)[..., None]
+    dry_m = np.clip((n2 - 0.58) * 2.1, 0.0, 0.42)[..., None]
     img = img * (1.0 - dry_m) + c_dry * dry_m
-    img *= (0.76 + 0.44 * n3)[..., None]
+    img *= (0.86 + 0.26 * n3)[..., None]
 
-    height = 0.35 + 0.25 * n2 + 0.40 * n3
-    rough = np.clip(0.89 + (n2 - 0.5) * 0.08, 0.76, 0.98)
-    ao = np.clip(0.62 + 0.38 * n3, 0.45, 1.0)
-    save_mat("grass", img, height, rough, ao, 2.7)
+    height = 0.42 + 0.36 * n1 + 0.18 * n2
+    rough = np.clip(0.94 + (n2 - 0.5) * 0.04, 0.86, 0.99)
+    ao = np.clip(0.76 + 0.24 * n2, 0.62, 1.0)
+    save_mat("grass", img, height, rough, ao, 0.75)
 
 
 # ---------------------------------------------------------------------- Tetti (Coppi e Lose)
@@ -405,10 +405,10 @@ def make_planks(name, base_hex, dark_hex, seed=30, plank=32, seam_w=2):
     seam_c = col(dark_hex)
     wood = base * tones[pid][..., None] * (0.88 + 0.16 * cathedral + (fine - 0.5) * 0.07)[..., None]
     albedo = np.where(is_joint[..., None], seam_c, wood * (0.94 + 0.06 * bevel[..., None]))
-    height = np.where(is_joint, 0.28, 0.64 + 0.22 * bevel + 0.12 * cathedral)
-    rough = np.where(is_joint, 0.86, 0.44 + (1.0 - cathedral) * 0.16)
-    ao = np.where(is_joint, 0.52, 0.84 + 0.16 * bevel)
-    save_mat(name, albedo, height, rough, ao, 2.2)
+    height = np.where(is_joint, 0.38, 0.68 + 0.18 * bevel + 0.08 * cathedral)
+    rough = np.where(is_joint, 0.88, 0.56 + (1.0 - cathedral) * 0.14)
+    ao = np.where(is_joint, 0.62, 0.86 + 0.14 * bevel)
+    save_mat(name, albedo, height, rough, ao, 1.45)
 
 
 def make_marble_dark():
@@ -437,59 +437,57 @@ def make_checker(name, c1_hex, c2_hex, cells=4, grout_hex="#c8c2b8", scuff=0.06,
     cx, cy = xs % cell, ys % cell
     tid = (xs // cell) * 3 + (ys // cell) * 5
     n = fbm(1.8, seed)
-    nf = fbm(0.6, seed + 1)
-    n_scuff = fbm(1.2, seed + 2)
+    nf = fbm(0.9, seed + 1)
+    n_scuff = fbm(1.4, seed + 2)
 
     r = np.random.default_rng(seed + 5)
-    t_var = r.uniform(0.94, 1.05, 64).astype(np.float32)
+    t_var = r.uniform(0.95, 1.04, 64).astype(np.float32)
 
     a, b = col(c1_hex), col(c2_hex)
     tile = np.where(k[..., None] == 1, a, b) * t_var[tid % 64][..., None]
-    tile *= (0.93 + 0.10 * n + (n_scuff - 0.5) * scuff)[..., None]
+    tile *= (0.94 + 0.08 * n + (n_scuff - 0.5) * scuff)[..., None]
 
     dist = np.minimum(np.minimum(cx, cell - 1 - cx), np.minimum(cy, cell - 1 - cy))
-    joint = (cx < 3) | (cy < 3)
-    chamfer = np.clip((dist - 2.0) / 5.0, 0.0, 1.0)
+    joint = (cx < 4) | (cy < 4)
+    chamfer = np.clip((dist - 3.0) / 7.0, 0.0, 1.0)
 
-    albedo = np.where(joint[..., None], col(grout_hex) * (0.85 + 0.25 * nf[..., None]), tile)
-    height = np.where(joint, 0.22, 0.75 + 0.18 * chamfer + 0.06 * nf)
-    rough = np.where(joint, 0.90, np.clip(0.28 + (n_scuff - 0.5) * 0.16 + (1.0 - chamfer) * 0.15, 0.18, 0.58))
-    ao = np.where(joint, 0.52, 0.84 + 0.16 * chamfer)
-    save_mat(name, albedo, height, rough, ao, 2.6)
+    albedo = np.where(joint[..., None], col(grout_hex) * (0.88 + 0.18 * nf[..., None]), tile)
+    height = np.where(joint, 0.38, 0.74 + 0.12 * chamfer)
+    rough = np.where(joint, 0.90, np.clip(0.58 + (n_scuff - 0.5) * 0.10 + (1.0 - chamfer) * 0.12, 0.48, 0.78))
+    ao = np.where(joint, 0.64, 0.88 + 0.12 * chamfer)
+    save_mat(name, albedo, height, rough, ao, 1.15)
 
 
 def make_concrete_ogr():
-    # Calcestruzzo industriale levigato a grandi lastre con giunti di dilatazione, aggregati e lieve lucentezza (OGR v1.4)
+    # Calcestruzzo industriale levigato a grandi lastre con giunti morbidi (zero aliasing da riflessi!)
     sz = 256
     ys, xs = np.mgrid[0:S, 0:S]
     cx, cy = xs % sz, ys % sz
     tid = (xs // sz) * 5 + (ys // sz) * 7
     n_trowel = fbm(2.3, 140)
     n_mid = fbm(1.3, 141)
-    n_fine = fbm(0.45, 142)
+    n_fine = fbm(0.75, 142)
     n_sheen = fbm(2.7, 143)
 
     r = np.random.default_rng(144)
-    tones = r.uniform(0.93, 1.05, 16).astype(np.float32)
+    tones = r.uniform(0.94, 1.04, 16).astype(np.float32)
 
     dist = np.minimum(np.minimum(cx, sz - 1 - cx), np.minimum(cy, sz - 1 - cy))
-    joint = (cx < 3) | (cy < 3)
-    chamfer = np.clip((dist - 2.0) / 5.0, 0.0, 1.0)
+    joint = (cx < 4) | (cy < 4)
+    chamfer = np.clip((dist - 3.0) / 6.0, 0.0, 1.0)
 
     base = col("#9ba0a6") * tones[tid % 16][..., None]
-    base *= (0.86 + 0.20 * n_trowel + 0.08 * n_mid + (n_fine - 0.5) * 0.12)[..., None]
-    # Subtle micro-aggregate speckles and polished patches
-    speck = (n_fine > 0.77).astype(np.float32) * 0.055 - (n_fine < 0.22).astype(np.float32) * 0.05
-    base = np.clip(base + speck[..., None], 0.12, 0.96)
+    base *= (0.88 + 0.16 * n_trowel + 0.06 * n_mid + (n_fine - 0.5) * 0.08)[..., None]
+    speck = (n_fine > 0.78).astype(np.float32) * 0.035 - (n_fine < 0.22).astype(np.float32) * 0.035
+    base = np.clip(base + speck[..., None], 0.14, 0.96)
 
-    joint_col = col("#4f545b") * (0.88 + 0.20 * n_fine[..., None])
-    albedo = np.where(joint[..., None], joint_col, base * (0.94 + 0.06 * chamfer[..., None]))
-    height = np.where(joint, 0.16, 0.60 + 0.20 * chamfer + (n_trowel - 0.5) * 0.12 + (n_fine - 0.5) * 0.14)
-    # Mix subtle semi-polished concrete sheen patches (specular light along the OGR hall!)
-    slab_rough = np.clip(0.38 + (n_sheen - 0.5) * 0.26 + (1.0 - chamfer) * 0.14, 0.24, 0.72)
+    joint_col = col("#5a6067") * (0.90 + 0.14 * n_fine[..., None])
+    albedo = np.where(joint[..., None], joint_col, base * (0.95 + 0.05 * chamfer[..., None]))
+    height = np.where(joint, 0.34, 0.66 + 0.14 * chamfer + (n_trowel - 0.5) * 0.08)
+    slab_rough = np.clip(0.56 + (n_sheen - 0.5) * 0.18 + (1.0 - chamfer) * 0.10, 0.44, 0.78)
     rough = np.where(joint, 0.92, slab_rough)
-    ao = np.where(joint, 0.44, 0.80 + 0.20 * chamfer)
-    save_mat("concrete_ogr", albedo, height, rough, ao, 2.2)
+    ao = np.where(joint, 0.56, 0.84 + 0.16 * chamfer)
+    save_mat("concrete_ogr", albedo, height, rough, ao, 1.15)
 
 
 def make_corrugated_metal():

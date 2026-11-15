@@ -32,6 +32,7 @@ func save_game() -> bool:
 			"upgrades": GameManager.studio_upgrades_installed
 		},
 		"upgrades": UpgradeManager.serialize(),
+		"knowledge": KnowledgeManager.serialize(),
 		"calendar": {
 			"day": CalendarSystem.current_day,
 			"hour": CalendarSystem.current_hour,
@@ -108,11 +109,16 @@ func load_game() -> bool:
 		for u in upg_list:
 			GameManager.studio_upgrades_installed.append(str(u))
 
-	# Restore Star Upgrades & Calendar Clock
+	# Restore Star Upgrades, Knowledge R&D & Calendar Clock
 	if data.has("upgrades") and data["upgrades"] is Dictionary:
 		UpgradeManager.deserialize(data["upgrades"])
 	else:
 		UpgradeManager.reset()
+
+	if data.has("knowledge") and data["knowledge"] is Dictionary:
+		KnowledgeManager.deserialize(data["knowledge"])
+	else:
+		KnowledgeManager.reset()
 
 	if data.has("calendar") and data["calendar"] is Dictionary:
 		var cal: Dictionary = data["calendar"]

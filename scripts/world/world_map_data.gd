@@ -3,11 +3,12 @@ extends RefCounted
 ## WorldMapData - Coordinate geometriche reali di Borgo San Carlo, Viale Est, Borgo Valdocco e Officina Bellini.
 ## Allineato alle coordinate di scripts/world/village_builder.gd e scenes/world/game_world.tscn.
 
-const WORLD_BOUNDS := Rect2(Vector2(-68.0, -14.0), Vector2(198.0, 62.0)) # X: -68..130, Z: -14..48
+const WORLD_BOUNDS := Rect2(Vector2(-68.0, -14.0), Vector2(198.0, 94.0)) # X: -68..130, Z: -14..80
 const SAN_CARLO_BOUNDS := Rect2(Vector2(-25.5, -10.5), Vector2(51.5, 54.0))
 const PARCO_BOUNDS := Rect2(Vector2(-57.5, 10.5), Vector2(36.0, 33.0))
 const VALDOCCO_BOUNDS := Rect2(Vector2(20.0, 10.0), Vector2(79.0, 35.0))
 const MERCATO_BOUNDS := Rect2(Vector2(57.5, -12.0), Vector2(70.5, 32.0)) # X: 57.5..128.0, Z: -12..20 (incl. OGR Tech Hub)
+const BORGOPO_BOUNDS := Rect2(Vector2(-26.0, 39.0), Vector2(84.0, 40.0)) # X: -26..58, Z: 39..79 (incl. Fiume Po & Molo)
 
 static func get_pois() -> Array[Dictionary]:
 	return [
@@ -159,6 +160,61 @@ static func get_pois() -> Array[Dictionary]:
 			"color": Color(0.32, 0.88, 0.96),
 			"label_dir": "bottom",
 			"desc": "Grande navata OGR Enterprise: Bay 01 aperta per la tua startup, Pod 02-04 riservati, Ing. Andrea Viale e maxi-bandi corporate (si apre dopo Via Po & Officina Bellini)."
+		},
+		{
+			"id": "arco_borgopo",
+			"name": "Arco Sud → Borgo Po",
+			"short": "Arco Sud",
+			"district": "Borgo Po",
+			"pos": Vector3(8.2, 0.0, 42.0),
+			"footprint": Vector2(6.8, 2.0),
+			"color": Color(0.76, 0.86, 0.96),
+			"label_dir": "right",
+			"desc": "Varco meridionale lungo la passeggiata lastricata che scende da San Carlo verso Viale Lungo Po."
+		},
+		{
+			"id": "incubatore_i3p",
+			"name": "Incubatore PoliTO · I3P",
+			"short": "I3P PoliTO",
+			"district": "Borgo Po",
+			"pos": Vector3(-13.5, 0.0, 48.0),
+			"footprint": Vector2(11.0, 6.4),
+			"color": Color(0.26, 0.86, 0.98),
+			"label_dir": "bottom",
+			"desc": "Polo innovazione R&D su Viale Lungo Po: ospita startup deep-tech, laboratori e cassette volantini."
+		},
+		{
+			"id": "lab_droni",
+			"name": "Lab Droni Torino · Aero R&D",
+			"short": "Lab Droni",
+			"district": "Borgo Po",
+			"pos": Vector3(24.0, 0.0, 48.2),
+			"footprint": Vector2(8.6, 6.0),
+			"color": Color(0.45, 0.82, 1.0),
+			"label_dir": "bottom",
+			"desc": "Centro collaudi aeromobili elettrici con piazzola H frontale su Lungo Po e consegne rider."
+		},
+		{
+			"id": "torrefazione_po",
+			"name": "Torrefazione Po · Storica",
+			"short": "Torrefazione",
+			"district": "Borgo Po",
+			"pos": Vector3(41.5, 0.0, 48.2),
+			"footprint": Vector2(7.6, 5.8),
+			"color": Color(0.92, 0.62, 0.34),
+			"label_dir": "bottom",
+			"desc": "Storica torrefazione torinese con dehors affacciato su Viale Lungo Po e Murazzi."
+		},
+		{
+			"id": "molo_po",
+			"name": "Molo sul Fiume Po & Murazzi",
+			"short": "Molo Po",
+			"district": "Lungo Po",
+			"pos": Vector3(16.0, 0.0, 68.5),
+			"footprint": Vector2(4.4, 5.4),
+			"color": Color(0.32, 0.78, 0.96),
+			"label_dir": "bottom",
+			"desc": "Imbarcadero panoramico in legno sul Fiume Po lungo i Murazzi meridionali."
 		}
 	]
 
@@ -175,7 +231,8 @@ static func get_roads_and_zones() -> Dictionary:
 			Rect2(Vector2(-24.0, -9.0), Vector2(48.0, 51.0)),   # San Carlo
 			Rect2(Vector2(24.0, 19.0), Vector2(35.0, 18.0)),    # Corridoio Viale Est
 			Rect2(Vector2(59.0, 14.0), Vector2(38.0, 28.0)),    # Borgo Valdocco
-			Rect2(Vector2(59.0, -12.0), Vector2(69.0, 29.0))    # Piazza del Mercato & OGR Tech Hub
+			Rect2(Vector2(59.0, -12.0), Vector2(69.0, 29.0)),   # Piazza del Mercato & OGR Tech Hub
+			Rect2(Vector2(-24.0, 42.0), Vector2(80.0, 24.0))    # Borgo Po / Lungo Po
 		],
 		"cobble": [
 			Rect2(Vector2(-4.2, 2.4), Vector2(8.4, 11.2)),      # Via del Borgo
@@ -186,16 +243,29 @@ static func get_roads_and_zones() -> Dictionary:
 			Rect2(Vector2(10.5, 25.3), Vector2(13.5, 5.4)),     # Ponte Arco Est
 			Rect2(Vector2(62.0, 18.0), Vector2(18.0, 20.0)),    # Piazza Valdocco
 			Rect2(Vector2(75.8, 13.5), Vector2(6.4, 5.0)),      # Passaggio Arco Nord
-			Rect2(Vector2(69.0, -3.2), Vector2(19.0, 17.7))     # Piazza del Mercato Nord
+			Rect2(Vector2(69.0, -3.2), Vector2(19.0, 17.7)),    # Piazza del Mercato Nord
+			Rect2(Vector2(6.0, 29.0), Vector2(4.4, 14.5)),      # Vialetto Arco Sud Borgo Po
+			Rect2(Vector2(1.0, 43.0), Vector2(14.4, 12.3))      # Piazza Borgo Po
 		],
 		"slabs": [
 			Rect2(Vector2(87.9, -0.35), Vector2(8.7, 6.2)),     # Promenade Mercato -> Cancello OGR
-			Rect2(Vector2(96.5, -9.5), Vector2(27.5, 24.5))     # Pavimentazione Navata OGR Tech Hub
+			Rect2(Vector2(96.5, -9.5), Vector2(27.5, 24.5)),    # Pavimentazione Navata OGR Tech Hub
+			Rect2(Vector2(-17.8, 51.1), Vector2(8.6, 4.2)),     # Sagrato I3P
+			Rect2(Vector2(20.2, 51.1), Vector2(7.6, 4.2)),      # Sagrato Lab Droni
+			Rect2(Vector2(37.7, 51.1), Vector2(7.6, 4.2)),      # Sagrato Torrefazione Po
+			Rect2(Vector2(-24.0, 60.7), Vector2(80.0, 5.1))     # Promenade Murazzi Lungo Po
 		],
 		"asphalt": [
 			Rect2(Vector2(-19.0, 9.1), Vector2(7.6, 5.4)),      # Parcheggio W
 			Rect2(Vector2(11.4, 9.1), Vector2(7.6, 5.4)),       # Parcheggio E
-			Rect2(Vector2(24.0, 25.3), Vector2(38.0, 5.4))      # Strada Asfaltata Est
+			Rect2(Vector2(24.0, 25.3), Vector2(38.0, 5.4)),     # Strada Asfaltata Est
+			Rect2(Vector2(-22.5, 55.3), Vector2(77.0, 5.4))     # Viale Lungo Po
+		],
+		"rivers": [
+			Rect2(Vector2(-32.0, 65.8), Vector2(96.0, 11.4))    # Fiume Po
+		],
+		"wood_piers": [
+			Rect2(Vector2(13.8, 65.8), Vector2(4.4, 5.4))       # Molo sul Po
 		],
 		"houses": [
 			Rect2(Vector2(-11.6, -2.7), Vector2(6.2, 5.4)),
@@ -208,7 +278,9 @@ static func get_roads_and_zones() -> Dictionary:
 			Rect2(Vector2(63.6, 36.8), Vector2(5.8, 4.8)),
 			Rect2(Vector2(71.4, 36.8), Vector2(5.6, 4.8)),
 			Rect2(Vector2(-37.4, 13.2), Vector2(6.8, 5.6)),     # Villa Parco Nord
-			Rect2(Vector2(-30.6, 23.4), Vector2(5.2, 6.2))      # Villa Parco Sud-Est
+			Rect2(Vector2(-30.6, 23.4), Vector2(5.2, 6.2)),     # Villa Parco Sud-Est
+			Rect2(Vector2(-5.6, 45.6), Vector2(6.0, 5.2)),      # Casa Borgo Po Ovest
+			Rect2(Vector2(48.3, 45.6), Vector2(5.8, 5.2))       # Casa Borgo Po Est
 		],
 		"water_circles": [
 			{"pos": Vector2(0.0, 21.0), "r": 2.2, "label": "Fontana"},
@@ -220,13 +292,20 @@ static func get_roads_and_zones() -> Dictionary:
 			[Vector2(-56.0, 12.0), Vector2(-24.0, 12.0)],
 			[Vector2(-56.0, 42.0), Vector2(-24.0, 42.0)],
 			[Vector2(-56.0, 12.0), Vector2(-56.0, 42.0)],
-			# San Carlo border
+			# San Carlo border (varco Sud Borgo Po X=5.0..11.4)
 			[Vector2(-24.0, -9.0), Vector2(24.0, -9.0)],
-			[Vector2(-24.0, 42.0), Vector2(24.0, 42.0)],
+			[Vector2(-24.0, 42.0), Vector2(5.0, 42.0)],
+			[Vector2(11.4, 42.0), Vector2(24.0, 42.0)],
 			[Vector2(-24.0, -9.0), Vector2(-24.0, 33.6)],
 			[Vector2(-24.0, 40.0), Vector2(-24.0, 42.0)],
 			[Vector2(24.0, -9.0), Vector2(24.0, 24.8)],
 			[Vector2(24.0, 31.2), Vector2(24.0, 42.0)],
+			# Borgo Po / Lungo Po border (muro Nord X=24..56, Est/Ovest, Balustrada Lungofiume aperta al Molo X=13.8..18.2)
+			[Vector2(24.0, 42.0), Vector2(56.0, 42.0)],
+			[Vector2(-24.0, 42.0), Vector2(-24.0, 65.8)],
+			[Vector2(56.0, 42.0), Vector2(56.0, 65.8)],
+			[Vector2(-24.0, 65.8), Vector2(13.8, 65.8)],
+			[Vector2(18.2, 65.8), Vector2(56.0, 65.8)],
 			# Borgo Valdocco border (varco Nord X=75.8..82.2, muro Est Z=15..42 sotto la navata OGR)
 			[Vector2(59.0, 14.0), Vector2(75.8, 14.0)],
 			[Vector2(82.2, 14.0), Vector2(96.75, 14.0)],

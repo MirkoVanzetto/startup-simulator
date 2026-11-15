@@ -24,7 +24,9 @@ const SIDE_JOBS: Dictionary = {
 			"mailbox_parco_villa_nord",
 			"mailbox_parco_villa_sud",
 			"mailbox_valdocco_casa",
-			"mailbox_mercato_nord"
+			"mailbox_mercato_nord",
+			"mailbox_borgopo_i3p",
+			"mailbox_torrefazione_po"
 		],
 		"step_count": 5,
 		"verb": "Imbuca volantini"
@@ -41,7 +43,7 @@ const SIDE_JOBS: Dictionary = {
 		"fast_limit_sec": 150.0,
 		"fast_bonus": 14.0,
 		"pickup_pool": ["pickup_pizzeria_rider", "pickup_cafe_rider"],
-		"drop_pool": ["delivery_parco_villa", "delivery_ogr_cowork", "delivery_sancarlo_est", "delivery_valdocco_porta"],
+		"drop_pool": ["delivery_parco_villa", "delivery_ogr_cowork", "delivery_sancarlo_est", "delivery_valdocco_porta", "delivery_lungopo_droni"],
 		"step_count": 4,
 		"verb": "Consegna ordine"
 	},
@@ -60,7 +62,8 @@ const SIDE_JOBS: Dictionary = {
 			"repair_cab_via_po",
 			"repair_cab_parco",
 			"repair_cab_valdocco",
-			"repair_cab_mercato"
+			"repair_cab_mercato",
+			"repair_cab_borgopo"
 		],
 		"step_count": 3,
 		"verb": "Ripristina quadro Fibra"
@@ -92,6 +95,8 @@ const DEFAULT_SPOTS: Dictionary = {
 	"mailbox_parco_villa_sud": {"label": "Cassetta Residenza Parco Est", "pos": Vector3(-31.4, 0.0, 29.2), "kind": "mailbox"},
 	"mailbox_valdocco_casa": {"label": "Cassetta Borgo Valdocco", "pos": Vector3(64.5, 0.0, 19.6), "kind": "mailbox"},
 	"mailbox_mercato_nord": {"label": "Cassetta Coworking OGR", "pos": Vector3(87.8, 0.0, 6.8), "kind": "mailbox"},
+	"mailbox_borgopo_i3p": {"label": "Cassetta Incubatore I3P", "pos": Vector3(-7.6, 0.0, 52.0), "kind": "mailbox"},
+	"mailbox_torrefazione_po": {"label": "Cassetta Torrefazione Po", "pos": Vector3(36.8, 0.0, 52.0), "kind": "mailbox"},
 
 	"pickup_pizzeria_rider": {"label": "Ritiro Pizzeria Da Mario", "pos": Vector3(-4.8, 0.0, 27.6), "kind": "pickup"},
 	"pickup_cafe_rider": {"label": "Ritiro Caffè San Carlo", "pos": Vector3(-9.6, 0.0, 23.6), "kind": "pickup"},
@@ -99,11 +104,13 @@ const DEFAULT_SPOTS: Dictionary = {
 	"delivery_ogr_cowork": {"label": "Ingresso Coworking OGR", "pos": Vector3(87.4, 0.0, 2.8), "kind": "delivery"},
 	"delivery_sancarlo_est": {"label": "Portone San Carlo Sud-Est", "pos": Vector3(11.8, 0.0, 32.2), "kind": "delivery"},
 	"delivery_valdocco_porta": {"label": "Portone Residenza Valdocco", "pos": Vector3(66.5, 0.0, 36.0), "kind": "delivery"},
+	"delivery_lungopo_droni": {"label": "Ingresso Lab Droni Torino", "pos": Vector3(21.0, 0.0, 52.0), "kind": "delivery"},
 
 	"repair_cab_via_po": {"label": "Armadio Fibra Via Po Ovest", "pos": Vector3(-17.8, 0.0, 25.0), "kind": "repair"},
 	"repair_cab_parco": {"label": "Armadio Fibra Parco Valentino", "pos": Vector3(-29.8, 0.0, 34.0), "kind": "repair"},
 	"repair_cab_valdocco": {"label": "Quadro Fibra Borgo Valdocco", "pos": Vector3(63.0, 0.0, 21.8), "kind": "repair"},
 	"repair_cab_mercato": {"label": "Terminale POS Mercato Nord", "pos": Vector3(70.4, 0.0, 2.5), "kind": "repair"},
+	"repair_cab_borgopo": {"label": "Armadio Fibra Piazza Borgo Po", "pos": Vector3(2.8, 0.0, 54.6), "kind": "repair"},
 
 	"crate_hub_poste": {"label": "Bancale Ufficio Postale Nord", "pos": Vector3(69.6, 0.0, 8.8), "kind": "crate_pickup"},
 	"crate_drop_mercato": {"label": "Banco Consegne Mercato Rionale", "pos": Vector3(78.5, 0.0, -1.2), "kind": "crate_drop"},

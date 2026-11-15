@@ -3,8 +3,8 @@ shader_type spatial;
 render_mode cull_back, diffuse_burley, specular_schlick_ggx;
 
 uniform vec4 tint : source_color = vec4(1.0);
-uniform sampler2D albedo_tex : source_color, filter_linear_mipmap, repeat_enable;
-uniform sampler2D pbr_tex : hint_default_white, filter_linear_mipmap, repeat_enable;
+uniform sampler2D albedo_tex : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D pbr_tex : hint_default_white, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform float use_tex = 1.0;
 uniform float use_pbr = 0.0;
 uniform float uv_scale = 0.35;
@@ -76,14 +76,18 @@ void fragment() {
 	}
 	vec3 c = tex * tint.rgb * brightness;
 
-	// Variazione organica a grande scala + patina architettonica continua (zero pattern a quadretti!)
+	float ndv = abs(dot(NORMAL, VIEW));
+	float grazing_fade = smoothstep(0.18, 0.72, ndv);
+	float dist_fade = 1.0 - smoothstep(9.0, 34.0, length(VERTEX));
+
+	// Variazione organica a grande scala + patina architettonica continua (zero Moire da angoli radenti!)
 	float macro_n = snoise3(world_pos * 0.24) * 0.65 + snoise3(world_pos * 0.72) * 0.35;
 	if (macro_variation > 0.001) {
 		c *= 1.0 + (macro_n - 0.5) * macro_variation;
 	}
 	if (grain_strength > 0.001) {
 		float fine_n = snoise3(world_pos * 6.5);
-		c *= 1.0 + (fine_n - 0.5) * grain_strength;
+		c *= 1.0 + (fine_n - 0.5) * grain_strength * grazing_fade * dist_fade;
 	}
 
 	float ao_val = 1.0;
@@ -94,8 +98,8 @@ void fragment() {
 		float ny = pbr.g * 2.0 - 1.0;
 		float nz = sqrt(clamp(1.0 - nx * nx - ny * ny, 0.001, 1.0));
 		NORMAL_MAP = vec3(pbr.r, pbr.g, nz * 0.5 + 0.5);
-		NORMAL_MAP_DEPTH = normal_depth;
-		rough = clamp(pbr.b * roughness_base, 0.04, 1.0);
+		NORMAL_MAP_DEPTH = normal_depth * mix(0.20, 1.0, grazing_fade * dist_fade);
+		rough = clamp(mix(roughness_base, pbr.b * roughness_base, 0.85), 0.04, 1.0);
 		ao_val = mix(1.0, pbr.a, ao_strength);
 	}
 

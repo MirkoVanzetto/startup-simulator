@@ -378,12 +378,20 @@ func interact_target(target_id: String) -> bool:
 		pay += 12.0
 		bonus_notes.append("+€ 12 Scanner Wi-Fi")
 
+	var upg_mult := UpgradeManager.get_side_job_pay_mult() if is_instance_valid(UpgradeManager) else 1.0
+	if upg_mult > 1.001:
+		pay = snappedf(pay * upg_mult, 0.01)
+		bonus_notes.append("+%d%% Optics ★" % int(roundf((upg_mult - 1.0) * 100.0)))
+
 	var rep := int(def.get("rep_reward", 4))
 	EconomyManager.earn(pay, "Lavoretto Quartiere: %s" % str(def["title"]))
 	FameManager.add_reputation(rep)
 	total_earned += pay
 	completed_counts[jid] = int(completed_counts.get(jid, 0)) + 1
 	cooldowns_until[jid] = get_current_total_minutes() + int(def.get("cooldown_minutes", 90))
+
+	if is_instance_valid(UpgradeManager) and get_completed_total() % 2 == 0:
+		UpgradeManager.add_stars(1, "Traguardo %d Lavoretti Quartiere" % get_completed_total())
 
 	var finished_title := str(def["title"])
 	active_job.clear()

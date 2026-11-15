@@ -56,3 +56,8 @@ signal side_job_started(job_id: String, job_data: Dictionary)
 signal side_job_progressed(job_id: String, step: int, total: int, detail: String)
 signal side_job_completed(job_id: String, reward: float, rep_gain: int)
 signal side_job_cancelled(job_id: String)
+
+# Upgrades & OGR Enterprise signals (v1.4)
+signal stars_changed(current_stars: int, delta: int, reason: String)
+signal upgrade_purchased(upgrade_id: String, new_rank: int)
+signal ogr_hub_unlocked()

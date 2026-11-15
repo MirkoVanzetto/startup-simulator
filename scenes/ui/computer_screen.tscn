@@ -1,32 +1,38 @@
-[gd_scene load_steps=5 format=3 uid="uid://cs8computer01"]
+[gd_scene load_steps=6 format=3 uid="uid://cs8computer01"]
 
 [ext_resource type="Script" path="res://scripts/ui/computer_screen.gd" id="1_comp"]
+[ext_resource type="Script" path="res://scripts/ui/to_os_wallpaper.gd" id="2_wall"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_topbar"]
-bg_color = Color(0.12, 0.14, 0.18, 0.98)
-border_width_bottom = 2
-border_color = Color(0.25, 0.3, 0.4, 0.8)
-content_margin_left = 10.0
-content_margin_right = 10.0
+bg_color = Color(0.055, 0.088, 0.145, 0.9)
+border_width_bottom = 1
+border_color = Color(0.24, 0.65, 0.85, 0.45)
+content_margin_left = 12.0
+content_margin_right = 12.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_window"]
-bg_color = Color(0.14, 0.16, 0.22, 0.98)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.3, 0.4, 0.55, 0.8)
+bg_color = Color(0.075, 0.115, 0.18, 0.91)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.32, 0.72, 0.92, 0.55)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card"]
+bg_color = Color(0.115, 0.168, 0.245, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.26, 0.48, 0.68, 0.42)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card"]
-bg_color = Color(0.18, 0.21, 0.28, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
 content_margin_left = 12.0
 content_margin_top = 12.0
 content_margin_right = 12.0
@@ -48,7 +54,9 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.08, 0.1, 0.14, 1)
+mouse_filter = 2
+color = Color(0.035, 0.08, 0.145, 1)
+script = ExtResource("2_wall")
 
 [node name="TopBar" type="PanelContainer" parent="."]
 layout_mode = 1
@@ -64,19 +72,19 @@ theme_override_constants/separation = 10
 
 [node name="OSLabel" type="Label" parent="TopBar/HBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
+theme_override_colors/font_color = Color(0.4, 0.88, 1, 1)
 theme_override_font_sizes/font_size = 14
 text = "❖ TO-OS 26.4"
 
 [node name="ClockLabel" type="Label" parent="TopBar/HBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.85, 0.9, 1)
+theme_override_colors/font_color = Color(0.82, 0.88, 0.94, 1)
 theme_override_font_sizes/font_size = 12
 text = "14:28 - Lunedì"
 
 [node name="WifiLabel" type="Label" parent="TopBar/HBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.3, 0.9, 0.5, 1)
+theme_override_colors/font_color = Color(0.3, 0.92, 0.55, 1)
 theme_override_font_sizes/font_size = 12
 text = "● FibraTorino 5G"
 
@@ -84,19 +92,26 @@ text = "● FibraTorino 5G"
 layout_mode = 2
 size_flags_horizontal = 3
 
+[node name="StarsLabel" type="Label" parent="TopBar/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.86, 0.35, 1)
+theme_override_font_sizes/font_size = 13
+text = "★ 0"
+
 [node name="BalanceLabel" type="Label" parent="TopBar/HBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
+theme_override_colors/font_color = Color(0.35, 1, 0.62, 1)
 theme_override_font_sizes/font_size = 14
 text = "Fondi: € 120.00"
 
 [node name="ExitButton" type="Button" parent="TopBar/HBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.4, 0.4, 1)
+theme_override_colors/font_color = Color(1, 0.42, 0.42, 1)
 theme_override_font_sizes/font_size = 13
 text = "✕ Alzati [ESC]"
 
 [node name="DesktopIcons" type="MarginContainer" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
@@ -167,14 +182,15 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 180.0
-offset_top = 50.0
-offset_right = -20.0
-offset_bottom = -20.0
+offset_left = 18.0
+offset_top = 52.0
+offset_right = -18.0
+offset_bottom = -64.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="MailWindow" type="PanelContainer" parent="Windows"]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -213,7 +229,7 @@ text = " ✕ "
 [node name="Split" type="HSplitContainer" parent="Windows/MailWindow/Margin/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
-split_offset = 320
+split_offset = 240
 
 [node name="MailList" type="ItemList" parent="Windows/MailWindow/Margin/VBox/Split"]
 layout_mode = 2
@@ -628,13 +644,13 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_window")
 [node name="Margin" type="MarginContainer" parent="Windows/RackWindow"]
 layout_mode = 2
 theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 12
+theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 16
+theme_override_constants/margin_bottom = 10
 
 [node name="VBox" type="VBoxContainer" parent="Windows/RackWindow/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
 [node name="Header" type="HBoxContainer" parent="Windows/RackWindow/Margin/VBox"]
 layout_mode = 2
@@ -642,8 +658,8 @@ layout_mode = 2
 [node name="Title" type="Label" parent="Windows/RackWindow/Margin/VBox/Header"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
-theme_override_font_sizes/font_size = 16
-text = "TORINO CLOUD INFRASTRUCTURE — 19\" RACK TELEMETRY & HARDWARE"
+theme_override_font_sizes/font_size = 15
+text = "TORINO CLOUD — 19\" RACK TELEMETRY & HARDWARE"
 
 [node name="Spacer" type="Control" parent="Windows/RackWindow/Margin/VBox/Header"]
 layout_mode = 2
@@ -657,41 +673,43 @@ text = " ✕ "
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="HBox" type="HBoxContainer" parent="Windows/RackWindow/Margin/VBox/TelemetryBanner"]
+[node name="HBox" type="HFlowContainer" parent="Windows/RackWindow/Margin/VBox/TelemetryBanner"]
 layout_mode = 2
-theme_override_constants/separation = 24
+theme_override_constants/h_separation = 14
+theme_override_constants/v_separation = 4
 
 [node name="TempLabel" type="Label" parent="Windows/RackWindow/Margin/VBox/TelemetryBanner/HBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 12
 text = "CPU: 46.5 °C [Normale]"
 
 [node name="FansLabel" type="Label" parent="Windows/RackWindow/Margin/VBox/TelemetryBanner/HBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.85, 1, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 12
 text = "Ventole: 2400 RPM"
 
 [node name="BandwidthLabel" type="Label" parent="Windows/RackWindow/Margin/VBox/TelemetryBanner/HBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 12
 text = "Banda: 340 Mbps"
 
 [node name="UptimeLabel" type="Label" parent="Windows/RackWindow/Margin/VBox/TelemetryBanner/HBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 12
 text = "SLA Uptime: 99.98%"
 
-[node name="CoolingRow" type="HBoxContainer" parent="Windows/RackWindow/Margin/VBox"]
+[node name="CoolingRow" type="HFlowContainer" parent="Windows/RackWindow/Margin/VBox"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 6
 
 [node name="CoolingTitle" type="Label" parent="Windows/RackWindow/Margin/VBox/CoolingRow"]
 layout_mode = 2
-text = "Modalità Ventole:"
+text = "Ventole:"
 
 [node name="CoolSilentBtn" type="Button" parent="Windows/RackWindow/Margin/VBox/CoolingRow"]
 layout_mode = 2
@@ -699,22 +717,21 @@ text = "Silenzioso (1800 RPM)"
 
 [node name="CoolAutoBtn" type="Button" parent="Windows/RackWindow/Margin/VBox/CoolingRow"]
 layout_mode = 2
-text = "Automatico (2600 RPM)"
+text = "Auto (2600 RPM)"
 
 [node name="CoolBoostBtn" type="Button" parent="Windows/RackWindow/Margin/VBox/CoolingRow"]
 layout_mode = 2
-text = "Boost 100% (4500 RPM)"
+text = "Boost (4500 RPM)"
 
 [node name="RecalibrateBtn" type="Button" parent="Windows/RackWindow/Margin/VBox/CoolingRow"]
 layout_mode = 2
-size_flags_horizontal = 10
 theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
-text = "🛠 Ricalibra & Pulisci Filtri"
+text = "🛠 Ricalibra Filtri"
 
 [node name="Split" type="HSplitContainer" parent="Windows/RackWindow/Margin/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
-split_offset = 340
+split_offset = 260
 
 [node name="DomainsPanel" type="PanelContainer" parent="Windows/RackWindow/Margin/VBox/Split"]
 layout_mode = 2
@@ -726,7 +743,7 @@ layout_mode = 2
 [node name="Title" type="Label" parent="Windows/RackWindow/Margin/VBox/Split/DomainsPanel/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.8, 0.3, 1)
-text = "DOMINI & CLIENTI OSPITATI SUL RACK:"
+text = "DOMINI OSPITATI:"
 
 [node name="DomainsText" type="RichTextLabel" parent="Windows/RackWindow/Margin/VBox/Split/DomainsPanel/VBox"]
 layout_mode = 2
@@ -736,38 +753,50 @@ text = "Caricamento domini..."
 
 [node name="ModulesPanel" type="PanelContainer" parent="Windows/RackWindow/Margin/VBox/Split"]
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="VBox" type="VBoxContainer" parent="Windows/RackWindow/Margin/VBox/Split/ModulesPanel"]
+[node name="ModulesScroll" type="ScrollContainer" parent="Windows/RackWindow/Margin/VBox/Split/ModulesPanel"]
 layout_mode = 2
-theme_override_constants/separation = 10
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
 
-[node name="Title" type="Label" parent="Windows/RackWindow/Margin/VBox/Split/ModulesPanel/VBox"]
+[node name="VBox" type="VBoxContainer" parent="Windows/RackWindow/Margin/VBox/Split/ModulesPanel/ModulesScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="Windows/RackWindow/Margin/VBox/Split/ModulesPanel/ModulesScroll/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
-text = "ESPANSIONI HARDWARE DISPONIBILI:"
+text = "ESPANSIONI HARDWARE:"
 
-[node name="BuyBladeBtn" type="Button" parent="Windows/RackWindow/Margin/VBox/Split/ModulesPanel/VBox"]
+[node name="BuyBladeBtn" type="Button" parent="Windows/RackWindow/Margin/VBox/Split/ModulesPanel/ModulesScroll/VBox"]
 layout_mode = 2
-text = "+ Installa Modulo Blade Quad-Core Xeon (€ 450,00)"
+clip_text = true
+text = "+ Modulo Blade Xeon (€ 450,00)"
 
-[node name="BuyLiquidBtn" type="Button" parent="Windows/RackWindow/Margin/VBox/Split/ModulesPanel/VBox"]
+[node name="BuyLiquidBtn" type="Button" parent="Windows/RackWindow/Margin/VBox/Split/ModulesPanel/ModulesScroll/VBox"]
 layout_mode = 2
-text = "+ Installa Raffreddamento a Liquido AIO (€ 320,00)"
+clip_text = true
+text = "+ Raffreddamento Liquido (€ 320,00)"
 
-[node name="BuySanBtn" type="Button" parent="Windows/RackWindow/Margin/VBox/Split/ModulesPanel/VBox"]
+[node name="BuySanBtn" type="Button" parent="Windows/RackWindow/Margin/VBox/Split/ModulesPanel/ModulesScroll/VBox"]
 layout_mode = 2
-text = "+ Installa Array Storage SAN Raid-10 (€ 680,00)"
+clip_text = true
+text = "+ Storage SAN Raid-10 (€ 680,00)"
 
-[node name="UpgradeTier2Btn" type="Button" parent="Windows/RackWindow/Margin/VBox/Split/ModulesPanel/VBox"]
+[node name="UpgradeTier2Btn" type="Button" parent="Windows/RackWindow/Margin/VBox/Split/ModulesPanel/ModulesScroll/VBox"]
 layout_mode = 2
+clip_text = true
 theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
-text = "▲ Upgrade: Blade 12U Enterprise (€ 750,00) [Capacità: 8 Domini]"
+text = "▲ Blade 12U Enterprise (€ 750,00) [8 Domini]"
 
-[node name="UpgradeTier3Btn" type="Button" parent="Windows/RackWindow/Margin/VBox/Split/ModulesPanel/VBox"]
+[node name="UpgradeTier3Btn" type="Button" parent="Windows/RackWindow/Margin/VBox/Split/ModulesPanel/ModulesScroll/VBox"]
 layout_mode = 2
+clip_text = true
 theme_override_colors/font_color = Color(0.3, 1, 0.6, 1)
-text = "▲ Upgrade: Full Cabinet 42U Data Center (€ 1.600,00) [Capacità: 20 Domini]"
+text = "▲ Cabinet 42U Data Center (€ 1.600) [20 Domini]"
 
 [node name="TalentWindow" type="PanelContainer" parent="Windows"]
 visible = false
@@ -796,8 +825,8 @@ layout_mode = 2
 [node name="Title" type="Label" parent="Windows/TalentWindow/Margin/VBox/Header"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.75, 1, 1)
-theme_override_font_sizes/font_size = 16
-text = "TALENT HUB — RECLUTAMENTO & TEAM MANAGEMENT (TORINO ICT)"
+theme_override_font_sizes/font_size = 15
+text = "TALENT HUB — RECLUTAMENTO & SEDE TORINO"
 
 [node name="Spacer" type="Control" parent="Windows/TalentWindow/Margin/VBox/Header"]
 layout_mode = 2
@@ -815,10 +844,12 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 1, 0.7, 1)
 text = "Team Attivo: 0 Dipendenti | Payroll: € 0.00 | Utile Passivo: € 0.00/giorno"
+autowrap_mode = 2
 
 [node name="CandidatesScroll" type="ScrollContainer" parent="Windows/TalentWindow/Margin/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
+horizontal_scroll_mode = 0
 
 [node name="CandidatesList" type="VBoxContainer" parent="Windows/TalentWindow/Margin/VBox/CandidatesScroll"]
 layout_mode = 2

@@ -31,6 +31,8 @@ func _ready() -> void:
 			EventBus.employee_hired.connect(_on_employee_hired)
 		if EventBus.has_signal("needs_changed"):
 			EventBus.needs_changed.connect(_on_needs_changed)
+		if EventBus.has_signal("ogr_hub_unlocked"):
+			EventBus.ogr_hub_unlocked.connect(func(): refresh_objective())
 
 var _last_needs_hint: String = ""
 
@@ -149,21 +151,26 @@ func _get_story_objective() -> String:
 			todo.append("Sito WebForge")
 		return "Officina Bellini (Est): completa %s (%d/4 pilastri)." % [", ".join(todo), fac["pillars_done"]]
 
-	# Priority 6: Marketplace B2B freelance projects
+	# Priority 6: Marketplace B2B & OGR Enterprise projects
 	for cid in ContractManager.active_contracts:
 		if cid in ["pizzeria_da_mario", "caffe_san_carlo", "elettronica_to"]:
 			continue
 		var c = ContractManager.active_contracts[cid]
 		var st = c.get("status", "")
 		var etype = c.get("execution_type", "webforge")
+		var is_ent := bool(c.get("is_enterprise", false))
+		var prefix := "OGR Enterprise" if is_ent else "Progetto B2B"
 		if st == "in_progress":
 			if etype == "hardware":
-				return "Acquista i componenti da Elettronica TO e installa '%s' da Freelance Hub (TO-OS)." % c.get("title", cid)
+				return "%s: acquista i componenti da Elettronica TO e installa '%s' su TO-OS." % [prefix, c.get("title", cid)]
 			elif etype == "netshield":
-				return "Configura i nodi per '%s' su NetShield Cyber (TO-OS)." % c.get("title", cid)
-			return "Completa il progetto B2B '%s' su WebForge IDE." % c.get("title", cid)
+				return "%s: configura i nodi per '%s' su NetShield Cyber (TO-OS)." % [prefix, c.get("title", cid)]
+			return "%s: completa '%s' su WebForge IDE (TO-OS)." % [prefix, c.get("title", cid)]
 		elif st == "built":
-			return "Consegna il progetto '%s' tramite TO-OS per riscuotere il compenso." % c.get("title", cid)
+			return "%s: consegna '%s' tramite TO-OS per riscuotere il compenso." % [prefix, c.get("title", cid)]
+
+	if ContractManager.is_ogr_unlocked():
+		return "OGR Tech Hub aperto! Visita Ing. Andrea Viale a Mercato Est o accetta un bando su OGR Enterprise / B2B (TO-OS)."
 
 	if not fac["accepted"] and not fac["completed"]:
 		return "Accetta incarichi B2B su Freelance Hub (TO-OS) o raggiungi l'Officina Bellini a Borgo Valdocco (Est)!"
@@ -186,6 +193,8 @@ func get_current_category() -> String:
 	var fac := ContractManager.get_factory_progress_summary()
 	if fac["accepted"] and not fac["completed"]:
 		return "Appalto"
+	if ContractManager.is_ogr_unlocked():
+		return "OGR Enterprise"
 	return "Freelance"
 
 func get_current_quest_info() -> Dictionary:

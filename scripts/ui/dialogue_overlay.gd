@@ -124,6 +124,15 @@ func _on_choice_clicked(action: String) -> void:
 		"cancel_sidejob":
 			_close_dialogue()
 			SideJobManager.cancel_active_job()
+		"details_ogr":
+			lines_queue = [
+				"Ogni progetto serio, contratto Web/NetShield e coppia di lavoretti ti premia con Stelle ★ Potenziamenti.",
+				"Apri l'app 'Potenziamenti ★' su TO-OS e investi stelle nel ramo 'Appalti OGR Enterprise': sbloccherai bandi fino al Tier IV (Smart Grid & Intesa Sanpaolo Core, oltre € 5.200+ con hardware dedicato da Elettronica TO)!"
+			]
+			active_choices = [
+				{"text": "Chiarissimo Ing. Viale! Scalo i bandi su TO-OS.", "action": "close"}
+			]
+			_show_next_line()
 		"close", _:
 			_close_dialogue()
 

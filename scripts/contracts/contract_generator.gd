@@ -248,3 +248,148 @@ static func generate_initial_marketplace_pool(count: int = 2, budget_mult: float
 	for i in range(count):
 		pool.append(generate_random_contract(i + 1, budget_mult))
 	return pool
+
+const ENTERPRISE_CONTRACTS: Array[Dictionary] = [
+	{
+		"id": "ogr_fiat_telemetria",
+		"tier": 1,
+		"title": "Portale Telemetria Flotta EV Torino",
+		"client": "Lingotto Mobility SpA (OGR Bay #1)",
+		"category": "OGR Enterprise · Web & Cloud",
+		"execution_type": "webforge",
+		"brief": "Console enterprise per monitorare 400 navette elettriche a Torino in tempo reale: Bento Grid ad alto contrasto Cyan e latenza minima.",
+		"preferred_tags": ["Tech", "Speed"],
+		"preferred_palette": "cyan",
+		"budget": 2400.0,
+		"reputation_reward": 40,
+		"star_reward": 3,
+		"difficulty": 4,
+		"deadline_days": 6,
+		"requirements": [
+			"Dashboard Bento Grid Real-Time Flotta",
+			"OTTIMIZZAZIONE Bundle + WebP + Meta",
+			"Console Deploy Docker & TLS 1.3"
+		]
+	},
+	{
+		"id": "ogr_musei_zero_trust",
+		"tier": 1,
+		"title": "Rete Zero-Trust & Firewall Musei Reali",
+		"client": "Fondazione Cultura Piemonte (OGR Hub)",
+		"category": "OGR Enterprise · Cybersecurity",
+		"execution_type": "netshield",
+		"checkpoints": {
+			Vector2i(0, 0): 1,
+			Vector2i(0, 4): 2,
+			Vector2i(2, 4): 3,
+			Vector2i(2, 1): 4,
+			Vector2i(4, 1): 5,
+			Vector2i(4, 4): 6
+		},
+		"budget": 2250.0,
+		"reputation_reward": 38,
+		"star_reward": 3,
+		"difficulty": 4,
+		"deadline_days": 5,
+		"requirements": [
+			"Matrice NetShield 6 Nodi Continua",
+			"Segmentazione Biglietteria & Archivi",
+			"Auditing IPSec & Ridondanza"
+		]
+	},
+	{
+		"id": "ogr_pininfarina_cluster",
+		"tier": 2,
+		"title": "Forno Rack & 4 Workstation CAD Stile",
+		"client": "Centro Stile Prototipi (OGR Lab #2)",
+		"category": "OGR Enterprise · Infrastruttura",
+		"execution_type": "hardware",
+		"required_hardware": {"hw_server_tower": 2, "hw_workstation_pc": 4},
+		"budget": 4200.0,
+		"reputation_reward": 55,
+		"star_reward": 4,
+		"difficulty": 4,
+		"deadline_days": 6,
+		"requirements": [
+			"Fornitura 2x Server Tower Xeon RAID-10",
+			"Fornitura 4x Workstation CAD & Ufficio",
+			"Collaudo da OGR Enterprise / Freelance Hub"
+		]
+	},
+	{
+		"id": "ogr_aerospace_twin",
+		"tier": 3,
+		"title": "Digital Twin Stabilimento Aerospazio",
+		"client": "Alenia Orbital Labs (OGR Incubator)",
+		"category": "OGR Enterprise · Aerospace",
+		"execution_type": "webforge",
+		"brief": "Portale critico missione con catalogo sensori orbitali, prenotazione collaudi camera bianca e palette Acciaio & Ambra Industriale.",
+		"preferred_tags": ["Tech", "Booking"],
+		"preferred_palette": "amber",
+		"budget": 5200.0,
+		"reputation_reward": 70,
+		"star_reward": 5,
+		"difficulty": 5,
+		"deadline_days": 7,
+		"requirements": [
+			"Architettura Bento & Sensor Grid",
+			"Auditorium Prenotazione Test Bench",
+			"Zero-Blocking Bundle + SEO Certificato"
+		]
+	},
+	{
+		"id": "ogr_intesa_core",
+		"tier": 4,
+		"title": "Core Banking Firewall & Redundancy Ring",
+		"client": "Piemonte Fintech Tower (OGR Vault)",
+		"category": "OGR Enterprise · FinTech Elite",
+		"execution_type": "netshield",
+		"checkpoints": {
+			Vector2i(1, 0): 1,
+			Vector2i(4, 0): 2,
+			Vector2i(4, 3): 3,
+			Vector2i(2, 3): 4,
+			Vector2i(2, 1): 5,
+			Vector2i(0, 4): 6
+		},
+		"budget": 6800.0,
+		"reputation_reward": 90,
+		"star_reward": 5,
+		"difficulty": 5,
+		"deadline_days": 7,
+		"requirements": [
+			"Topologia Ring Multi-Hop FinTech",
+			"Firewall UTM Zero-Loss Latency",
+			"Certificazione Tier IV OGR Elite"
+		]
+	}
+]
+
+static func build_enterprise_pool(max_tier: int, completed_ids: Array[String], active_ids: Array, budget_mult: float = 1.0) -> Array[Dictionary]:
+	var pool: Array[Dictionary] = []
+	for raw in ENTERPRISE_CONTRACTS:
+		var cid := str(raw.get("id", ""))
+		if int(raw.get("tier", 1)) > max_tier:
+			continue
+		if cid in completed_ids or cid in active_ids:
+			continue
+		pool.append(_clone_enterprise_entry(raw, budget_mult))
+	if pool.is_empty():
+		# Bandi ricorrenti Enterprise se tutti quelli sbloccati sono già stati completati
+		var idx := 0
+		for raw in ENTERPRISE_CONTRACTS:
+			if int(raw.get("tier", 1)) <= max_tier:
+				idx += 1
+				var copy := _clone_enterprise_entry(raw, budget_mult)
+				copy["id"] = "%s_r_%d_%d" % [str(raw["id"]), Time.get_ticks_msec() % 10000, idx]
+				pool.append(copy)
+	return pool
+
+static func _clone_enterprise_entry(raw: Dictionary, budget_mult: float) -> Dictionary:
+	var c := raw.duplicate(true)
+	c["status"] = "available"
+	c["is_enterprise"] = true
+	c["budget"] = round((float(raw.get("budget", 2000.0)) * budget_mult) / 50.0) * 50.0
+	c["objective_text"] = "Appalto Enterprise OGR per %s." % str(raw.get("client", "Corporate"))
+	return c
+

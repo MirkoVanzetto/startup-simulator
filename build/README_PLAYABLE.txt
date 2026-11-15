@@ -1,54 +1,52 @@
 ================================================================================
-STARTUP SIMULATOR — v1.2.0 "QUARTIERI, WEBFORGE 5 & FARMING EDITION"
+STARTUP SIMULATOR — v1.4.0 "TO-OS 26.4, OGR ENTERPRISE & REALISMO TORINO"
 Release Windows x86_64
 ================================================================================
 
 Benvenuto in STARTUP SIMULATOR!
 Un simulatore gestionale e di vita in prima persona 3D ambientato tra i quattro
 quartieri di Torino: Borgo San Carlo, Parco Valentino Ovest, Borgo Valdocco e
-Mercato Nord / Coworking OGR.
+Mercato Nord / OGR Tech Hub Torino.
 
-NOVITA' DELLA VERSIONE 1.2.0:
+NOVITA' DELLA VERSIONE 1.4.0 (OVERHAUL COMPLETO):
 --------------------------------------------------------------------------------
-1. ECONOMIA SIMULATOR PIU' LENTA & SOSTENIBILE:
-   - Capitale iniziale realistico (€ 120.00) e compensi iniziali ribilanciati
-     (Da Mario € 260, San Carlo € 540, Elettronica TO € 860, Officina Bellini
-     € 2.530 + € 950 bonus).
-   - Bollette giornaliere automatiche alle 08:00 (€ 48/giorno = affitto € 30 +
-     utenze € 10 + fibra € 8) con addebito parziale anti-softlock fino a € 0.
-   - Espansione Tier 2 (65 Rep, € 1.800 capitale, costo € 950) e cadenza lead
-     B2B piu' graduale (780m -> 420m -> 150m assumendo Luca Vianello).
+1. DESKTOP TO-OS 26.4 & SCHEDA POTENZIAMENTI (★ SKILL TREE):
+   - Nuovo Desktop a finestre mobili & ridimensionabili con 10 app (Posta,
+     Freelance Hub, WebForge IDE, TorinoHardware, Banca, Rack 19", Talent HR,
+     NetShield Cyber, Potenziamenti ★ e OGR Enterprise) e Dock rapido.
+   - Sistema Stelle ★ (guadagnate da contratti, appalti OGR, notorieta' e ogni
+     2 lavoretti rapidi) investibili in 6 rami x 3 livelli (18 livelli totali):
+     * Agilita' Urbana & Stamina (+velocita', meno consumo energia)
+     * Optics & Lavoretti Rapidi (+raggio interazione 3D & +compensi lavoretti)
+     * Pipeline CI/CD & WebForge (-durata compilazione & +bonus B2B)
+     * Cluster Hosting Cloud 19" (+rendita giornaliera domini Rack)
+     * Ottimizzazione Studio & Utenze (-spese fisse giornaliere)
+     * Appalti OGR Enterprise (sblocco Tier II/III/IV e +premio appalti)
 
-2. 4 ATTIVITA' RIPETIBILI PER FARMARE CAPITALE ("BACHECA LAVORI RAPIDI"):
-   - Interagisci con BachecaSanCarlo (Piazzetta) o BachecaMercato (Nord):
-     * Volantinaggio Quartiere (5 cassette postali — € 42 + bonus velocità/Sneakers)
-     * Corriere Espresso Quartiere (ritiro pizzeria/caffè + 3 consegne — € 58 + bonus)
-     * Ripristino Quadri Fibra & POS (3 armadi — € 72 + bonus Analizzatore Wi-Fi 6)
-     * Scarico Merci & Logistica (navetta Poste/Furgone/Mercato/Officina — € 68 + bonus)
-   - Nuovo tracciamento attivo nell'HUD con Beacon 3D sui bersagli, bussola
-     automatica e salvataggio/ripristino completo in JSON.
+2. GRANDE OGR TECH HUB & APPALTI ENTERPRISE (CHIUSO FINO A DOPO L'OFFICINA):
+   - Grande navata industriale OGR espansa (27.5m x 24.5m) con lucernari,
+     Bay 01 aperto con isole coworking per la tua startup, Pod 02-04 riservati,
+     ed Ing. Andrea Viale come referente B2B.
+   - Cancello fisico OGR sbarrato fino al completamento dei contratti iniziali
+     di Via Po e del maxi-appalto Officina Meccanica Bellini.
+   - Grandi Bandi Enterprise Tier I-IV (Smart Grid Torino, Intesa Sanpaolo Core,
+     Musei Reali Zero-Trust) fino a oltre € 5.200+!
 
-3. WEBFORGE 5.0 RIPENSATO DA ZERO:
-   - Visual Block Composer: riordina le 5 sezioni (▲/▼) o svuota gli slot (✕)
-     con verifica DOM semantica in tempo reale.
-   - Switcher Architettura Grid: Classica (1-Col), Vetrina (2-Col) o Bento Grid
-     con adattamento responsive Mobile 390x844 (1-Col Stack).
-   - Slider Media KB Budget (140..960 KB) con impatto reale su Lighthouse Perf
-     e qualita' A11y.
-   - Code Inspector Click-to-Patch AST: ispeziona la riga buggata prima di
-     applicare la Git Patch corretta.
+3. PERSONAGGI 3D SEMI-REALISTICI, MATERIALI PBR & CICLO GIORNO/NOTTE:
+   - Modelli anatomici ad alta definizione con tratti facciali, occhi espressivi
+     con iride/palpebre, mani a 5 dita, abiti sartoriali e animazioni idle/seduto.
+   - Materiali PBR con bump/normal e roughness reali (porfido, acciottolato,
+     sterrato con ciottoli, mattoni, intonaco invecchiato, marmo venato).
+   - Ciclo completo Giorno / Alba / Tramonto / Notte stellata con luna, lampioni
+     dinamici accesi al crepuscolo ed esterni/interni illuminati.
 
-4. OLOGRAMMI 3D BLUEPRINT IN OFFICINA BELLINI:
-   - Dopo aver completato le 4 zone di sopralluogo, le postazioni Wi-Fi 6, Server
-     Xeon e 2x PC CAD mostrano ologrammi 3D blueprint ciano semi-trasparenti
-     (prima in ambra bloccata) fino al montaggio dell'hardware fisico.
-
-5. DUE NUOVI QUARTIERI ESPLORABILI & UPGRADE GRAFICO:
-   - Parco Valentino Ovest (laghetto delle anatre, pontile, gazebo e ville)
-     raggiungibile dall'Arco Ovest di Piazzetta Sud.
-   - Mercato Rionale Nord, Ufficio Postale e Coworking OGR oltre il Varco Nord
-     di Borgo Valdocco, con corona delle Alpi Piemontesi sullo sfondo.
-   - Mappa del Territorio [CAPS LOCK / M] estesa a 14 POI e 5 filtri quartiere.
+4. ECONOMIA BILANCIATA, BACHECA LAVORI, HOLOGRAMMI & FIX MAPPA:
+   - Fix completo Mappa del Territorio [CAPS LOCK / M]: pannello laterale
+     ridimensionabile e zoomabile con rotella/pulsanti anche dopo aver
+     selezionato qualunque dei 14 POI!
+   - Range interazione 3D ampliati in Officina Bellini + ologrammi blueprint ciano.
+   - Confermate tutte le meccaniche v1.2: WebForge 5.0 Bento/AST, Zaino [TAB],
+     4 Lavoretti Rapidi, Parco Valentino Ovest e Mercato Rionale Nord.
 
 COMANDI:
 --------------------------------------------------------------------------------

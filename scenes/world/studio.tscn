@@ -89,40 +89,40 @@ shape = SubResource("BoxShape3D_wall_door_side")
 
 [node name="CeilingLamp" type="OmniLight3D" parent="Lighting"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.55, -0.4)
-light_color = Color(1, 0.94, 0.85, 1)
-light_energy = 0.65
-omni_range = 9.0
+light_color = Color(1, 0.94, 0.86, 1)
+light_energy = 1.02
+omni_range = 9.5
 
 [node name="DeskSpot" type="SpotLight3D" parent="Lighting"]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 2.7, -1.75)
-light_color = Color(0.92, 0.96, 1, 1)
-light_energy = 0.75
-spot_range = 3.8
-spot_angle = 48.0
+light_color = Color(0.95, 0.97, 1, 1)
+light_energy = 0.90
+spot_range = 4.2
+spot_angle = 52.0
 
 [node name="GarageDoorLantern" type="OmniLight3D" parent="Lighting"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.9, 2.8)
 light_color = Color(1, 0.9, 0.75, 1)
-light_energy = 0.7
+light_energy = 0.65
 omni_range = 5.0
 
 [node name="ScreenGlow" type="OmniLight3D" parent="Lighting"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.14, 1.15, -1.9)
-light_color = Color(0.35, 0.75, 1, 1)
-light_energy = 0.5
-omni_range = 2.8
+light_color = Color(0.45, 0.78, 1, 1)
+light_energy = 0.28
+omni_range = 2.4
 
 [node name="PCTowerGlow" type="OmniLight3D" parent="Lighting"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.98, 0.35, -1.96)
-light_color = Color(0, 0.9, 1, 1)
-light_energy = 0.38
-omni_range = 1.8
+light_color = Color(0.25, 0.85, 1, 1)
+light_energy = 0.20
+omni_range = 1.4
 
 [node name="ServerRackGlow" type="OmniLight3D" parent="Lighting"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.7, 1.2, 1.65)
-light_color = Color(0.2, 0.9, 0.5, 1)
-light_energy = 0.6
-omni_range = 3.2
+light_color = Color(0.35, 0.88, 0.6, 1)
+light_energy = 0.28
+omni_range = 2.6
 
 [node name="Furniture" type="Node3D" parent="."]
 

@@ -3,11 +3,11 @@ extends RefCounted
 ## WorldMapData - Coordinate geometriche reali di Borgo San Carlo, Viale Est, Borgo Valdocco e Officina Bellini.
 ## Allineato alle coordinate di scripts/world/village_builder.gd e scenes/world/game_world.tscn.
 
-const WORLD_BOUNDS := Rect2(Vector2(-58.0, -14.0), Vector2(158.0, 60.0)) # X: -58..100, Z: -14..46
+const WORLD_BOUNDS := Rect2(Vector2(-68.0, -14.0), Vector2(198.0, 62.0)) # X: -68..130, Z: -14..48
 const SAN_CARLO_BOUNDS := Rect2(Vector2(-25.5, -10.5), Vector2(51.5, 54.0))
 const PARCO_BOUNDS := Rect2(Vector2(-57.5, 10.5), Vector2(36.0, 33.0))
 const VALDOCCO_BOUNDS := Rect2(Vector2(20.0, 10.0), Vector2(79.0, 35.0))
-const MERCATO_BOUNDS := Rect2(Vector2(57.5, -12.0), Vector2(41.5, 34.0))
+const MERCATO_BOUNDS := Rect2(Vector2(57.5, -12.0), Vector2(70.5, 32.0)) # X: 57.5..128.0, Z: -12..20 (incl. OGR Tech Hub)
 
 static func get_pois() -> Array[Dictionary]:
 	return [
@@ -73,7 +73,7 @@ static func get_pois() -> Array[Dictionary]:
 			"footprint": Vector2(6.0, 7.8),
 			"color": Color(0.28, 0.62, 1.0),
 			"label_dir": "top",
-			"desc": "Router Wi-Fi 6, Server Xeon, PC CAD, Firewall UTM e Gadget Tech (sconto -20%% partner!)."
+			"desc": "Router Wi-Fi 6, Server Xeon, PC CAD, Firewall UTM e Gadget Tech (sconto -20% partner!)."
 		},
 		{
 			"id": "pizzeria_mario",
@@ -151,14 +151,14 @@ static func get_pois() -> Array[Dictionary]:
 		},
 		{
 			"id": "coworking_ogr",
-			"name": "Coworking OGR Torino",
-			"short": "OGR",
+			"name": "OGR Tech Hub Torino (Enterprise)",
+			"short": "OGR Hub",
 			"district": "Mercato & OGR",
-			"pos": Vector3(92.0, 0.0, 2.8),
-			"footprint": Vector2(6.6, 10.6),
+			"pos": Vector3(110.25, 0.0, 2.75),
+			"footprint": Vector2(27.5, 24.5),
 			"color": Color(0.32, 0.88, 0.96),
 			"label_dir": "bottom",
-			"desc": "Complesso OGR riconvertito in polo startup: consegne rider espresso, eventi e networking."
+			"desc": "Grande navata OGR Enterprise: Bay 01 aperta per la tua startup, Pod 02-04 riservati, Ing. Andrea Viale e maxi-bandi corporate (si apre dopo Via Po & Officina Bellini)."
 		}
 	]
 
@@ -175,7 +175,7 @@ static func get_roads_and_zones() -> Dictionary:
 			Rect2(Vector2(-24.0, -9.0), Vector2(48.0, 51.0)),   # San Carlo
 			Rect2(Vector2(24.0, 19.0), Vector2(35.0, 18.0)),    # Corridoio Viale Est
 			Rect2(Vector2(59.0, 14.0), Vector2(38.0, 28.0)),    # Borgo Valdocco
-			Rect2(Vector2(59.0, -10.0), Vector2(38.0, 24.0))    # Piazza del Mercato & OGR
+			Rect2(Vector2(59.0, -12.0), Vector2(69.0, 29.0))    # Piazza del Mercato & OGR Tech Hub
 		],
 		"cobble": [
 			Rect2(Vector2(-4.2, 2.4), Vector2(8.4, 11.2)),      # Via del Borgo
@@ -187,6 +187,10 @@ static func get_roads_and_zones() -> Dictionary:
 			Rect2(Vector2(62.0, 18.0), Vector2(18.0, 20.0)),    # Piazza Valdocco
 			Rect2(Vector2(75.8, 13.5), Vector2(6.4, 5.0)),      # Passaggio Arco Nord
 			Rect2(Vector2(69.0, -3.2), Vector2(19.0, 17.7))     # Piazza del Mercato Nord
+		],
+		"slabs": [
+			Rect2(Vector2(87.9, -0.35), Vector2(8.7, 6.2)),     # Promenade Mercato -> Cancello OGR
+			Rect2(Vector2(96.5, -9.5), Vector2(27.5, 24.5))     # Pavimentazione Navata OGR Tech Hub
 		],
 		"asphalt": [
 			Rect2(Vector2(-19.0, 9.1), Vector2(7.6, 5.4)),      # Parcheggio W
@@ -223,16 +227,23 @@ static func get_roads_and_zones() -> Dictionary:
 			[Vector2(-24.0, 40.0), Vector2(-24.0, 42.0)],
 			[Vector2(24.0, -9.0), Vector2(24.0, 24.8)],
 			[Vector2(24.0, 31.2), Vector2(24.0, 42.0)],
-			# Borgo Valdocco border (varco Nord X=75.8..82.2)
+			# Borgo Valdocco border (varco Nord X=75.8..82.2, muro Est Z=15..42 sotto la navata OGR)
 			[Vector2(59.0, 14.0), Vector2(75.8, 14.0)],
-			[Vector2(82.2, 14.0), Vector2(97.0, 14.0)],
-			[Vector2(59.0, 42.0), Vector2(97.0, 42.0)],
-			[Vector2(97.0, 14.0), Vector2(97.0, 42.0)],
+			[Vector2(82.2, 14.0), Vector2(96.75, 14.0)],
+			[Vector2(59.0, 42.0), Vector2(96.75, 42.0)],
+			[Vector2(96.75, 15.0), Vector2(96.75, 42.0)],
 			[Vector2(59.0, 14.0), Vector2(59.0, 24.8)],
 			[Vector2(59.0, 31.2), Vector2(59.0, 42.0)],
-			# Mercato Nord & OGR border
-			[Vector2(59.0, -10.0), Vector2(97.0, -10.0)],
+			# Mercato Nord & Ingresso OGR border (muro Est spezzato attorno a Z=0.35..5.15)
+			[Vector2(59.0, -10.0), Vector2(96.2, -10.0)],
 			[Vector2(59.0, -10.0), Vector2(59.0, 14.0)],
-			[Vector2(97.0, -10.0), Vector2(97.0, 14.0)]
+			[Vector2(96.2, -10.0), Vector2(96.2, 0.35)],
+			[Vector2(96.2, 5.15), Vector2(96.2, 15.0)],
+			# Perimetro esterno Navata OGR Tech Hub (aperto ad Ovest Z=0.35..5.15)
+			[Vector2(96.5, -9.5), Vector2(124.0, -9.5)],
+			[Vector2(124.0, -9.5), Vector2(124.0, 15.0)],
+			[Vector2(124.0, 15.0), Vector2(96.5, 15.0)],
+			[Vector2(96.5, -9.5), Vector2(96.5, 0.35)],
+			[Vector2(96.5, 5.15), Vector2(96.5, 15.0)]
 		]
 	}

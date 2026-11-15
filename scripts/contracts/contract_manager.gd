@@ -13,6 +13,7 @@ const FACTORY_SCOUT_ZONES: Array[String] = [
 var active_contracts: Dictionary = {}
 var completed_contracts: Array[String] = []
 var marketplace_contracts: Array[Dictionary] = []
+var enterprise_contracts: Array[Dictionary] = []
 
 var lead_timer_minutes: int = 0
 var preferred_webforge_contract_id: String = ""
@@ -36,11 +37,31 @@ func _ready() -> void:
 	EventBus.day_passed.connect(_on_day_passed)
 	EventBus.time_tick.connect(_on_time_tick)
 	EventBus.employee_hired.connect(_on_employee_hired)
+	EventBus.upgrade_purchased.connect(func(uid: String, _rank: int):
+		if uid == "enterprise" and is_ogr_unlocked():
+			refresh_enterprise_contracts(true)
+	)
+
+func is_ogr_unlocked() -> bool:
+	return is_contract_completed("pizzeria_da_mario") \
+		and is_contract_completed("caffe_san_carlo") \
+		and is_contract_completed("elettronica_to") \
+		and (is_contract_completed("factory_bellini") or bool(factory_state.get("completed", false)))
+
+func has_pending_contracts() -> bool:
+	for cid in active_contracts:
+		var c = active_contracts[cid]
+		if c is Dictionary:
+			var st := str(c.get("status", ""))
+			if st == "in_progress" or st == "built":
+				return true
+	return false
 
 func init_tutorial_contract() -> void:
 	active_contracts.clear()
 	completed_contracts.clear()
 	marketplace_contracts.clear()
+	enterprise_contracts.clear()
 	lead_timer_minutes = 0
 	preferred_webforge_contract_id = ""
 	preferred_netshield_contract_id = ""
@@ -55,6 +76,7 @@ func init_tutorial_contract() -> void:
 		"location": "Via Po 18, Torino",
 		"budget": 260.00,
 		"reputation_reward": 12,
+		"star_reward": 2,
 		"difficulty": 1,
 		"deadline_days": 2,
 		"status": "available", # "available" -> "in_progress" -> "built" -> "completed"
@@ -213,9 +235,11 @@ func complete_story_contract(contract_id: String) -> void:
 		var c = active_contracts[contract_id]
 		if c.get("status") == "completed" or (contract_id in completed_contracts):
 			return
+		var was_ogr := is_ogr_unlocked()
 		c["status"] = "completed"
 		var reward = float(c["budget"]) * float(c.get("fame_bonus", 1.0))
 		var rep = int(c["reputation_reward"])
+		var star_gain := int(c.get("star_reward", 2))
 		completed_contracts.append(contract_id)
 
 		if EmployeeManager.is_employee_hired("emp_marco"):
@@ -223,6 +247,8 @@ func complete_story_contract(contract_id: String) -> void:
 
 		EconomyManager.earn(reward, "Compenso Progetto: " + c["title"])
 		GameManager.reputation_points += rep
+		if is_instance_valid(UpgradeManager) and star_gain > 0:
+			UpgradeManager.add_stars(star_gain, "Missione completata: " + str(c.get("title", contract_id)))
 
 		EventBus.contract_completed.emit(contract_id, reward, rep)
 		EventBus.contract_updated.emit(contract_id, "completed")
@@ -235,6 +261,8 @@ func complete_story_contract(contract_id: String) -> void:
 
 		_unlock_next_story_mission(contract_id)
 		_stamp_fame_bonus()
+		if not was_ogr and is_ogr_unlocked():
+			_notify_ogr_unlocked()
 		SaveManager.request_auto_save()
 
 func _stamp_fame_bonus() -> void:
@@ -256,6 +284,7 @@ func _unlock_next_story_mission(just_completed_id: String) -> void:
 				"location": "Via Po 12, Torino (Lato Est)",
 				"budget": 540.00,
 				"reputation_reward": 20,
+				"star_reward": 2,
 				"difficulty": 2,
 				"deadline_days": 3,
 				"status": "available",
@@ -287,6 +316,7 @@ func _unlock_next_story_mission(just_completed_id: String) -> void:
 				"location": "Via Po 6, Torino (Lato Ovest)",
 				"budget": 860.00,
 				"reputation_reward": 28,
+				"star_reward": 3,
 				"difficulty": 3,
 				"deadline_days": 4,
 				"status": "available",
@@ -332,23 +362,84 @@ func accept_marketplace_contract(contract_id: String) -> bool:
 			return true
 	return false
 
+func refresh_enterprise_contracts(force: bool = false) -> void:
+	if not is_ogr_unlocked():
+		if not enterprise_contracts.is_empty():
+			enterprise_contracts.clear()
+			EventBus.contract_marketplace_refreshed.emit()
+		return
+	if not force and not enterprise_contracts.is_empty():
+		return
+	var max_tier := UpgradeManager.get_enterprise_tier() if is_instance_valid(UpgradeManager) else 1
+	var budget_mult := 1.15 if EmployeeManager.is_employee_hired("emp_luca") else 1.0
+	enterprise_contracts = ContractGenerator.build_enterprise_pool(max_tier, completed_contracts, active_contracts.keys(), budget_mult)
+	EventBus.contract_marketplace_refreshed.emit()
+
+func accept_enterprise_contract(contract_id: String) -> bool:
+	if not is_ogr_unlocked():
+		SoundManager.play_ui_error()
+		EventBus.notification_posted.emit("OGR Enterprise Bloccato", "Completa prima Via Po (Mario, Elena, Davide) e l'Officina Bellini!", "warning")
+		return false
+	for i in range(enterprise_contracts.size()):
+		var c: Dictionary = enterprise_contracts[i]
+		if str(c.get("id", "")) == contract_id:
+			c["status"] = "in_progress"
+			c["fame_bonus"] = FameManager.get_contract_bonus()
+			active_contracts[contract_id] = c
+			enterprise_contracts.remove_at(i)
+			if c.get("execution_type", "webforge") == "webforge":
+				preferred_webforge_contract_id = contract_id
+			elif c.get("execution_type", "") == "netshield":
+				preferred_netshield_contract_id = contract_id
+			EventBus.contract_updated.emit(contract_id, "in_progress")
+			EventBus.notification_posted.emit("Bando OGR Enterprise Accettato!", "Avviato appalto corporate: " + str(c.get("title", contract_id)), "contract")
+			EventBus.contract_marketplace_refreshed.emit()
+			SaveManager.request_auto_save()
+			return true
+	return false
+
+func cancel_active_contract(contract_id: String) -> bool:
+	if contract_id in ["pizzeria_da_mario", "caffe_san_carlo", "elettronica_to", "factory_bellini_web", "factory_bellini"]:
+		return false
+	if not active_contracts.has(contract_id):
+		return false
+	var c: Dictionary = active_contracts[contract_id]
+	var was_ent := bool(c.get("is_enterprise", false))
+	active_contracts.erase(contract_id)
+	if preferred_webforge_contract_id == contract_id:
+		preferred_webforge_contract_id = ""
+	if preferred_netshield_contract_id == contract_id:
+		preferred_netshield_contract_id = ""
+	if was_ent:
+		refresh_enterprise_contracts(true)
+	EventBus.contract_updated.emit(contract_id, "cancelled")
+	EventBus.contract_marketplace_refreshed.emit()
+	SaveManager.request_auto_save()
+	return true
+
 func complete_marketplace_contract(contract_id: String) -> bool:
 	if active_contracts.has(contract_id):
 		var c = active_contracts[contract_id]
 		if c.get("status") == "completed" or (contract_id in completed_contracts):
 			return false
 		c["status"] = "completed"
+		var is_ent := bool(c.get("is_enterprise", false))
 		var reward = float(c["budget"]) * float(c.get("fame_bonus", 1.0))
+		if is_instance_valid(UpgradeManager):
+			reward *= UpgradeManager.get_enterprise_payout_mult() if is_ent else UpgradeManager.get_contract_payout_mult()
 		if EmployeeManager.is_employee_hired("emp_marco"):
 			reward *= 1.20
 		if c.get("execution_type", "") == "netshield" and ShopManager.has_gadget("gadget_scanner_wifi"):
 			reward *= 1.10
 
 		var rep = int(c["reputation_reward"])
+		var star_gain := int(c.get("star_reward", 1))
 		completed_contracts.append(contract_id)
 
 		EconomyManager.earn(reward, "Liquidazione Progetto: " + c["title"])
 		GameManager.reputation_points += rep
+		if is_instance_valid(UpgradeManager) and star_gain > 0:
+			UpgradeManager.add_stars(star_gain, "Progetto completato: " + str(c.get("title", contract_id)))
 
 		EventBus.contract_completed.emit(contract_id, reward, rep)
 		EventBus.contract_updated.emit(contract_id, "completed")
@@ -356,6 +447,8 @@ func complete_marketplace_contract(contract_id: String) -> bool:
 
 		if contract_id == "factory_bellini_web":
 			on_factory_web_completed()
+		elif is_ent:
+			refresh_enterprise_contracts(true)
 
 		SaveManager.request_auto_save()
 		return true
@@ -406,6 +499,7 @@ func accept_factory_commission() -> void:
 		"preferred_palette": "amber",
 		"budget": 680.00,
 		"reputation_reward": 18,
+		"star_reward": 1,
 		"difficulty": 3,
 		"deadline_days": 5,
 		"status": "in_progress",
@@ -503,6 +597,8 @@ func complete_factory_wifi_netshield() -> bool:
 		pay *= 1.10
 	EconomyManager.earn(pay, "Officina Bellini: Configurazione Wi-Fi 6 & VLAN")
 	GameManager.reputation_points += 12
+	if is_instance_valid(UpgradeManager):
+		UpgradeManager.add_stars(1, "Officina Bellini: Wi-Fi & VLAN")
 	EventBus.contract_completed.emit("factory_bellini_wifi", pay, 12)
 	EventBus.contract_updated.emit("factory_bellini", "wifi_done")
 	EventBus.notification_posted.emit("Wi-Fi & VLAN Officina Operativi!", "Incassati € %0.2f (+12 Rep)." % pay, "success")
@@ -527,6 +623,8 @@ func install_factory_server() -> bool:
 		pay *= 1.20
 	EconomyManager.earn(pay, "Officina Bellini: Installazione Server Xeon RAID-10")
 	GameManager.reputation_points += 18
+	if is_instance_valid(UpgradeManager):
+		UpgradeManager.add_stars(1, "Officina Bellini: Server Xeon")
 	SoundManager.play_cash_register()
 	EventBus.contract_completed.emit("factory_bellini_server", pay, 18)
 	EventBus.contract_updated.emit("factory_bellini", "server_done")
@@ -553,6 +651,8 @@ func install_factory_pcs() -> bool:
 		pay *= 1.20
 	EconomyManager.earn(pay, "Officina Bellini: Installazione 2 Workstation CAD")
 	GameManager.reputation_points += 18
+	if is_instance_valid(UpgradeManager):
+		UpgradeManager.add_stars(1, "Officina Bellini: 2 Workstation CAD")
 	SoundManager.play_cash_register()
 	EventBus.contract_completed.emit("factory_bellini_pcs", pay, 18)
 	EventBus.contract_updated.emit("factory_bellini", "pcs_done")
@@ -570,12 +670,15 @@ func _check_factory_grand_completion() -> void:
 	if bool(factory_state.get("completed", false)):
 		return
 	if bool(factory_state.get("wifi_done", false)) and bool(factory_state.get("web_done", false)) and bool(factory_state.get("server_done", false)) and bool(factory_state.get("pcs_done", false)):
+		var was_ogr := is_ogr_unlocked()
 		factory_state["completed"] = true
 		if not ("factory_bellini" in completed_contracts):
 			completed_contracts.append("factory_bellini")
 		var bonus := 950.0
 		EconomyManager.earn(bonus, "Premio Maxi-Appalto Completato: Officina Bellini")
 		GameManager.reputation_points += 35
+		if is_instance_valid(UpgradeManager):
+			UpgradeManager.add_stars(4, "Maxi-Appalto Officina Bellini Completato!")
 		SoundManager.play_ui_success()
 		EventBus.contract_completed.emit("factory_bellini", bonus, 35)
 		EventBus.contract_updated.emit("factory_bellini", "completed")
@@ -584,6 +687,19 @@ func _check_factory_grand_completion() -> void:
 			"Wi-Fi, Server, 2 PC & Sito Web consegnati! Bonus finale +€ 950,00 & +35 Reputazione!",
 			"success"
 		)
+		if not was_ogr and is_ogr_unlocked():
+			_notify_ogr_unlocked()
+		elif is_ogr_unlocked():
+			refresh_enterprise_contracts(true)
+
+func _notify_ogr_unlocked() -> void:
+	refresh_enterprise_contracts(true)
+	EventBus.ogr_hub_unlocked.emit()
+	EventBus.notification_posted.emit(
+		"OGR TECH HUB & ENTERPRISE SBLOCCATI!",
+		"I cancelli delle OGR a Mercato Est sono aperti! Visita Ing. Andrea Viale o apri OGR Enterprise su TO-OS!",
+		"success"
+	)
 
 func get_factory_progress_summary() -> Dictionary:
 	var pillars_done := 0
@@ -632,6 +748,7 @@ func serialize() -> Dictionary:
 		"active": active_contracts.duplicate(true),
 		"completed": completed_contracts.duplicate(),
 		"marketplace": marketplace_contracts.duplicate(true),
+		"enterprise": enterprise_contracts.duplicate(true),
 		"lead_timer_minutes": lead_timer_minutes,
 		"preferred_webforge_contract_id": preferred_webforge_contract_id,
 		"preferred_netshield_contract_id": preferred_netshield_contract_id,
@@ -652,6 +769,10 @@ func deserialize(data: Dictionary) -> void:
 	for mc in data.get("marketplace", []):
 		if mc is Dictionary:
 			marketplace_contracts.append(_normalize_contract_dict(mc))
+	enterprise_contracts.clear()
+	for ec in data.get("enterprise", []):
+		if ec is Dictionary:
+			enterprise_contracts.append(_normalize_contract_dict(ec))
 	lead_timer_minutes = int(data.get("lead_timer_minutes", 0))
 	preferred_webforge_contract_id = str(data.get("preferred_webforge_contract_id", ""))
 	preferred_netshield_contract_id = str(data.get("preferred_netshield_contract_id", ""))
@@ -660,5 +781,9 @@ func deserialize(data: Dictionary) -> void:
 	if fs is Dictionary:
 		for k in fs:
 			factory_state[k] = fs[k]
+	if is_ogr_unlocked() and enterprise_contracts.is_empty():
+		refresh_enterprise_contracts(true)
 	EventBus.contract_marketplace_refreshed.emit()
 	EventBus.contract_updated.emit("factory_bellini", "loaded")
+	if is_ogr_unlocked():
+		EventBus.ogr_hub_unlocked.emit()

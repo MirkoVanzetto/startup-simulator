@@ -89,9 +89,11 @@ func check_tier() -> void:
 	_last_tier = idx
 	EventBus.fame_tier_changed.emit(idx, TIER_NAMES[idx])
 	if went_up:
+		if is_instance_valid(UpgradeManager):
+			UpgradeManager.add_stars(1, "Grado Notorietà: %s" % TIER_NAMES[idx])
 		EventBus.notification_posted.emit(
 			"🎉 Nuova Notorietà!",
-			"Ora sei «%s»! Sconto %d%% nei negozi del borgo e compensi più alti sui nuovi contratti." % [TIER_NAMES[idx], get_discount_percent()],
+			"Ora sei «%s»! Sconto %d%% nei negozi del borgo, +1 ★ Potenziamenti e compensi più alti sui nuovi contratti." % [TIER_NAMES[idx], get_discount_percent()],
 			"success"
 		)
 		SoundManager.play_ui_success()

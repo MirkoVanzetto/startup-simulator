@@ -19,7 +19,7 @@ func save_game() -> bool:
 		player_rot = GameManager.player_node.rotation.y
 		
 	var save_dict: Dictionary = {
-		"version": "1.2.0",
+		"version": "1.4.0",
 		"timestamp": Time.get_datetime_string_from_system(),
 		"economy": {
 			"balance": EconomyManager.balance,
@@ -30,6 +30,12 @@ func save_game() -> bool:
 			"reputation": GameManager.reputation_points,
 			"days_elapsed": GameManager.days_elapsed,
 			"upgrades": GameManager.studio_upgrades_installed
+		},
+		"upgrades": UpgradeManager.serialize(),
+		"calendar": {
+			"day": CalendarSystem.current_day,
+			"hour": CalendarSystem.current_hour,
+			"minute": CalendarSystem.current_minute
 		},
 		"contracts": ContractManager.serialize(),
 		"employees": EmployeeManager.serialize(),
@@ -101,8 +107,22 @@ func load_game() -> bool:
 		GameManager.studio_upgrades_installed.clear()
 		for u in upg_list:
 			GameManager.studio_upgrades_installed.append(str(u))
+
+	# Restore Star Upgrades & Calendar Clock
+	if data.has("upgrades") and data["upgrades"] is Dictionary:
+		UpgradeManager.deserialize(data["upgrades"])
+	else:
+		UpgradeManager.reset()
+
+	if data.has("calendar") and data["calendar"] is Dictionary:
+		var cal: Dictionary = data["calendar"]
+		CalendarSystem.current_day = maxi(1, int(cal.get("day", GameManager.days_elapsed)))
+		CalendarSystem.current_hour = clampi(int(cal.get("hour", 9)), 0, 23)
+		CalendarSystem.current_minute = clampi(int(cal.get("minute", 0)), 0, 59)
+		CalendarSystem.time_accumulator = 0.0
+		EventBus.time_tick.emit(CalendarSystem.current_hour, CalendarSystem.current_minute, CalendarSystem.current_day)
 			
-	# Restore Contracts (includes active, completed, marketplace, lead timer, factory_state)
+	# Restore Contracts (includes active, completed, marketplace, enterprise, lead timer, factory_state)
 	if data.has("contracts") and data["contracts"] is Dictionary:
 		ContractManager.deserialize(data["contracts"])
 

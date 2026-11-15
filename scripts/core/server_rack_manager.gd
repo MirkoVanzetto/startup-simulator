@@ -235,6 +235,10 @@ func calculate_daily_hosting_revenue() -> float:
 	# Bonus if DevOps Sara Bellini is hired
 	if EmployeeManager and EmployeeManager.is_employee_hired("emp_sara"):
 		total *= 1.35 # +35% uptime SLA premium
+
+	# Bonus Cluster Hosting Pro (UpgradeManager)
+	if is_instance_valid(UpgradeManager):
+		total *= UpgradeManager.get_hosting_bonus_mult()
 		
 	return total
 

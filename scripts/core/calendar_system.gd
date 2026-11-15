@@ -50,11 +50,12 @@ func _advance_day() -> void:
 	EventSystem.evaluate_daily_events(current_day)
 
 func _bill_daily_expenses() -> void:
-	var total_overhead = DAILY_RENT + DAILY_UTILITIES + DAILY_INTERNET
+	var disc := UpgradeManager.get_overhead_discount_mult() if is_instance_valid(UpgradeManager) else 1.0
+	var total_overhead = snappedf((DAILY_RENT + DAILY_UTILITIES + DAILY_INTERNET) * disc, 0.01)
 	var breakdown = {
-		"rent": DAILY_RENT,
-		"utilities": DAILY_UTILITIES,
-		"internet": DAILY_INTERNET,
+		"rent": snappedf(DAILY_RENT * disc, 0.01),
+		"utilities": snappedf(DAILY_UTILITIES * disc, 0.01),
+		"internet": snappedf(DAILY_INTERNET * disc, 0.01),
 		"total": total_overhead
 	}
 	
@@ -64,7 +65,7 @@ func _bill_daily_expenses() -> void:
 		billed_amount = total_overhead
 		EventBus.notification_posted.emit(
 			"Rendiconto Spese Giornaliere",
-			"Addebitati € %0.2f (Affitto €30, Utenze €10, Fibra €8) per il Giorno %d." % [total_overhead, current_day],
+			"Addebitati € %0.2f (Affitto €%.0f, Utenze €%.0f, Fibra €%.0f) per il Giorno %d." % [total_overhead, breakdown["rent"], breakdown["utilities"], breakdown["internet"], current_day],
 			"warning"
 		)
 	elif EconomyManager.balance > 0.01:

@@ -1,18 +1,36 @@
 extends Control
-## WorldMapCanvas - Rendering 2D architettonico ad alta nitidezza di Borgo San Carlo & Borgo Valdocco.
+## WorldMapCanvas - Rendering 2D architettonico ad alta nitidezza di Borgo San Carlo, Parco Valentino, Valdocco & OGR Tech Hub.
+## Supporta zoom centrato sul cursore (rotella / pulsanti), drag & pan fluido, e resize continuo in qualsiasi vista.
 
 const MapData := preload("res://scripts/world/world_map_data.gd")
 
 signal poi_clicked(poi_id: String)
 signal poi_double_clicked(poi_id: String)
+signal zoom_changed(zoom_val: float)
+
+const MIN_ZOOM: float = 0.45
+const MAX_ZOOM: float = 4.50
 
 var selected_poi_id: String = "studio"
 var hovered_poi_id: String = ""
 var _view_bounds: Rect2 = MapData.WORLD_BOUNDS
+var _zoom: float = 1.0
+var _pan_world: Vector2 = Vector2.ZERO
+var _dragging: bool = false
+var _drag_moved: bool = false
+var _press_pos: Vector2 = Vector2.ZERO
+var _press_pan: Vector2 = Vector2.ZERO
 var _last_click_id: String = ""
 var _last_click_ms: int = 0
 
-func set_view_bounds(view_id: String) -> void:
+func _ready() -> void:
+	clip_contents = true
+	resized.connect(func():
+		_clamp_pan()
+		queue_redraw()
+	)
+
+func set_view_bounds(view_id: String, preserve_zoom: bool = false) -> void:
 	match view_id:
 		"sancarlo":
 			_view_bounds = MapData.SAN_CARLO_BOUNDS
@@ -24,25 +42,80 @@ func set_view_bounds(view_id: String) -> void:
 			_view_bounds = MapData.MERCATO_BOUNDS
 		_:
 			_view_bounds = MapData.WORLD_BOUNDS
+	if not preserve_zoom:
+		_zoom = 1.0
+		_pan_world = Vector2.ZERO
+	_clamp_pan()
+	zoom_changed.emit(_zoom)
 	queue_redraw()
+
+func get_zoom() -> float:
+	return _zoom
+
+func get_pan_world() -> Vector2:
+	return _pan_world
+
+func zoom_at(pivot_canvas: Vector2, target_zoom: float) -> void:
+	var new_zoom := clampf(target_zoom, MIN_ZOOM, MAX_ZOOM)
+	if is_equal_approx(new_zoom, _zoom):
+		return
+	var world_pivot := canvas_to_world(pivot_canvas)
+	_zoom = new_zoom
+	var proj := get_projection()
+	var sc := maxf(0.0001, float(proj["scale"]))
+	var cc: Vector2 = proj["canvas_center"]
+	var new_vc := world_pivot - (pivot_canvas - cc) / sc
+	var base_center := _view_bounds.position + _view_bounds.size * 0.5
+	_pan_world = new_vc - base_center
+	_clamp_pan()
+	zoom_changed.emit(_zoom)
+	queue_redraw()
+
+func zoom_in() -> void:
+	zoom_at(size * 0.5, _zoom * 1.25)
+
+func zoom_out() -> void:
+	zoom_at(size * 0.5, _zoom / 1.25)
+
+func reset_zoom() -> void:
+	_zoom = 1.0
+	_pan_world = Vector2.ZERO
+	_clamp_pan()
+	zoom_changed.emit(_zoom)
+	queue_redraw()
+
+func _clamp_pan() -> void:
+	var base_center := _view_bounds.position + _view_bounds.size * 0.5
+	var vc := base_center + _pan_world
+	var safe := MapData.WORLD_BOUNDS.grow(24.0)
+	vc.x = clampf(vc.x, safe.position.x, safe.end.x)
+	vc.y = clampf(vc.y, safe.position.y, safe.end.y)
+	_pan_world = vc - base_center
 
 func get_projection() -> Dictionary:
 	var s := size
 	var pad := 16.0
 	var avail_w := maxf(s.x - pad * 2.0, 40.0)
 	var avail_h := maxf(s.y - pad * 2.0, 40.0)
-	var scale_val := minf(avail_w / _view_bounds.size.x, avail_h / _view_bounds.size.y)
-	var drawn_w := _view_bounds.size.x * scale_val
-	var drawn_h := _view_bounds.size.y * scale_val
-	var ox := (s.x - drawn_w) * 0.5
-	var oy := (s.y - drawn_h) * 0.5
-	return {"scale": scale_val, "origin": Vector2(ox, oy)}
+	var base_scale := minf(avail_w / _view_bounds.size.x, avail_h / _view_bounds.size.y)
+	var sc := base_scale * _zoom
+	var view_center := _view_bounds.position + _view_bounds.size * 0.5 + _pan_world
+	var canvas_center := s * 0.5
+	return {"scale": sc, "base_scale": base_scale, "view_center": view_center, "canvas_center": canvas_center}
 
 func world_to_canvas(world_xz: Vector2) -> Vector2:
 	var proj := get_projection()
 	var sc: float = proj["scale"]
-	var org: Vector2 = proj["origin"]
-	return org + (world_xz - _view_bounds.position) * sc
+	var vc: Vector2 = proj["view_center"]
+	var cc: Vector2 = proj["canvas_center"]
+	return cc + (world_xz - vc) * sc
+
+func canvas_to_world(canvas_pt: Vector2) -> Vector2:
+	var proj := get_projection()
+	var sc := maxf(0.0001, float(proj["scale"]))
+	var vc: Vector2 = proj["view_center"]
+	var cc: Vector2 = proj["canvas_center"]
+	return vc + (canvas_pt - cc) / sc
 
 func world_rect_to_canvas(r: Rect2) -> Rect2:
 	var tl := world_to_canvas(r.position)
@@ -50,22 +123,53 @@ func world_rect_to_canvas(r: Rect2) -> Rect2:
 	return Rect2(tl, r.size * sc)
 
 func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseMotion:
+	if event is InputEventMouseButton:
+		if event.pressed and event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			zoom_at(event.position, _zoom * 1.15)
+			accept_event()
+			return
+		elif event.pressed and event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			zoom_at(event.position, _zoom / 1.15)
+			accept_event()
+			return
+		elif event.button_index == MOUSE_BUTTON_LEFT or event.button_index == MOUSE_BUTTON_MIDDLE or event.button_index == MOUSE_BUTTON_RIGHT:
+			if event.pressed:
+				_dragging = true
+				_drag_moved = false
+				_press_pos = event.position
+				_press_pan = _pan_world
+			else:
+				var was_click: bool = _dragging and not _drag_moved and event.button_index == MOUSE_BUTTON_LEFT
+				_dragging = false
+				_drag_moved = false
+				mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND if hovered_poi_id != "" else Control.CURSOR_ARROW
+				if was_click:
+					var hit_id := _find_poi_at_point(event.position)
+					if hit_id != "":
+						var now_ms := Time.get_ticks_msec()
+						if hit_id == _last_click_id and (now_ms - _last_click_ms) < 420:
+							poi_double_clicked.emit(hit_id)
+						else:
+							poi_clicked.emit(hit_id)
+						_last_click_id = hit_id
+						_last_click_ms = now_ms
+	elif event is InputEventMouseMotion:
+		if _dragging:
+			var delta_c: Vector2 = event.position - _press_pos
+			if delta_c.length() > 6.0:
+				_drag_moved = true
+			if _drag_moved:
+				var sc := maxf(0.0001, float(get_projection()["scale"]))
+				_pan_world = _press_pan - delta_c / sc
+				_clamp_pan()
+				mouse_default_cursor_shape = Control.CURSOR_DRAG
+				queue_redraw()
+				return
 		var new_hover := _find_poi_at_point(event.position)
 		if new_hover != hovered_poi_id:
 			hovered_poi_id = new_hover
 			mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND if hovered_poi_id != "" else Control.CURSOR_ARROW
 			queue_redraw()
-	elif event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		var hit_id := _find_poi_at_point(event.position)
-		if hit_id != "":
-			var now_ms := Time.get_ticks_msec()
-			if hit_id == _last_click_id and (now_ms - _last_click_ms) < 420:
-				poi_double_clicked.emit(hit_id)
-			else:
-				poi_clicked.emit(hit_id)
-			_last_click_id = hit_id
-			_last_click_ms = now_ms
 
 func _find_poi_at_point(pt: Vector2) -> String:
 	var sc := float(get_projection()["scale"])
@@ -75,7 +179,7 @@ func _find_poi_at_point(pt: Vector2) -> String:
 		var p3: Vector3 = poi["pos"]
 		var c := world_to_canvas(Vector2(p3.x, p3.z))
 		var fp: Vector2 = poi["footprint"]
-		var hit_r := maxf(16.0, maxf(fp.x, fp.y) * sc * 0.65)
+		var hit_r := maxf(16.0, maxf(fp.x, fp.y) * sc * 0.55)
 		var d := pt.distance_to(c)
 		if d <= hit_r and d < best_d:
 			best_d = d
@@ -89,19 +193,20 @@ func _draw() -> void:
 	var proj := get_projection()
 	var sc: float = proj["scale"]
 
-	# Clip drawing inside canvas bounds
 	draw_rect(Rect2(Vector2.ZERO, size), Color(0.06, 0.08, 0.13, 1.0))
 
-	# Subtle 10m architectural grid
-	var gx0 := int(floor(_view_bounds.position.x / 10.0)) * 10
-	var gx1 := int(ceil(_view_bounds.end.x / 10.0)) * 10
+	# Architectural 10m grid spanning visible canvas
+	var w_tl := canvas_to_world(Vector2.ZERO)
+	var w_br := canvas_to_world(size)
+	var gx0 := int(floor(minf(w_tl.x, w_br.x) / 10.0)) * 10
+	var gx1 := int(ceil(maxf(w_tl.x, w_br.x) / 10.0)) * 10
 	for gx in range(gx0, gx1 + 1, 10):
-		var x_pos := world_to_canvas(Vector2(float(gx), _view_bounds.position.y)).x
+		var x_pos := world_to_canvas(Vector2(float(gx), 0.0)).x
 		draw_line(Vector2(x_pos, 0), Vector2(x_pos, size.y), Color(1, 1, 1, 0.035), 1.0)
-	var gz0 := int(floor(_view_bounds.position.y / 10.0)) * 10
-	var gz1 := int(ceil(_view_bounds.end.y / 10.0)) * 10
+	var gz0 := int(floor(minf(w_tl.y, w_br.y) / 10.0)) * 10
+	var gz1 := int(ceil(maxf(w_tl.y, w_br.y) / 10.0)) * 10
 	for gz in range(gz0, gz1 + 1, 10):
-		var y_pos := world_to_canvas(Vector2(_view_bounds.position.x, float(gz))).y
+		var y_pos := world_to_canvas(Vector2(0.0, float(gz))).y
 		draw_line(Vector2(0, y_pos), Vector2(size.x, y_pos), Color(1, 1, 1, 0.035), 1.0)
 
 	var geo := MapData.get_roads_and_zones()
@@ -117,6 +222,13 @@ func _draw() -> void:
 		var cr := world_rect_to_canvas(cb)
 		draw_rect(cr, Color(0.32, 0.30, 0.28, 0.95), true)
 		draw_rect(cr, Color(0.46, 0.44, 0.40, 0.8), false, 1.0)
+
+	# 2b. Stone slabs & OGR concrete nave floor
+	if geo.has("slabs"):
+		for sl in geo["slabs"]:
+			var sr := world_rect_to_canvas(sl)
+			draw_rect(sr, Color(0.28, 0.31, 0.36, 0.92), true)
+			draw_rect(sr, Color(0.46, 0.56, 0.66, 0.85), false, 1.1)
 
 	# 3. Asphalt roads & centerline
 	for asp in geo["asphalt"]:
@@ -140,7 +252,24 @@ func _draw() -> void:
 		var p2 := world_to_canvas(wseg[1])
 		draw_line(p1, p2, Color(0.48, 0.54, 0.64, 0.9), maxf(2.0, 0.4 * sc))
 
-	# 6. Water fountain & stone well
+	# 5b. OGR Bay 01 vs Closed Pods floor detail + Gate line
+	var bay1 := world_rect_to_canvas(Rect2(Vector2(99.5, 9.0), Vector2(6.3, 5.5)))
+	draw_rect(bay1, Color(0.22, 0.65, 0.52, 0.32), true)
+	draw_rect(bay1, Color(0.35, 0.95, 0.72, 0.85), false, 1.2)
+	for closed_pod in [
+		Rect2(Vector2(100.9, -9.1), Vector2(6.3, 5.5)),
+		Rect2(Vector2(109.3, -9.1), Vector2(6.3, 5.5)),
+		Rect2(Vector2(113.5, 9.0), Vector2(6.3, 5.5))
+	]:
+		var pr := world_rect_to_canvas(closed_pod)
+		draw_rect(pr, Color(0.38, 0.22, 0.24, 0.35), true)
+		draw_rect(pr, Color(0.85, 0.46, 0.38, 0.75), false, 1.0)
+	var gate_a := world_to_canvas(Vector2(96.15, 0.35))
+	var gate_b := world_to_canvas(Vector2(96.15, 5.15))
+	var ogr_open := is_instance_valid(ContractManager) and ContractManager.is_ogr_unlocked()
+	draw_line(gate_a, gate_b, Color(0.35, 0.98, 0.68, 0.95) if ogr_open else Color(1.0, 0.42, 0.34, 0.95), maxf(2.5, 0.45 * sc))
+
+	# 6. Water fountain, well & pond
 	for wc in geo["water_circles"]:
 		var cpos := world_to_canvas(wc["pos"])
 		var cr := maxf(4.0, float(wc["r"]) * sc)
@@ -152,7 +281,7 @@ func _draw() -> void:
 	_draw_label_centered(font, world_to_canvas(Vector2(-1.0, -11.4)), "BORGO SAN CARLO", 12, Color(0.65, 0.78, 0.88, 0.72))
 	_draw_label_centered(font, world_to_canvas(Vector2(43.0, 20.8)), "VIALE EST", 11, Color(0.75, 0.78, 0.84, 0.6))
 	_draw_label_centered(font, world_to_canvas(Vector2(76.0, 16.2)), "BORGO VALDOCCO", 12, Color(0.95, 0.84, 0.45, 0.7))
-	_draw_label_centered(font, world_to_canvas(Vector2(78.5, -12.0)), "MERCATO NORD · OGR", 11, Color(0.98, 0.76, 0.48, 0.78))
+	_draw_label_centered(font, world_to_canvas(Vector2(92.0, -12.0)), "MERCATO NORD · OGR TECH HUB", 11, Color(0.62, 0.92, 1.0, 0.82))
 
 	# 8. Waypoint path from player
 	var wp := GameManager.active_waypoint
@@ -185,7 +314,7 @@ func _draw() -> void:
 		var bw := maxf(10.0, fp.x * sc)
 		var bh := maxf(10.0, fp.y * sc)
 		var brect := Rect2(c - Vector2(bw, bh) * 0.5, Vector2(bw, bh))
-		draw_rect(brect, Color(col.r, col.g, col.b, 0.35), true)
+		draw_rect(brect, Color(col.r, col.g, col.b, 0.30 if pid == "coworking_ogr" else 0.35), true)
 		draw_rect(brect, col, false, 2.0 if (pid == selected_poi_id or pid == hovered_poi_id) else 1.3)
 
 		var dot_r := 6.5 if (pid == selected_poi_id or pid == hovered_poi_id) else 5.0
@@ -233,7 +362,6 @@ func _draw() -> void:
 		dir2 = dir2.normalized()
 		var ang := dir2.angle()
 
-		# FOV Cone
 		var cone_len := maxf(22.0, 4.5 * sc)
 		var spread := deg_to_rad(28.0)
 		var pts := PackedVector2Array([
@@ -243,14 +371,13 @@ func _draw() -> void:
 		])
 		draw_colored_polygon(pts, Color(0.30, 0.95, 1.0, 0.22))
 
-		# Player arrow triangle
 		var tip := pc + dir2 * 10.5
 		var left_v := pc + Vector2.from_angle(ang + deg_to_rad(142.0)) * 8.0
 		var right_v := pc + Vector2.from_angle(ang - deg_to_rad(142.0)) * 8.0
 		draw_colored_polygon(PackedVector2Array([tip, left_v, right_v]), Color(0.25, 0.98, 1.0))
 		draw_polyline(PackedVector2Array([tip, left_v, right_v, tip]), Color(0.05, 0.10, 0.16), 1.6)
 
-	# 11. Compass & Scale Bar
+	# 11. Compass & Scale Bar + Zoom pill
 	var comp := Vector2(size.x - 28.0, 26.0)
 	draw_circle(comp, 16.0, Color(0.08, 0.10, 0.15, 0.85))
 	draw_arc(comp, 16.0, 0.0, TAU, 24, Color(0.45, 0.55, 0.70, 0.8), 1.2)
@@ -259,12 +386,13 @@ func _draw() -> void:
 	_draw_label_centered(font, comp + Vector2(0, 13), "S", 9, Color(0.8, 0.85, 0.9))
 	_draw_label_centered(font, comp + Vector2(-11, 3), "O", 9, Color(0.8, 0.85, 0.9))
 
-	var bar_len := 10.0 * sc
+	var bar_len := clampf(10.0 * sc, 24.0, 140.0)
+	var meters := roundi(bar_len / maxf(0.01, sc))
 	var bar_p := Vector2(14.0, size.y - 14.0)
 	draw_line(bar_p, bar_p + Vector2(bar_len, 0), Color(0.85, 0.90, 0.96, 0.8), 2.0)
 	draw_line(bar_p + Vector2(0, -4), bar_p + Vector2(0, 4), Color(0.85, 0.90, 0.96, 0.8), 1.5)
 	draw_line(bar_p + Vector2(bar_len, -4), bar_p + Vector2(bar_len, 4), Color(0.85, 0.90, 0.96, 0.8), 1.5)
-	draw_string(font, bar_p + Vector2(0, -6), "10 m", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.85, 0.90, 0.96, 0.85))
+	draw_string(font, bar_p + Vector2(0, -6), "%d m · Zoom %d%%" % [meters, int(roundf(_zoom * 100.0))], HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color(0.85, 0.90, 0.96, 0.88))
 
 func _draw_label_centered(font: Font, pos: Vector2, txt: String, fsize: int, col: Color) -> void:
 	if font == null or txt == "":

@@ -1,18 +1,35 @@
 extends Control
 ## ComputerScreen - Simulated Desktop Operating System (TO-OS 26.4 Torino Edition)
-## Complete with Mail, Freelance Hub, Hardware Shop, Bank, 19" Rack Manager & Talent Hub
+## Desktop moderno con sfondo geometrico, App Grid selezionabile, Bottom Dock,
+## Posta, Freelance Hub, TorinoHardware, Banca, Rack Manager, Talent Hub,
+## Potenziamenti ★ e OGR Enterprise.
 
+@onready var desktop_wallpaper: ColorRect = $DesktopWallpaper
 @onready var top_balance_label: Label = $TopBar/HBox/BalanceLabel
+@onready var stars_label: Label = $TopBar/HBox/StarsLabel
 @onready var clock_label: Label = $TopBar/HBox/ClockLabel
+@onready var wifi_label: Label = $TopBar/HBox/WifiLabel
 @onready var exit_button: Button = $TopBar/HBox/ExitButton
+@onready var windows_root: Control = $Windows
 
-# App windows
+# App windows (scena + finestre procedurali TO-OS 26.4)
 @onready var mail_window: PanelContainer = $Windows/MailWindow
 @onready var freelance_window: PanelContainer = $Windows/FreelanceWindow
 @onready var shop_window: PanelContainer = $Windows/ShopWindow
 @onready var bank_window: PanelContainer = $Windows/BankWindow
 @onready var rack_window: PanelContainer = $Windows/RackWindow
 @onready var talent_window: PanelContainer = $Windows/TalentWindow
+var upgrades_window: PanelContainer = null
+var ogr_window: PanelContainer = null
+
+# Desktop & Dock (TO-OS 26.4)
+var desktop_area: Control = null
+var desktop_hero_title: Label = null
+var desktop_hero_sub: Label = null
+var desktop_apps_scroll: ScrollContainer = null
+var desktop_apps_grid: GridContainer = null
+var bottom_dock: Control = null
+var dock_row: HBoxContainer = null
 
 # Mail Window components
 @onready var mail_list: ItemList = $Windows/MailWindow/Margin/VBox/Split/MailList
@@ -51,22 +68,51 @@ extends Control
 @onready var cool_boost_btn: Button = $Windows/RackWindow/Margin/VBox/CoolingRow/CoolBoostBtn
 @onready var recalibrate_btn: Button = $Windows/RackWindow/Margin/VBox/CoolingRow/RecalibrateBtn
 @onready var domains_text: RichTextLabel = $Windows/RackWindow/Margin/VBox/Split/DomainsPanel/VBox/DomainsText
-@onready var buy_blade_btn: Button = $Windows/RackWindow/Margin/VBox/Split/ModulesPanel/VBox/BuyBladeBtn
-@onready var buy_liquid_btn: Button = $Windows/RackWindow/Margin/VBox/Split/ModulesPanel/VBox/BuyLiquidBtn
-@onready var buy_san_btn: Button = $Windows/RackWindow/Margin/VBox/Split/ModulesPanel/VBox/BuySanBtn
-@onready var upgrade_tier2_btn: Button = $Windows/RackWindow/Margin/VBox/Split/ModulesPanel/VBox/UpgradeTier2Btn
-@onready var upgrade_tier3_btn: Button = $Windows/RackWindow/Margin/VBox/Split/ModulesPanel/VBox/UpgradeTier3Btn
+@onready var buy_blade_btn: Button = $Windows/RackWindow/Margin/VBox/Split/ModulesPanel/ModulesScroll/VBox/BuyBladeBtn
+@onready var buy_liquid_btn: Button = $Windows/RackWindow/Margin/VBox/Split/ModulesPanel/ModulesScroll/VBox/BuyLiquidBtn
+@onready var buy_san_btn: Button = $Windows/RackWindow/Margin/VBox/Split/ModulesPanel/ModulesScroll/VBox/BuySanBtn
+@onready var upgrade_tier2_btn: Button = $Windows/RackWindow/Margin/VBox/Split/ModulesPanel/ModulesScroll/VBox/UpgradeTier2Btn
+@onready var upgrade_tier3_btn: Button = $Windows/RackWindow/Margin/VBox/Split/ModulesPanel/ModulesScroll/VBox/UpgradeTier3Btn
 
 # Talent Hub components
 @onready var talent_stats_label: Label = $Windows/TalentWindow/Margin/VBox/StatsBanner/StatsLabel
 @onready var candidates_list: VBoxContainer = $Windows/TalentWindow/Margin/VBox/CandidatesScroll/CandidatesList
 @onready var firewall_icon: Button = $DesktopIcons/Scroll/VBox/FirewallIcon
 
+# Upgrades ★ & OGR Enterprise dynamic sub-nodes
+var upgrades_stars_banner_label: Label = null
+var upgrades_grid: GridContainer = null
+var ogr_banner_label: Label = null
+var ogr_banner_actions: HFlowContainer = null
+var ogr_content_vbox: VBoxContainer = null
+
 var emails: Array[Dictionary] = []
 var _selected_email_cid: String = ""
+var _app_tiles: Dictionary = {} # app_id -> {btn, badge, accent}
+var _dock_buttons: Dictionary = {} # app_id -> Button
+var _dock_short_labels: Dictionary = {}
+var _dock_wide_labels: Dictionary = {}
+var _window_compact_state: Dictionary = {} # PanelContainer -> bool
+var _active_app_id: String = "desktop"
+
+const APP_CATALOG: Array[Dictionary] = [
+	{"id": "mail", "icon": "✉", "title": "Posta / Mail", "sub": "Email & Consegne", "dock_s": "✉ Mail", "dock_w": "✉ Posta", "accent": Color(0.45, 0.88, 1.0)},
+	{"id": "freelance", "icon": "💼", "title": "Freelance Hub", "sub": "Contratti & Lead B2B", "dock_s": "💼 Hub", "dock_w": "💼 Freelance", "accent": Color(1.0, 0.82, 0.35)},
+	{"id": "webforge", "icon": "⚡", "title": "WebForge IDE", "sub": "Sviluppo Siti 5.0", "dock_s": "⚡ IDE", "dock_w": "⚡ WebForge", "accent": Color(0.32, 0.96, 1.0)},
+	{"id": "shop", "icon": "🛒", "title": "TorinoHardware", "sub": "Studio & Ricambi", "dock_s": "🛒 Shop", "dock_w": "🛒 Shop", "accent": Color(0.45, 1.0, 0.68)},
+	{"id": "bank", "icon": "🏛", "title": "Banca & Spese", "sub": "Conto Startup", "dock_s": "🏛 €", "dock_w": "🏛 Banca", "accent": Color(0.35, 1.0, 0.58)},
+	{"id": "rack", "icon": "🖥", "title": "Rack Manager", "sub": "Cluster 19\" Cloud", "dock_s": "🖥 Rack", "dock_w": "🖥 Rack 19\"", "accent": Color(0.38, 0.85, 1.0)},
+	{"id": "talent", "icon": "👥", "title": "Talent Hub HR", "sub": "Team & Sede", "dock_s": "👥 HR", "dock_w": "👥 Talent HR", "accent": Color(0.84, 0.70, 1.0)},
+	{"id": "firewall", "icon": "🛡", "title": "NetShield Cyber", "sub": "Reti, VLAN & DMZ", "dock_s": "🛡 Net", "dock_w": "🛡 NetShield", "accent": Color(1.0, 0.62, 0.25)},
+	{"id": "upgrades", "icon": "★", "title": "Potenziamenti ★", "sub": "Albero Abilità", "dock_s": "★ Skill", "dock_w": "★ Skill Tree", "accent": Color(1.0, 0.86, 0.30)},
+	{"id": "ogr", "icon": "🏢", "title": "OGR Enterprise", "sub": "Appalti Corporate", "dock_s": "🏢 OGR", "dock_w": "🏢 OGR Corp", "accent": Color(0.40, 0.95, 0.92)}
+]
 
 func _ready() -> void:
 	visible = false
+	_build_to_os_desktop_and_apps()
+	_enhance_all_window_headers()
+
 	EventBus.computer_opened.connect(_on_computer_opened)
 	EventBus.computer_closed.connect(_on_computer_closed)
 	EventBus.funds_changed.connect(_on_funds_changed)
@@ -76,11 +122,30 @@ func _ready() -> void:
 		_update_shop_buttons()
 		_setup_emails()
 		_update_rack_display()
+		_update_ogr_display()
+		_refresh_desktop_badges()
 	)
-	
+	EventBus.stars_changed.connect(func(_s, _d, _r):
+		_update_top_bar()
+		_update_upgrades_display()
+		_update_ogr_display()
+		_refresh_desktop_badges()
+	)
+	EventBus.upgrade_purchased.connect(func(_uid, _rk):
+		_update_top_bar()
+		_update_upgrades_display()
+		_update_ogr_display()
+		_update_rack_display()
+		_refresh_desktop_badges()
+	)
+	EventBus.ogr_hub_unlocked.connect(func():
+		_update_ogr_display()
+		_refresh_desktop_badges()
+	)
+
 	exit_button.pressed.connect(_on_exit_pressed)
-	
-	# Desktop icons
+
+	# Legacy sidebar icons (nascosti ma mantenuti connessi per compatibilità)
 	$DesktopIcons/Scroll/VBox/MailIcon.pressed.connect(func(): _open_window(mail_window))
 	$DesktopIcons/Scroll/VBox/FreelanceIcon.pressed.connect(func(): _open_window(freelance_window))
 	$DesktopIcons/Scroll/VBox/WebForgeIcon.pressed.connect(_launch_webforge)
@@ -89,15 +154,13 @@ func _ready() -> void:
 	$DesktopIcons/Scroll/VBox/RackIcon.pressed.connect(func(): _open_window(rack_window))
 	$DesktopIcons/Scroll/VBox/TalentIcon.pressed.connect(func(): _open_window(talent_window))
 	firewall_icon.pressed.connect(_launch_firewall)
-	
-	# Close buttons for windows
-	$Windows/MailWindow/Margin/VBox/Header/CloseBtn.pressed.connect(func(): mail_window.visible = false)
-	$Windows/FreelanceWindow/Margin/VBox/Header/CloseBtn.pressed.connect(func(): freelance_window.visible = false)
-	$Windows/ShopWindow/Margin/VBox/Header/CloseBtn.pressed.connect(func(): shop_window.visible = false)
-	$Windows/BankWindow/Margin/VBox/Header/CloseBtn.pressed.connect(func(): bank_window.visible = false)
-	$Windows/RackWindow/Margin/VBox/Header/CloseBtn.pressed.connect(func(): rack_window.visible = false)
-	$Windows/TalentWindow/Margin/VBox/Header/CloseBtn.pressed.connect(func(): talent_window.visible = false)
-	
+
+	# Window buttons close -> return to TO-OS Desktop
+	for win in _all_windows():
+		var close_btn := win.get_node_or_null("Margin/VBox/Header/CloseBtn") as Button
+		if close_btn:
+			close_btn.pressed.connect(_show_desktop)
+
 	mail_list.item_selected.connect(_on_mail_selected)
 	deliver_project_btn.pressed.connect(_on_deliver_project_pressed)
 	open_webforge_btn.pressed.connect(_launch_webforge)
@@ -105,7 +168,7 @@ func _ready() -> void:
 	buy_chair_btn.pressed.connect(_buy_chair)
 	buy_plant_btn.pressed.connect(_buy_plant)
 	buy_server_btn.pressed.connect(_buy_server)
-	
+
 	# Rack Manager buttons
 	cool_silent_btn.pressed.connect(func(): ServerRackManager.set_cooling_mode("silent"))
 	cool_auto_btn.pressed.connect(func(): ServerRackManager.set_cooling_mode("auto"))
@@ -116,31 +179,550 @@ func _ready() -> void:
 	buy_san_btn.pressed.connect(_buy_san)
 	upgrade_tier2_btn.pressed.connect(func(): ServerRackManager.upgrade_rack_tier(2); _update_rack_display())
 	upgrade_tier3_btn.pressed.connect(func(): ServerRackManager.upgrade_rack_tier(3); _update_rack_display())
-	
+
 	ServerRackManager.telemetry_updated.connect(_on_rack_telemetry)
 	EventBus.employee_hired.connect(func(_id, _n):
 		_update_talent_display()
 		_update_freelance_display()
+		_update_ogr_display()
+		_refresh_desktop_badges()
 	)
 	EventBus.employee_fired.connect(func(_id):
 		_update_talent_display()
 		_update_freelance_display()
+		_update_ogr_display()
+		_refresh_desktop_badges()
 	)
 	if ShopManager.has_signal("hardware_changed"):
 		ShopManager.hardware_changed.connect(func():
 			_update_shop_buttons()
 			_update_freelance_display()
+			_update_ogr_display()
 		)
-	
+
 	_setup_emails()
 	_update_shop_buttons()
 	_update_freelance_display()
+	_update_upgrades_display()
+	_update_ogr_display()
+	_update_top_bar()
+	_show_desktop()
+
+	resized.connect(_update_responsive_layout)
+	_update_responsive_layout()
+
 	EventBus.time_tick.connect(func(_h, _m, _d):
 		_update_top_bar()
 		if visible and freelance_window.visible:
 			_update_lead_banner_only()
 	)
-	EventBus.contract_marketplace_refreshed.connect(_update_freelance_display)
+	EventBus.contract_marketplace_refreshed.connect(func():
+		_update_freelance_display()
+		_update_ogr_display()
+		_refresh_desktop_badges()
+	)
+
+func _all_windows() -> Array[PanelContainer]:
+	var arr: Array[PanelContainer] = [mail_window, freelance_window, shop_window, bank_window, rack_window, talent_window]
+	if upgrades_window:
+		arr.append(upgrades_window)
+	if ogr_window:
+		arr.append(ogr_window)
+	return arr
+
+func _make_frosted_style(bg: Color, border: Color, radius: int = 10, bw: int = 1) -> StyleBoxFlat:
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = bg
+	sb.border_color = border
+	sb.set_border_width_all(bw)
+	sb.set_corner_radius_all(radius)
+	return sb
+
+func _build_to_os_desktop_and_apps() -> void:
+	# 1. DesktopArea (sopra DesktopWallpaper, sotto $Windows)
+	desktop_area = Control.new()
+	desktop_area.name = "DesktopArea"
+	desktop_area.set_anchors_preset(Control.PRESET_FULL_RECT)
+	desktop_area.offset_left = 18.0
+	desktop_area.offset_top = 52.0
+	desktop_area.offset_right = -18.0
+	desktop_area.offset_bottom = -64.0
+	desktop_area.mouse_filter = Control.MOUSE_FILTER_PASS
+	add_child(desktop_area)
+	move_child(desktop_area, windows_root.get_index())
+
+	var d_vbox := VBoxContainer.new()
+	d_vbox.name = "DesktopVBox"
+	d_vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
+	d_vbox.add_theme_constant_override("separation", 10)
+	desktop_area.add_child(d_vbox)
+
+	# Hero banner trasparente
+	var hero := PanelContainer.new()
+	hero.name = "HeroBanner"
+	var hero_sb := _make_frosted_style(Color(0.055, 0.105, 0.175, 0.72), Color(0.32, 0.78, 0.96, 0.38), 10, 1)
+	hero_sb.set_content_margin_all(10)
+	hero.add_theme_stylebox_override("panel", hero_sb)
+	d_vbox.add_child(hero)
+
+	var h_vbox := VBoxContainer.new()
+	h_vbox.add_theme_constant_override("separation", 2)
+	hero.add_child(h_vbox)
+
+	desktop_hero_title = Label.new()
+	desktop_hero_title.text = "❖ DESKTOP TO-OS 26.4 — WORKSPACE TORINO"
+	desktop_hero_title.add_theme_font_size_override("font_size", 15)
+	desktop_hero_title.add_theme_color_override("font_color", Color(0.55, 0.92, 1.0))
+	desktop_hero_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	h_vbox.add_child(desktop_hero_title)
+
+	desktop_hero_sub = Label.new()
+	desktop_hero_sub.text = "Seleziona un'app qui sotto o usa la barra rapida in basso."
+	desktop_hero_sub.add_theme_font_size_override("font_size", 12)
+	desktop_hero_sub.add_theme_color_override("font_color", Color(0.80, 0.89, 0.96))
+	desktop_hero_sub.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	h_vbox.add_child(desktop_hero_sub)
+
+	# Griglia App centrata
+	desktop_apps_scroll = ScrollContainer.new()
+	desktop_apps_scroll.name = "AppsScroll"
+	desktop_apps_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	desktop_apps_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	desktop_apps_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	d_vbox.add_child(desktop_apps_scroll)
+
+	var center_box := CenterContainer.new()
+	center_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	center_box.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	desktop_apps_scroll.add_child(center_box)
+
+	desktop_apps_grid = GridContainer.new()
+	desktop_apps_grid.name = "DesktopAppsGrid"
+	desktop_apps_grid.columns = 5
+	desktop_apps_grid.add_theme_constant_override("h_separation", 12)
+	desktop_apps_grid.add_theme_constant_override("v_separation", 12)
+	center_box.add_child(desktop_apps_grid)
+
+	for app in APP_CATALOG:
+		var aid := str(app["id"])
+		var acc: Color = app["accent"]
+
+		var tile_btn := Button.new()
+		tile_btn.name = "AppTile_" + aid
+		tile_btn.custom_minimum_size = Vector2(146, 86)
+		tile_btn.focus_mode = Control.FOCUS_NONE
+		tile_btn.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+
+		var n_sb := _make_frosted_style(Color(0.075, 0.135, 0.215, 0.82), Color(acc.r, acc.g, acc.b, 0.45), 10, 1)
+		n_sb.set_content_margin_all(8)
+		var h_sb := _make_frosted_style(Color(0.115, 0.215, 0.325, 0.94), Color(acc.r, acc.g, acc.b, 0.95), 10, 2)
+		h_sb.set_content_margin_all(8)
+		var p_sb := _make_frosted_style(Color(0.055, 0.110, 0.180, 0.96), acc, 10, 2)
+		p_sb.set_content_margin_all(8)
+		tile_btn.add_theme_stylebox_override("normal", n_sb)
+		tile_btn.add_theme_stylebox_override("hover", h_sb)
+		tile_btn.add_theme_stylebox_override("pressed", p_sb)
+
+		var tv := VBoxContainer.new()
+		tv.set_anchors_preset(Control.PRESET_FULL_RECT)
+		tv.offset_left = 8
+		tv.offset_top = 6
+		tv.offset_right = -8
+		tv.offset_bottom = -6
+		tv.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		tv.add_theme_constant_override("separation", 2)
+		tile_btn.add_child(tv)
+
+		var top_line := HBoxContainer.new()
+		top_line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		tv.add_child(top_line)
+
+		var ico_lbl := Label.new()
+		ico_lbl.text = str(app["icon"])
+		ico_lbl.add_theme_font_size_override("font_size", 20)
+		ico_lbl.add_theme_color_override("font_color", acc)
+		ico_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		top_line.add_child(ico_lbl)
+
+		var sp := Control.new()
+		sp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		sp.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		top_line.add_child(sp)
+
+		var badge_lbl := Label.new()
+		badge_lbl.text = ""
+		badge_lbl.add_theme_font_size_override("font_size", 10)
+		badge_lbl.add_theme_color_override("font_color", acc)
+		badge_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		top_line.add_child(badge_lbl)
+
+		var title_lbl := Label.new()
+		title_lbl.text = str(app["title"])
+		title_lbl.add_theme_font_size_override("font_size", 13)
+		title_lbl.add_theme_color_override("font_color", Color(0.95, 0.97, 1.0))
+		title_lbl.clip_text = true
+		title_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		tv.add_child(title_lbl)
+
+		var sub_lbl := Label.new()
+		sub_lbl.text = str(app["sub"])
+		sub_lbl.add_theme_font_size_override("font_size", 10)
+		sub_lbl.add_theme_color_override("font_color", Color(0.68, 0.78, 0.88))
+		sub_lbl.clip_text = true
+		sub_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		tv.add_child(sub_lbl)
+
+		var aid_copy := aid
+		tile_btn.pressed.connect(func(): open_app(aid_copy))
+		desktop_apps_grid.add_child(tile_btn)
+		_app_tiles[aid] = {"btn": tile_btn, "badge": badge_lbl, "sub": sub_lbl, "accent": acc}
+
+	# 2. BottomDock (pill trasparente centrata in basso)
+	bottom_dock = Control.new()
+	bottom_dock.name = "BottomDock"
+	bottom_dock.anchor_left = 0.0
+	bottom_dock.anchor_top = 1.0
+	bottom_dock.anchor_right = 1.0
+	bottom_dock.anchor_bottom = 1.0
+	bottom_dock.offset_top = -54.0
+	bottom_dock.offset_bottom = -8.0
+	bottom_dock.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(bottom_dock)
+
+	var dock_center := CenterContainer.new()
+	dock_center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dock_center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bottom_dock.add_child(dock_center)
+
+	var dock_panel := PanelContainer.new()
+	dock_panel.name = "DockPanel"
+	var dock_sb := _make_frosted_style(Color(0.05, 0.085, 0.14, 0.90), Color(0.32, 0.72, 0.92, 0.42), 12, 1)
+	dock_sb.content_margin_left = 8
+	dock_sb.content_margin_right = 8
+	dock_sb.content_margin_top = 4
+	dock_sb.content_margin_bottom = 4
+	dock_panel.add_theme_stylebox_override("panel", dock_sb)
+	dock_center.add_child(dock_panel)
+
+	dock_row = HBoxContainer.new()
+	dock_row.name = "DockRow"
+	dock_row.add_theme_constant_override("separation", 4)
+	dock_panel.add_child(dock_row)
+
+	_add_dock_button("desktop", "❖ OS", "❖ Desktop", "Torna al Desktop TO-OS", Color(0.55, 0.92, 1.0))
+	for app in APP_CATALOG:
+		_add_dock_button(str(app["id"]), str(app["dock_s"]), str(app["dock_w"]), str(app["title"]), app["accent"])
+
+	# 3. Finestre procedurali: Potenziamenti ★ e OGR Enterprise
+	_build_upgrades_window()
+	_build_ogr_window()
+
+func _add_dock_button(app_id: String, short_lbl: String, wide_lbl: String, tip: String, accent: Color) -> void:
+	var btn := Button.new()
+	btn.name = "Dock_" + app_id
+	btn.text = short_lbl
+	btn.tooltip_text = tip
+	btn.focus_mode = Control.FOCUS_NONE
+	btn.custom_minimum_size = Vector2(54, 34)
+	btn.add_theme_font_size_override("font_size", 11)
+	btn.add_theme_color_override("font_color", accent)
+	btn.pressed.connect(func():
+		if app_id == "desktop":
+			SoundManager.play_ui_click()
+			_show_desktop()
+		else:
+			open_app(app_id)
+	)
+	dock_row.add_child(btn)
+	_dock_buttons[app_id] = btn
+	_dock_short_labels[app_id] = short_lbl
+	_dock_wide_labels[app_id] = wide_lbl
+
+func _create_window_shell(node_name: String, title_text: String, title_col: Color) -> Dictionary:
+	var win := PanelContainer.new()
+	win.name = node_name
+	win.visible = false
+	win.set_anchors_preset(Control.PRESET_FULL_RECT)
+	win.add_theme_stylebox_override("panel", _make_frosted_style(Color(0.075, 0.115, 0.180, 0.91), Color(0.32, 0.72, 0.92, 0.55), 10, 1))
+	windows_root.add_child(win)
+
+	var margin := MarginContainer.new()
+	margin.name = "Margin"
+	margin.add_theme_constant_override("margin_left", 16)
+	margin.add_theme_constant_override("margin_top", 12)
+	margin.add_theme_constant_override("margin_right", 16)
+	margin.add_theme_constant_override("margin_bottom", 16)
+	win.add_child(margin)
+
+	var vbox := VBoxContainer.new()
+	vbox.name = "VBox"
+	vbox.add_theme_constant_override("separation", 10)
+	margin.add_child(vbox)
+
+	var header := HBoxContainer.new()
+	header.name = "Header"
+	header.add_theme_constant_override("separation", 6)
+	vbox.add_child(header)
+
+	var title := Label.new()
+	title.name = "Title"
+	title.text = title_text
+	title.add_theme_font_size_override("font_size", 15)
+	title.add_theme_color_override("font_color", title_col)
+	header.add_child(title)
+
+	var spacer := Control.new()
+	spacer.name = "Spacer"
+	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	header.add_child(spacer)
+
+	var close_btn := Button.new()
+	close_btn.name = "CloseBtn"
+	close_btn.text = " ✕ "
+	header.add_child(close_btn)
+
+	return {"win": win, "vbox": vbox}
+
+func _build_upgrades_window() -> void:
+	var shell := _create_window_shell("UpgradesWindow", "POTENZIAMENTI ★ — ALBERO ABILITÀ STARTUP", Color(1.0, 0.86, 0.35))
+	upgrades_window = shell["win"]
+	var vbox: VBoxContainer = shell["vbox"]
+
+	var banner := PanelContainer.new()
+	banner.add_theme_stylebox_override("panel", _make_frosted_style(Color(0.115, 0.168, 0.245, 0.90), Color(0.95, 0.78, 0.25, 0.45), 8, 1))
+	var bm := MarginContainer.new()
+	bm.add_theme_constant_override("margin_left", 10)
+	bm.add_theme_constant_override("margin_right", 10)
+	bm.add_theme_constant_override("margin_top", 8)
+	bm.add_theme_constant_override("margin_bottom", 8)
+	banner.add_child(bm)
+
+	upgrades_stars_banner_label = Label.new()
+	upgrades_stars_banner_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	upgrades_stars_banner_label.add_theme_font_size_override("font_size", 12)
+	upgrades_stars_banner_label.add_theme_color_override("font_color", Color(1.0, 0.92, 0.62))
+	bm.add_child(upgrades_stars_banner_label)
+	vbox.add_child(banner)
+
+	var sc := ScrollContainer.new()
+	sc.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	vbox.add_child(sc)
+
+	upgrades_grid = GridContainer.new()
+	upgrades_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	upgrades_grid.columns = 2
+	upgrades_grid.add_theme_constant_override("h_separation", 12)
+	upgrades_grid.add_theme_constant_override("v_separation", 12)
+	sc.add_child(upgrades_grid)
+
+func _build_ogr_window() -> void:
+	var shell := _create_window_shell("OgrWindow", "OGR TECH HUB TORINO — APPALTI ENTERPRISE", Color(0.42, 0.94, 1.0))
+	ogr_window = shell["win"]
+	var vbox: VBoxContainer = shell["vbox"]
+
+	var banner := PanelContainer.new()
+	banner.add_theme_stylebox_override("panel", _make_frosted_style(Color(0.11, 0.165, 0.24, 0.90), Color(0.32, 0.78, 0.96, 0.50), 8, 1))
+	var bm := MarginContainer.new()
+	bm.add_theme_constant_override("margin_left", 10)
+	bm.add_theme_constant_override("margin_right", 10)
+	bm.add_theme_constant_override("margin_top", 8)
+	bm.add_theme_constant_override("margin_bottom", 8)
+	banner.add_child(bm)
+
+	var bv := VBoxContainer.new()
+	bv.add_theme_constant_override("separation", 6)
+	bm.add_child(bv)
+
+	ogr_banner_label = Label.new()
+	ogr_banner_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	ogr_banner_label.add_theme_font_size_override("font_size", 12)
+	ogr_banner_label.add_theme_color_override("font_color", Color(0.84, 0.95, 1.0))
+	bv.add_child(ogr_banner_label)
+
+	ogr_banner_actions = HFlowContainer.new()
+	ogr_banner_actions.add_theme_constant_override("h_separation", 8)
+	ogr_banner_actions.add_theme_constant_override("v_separation", 6)
+	bv.add_child(ogr_banner_actions)
+	vbox.add_child(banner)
+
+	var sc := ScrollContainer.new()
+	sc.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	vbox.add_child(sc)
+
+	ogr_content_vbox = VBoxContainer.new()
+	ogr_content_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	ogr_content_vbox.add_theme_constant_override("separation", 10)
+	sc.add_child(ogr_content_vbox)
+
+func _enhance_all_window_headers() -> void:
+	for win in _all_windows():
+		_window_compact_state[win] = false
+		var hdr := win.get_node_or_null("Margin/VBox/Header") as HBoxContainer
+		if hdr == null:
+			continue
+		var close_btn := hdr.get_node_or_null("CloseBtn") as Button
+		if close_btn == null:
+			continue
+		close_btn.focus_mode = Control.FOCUS_NONE
+
+		var min_btn := Button.new()
+		min_btn.name = "MinBtn"
+		min_btn.text = " _ "
+		min_btn.tooltip_text = "Riduci sul Desktop"
+		min_btn.focus_mode = Control.FOCUS_NONE
+		min_btn.pressed.connect(func():
+			SoundManager.play_ui_click()
+			_show_desktop()
+		)
+		hdr.add_child(min_btn)
+		hdr.move_child(min_btn, close_btn.get_index())
+
+		var max_btn := Button.new()
+		max_btn.name = "MaxBtn"
+		max_btn.text = " □ "
+		max_btn.tooltip_text = "Alterna Finestra Compatta / Schermo Intero"
+		max_btn.focus_mode = Control.FOCUS_NONE
+		var w_ref := win
+		max_btn.pressed.connect(func():
+			SoundManager.play_ui_click()
+			_toggle_window_compact(w_ref)
+		)
+		hdr.add_child(max_btn)
+		hdr.move_child(max_btn, close_btn.get_index())
+
+func _toggle_window_compact(win: PanelContainer) -> void:
+	var next_compact := not bool(_window_compact_state.get(win, false))
+	_window_compact_state[win] = next_compact
+	if next_compact:
+		win.anchor_left = 0.06
+		win.anchor_top = 0.05
+		win.anchor_right = 0.94
+		win.anchor_bottom = 0.95
+	else:
+		win.anchor_left = 0.0
+		win.anchor_top = 0.0
+		win.anchor_right = 1.0
+		win.anchor_bottom = 1.0
+	win.offset_left = 0.0
+	win.offset_top = 0.0
+	win.offset_right = 0.0
+	win.offset_bottom = 0.0
+
+func _update_responsive_layout() -> void:
+	var w := size.x if size.x > 10.0 else 1280.0
+	if wifi_label:
+		wifi_label.visible = (w >= 920.0)
+	if desktop_apps_grid:
+		var avail_w := w - 48.0
+		var cols := 5 if avail_w >= 900.0 else (4 if avail_w >= 650.0 else 3)
+		desktop_apps_grid.columns = cols
+		var tile_w := 168.0 if avail_w >= 1060.0 else 146.0
+		var tile_h := 94.0 if avail_w >= 1060.0 else 86.0
+		for aid in _app_tiles:
+			var tbtn := _app_tiles[aid]["btn"] as Button
+			if tbtn:
+				tbtn.custom_minimum_size = Vector2(tile_w, tile_h)
+	if upgrades_grid:
+		var u_avail := w - 72.0
+		upgrades_grid.columns = 2 if u_avail >= 560.0 else 1
+	var use_wide_dock := (w >= 1120.0)
+	for aid in _dock_buttons:
+		var db := _dock_buttons[aid] as Button
+		if db:
+			db.text = _dock_wide_labels[aid] if use_wide_dock else _dock_short_labels[aid]
+			db.custom_minimum_size = Vector2(82 if use_wide_dock else 54, 34)
+
+func _show_desktop() -> void:
+	_active_app_id = "desktop"
+	for w in _all_windows():
+		w.visible = false
+	if desktop_area:
+		desktop_area.visible = true
+	_refresh_desktop_badges()
+	_sync_dock_highlight()
+
+func open_app(app_id: String) -> void:
+	match app_id:
+		"mail":
+			_open_window(mail_window)
+		"freelance":
+			_open_window(freelance_window)
+		"webforge":
+			_launch_webforge()
+		"shop":
+			_open_window(shop_window)
+		"bank":
+			_open_window(bank_window)
+		"rack":
+			_open_window(rack_window)
+		"talent":
+			_open_window(talent_window)
+		"firewall":
+			_launch_firewall()
+		"upgrades":
+			_open_window(upgrades_window)
+		"ogr":
+			_open_window(ogr_window)
+		_:
+			_show_desktop()
+
+func _window_to_app_id(win: PanelContainer) -> String:
+	if win == mail_window: return "mail"
+	if win == freelance_window: return "freelance"
+	if win == shop_window: return "shop"
+	if win == bank_window: return "bank"
+	if win == rack_window: return "rack"
+	if win == talent_window: return "talent"
+	if win == upgrades_window: return "upgrades"
+	if win == ogr_window: return "ogr"
+	return "desktop"
+
+func _sync_dock_highlight() -> void:
+	for aid in _dock_buttons:
+		var btn := _dock_buttons[aid] as Button
+		if not btn:
+			continue
+		if aid == _active_app_id:
+			var hi := _make_frosted_style(Color(0.14, 0.30, 0.45, 0.96), Color(0.45, 0.92, 1.0, 0.95), 7, 1)
+			hi.content_margin_left = 6
+			hi.content_margin_right = 6
+			btn.add_theme_stylebox_override("normal", hi)
+		else:
+			btn.remove_theme_stylebox_override("normal")
+
+func _refresh_desktop_badges() -> void:
+	var stars_count := UpgradeManager.get_stars() if is_instance_valid(UpgradeManager) else 0
+	var ogr_open := ContractManager.is_ogr_unlocked()
+	if desktop_hero_sub:
+		var tier_n := GameManager.get_company_tier_name() if GameManager.has_method("get_company_tier_name") else "Studio"
+		var ogr_s := "OGR Sbloccata ✔" if ogr_open else "OGR 🔒 (Completa Via Po & Bellini)"
+		desktop_hero_sub.text = "Sede: %s · Rep: %d · Stelle: %d ★ · Lead Marketplace: %d · %s" % [
+			tier_n, GameManager.reputation_points, stars_count, ContractManager.marketplace_contracts.size(), ogr_s
+		]
+
+	if _app_tiles.has("mail"):
+		var ready_deliver := 0
+		for ac in ContractManager.active_contracts.values():
+			if ac is Dictionary and str(ac.get("status", "")) == "built":
+				ready_deliver += 1
+		(_app_tiles["mail"]["badge"] as Label).text = "%d pronte" % ready_deliver if ready_deliver > 0 else "%d mail" % emails.size()
+
+	if _app_tiles.has("freelance"):
+		var n_mkt := ContractManager.marketplace_contracts.size()
+		(_app_tiles["freelance"]["badge"] as Label).text = "%d offerte" % n_mkt if n_mkt > 0 else "Attivo"
+
+	if _app_tiles.has("upgrades"):
+		var buyable := 0
+		if is_instance_valid(UpgradeManager):
+			for up in UpgradeManager.get_all_upgrades():
+				if bool(up.get("can_afford", false)):
+					buyable += 1
+		(_app_tiles["upgrades"]["badge"] as Label).text = "%d ★ (%d ok)" % [stars_count, buyable] if buyable > 0 else "%d ★" % stars_count
+
+	if _app_tiles.has("ogr"):
+		(_app_tiles["ogr"]["badge"] as Label).text = ("Tier %d (%d)" % [UpgradeManager.get_enterprise_tier() if is_instance_valid(UpgradeManager) else 1, ContractManager.enterprise_contracts.size()]) if ogr_open else "🔒 Bloccato"
 
 func _on_computer_opened() -> void:
 	visible = true
@@ -152,7 +734,10 @@ func _on_computer_opened() -> void:
 	_update_shop_buttons()
 	_update_rack_display()
 	_update_talent_display()
-	_open_window(mail_window)
+	_update_upgrades_display()
+	_update_ogr_display()
+	_update_responsive_layout()
+	_show_desktop()
 
 func _on_computer_closed() -> void:
 	visible = false
@@ -164,47 +749,388 @@ func _on_exit_pressed() -> void:
 func _update_top_bar() -> void:
 	top_balance_label.text = "Fondi: € %0.2f" % EconomyManager.balance
 	clock_label.text = "%s - Giorno %d (%s)" % [CalendarSystem.get_formatted_time(), CalendarSystem.current_day, CalendarSystem.get_day_name()]
+	if stars_label:
+		stars_label.text = "★ %d" % (UpgradeManager.get_stars() if is_instance_valid(UpgradeManager) else 0)
 
 func _on_funds_changed(new_balance: float, _delta: float, _reason: String) -> void:
 	top_balance_label.text = "Fondi: € %0.2f" % new_balance
 	_update_shop_buttons()
 	_update_bank_display()
 	_update_rack_display()
+	_update_ogr_display()
 	if freelance_window.visible:
 		_update_freelance_display()
 
 func _on_contract_updated(_id: String, _status: String) -> void:
 	_update_freelance_display()
+	_update_ogr_display()
 	_setup_emails()
+	_refresh_desktop_badges()
 
 func _open_window(target_window: PanelContainer) -> void:
+	if target_window == null:
+		return
 	SoundManager.play_ui_click()
-	mail_window.visible = false
-	freelance_window.visible = false
-	shop_window.visible = false
-	bank_window.visible = false
-	rack_window.visible = false
-	talent_window.visible = false
+	if desktop_area:
+		desktop_area.visible = false
+	for w in _all_windows():
+		w.visible = false
 	target_window.visible = true
+	_active_app_id = _window_to_app_id(target_window)
+	_sync_dock_highlight()
+
 	if target_window == freelance_window:
 		_update_freelance_display()
 	elif target_window == shop_window:
 		_update_shop_buttons()
+	elif target_window == bank_window:
+		_update_bank_display()
+	elif target_window == rack_window:
+		_update_rack_display()
+	elif target_window == talent_window:
+		_update_talent_display()
+	elif target_window == upgrades_window:
+		_update_upgrades_display()
+	elif target_window == ogr_window:
+		_update_ogr_display()
 
+# ==============================================================================
+# POTENZIAMENTI ★ UI
+# ==============================================================================
+func _update_upgrades_display() -> void:
+	if not upgrades_window or not upgrades_grid:
+		return
+	for ch in upgrades_grid.get_children():
+		ch.queue_free()
+
+	var sc := UpgradeManager.get_stars() if is_instance_valid(UpgradeManager) else 0
+	var list := UpgradeManager.get_all_upgrades() if is_instance_valid(UpgradeManager) else []
+	var unlocked_total := 0
+	for item in list:
+		unlocked_total += int(item.get("rank", 0))
+	if upgrades_stars_banner_label:
+		upgrades_stars_banner_label.text = "★ Stelle Disponibili: %d ★  |  Livelli Sbloccati: %d / %d  —  Guadagna Stelle da Contratti, Bandi OGR, Notorietà e Lavoretti (ogni 2 = +1 ★)." % [
+			sc, unlocked_total, list.size() * UpgradeManager.MAX_RANK
+		]
+
+	for up in list:
+		var uid := str(up["id"])
+		var rk := int(up["rank"])
+		var max_rk := int(up["max_rank"])
+		var next_cost := int(up["next_cost"])
+		var can_buy := bool(up["can_afford"])
+		var labels: Array = up.get("effect_labels", [])
+
+		var border_col := Color(0.35, 1.0, 0.58, 0.78) if rk >= max_rk else (Color(1.0, 0.85, 0.30, 0.85) if can_buy else Color(0.30, 0.50, 0.72, 0.65))
+		var card := _make_hub_card(Color(0.11, 0.16, 0.24, 0.94), border_col)
+		card.custom_minimum_size = Vector2(220, 146)
+
+		var cv := VBoxContainer.new()
+		cv.add_theme_constant_override("separation", 5)
+		card.add_child(cv)
+
+		var top := HBoxContainer.new()
+		var t_lbl := Label.new()
+		t_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		t_lbl.text = "%s %s" % [str(up["icon"]), str(up["title"])]
+		t_lbl.add_theme_font_size_override("font_size", 14)
+		t_lbl.add_theme_color_override("font_color", Color(0.55, 0.92, 1.0))
+		t_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		top.add_child(t_lbl)
+
+		var stars_badge := Label.new()
+		stars_badge.text = "★".repeat(rk) + "☆".repeat(maxi(0, max_rk - rk))
+		stars_badge.add_theme_font_size_override("font_size", 13)
+		stars_badge.add_theme_color_override("font_color", Color(1.0, 0.86, 0.32))
+		top.add_child(stars_badge)
+		cv.add_child(top)
+
+		var sum_lbl := Label.new()
+		sum_lbl.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		sum_lbl.text = str(up["summary"])
+		sum_lbl.add_theme_font_size_override("font_size", 11)
+		sum_lbl.add_theme_color_override("font_color", Color(0.78, 0.85, 0.92))
+		sum_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		cv.add_child(sum_lbl)
+
+		var cur_eff := str(labels[rk]) if rk < labels.size() else "Attivo"
+		var eff_lbl := Label.new()
+		eff_lbl.add_theme_font_size_override("font_size", 11)
+		eff_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		if rk < max_rk and (rk + 1) < labels.size():
+			eff_lbl.text = "Attuale: %s  ➔  Prossimo: %s" % [cur_eff, str(labels[rk + 1])]
+			eff_lbl.add_theme_color_override("font_color", Color(0.60, 0.95, 0.72))
+		else:
+			eff_lbl.text = "Attuale: %s (Livello Massimo)" % cur_eff
+			eff_lbl.add_theme_color_override("font_color", Color(0.38, 1.0, 0.62))
+		cv.add_child(eff_lbl)
+
+		var act_btn := Button.new()
+		act_btn.custom_minimum_size = Vector2(0, 32)
+		act_btn.focus_mode = Control.FOCUS_NONE
+		if rk >= max_rk:
+			act_btn.text = "✔ POTENZIAMENTO AL MASSIMO (Lv.3/3)"
+			act_btn.disabled = true
+		else:
+			act_btn.text = "★ Sblocca Livello %d/%d — Costo: %d ★" % [rk + 1, max_rk, next_cost]
+			act_btn.disabled = not can_buy
+			if can_buy:
+				act_btn.add_theme_color_override("font_color", Color(1.0, 0.88, 0.30))
+			var uid_copy := uid
+			act_btn.pressed.connect(func():
+				if UpgradeManager.purchase(uid_copy):
+					_update_upgrades_display()
+					_update_top_bar()
+					_refresh_desktop_badges()
+			)
+		cv.add_child(act_btn)
+		upgrades_grid.add_child(card)
+
+# ==============================================================================
+# OGR ENTERPRISE UI
+# ==============================================================================
+func _update_ogr_display() -> void:
+	if not ogr_window or not ogr_content_vbox:
+		return
+	for ch in ogr_content_vbox.get_children():
+		ch.queue_free()
+	if ogr_banner_actions:
+		for ch in ogr_banner_actions.get_children():
+			ch.queue_free()
+
+	var unlocked := ContractManager.is_ogr_unlocked()
+	if not unlocked:
+		if ogr_banner_label:
+			ogr_banner_label.text = "🔒 ACCESSO OGR TECH HUB TORINO BLOCCATO — Completa le 4 missioni iniziali di San Carlo & Valdocco per aprire i cancelli OGR di Mercato Est."
+		if ogr_banner_actions:
+			var go_hub := Button.new()
+			go_hub.text = "💼 Apri Freelance Hub"
+			go_hub.pressed.connect(func(): _open_window(freelance_window))
+			ogr_banner_actions.add_child(go_hub)
+
+		var chk_card := _make_hub_card(Color(0.14, 0.16, 0.23, 0.92), Color(1.0, 0.58, 0.32, 0.75))
+		var cv := VBoxContainer.new()
+		cv.add_theme_constant_override("separation", 6)
+		chk_card.add_child(cv)
+
+		var hdr := Label.new()
+		hdr.text = "REQUISITI SBLOCCO CANCELLI OGR (ING. ANDREA VIALE):"
+		hdr.add_theme_font_size_override("font_size", 13)
+		hdr.add_theme_color_override("font_color", Color(1.0, 0.80, 0.40))
+		hdr.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		cv.add_child(hdr)
+
+		var steps := [
+			["Pizzeria Da Mario (Via Po 18)", ContractManager.is_contract_completed("pizzeria_da_mario")],
+			["Caffè San Carlo — Touch Web POS", ContractManager.is_contract_completed("caffe_san_carlo")],
+			["Elettronica TO — Migrazione Cloud", ContractManager.is_contract_completed("elettronica_to")],
+			["Maxi-Appalto Officina Bellini (4 Zone + 4 Pilastri)", ContractManager.is_contract_completed("factory_bellini") or bool(ContractManager.factory_state.get("completed", false))]
+		]
+		for st in steps:
+			var done := bool(st[1])
+			var line := Label.new()
+			line.text = "%s %s" % ["✔" if done else "○", str(st[0])]
+			line.add_theme_font_size_override("font_size", 12)
+			line.add_theme_color_override("font_color", Color(0.42, 1.0, 0.62) if done else Color(0.86, 0.88, 0.94))
+			line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			cv.add_child(line)
+		ogr_content_vbox.add_child(chk_card)
+		return
+
+	if ContractManager.enterprise_contracts.is_empty():
+		ContractManager.refresh_enterprise_contracts(true)
+
+	var ent_tier := UpgradeManager.get_enterprise_tier() if is_instance_valid(UpgradeManager) else 1
+	var ent_bonus_pct := roundi((UpgradeManager.get_enterprise_payout_mult() - 1.0) * 100.0) if is_instance_valid(UpgradeManager) else 0
+	if ogr_banner_label:
+		ogr_banner_label.text = "🏢 OGR TECH HUB APERTO — Appalti Corporate Attivi | Livello Appalti: Tier %d/4 (+%d%% compenso extra) · %d bandi disponibili" % [
+			ent_tier, ent_bonus_pct, ContractManager.enterprise_contracts.size()
+		]
+
+	if ogr_banner_actions:
+		var ref_btn := Button.new()
+		ref_btn.text = "↻ Aggiorna Bandi"
+		ref_btn.pressed.connect(func():
+			ContractManager.refresh_enterprise_contracts(true)
+			_update_ogr_display()
+		)
+		ogr_banner_actions.add_child(ref_btn)
+		if ent_tier < 4:
+			var up_btn := Button.new()
+			up_btn.text = "★ Potenzia Appalti OGR (Attuale Tier %d)" % ent_tier
+			up_btn.add_theme_color_override("font_color", Color(1.0, 0.86, 0.35))
+			up_btn.pressed.connect(func(): _open_window(upgrades_window))
+			ogr_banner_actions.add_child(up_btn)
+
+	# Contratti Enterprise attivi
+	var active_ent: Array[Dictionary] = []
+	for cid in ContractManager.active_contracts:
+		var c = ContractManager.active_contracts[cid]
+		if c is Dictionary and bool(c.get("is_enterprise", false)) and str(c.get("status", "")) != "completed":
+			active_ent.append(c)
+
+	if not active_ent.is_empty():
+		var ah := Label.new()
+		ah.text = "🔧 APPALTI CORPORATE IN LAVORAZIONE:"
+		ah.add_theme_font_size_override("font_size", 13)
+		ah.add_theme_color_override("font_color", Color(0.45, 0.94, 1.0))
+		ogr_content_vbox.add_child(ah)
+
+		for c in active_ent:
+			var cid := str(c["id"])
+			var st := str(c.get("status", "in_progress"))
+			var etype := str(c.get("execution_type", "webforge"))
+			var card := _make_hub_card(Color(0.12, 0.19, 0.28, 0.94), Color(0.35, 0.85, 1.0, 0.85))
+			var v := VBoxContainer.new()
+			v.add_theme_constant_override("separation", 6)
+			card.add_child(v)
+
+			var ttl := Label.new()
+			ttl.text = "[TIER %d] %s — %s (€ %0.2f · +%d★)" % [
+				int(c.get("tier", 1)), str(c.get("title", cid)), str(c.get("client", "")), float(c.get("budget", 0.0)), int(c.get("star_reward", 3))
+			]
+			ttl.add_theme_font_size_override("font_size", 13)
+			ttl.add_theme_color_override("font_color", Color(0.95, 0.97, 1.0))
+			ttl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			v.add_child(ttl)
+
+			var req := Label.new()
+			req.text = "%s | Requisiti: %s" % [str(c.get("category", "Enterprise")), ", ".join(c.get("requirements", []))]
+			req.add_theme_font_size_override("font_size", 11)
+			req.add_theme_color_override("font_color", Color(0.75, 0.84, 0.92))
+			req.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			v.add_child(req)
+
+			var row := HFlowContainer.new()
+			row.add_theme_constant_override("h_separation", 8)
+			row.add_theme_constant_override("v_separation", 6)
+			if st == "built":
+				var d_btn := Button.new()
+				d_btn.text = "★ Consegna & Incassa (€ %0.2f)" % float(c.get("budget", 0.0))
+				d_btn.add_theme_color_override("font_color", Color(0.35, 1.0, 0.58))
+				d_btn.pressed.connect(func(): _complete_contract_by_id(cid))
+				row.add_child(d_btn)
+			elif etype == "netshield":
+				var ns_btn := Button.new()
+				ns_btn.text = "🛡 Configura su NetShield Cyber"
+				ns_btn.add_theme_color_override("font_color", Color(1.0, 0.72, 0.30))
+				ns_btn.pressed.connect(func(): _launch_netshield_for(cid))
+				row.add_child(ns_btn)
+			elif etype == "hardware":
+				var req_hw: Dictionary = c.get("required_hardware", {})
+				var all_ok := true
+				var parts: Array[String] = []
+				for hw_id in req_hw:
+					var need := int(req_hw[hw_id])
+					var have := ShopManager.get_hardware_count(str(hw_id))
+					if have < need:
+						all_ok = false
+					parts.append("%s: %d/%d" % [ShopManager.get_hardware_item_name(str(hw_id)), have, need])
+				var hw_lbl := Label.new()
+				hw_lbl.custom_minimum_size = Vector2(210, 0)
+				hw_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				hw_lbl.text = "Stock: " + ", ".join(parts)
+				hw_lbl.add_theme_font_size_override("font_size", 11)
+				hw_lbl.add_theme_color_override("font_color", Color(0.45, 1.0, 0.65) if all_ok else Color(1.0, 0.78, 0.35))
+				hw_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+				row.add_child(hw_lbl)
+
+				var hw_btn := Button.new()
+				hw_btn.text = "📦 Installa & Consegna" if all_ok else "🛒 Ordina su TorinoHardware"
+				if all_ok:
+					hw_btn.add_theme_color_override("font_color", Color(0.35, 1.0, 0.55))
+					hw_btn.pressed.connect(func():
+						ContractManager.deliver_hardware_contract(cid)
+						_update_ogr_display()
+					)
+				else:
+					hw_btn.pressed.connect(func(): _open_window(shop_window))
+				row.add_child(hw_btn)
+			else:
+				var wf_btn := Button.new()
+				wf_btn.text = "⚡ Sviluppa su WebForge"
+				wf_btn.add_theme_color_override("font_color", Color(0.40, 0.92, 1.0))
+				wf_btn.pressed.connect(func(): _launch_webforge_for(cid))
+				row.add_child(wf_btn)
+
+			var cancel_btn := Button.new()
+			cancel_btn.text = "✕ Annulla Bando"
+			cancel_btn.add_theme_color_override("font_color", Color(1.0, 0.52, 0.52))
+			cancel_btn.pressed.connect(func():
+				ContractManager.cancel_active_contract(cid)
+				_update_ogr_display()
+			)
+			row.add_child(cancel_btn)
+			v.add_child(row)
+			ogr_content_vbox.add_child(card)
+
+	# Bandi OGR Disponibili
+	var th := Label.new()
+	th.text = "🏛 BANDI DISPONIBILI IN SALA OGR (%d):" % ContractManager.enterprise_contracts.size()
+	th.add_theme_font_size_override("font_size", 13)
+	th.add_theme_color_override("font_color", Color(1.0, 0.85, 0.35))
+	ogr_content_vbox.add_child(th)
+
+	for c in ContractManager.enterprise_contracts:
+		var cid := str(c["id"])
+		var tier_n := int(c.get("tier", 1))
+		var etype := str(c.get("execution_type", "webforge"))
+		var card := _make_hub_card(Color(0.13, 0.17, 0.25, 0.92), Color(0.38, 0.72, 0.95, 0.65))
+		var v := VBoxContainer.new()
+		v.add_theme_constant_override("separation", 5)
+		card.add_child(v)
+
+		var row := HFlowContainer.new()
+		row.add_theme_constant_override("h_separation", 8)
+		row.add_theme_constant_override("v_separation", 6)
+
+		var tl := Label.new()
+		tl.custom_minimum_size = Vector2(220, 0)
+		tl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tl.text = "[TIER %d · %s] %s — %s" % [tier_n, etype.to_upper(), str(c["title"]), str(c["client"])]
+		tl.add_theme_font_size_override("font_size", 13)
+		tl.add_theme_color_override("font_color", Color(0.55, 0.94, 1.0))
+		tl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		row.add_child(tl)
+
+		var acc_btn := Button.new()
+		acc_btn.custom_minimum_size = Vector2(150, 32)
+		acc_btn.text = "✓ Accetta (€ %0.0f)" % float(c["budget"])
+		acc_btn.add_theme_color_override("font_color", Color(0.35, 1.0, 0.58))
+		acc_btn.pressed.connect(func():
+			SoundManager.play_ui_click()
+			ContractManager.accept_enterprise_contract(cid)
+			_update_ogr_display()
+		)
+		row.add_child(acc_btn)
+		v.add_child(row)
+
+		var ml := Label.new()
+		ml.text = "Premio: € %0.2f (+%d★ · +%d Rep) | %s\nRequisiti: %s" % [
+			float(c["budget"]), int(c.get("star_reward", 3)), int(c.get("reputation_reward", 40)),
+			str(c.get("category", "Enterprise")), ", ".join(c.get("requirements", []))
+		]
+		ml.add_theme_font_size_override("font_size", 11)
+		ml.add_theme_color_override("font_color", Color(0.78, 0.85, 0.92))
+		ml.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		v.add_child(ml)
+		ogr_content_vbox.add_child(card)
+
+# ==============================================================================
+# MAIL, FREELANCE HUB, SHOP, BANK
+# ==============================================================================
 func _setup_emails() -> void:
 	mail_list.clear()
 	emails.clear()
 	_selected_email_cid = ""
-	
-	# Mario (Pizzeria)
+
 	emails.append({
 		"from": "Mario Esposito <mario@pizzeriadamario-to.it>",
 		"subject": "Richiesta Realizzazione Sito Web - Pizzeria Da Mario (Via Po)",
 		"body": "Gentile Dottore,\n\nHo visto il suo annuncio su Freelance Hub Torino. Cerchiamo qualcuno che crei il nostro sito web ufficiale per attirare turisti e clienti a Torino.\n\nBudget concordato: € 260,00 netti (+ eventuale mancia qualità).\n\nPassi a trovarmi direttamente di persona in bottega in Via Po 18 (esca dal suo studio e segua la via fino all'insegna luminosa).\n\nMario Esposito - Titolare",
 		"contract_id": "pizzeria_da_mario"
 	})
-	
-	# Elena (Caffè San Carlo)
+
 	if ContractManager.is_contract_completed("pizzeria_da_mario") or ContractManager.active_contracts.has("caffe_san_carlo"):
 		emails.append({
 			"from": "Elena Rossi <elena@caffesancarlo.to.it>",
@@ -212,8 +1138,7 @@ func _setup_emails() -> void:
 			"body": "Gentile Sviluppatore,\n\nMario mi ha mostrato il nuovo sito web e ne sono rimasta affascinata!\nQui al Caffè San Carlo abbiamo code al bancone nelle ore di punta. Ci serve un sistema Web POS moderno per velocizzare le ordinazioni di caffè e bicerin.\n\nBudget: € 540,00 netti + Hosting mensile sul suo server rack!\nPassi al bancone del Caffè in Piazzetta per definire i dettagli.\n\nCordiali saluti,\nElena - Store Manager",
 			"contract_id": "caffe_san_carlo"
 		})
-		
-	# Davide (Elettronica TO)
+
 	if ContractManager.is_contract_completed("caffe_san_carlo") or ContractManager.active_contracts.has("elettronica_to"):
 		emails.append({
 			"from": "Davide Ferrero <davide@elettronicato.com>",
@@ -222,7 +1147,6 @@ func _setup_emails() -> void:
 			"contract_id": "elettronica_to"
 		})
 
-	# Officina Bellini e contratti B2B WebForge in corso o pronti per consegna
 	for cid in ContractManager.active_contracts:
 		if cid in ["pizzeria_da_mario", "caffe_san_carlo", "elettronica_to"]:
 			continue
@@ -242,25 +1166,24 @@ func _setup_emails() -> void:
 					],
 					"contract_id": cid
 				})
-	
+
 	emails.append({
 		"from": "Risorse Umane <recruiting@megacorp-consulting.it>",
 		"subject": "Esito candidatura Posizione Junior Software Engineer",
 		"body": "Gentile Candidato,\n\nLa ringraziamo per aver inviato il suo CV. Pur apprezzando il suo brillante percorso di laurea con 110 e lode al Politecnico, cerchiamo per questo stage (rimborso mensile: 400€ lordi) un profilo con almeno 8 anni di esperienza pregressa in cloud computing e intelligenza artificiale quantistica.\n\nLe auguriamo il meglio per il suo futuro.",
 		"contract_id": ""
 	})
-	
+
 	emails.append({
 		"from": "Segreteria Studenti <laurea@unito.it>",
 		"subject": "Certificato Ufficiale di Laurea in Informatica",
 		"body": "Gentile Dottore,\n\nIl suo certificato ufficiale di Laurea Magistrale in Informatica (110 e Lode) è pronto. Può ammirarlo appeso alla parete del suo studio.\n\nCongratulazioni per il traguardo raggiunto!",
 		"contract_id": ""
 	})
-	
+
 	for i in range(emails.size()):
-		var e = emails[i]
-		mail_list.add_item(e["subject"])
-		
+		mail_list.add_item(emails[i]["subject"])
+
 	if emails.size() > 0:
 		_display_email(0)
 
@@ -272,7 +1195,7 @@ func _display_email(index: int) -> void:
 		var e = emails[index]
 		mail_subject.text = e["subject"]
 		mail_content.text = "[b]Da:[/b] " + e["from"] + "\n\n" + e["body"]
-		
+
 		var cid = str(e.get("contract_id", ""))
 		_selected_email_cid = cid
 		if cid != "":
@@ -304,8 +1227,11 @@ func _complete_contract_by_id(cid: String) -> void:
 	deliver_project_btn.visible = false
 	_setup_emails()
 	_update_freelance_display()
+	_update_ogr_display()
 	_update_shop_buttons()
 	_update_rack_display()
+	_update_top_bar()
+	_refresh_desktop_badges()
 
 func _update_lead_banner_only() -> void:
 	if not lead_banner_label:
@@ -324,7 +1250,7 @@ func _make_hub_card(bg: Color, border: Color) -> PanelContainer:
 	st.bg_color = bg
 	st.border_color = border
 	st.set_border_width_all(1)
-	st.set_corner_radius_all(6)
+	st.set_corner_radius_all(8)
 	st.set_content_margin_all(10)
 	card.add_theme_stylebox_override("panel", st)
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -340,7 +1266,7 @@ func _update_freelance_display() -> void:
 	# 1. Grande Appalto Officina Bellini (Borgo Valdocco Est)
 	var fac := ContractManager.get_factory_progress_summary()
 	if fac["accepted"] or ContractManager.is_contract_completed("elettronica_to"):
-		var f_card := _make_hub_card(Color(0.14, 0.17, 0.24, 1.0), Color(0.92, 0.65, 0.22, 0.85))
+		var f_card := _make_hub_card(Color(0.14, 0.17, 0.24, 0.94), Color(0.92, 0.65, 0.22, 0.85))
 		var f_vbox := VBoxContainer.new()
 		f_vbox.add_theme_constant_override("separation", 6)
 		f_card.add_child(f_vbox)
@@ -360,7 +1286,7 @@ func _update_freelance_display() -> void:
 			f_info.add_theme_color_override("font_color", Color(0.84, 0.88, 0.94))
 			f_vbox.add_child(f_info)
 		elif fac["completed"]:
-			f_info.text = "✔ Appalto Completato al 100%%! Wi-Fi, Sito Web, Server Xeon e 2 Workstation CAD attivi."
+			f_info.text = "✔ Appalto Completato al 100%%! Wi-Fi, Sito Web, Server Xeon e 2 Workstation CAD attivi — Cancelli OGR aperti!"
 			f_info.add_theme_color_override("font_color", Color(0.35, 1.0, 0.58))
 			f_vbox.add_child(f_info)
 		else:
@@ -423,7 +1349,7 @@ func _update_freelance_display() -> void:
 			var c: Dictionary = ContractManager.active_contracts[cid]
 			var st := str(c.get("status", "in_progress"))
 			var etype := str(c.get("execution_type", "webforge"))
-			var card := _make_hub_card(Color(0.15, 0.20, 0.28, 1.0), Color(0.30, 0.72, 0.95, 0.85))
+			var card := _make_hub_card(Color(0.14, 0.19, 0.28, 0.94), Color(0.30, 0.72, 0.95, 0.85))
 			var v := VBoxContainer.new()
 			v.add_theme_constant_override("separation", 6)
 			card.add_child(v)
@@ -498,6 +1424,17 @@ func _update_freelance_display() -> void:
 				wf_btn.pressed.connect(func(): _launch_webforge_for(cid_copy))
 				row.add_child(wf_btn)
 
+			if not (cid in ["pizzeria_da_mario", "caffe_san_carlo", "elettronica_to", "factory_bellini_web"]):
+				var cxl_btn := Button.new()
+				cxl_btn.text = "✕ Ritira"
+				cxl_btn.add_theme_color_override("font_color", Color(1.0, 0.55, 0.55))
+				var cid_cxl := cid
+				cxl_btn.pressed.connect(func():
+					ContractManager.cancel_active_contract(cid_cxl)
+					_update_freelance_display()
+				)
+				row.add_child(cxl_btn)
+
 			v.add_child(row)
 			freelance_cards.add_child(card)
 
@@ -533,14 +1470,16 @@ func _update_freelance_display() -> void:
 				badge_col = Color(0.55, 1.0, 0.58)
 				type_tag = "HARDWARE B2B"
 
-			var m_card := _make_hub_card(Color(0.16, 0.19, 0.26, 1.0), badge_col * Color(1, 1, 1, 0.7))
+			var m_card := _make_hub_card(Color(0.14, 0.18, 0.26, 0.94), badge_col * Color(1, 1, 1, 0.7))
 			var mv := VBoxContainer.new()
 			mv.add_theme_constant_override("separation", 5)
 			m_card.add_child(mv)
 
-			var top_row := HBoxContainer.new()
-			top_row.add_theme_constant_override("separation", 8)
+			var top_row := HFlowContainer.new()
+			top_row.add_theme_constant_override("h_separation", 8)
+			top_row.add_theme_constant_override("v_separation", 4)
 			var title_lbl := Label.new()
+			title_lbl.custom_minimum_size = Vector2(220, 0)
 			title_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			title_lbl.text = "[%s] %s — %s" % [type_tag, str(c["title"]), str(c["client"])]
 			title_lbl.add_theme_font_size_override("font_size", 13)
@@ -595,7 +1534,6 @@ func _update_freelance_display() -> void:
 		s_lbl.add_theme_color_override("font_color", Color(0.55, 1.0, 0.65) if sst == "completed" else Color(0.78, 0.82, 0.88))
 		freelance_cards.add_child(s_lbl)
 
-	# Pulsante veloce footer WebForge visibile solo se c'è un contratto webforge in lavorazione
 	var has_wf := false
 	for ac in ContractManager.active_contracts.values():
 		if ac.get("status") == "in_progress" and ac.get("execution_type", "webforge") == "webforge":
@@ -605,7 +1543,6 @@ func _update_freelance_display() -> void:
 	if has_wf:
 		open_webforge_btn.text = "⚡ Apri WebForge IDE (Sviluppa Sito Selezionato)"
 
-	# Mantiene freelance_text popolato per retrocompatibilità
 	if freelance_text:
 		freelance_text.text = ContractManager.get_lead_eta_text()
 
@@ -643,7 +1580,7 @@ func _update_shop_buttons() -> void:
 	var has_server = "server_rack_upgrade" in GameManager.studio_upgrades_installed
 	var col_ok := Color(0.27, 1.0, 0.53)
 	var col_avail := Color(0.75, 0.78, 0.85)
-	
+
 	if has_monitor:
 		buy_monitor_btn.disabled = true
 		buy_monitor_btn.text = "GIÀ INSTALLATO"
@@ -654,7 +1591,7 @@ func _update_shop_buttons() -> void:
 		buy_monitor_btn.text = "Acquista (€ 350,00)"
 		monitor_status.text = "Disponibile"
 		monitor_status.add_theme_color_override("font_color", col_avail)
-		
+
 	if has_chair:
 		buy_chair_btn.disabled = true
 		buy_chair_btn.text = "GIÀ INSTALLATA"
@@ -711,7 +1648,7 @@ func _rebuild_client_hardware_shop() -> void:
 		var price := ShopManager.get_price("elettronica_componenti", hw_id)
 		var stock := ShopManager.get_hardware_count(hw_id)
 
-		var card := _make_hub_card(Color(0.17, 0.20, 0.27, 1.0), Color(0.32, 0.45, 0.65, 0.75))
+		var card := _make_hub_card(Color(0.14, 0.18, 0.26, 0.94), Color(0.32, 0.45, 0.65, 0.75))
 		card.custom_minimum_size = Vector2(235, 138)
 		var v := VBoxContainer.new()
 		v.add_theme_constant_override("separation", 6)
@@ -797,9 +1734,9 @@ func _update_bank_display() -> void:
 		t += "• %s: %s (Saldo: € %0.2f)\n" % [entry["reason"], delta_str, entry["balance_after"]]
 	bank_ledger_text.text = t
 
-# -------------------------------------------------------------
+# ==============================================================================
 # RACK MANAGER UI
-# -------------------------------------------------------------
+# ==============================================================================
 func _launch_firewall() -> void:
 	SoundManager.play_ui_click()
 	EventBus.minigame_started.emit("firewall_router")
@@ -807,26 +1744,24 @@ func _launch_firewall() -> void:
 func _update_rack_display() -> void:
 	if not rack_window:
 		return
-		
+
 	var temp = ServerRackManager.temperature_celsius
 	var fans = ServerRackManager.fan_speed_rpm
 	var bw = ServerRackManager.bandwidth_mbps
-	var uptime = ServerRackManager.uptime_percent
 	var status = ServerRackManager.status_health
-	
+
 	_on_rack_telemetry(temp, fans, bw, status)
-	
-	# Domains & Tier Info
+
 	var max_safe = ServerRackManager.get_max_safe_domains()
 	var current_domains = ServerRackManager.hosted_domains.size()
 	var dt = "[b]HARDWARE:[/b] [color=#00ccff]%s[/color]\n" % ServerRackManager.get_tier_name()
 	dt += "[b]CAPACITÀ ATTUALE:[/b] %d / %d Domini Massimi\n\n" % [current_domains, max_safe]
-	
+
 	if current_domains > max_safe:
 		dt += "[color=#ff4444][b]⚠ ATTENZIONE: SERVER IN SOVRACCARICO (OVERLOAD)![/b]\nIl mini-rack casalingo è sovraccarico (limite: %d clienti). CPU al 95%%, thermal throttling attivo e rendite dimezzate (-50%%)! Aggiorna a Blade 12U Enterprise![/color]\n\n" % max_safe
 	elif current_domains == max_safe:
 		dt += "[color=#ffbb33]Capacità massima del rack raggiunta (%d/%d). Nuovi contratti richiederanno un upgrade hardware![/color]\n\n" % [current_domains, max_safe]
-		
+
 	if ServerRackManager.hosted_domains.is_empty():
 		dt += "Nessun dominio ospitato. Acquista il server rack e completa contratti per vendere servizi di hosting!\n"
 	else:
@@ -836,49 +1771,45 @@ func _update_rack_display() -> void:
 		dt += "[b]Totale Ricavi Ricorrenti:[/b] [color=#44ff88]+€ %0.2f/giorno[/color]" % total_daily
 		if EmployeeManager.is_employee_hired("emp_sara"):
 			dt += " [color=#00ccff](+35% Bonus DevOps Sara Bellini)[/color]"
-			
+		if is_instance_valid(UpgradeManager) and UpgradeManager.get_rank("hosting") > 0:
+			var pct := roundi((UpgradeManager.get_hosting_bonus_mult() - 1.0) * 100.0)
+			dt += " [color=#ffd655](+%d%% Cluster Cloud ★)[/color]" % pct
+
 	domains_text.text = dt
-	
-	# Module Buttons
+
 	var has_blade = "server_blade_quad" in ServerRackManager.installed_modules
 	var has_liquid = "server_cooling_liquid" in ServerRackManager.installed_modules
 	var has_san = "server_storage_san" in ServerRackManager.installed_modules
-	
 	var is_unlocked = ServerRackManager.is_rack_unlocked
-	
+
 	buy_blade_btn.disabled = has_blade or not is_unlocked or not EconomyManager.can_afford(450.0)
-	buy_blade_btn.text = "✔ Modulo Blade Quad-Core Installato" if has_blade else "+ Installa Modulo Blade Quad-Core Xeon (€ 450,00)"
-	
+	buy_blade_btn.text = "✔ Blade Quad-Core Installato" if has_blade else "+ Modulo Blade Xeon (€ 450,00)"
+
 	buy_liquid_btn.disabled = has_liquid or not is_unlocked or not EconomyManager.can_afford(320.0)
-	buy_liquid_btn.text = "✔ Raffreddamento Liquido AIO Attivo" if has_liquid else "+ Installa Raffreddamento a Liquido AIO (€ 320,00)"
-	
+	buy_liquid_btn.text = "✔ Raffreddamento Liquido Attivo" if has_liquid else "+ Raffreddamento Liquido (€ 320,00)"
+
 	buy_san_btn.disabled = has_san or not is_unlocked or not EconomyManager.can_afford(680.0)
-	buy_san_btn.text = "✔ Storage SAN Raid-10 Operativo (+25% fee)" if has_san else "+ Installa Array Storage SAN Raid-10 (€ 680,00)"
-	
-	# Tier Upgrade Buttons
+	buy_san_btn.text = "✔ Storage SAN Raid-10 Attivo (+25%)" if has_san else "+ Storage SAN Raid-10 (€ 680,00)"
+
 	var tier = ServerRackManager.rack_tier
 	if tier >= 2:
 		upgrade_tier2_btn.disabled = true
-		upgrade_tier2_btn.text = "✔ Tier 2: Blade 12U Enterprise Attivo"
+		upgrade_tier2_btn.text = "✔ Tier 2: Blade 12U Enterprise"
 	else:
 		upgrade_tier2_btn.disabled = not is_unlocked or not EconomyManager.can_afford(750.0)
-		upgrade_tier2_btn.text = "▲ Upgrade a Server Blade 12U Enterprise (€ 750,00) [Capacità: 8 domini]"
-		
+		upgrade_tier2_btn.text = "▲ Blade 12U Enterprise (€ 750,00) [8 Domini]"
+
 	if tier >= 3:
 		upgrade_tier3_btn.disabled = true
-		upgrade_tier3_btn.text = "✔ Tier 3: Full Cabinet 42U Data Center Attivo"
+		upgrade_tier3_btn.text = "✔ Tier 3: Full Cabinet 42U DC"
 	elif tier == 2:
 		upgrade_tier3_btn.disabled = not EconomyManager.can_afford(1600.0)
-		upgrade_tier3_btn.text = "▲ Upgrade a Full Cabinet 42U Data Center (€ 1.600,00) [Capacità: 20 domini]"
+		upgrade_tier3_btn.text = "▲ Cabinet 42U Data Center (€ 1.600) [20 Domini]"
 	else:
 		upgrade_tier3_btn.disabled = true
-		upgrade_tier3_btn.text = "▲ Upgrade Cabinet 42U (Richiede Tier 2)"
+		upgrade_tier3_btn.text = "▲ Cabinet 42U (Richiede Tier 2)"
 
 func _on_rack_telemetry(temp: float, fans: int, bw: float, status: String) -> void:
-	var color_tag = "#44ff88"
-	if status == "warning": color_tag = "#ffaa33"
-	elif status == "critical": color_tag = "#ff4444"
-	
 	temp_label.text = "🌡 CPU: %0.1f °C [%s]" % [temp, status.to_upper()]
 	fans_label.text = "💨 Ventole: %d RPM" % fans
 	bandwidth_label.text = "📡 Banda: %0.1f Mbps" % bw
@@ -896,69 +1827,62 @@ func _buy_san() -> void:
 	if ServerRackManager.install_module("server_storage_san", "Storage SAN Raid-10", 680.0):
 		_update_rack_display()
 
-# -------------------------------------------------------------
+# ==============================================================================
 # TALENT HUB UI
-# -------------------------------------------------------------
+# ==============================================================================
 func _update_talent_display() -> void:
 	if not talent_window:
 		return
-		
+
 	var hired = EmployeeManager.get_hired_employees()
 	var payroll = EmployeeManager.calculate_daily_payroll()
 	var revenue = EmployeeManager.calculate_employee_revenue()
 	var net = revenue - payroll
-	
+
 	var max_slots: int = GameManager.get_max_employee_slots() if GameManager.has_method("get_max_employee_slots") else 1
 	var tier_name: String = GameManager.get_company_tier_name() if GameManager.has_method("get_company_tier_name") else "Sede Aziendale"
 	talent_stats_label.text = "🏢 Sede: %s (Scrivanie: %d/%d) | 👥 Team: %d | Buste Paga: € %0.2f/g | Ricavi: +€ %0.2f/g | Netto: +€ %0.2f/g" % [
 		tier_name, hired.size(), max_slots, hired.size(), payroll, revenue, net
 	]
-	
-	# Clear previous candidates
+
 	for child in candidates_list.get_children():
 		child.queue_free()
-		
-	# Company Expansion Section (if not at max tier)
+
 	if GameManager.company_tier < 4:
 		var exp_check: Dictionary = GameManager.can_upgrade_company_tier()
 		var target_tier: int = GameManager.company_tier + 1
 		var target_name: String = GameManager.get_company_tier_name(target_tier)
-		
-		var exp_card = PanelContainer.new()
-		var exp_style = StyleBoxFlat.new()
-		exp_style.bg_color = Color(0.14, 0.18, 0.26, 1)
-		exp_style.border_color = Color(0.35, 0.55, 0.85, 0.8)
-		exp_style.set_border_width_all(1)
-		exp_style.set_content_margin_all(12)
-		exp_style.set_corner_radius_all(6)
-		exp_card.add_theme_stylebox_override("panel", exp_style)
-		
+
+		var exp_card = _make_hub_card(Color(0.14, 0.18, 0.26, 0.94), Color(0.35, 0.55, 0.85, 0.8))
 		var exp_hbox = HBoxContainer.new()
-		exp_hbox.add_theme_constant_override("separation", 16)
-		
+		exp_hbox.add_theme_constant_override("separation", 12)
+
 		var exp_vbox = VBoxContainer.new()
 		exp_vbox.size_flags_horizontal = SIZE_EXPAND_FILL
-		
+
 		var exp_title = Label.new()
 		exp_title.text = "🏢 Espansione Sede: %s (Livello %d)" % [target_name, target_tier]
 		exp_title.add_theme_font_size_override("font_size", 15)
 		exp_title.add_theme_color_override("font_color", Color(0.95, 0.82, 0.35, 1))
+		exp_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		exp_vbox.add_child(exp_title)
-		
+
 		var exp_desc = Label.new()
 		var target_slots: int = 1 if target_tier == 2 else (3 if target_tier == 3 else 6)
 		exp_desc.text = "Espandi l'ufficio per ospitare fino a %d dipendenti e sbloccare nuove opportunità commerciali a Torino." % target_slots
 		exp_desc.add_theme_font_size_override("font_size", 12)
 		exp_desc.add_theme_color_override("font_color", Color(0.75, 0.8, 0.85, 1))
+		exp_desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		exp_vbox.add_child(exp_desc)
-		
+
 		var exp_req = Label.new()
 		var cost_val = float(exp_check.get("cost", 950.0 if target_tier == 2 else (3500.0 if target_tier == 3 else 8000.0)))
 		exp_req.text = "Costo Espansione: € %0.2f | Reputazione Richiesta: %s" % [cost_val, "65" if target_tier == 2 else ("120" if target_tier == 3 else "250")]
 		exp_req.add_theme_font_size_override("font_size", 11)
 		exp_req.add_theme_color_override("font_color", Color(0.4, 0.9, 0.6, 1))
+		exp_req.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		exp_vbox.add_child(exp_req)
-		
+
 		if not exp_check.get("allowed", false):
 			var exp_blocked_lbl = Label.new()
 			exp_blocked_lbl.text = "🔒 " + str(exp_check.get("reason", "Requisiti non soddisfatti"))
@@ -966,13 +1890,13 @@ func _update_talent_display() -> void:
 			exp_blocked_lbl.add_theme_color_override("font_color", Color(1.0, 0.45, 0.45, 1))
 			exp_blocked_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			exp_vbox.add_child(exp_blocked_lbl)
-			
+
 		exp_hbox.add_child(exp_vbox)
-		
+
 		var exp_btn = Button.new()
-		exp_btn.custom_minimum_size = Vector2(160, 42)
+		exp_btn.custom_minimum_size = Vector2(150, 40)
 		exp_btn.size_flags_vertical = SIZE_SHRINK_CENTER
-		exp_btn.text = "Espandi Sede (€ %0.2f)" % cost_val
+		exp_btn.text = "Espandi (€ %0.0f)" % cost_val
 		exp_btn.disabled = not exp_check.get("allowed", false)
 		if exp_check.get("allowed", false):
 			exp_btn.add_theme_color_override("font_color", Color(1, 0.85, 0.2, 1))
@@ -983,51 +1907,49 @@ func _update_talent_display() -> void:
 		exp_hbox.add_child(exp_btn)
 		exp_card.add_child(exp_hbox)
 		candidates_list.add_child(exp_card)
-		
+
 	var candidates = EmployeeManager.get_all_candidates()
 	for cand in candidates:
-		var card = PanelContainer.new()
-		var card_style = StyleBoxFlat.new()
-		card_style.bg_color = Color(0.18, 0.21, 0.28, 1)
-		card_style.set_content_margin_all(12)
-		card_style.set_corner_radius_all(6)
-		card.add_theme_stylebox_override("panel", card_style)
-		
+		var card = _make_hub_card(Color(0.15, 0.18, 0.25, 0.94), Color(0.30, 0.45, 0.68, 0.65))
 		var hbox = HBoxContainer.new()
-		hbox.add_theme_constant_override("separation", 16)
-		
+		hbox.add_theme_constant_override("separation", 12)
+
 		var vbox = VBoxContainer.new()
 		vbox.size_flags_horizontal = SIZE_EXPAND_FILL
-		
+
 		var name_lbl = Label.new()
 		name_lbl.text = "%s — %s" % [cand["name"], cand["role"]]
-		name_lbl.add_theme_font_size_override("font_size", 16)
+		name_lbl.add_theme_font_size_override("font_size", 15)
 		name_lbl.add_theme_color_override("font_color", Color(0.3, 0.9, 1, 1))
+		name_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		vbox.add_child(name_lbl)
-		
+
 		var desc_lbl = Label.new()
 		desc_lbl.text = cand["avatar_desc"]
 		desc_lbl.add_theme_font_size_override("font_size", 12)
 		desc_lbl.add_theme_color_override("font_color", Color(0.75, 0.8, 0.85, 1))
+		desc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		vbox.add_child(desc_lbl)
-		
+
 		var perk_lbl = Label.new()
 		perk_lbl.text = "★ Specializzazione: " + cand["perk"]
-		perk_lbl.add_theme_font_size_override("font_size", 13)
+		perk_lbl.add_theme_font_size_override("font_size", 12)
 		perk_lbl.add_theme_color_override("font_color", Color(1, 0.85, 0.4, 1))
+		perk_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		vbox.add_child(perk_lbl)
-		
+
 		var salary_lbl = Label.new()
-		salary_lbl.text = "Stipendio: € %0.2f/giorno | Valore Prodotto: € %0.2f/giorno | Reputazione Richiesta: %d" % [cand["daily_salary"], cand["daily_revenue"], cand["reputation_req"]]
+		salary_lbl.text = "Stipendio: € %0.2f/g | Valore: € %0.2f/g | Rep. Req: %d" % [cand["daily_salary"], cand["daily_revenue"], cand["reputation_req"]]
 		salary_lbl.add_theme_font_size_override("font_size", 12)
 		salary_lbl.add_theme_color_override("font_color", Color(0.4, 1, 0.6, 1))
+		salary_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		vbox.add_child(salary_lbl)
-		
+
 		var is_hired = EmployeeManager.is_employee_hired(cand["id"])
 		var action_btn = Button.new()
-		action_btn.custom_minimum_size = Vector2(140, 42)
+		action_btn.custom_minimum_size = Vector2(135, 40)
 		action_btn.size_flags_vertical = SIZE_SHRINK_CENTER
-		
+
 		if is_hired:
 			action_btn.text = "Licenzia"
 			action_btn.add_theme_color_override("font_color", Color(1, 0.4, 0.4, 1))
@@ -1036,7 +1958,7 @@ func _update_talent_display() -> void:
 		else:
 			var hire_check: Dictionary = EmployeeManager.can_hire_employee(cand["id"])
 			var can_hire: bool = hire_check.get("allowed", false)
-			action_btn.text = "Assumi (€ %0.2f)" % cand["daily_salary"]
+			action_btn.text = "Assumi (€ %0.0f)" % cand["daily_salary"]
 			action_btn.disabled = not can_hire
 			if can_hire:
 				action_btn.add_theme_color_override("font_color", Color(0.3, 1, 0.6, 1))
@@ -1048,10 +1970,10 @@ func _update_talent_display() -> void:
 				block_lbl.add_theme_color_override("font_color", Color(1.0, 0.45, 0.45, 1))
 				block_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 				vbox.add_child(block_lbl)
-				
+
 			var cid = cand["id"]
 			action_btn.pressed.connect(func(): EmployeeManager.hire_employee(cid); _update_talent_display())
-			
+
 		hbox.add_child(vbox)
 		hbox.add_child(action_btn)
 		card.add_child(hbox)

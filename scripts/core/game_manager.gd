@@ -117,6 +117,8 @@ func get_recommended_quest_poi_id() -> String:
 		if not bool(fac["wifi_done"]) or not bool(fac["server_done"]) or not bool(fac["pcs_done"]):
 			return "officina_bellini"
 		return "studio"
+	if ContractManager.is_ogr_unlocked() and not ContractManager.has_pending_contracts():
+		return "coworking_ogr"
 	return "studio"
 
 func start_new_game() -> void:
@@ -125,16 +127,22 @@ func start_new_game() -> void:
 	reputation_points = 0
 	days_elapsed = 1
 	active_waypoint.clear()
+	CalendarSystem.current_day = 1
+	CalendarSystem.current_hour = 9
+	CalendarSystem.current_minute = 0
+	CalendarSystem.time_accumulator = 0.0
 	NeedsManager.reset()
 	ShopManager.reset()
 	ShopManager.grant_starter_kit()
 	FameManager.reset()
 	SideJobManager.reset()
+	UpgradeManager.reset()
 	EmployeeManager.reset()
 	ServerRackManager.reset()
 	EconomyManager.reset_economy(120.0) # Tight realistic starting capital: 120 EUR
 	ContractManager.init_tutorial_contract()
 	change_state(GameState.FIRST_PERSON)
+	EventBus.time_tick.emit(9, 0, 1)
 	EventBus.waypoint_changed.emit({})
 	EventBus.notification_posted.emit("Nuova Avventura", "Benvenuto a Torino! Capitale iniziale € 120: cerca Mario o i Lavoretti Rapidi alla Bacheca.", "info")
 

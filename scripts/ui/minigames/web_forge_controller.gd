@@ -477,6 +477,7 @@ func _on_minigame_started(type: String) -> void:
 				
 	if active_contract_id == "":
 		visible = false
+		EventBus.computer_opened.emit()
 		EventBus.notification_posted.emit(
 			"WebForge Inattivo",
 			"Nessun sito web in lavorazione! Accetta un lavoro su Freelance Hub o parla con i clienti nel Borgo.",
@@ -545,8 +546,14 @@ func _calculate_compilation_speed() -> void:
 	if ShopManager and ShopManager.has_gadget("gadget_scanner_wifi"):
 		duration -= 0.6
 		boosts.append("Scanner Wi-Fi 6 (-0.6s)")
+
+	if is_instance_valid(UpgradeManager):
+		var pipe_bonus := UpgradeManager.get_webforge_speed_bonus()
+		if pipe_bonus > 0.01:
+			duration -= pipe_bonus
+			boosts.append("Pipeline CI/CD ★ (-%0.1fs)" % pipe_bonus)
 		
-	compile_target_duration = maxf(1.2, duration)
+	compile_target_duration = maxf(1.0, duration)
 	
 	if boosts.is_empty():
 		build_speed_info.text = "Toolchain: Starter Laptop (%0.1fs)" % compile_target_duration

@@ -33,11 +33,17 @@ func _sync_state() -> void:
 	if mode == "scout":
 		var done := ContractManager.is_factory_zone_scouted(zone_id)
 		is_interactable = not done
+		for ch in get_children():
+			if ch is CollisionShape3D:
+				(ch as CollisionShape3D).disabled = done
 		var beacon := get_node_or_null(beacon_path) as Node3D if not beacon_path.is_empty() else null
 		if beacon:
 			beacon.visible = not done
 	else:
 		is_interactable = true
+		for ch in get_children():
+			if ch is CollisionShape3D:
+				(ch as CollisionShape3D).disabled = false
 	prompt_message = get_prompt()
 
 func get_prompt() -> String:

@@ -79,11 +79,13 @@ func _physics_process(delta: float) -> void:
 	
 	var is_sprinting = Input.is_action_pressed("sprint") and NeedsManager.get_energy() > 0.0
 	var gadget_mult: float = 1.18 if ShopManager.has_gadget("gadget_scarpe_pro") else 1.0
-	var speed = (sprint_speed if is_sprinting else walk_speed) * NeedsManager.get_speed_multiplier() * gadget_mult
+	var skill_mult: float = UpgradeManager.get_speed_mult() if is_instance_valid(UpgradeManager) else 1.0
+	var speed = (sprint_speed if is_sprinting else walk_speed) * NeedsManager.get_speed_multiplier() * gadget_mult * skill_mult
 	
 	if direction:
 		if is_sprinting and is_on_floor():
-			NeedsManager.consume_sprint(delta) # lo scatto consuma un po' di energia
+			var drain_mult: float = UpgradeManager.get_sprint_drain_mult() if is_instance_valid(UpgradeManager) else 1.0
+			NeedsManager.consume_sprint(delta * drain_mult) # lo scatto consuma un po' di energia
 		velocity.x = direction.x * speed
 		velocity.z = direction.z * speed
 		is_moving = true
@@ -132,10 +134,12 @@ func _detect_surface() -> String:
 						return tagged
 				node = node.get_parent()
 				depth += 1
-	# 2) Fallback spaziale accurato (Studio legno, Officina piastrelle, Viale Est asfalto, Borghi/Parco/Mercato pietra)
+	# 2) Fallback spaziale accurato (Studio legno, Officina piastrelle, OGR cemento/tile, Viale Est asfalto, Borghi/Parco/Mercato pietra)
 	if global_position.z < 2.3 and absf(global_position.x) < 4.0:
 		return "wood"
 	if global_position.x > 79.0 and global_position.x < 91.5 and absf(global_position.z - 27.5) < 6.0:
+		return "tile"
+	if global_position.x > 96.0 and absf(global_position.z - 2.8) < 12.5:
 		return "tile"
 	if global_position.x > 24.0 and global_position.x < 62.0 and absf(global_position.z - 28.0) < 2.8:
 		return "asphalt"
@@ -144,6 +148,10 @@ func _detect_surface() -> String:
 	return "stone"
 
 func _handle_interaction_ray() -> void:
+	var reach := 3.4 + (UpgradeManager.get_interaction_reach_bonus() if is_instance_valid(UpgradeManager) else 0.0)
+	if interaction_ray:
+		interaction_ray.target_position = Vector3(0, 0, -reach)
+
 	if interaction_ray.is_colliding():
 		var collider = interaction_ray.get_collider()
 		# Il primo collider colpito deve essere un interagibile: i muri azzerano target e prompt
@@ -152,7 +160,54 @@ func _handle_interaction_ray() -> void:
 				current_target = collider
 				EventBus.prompt_changed.emit(current_target.get_prompt())
 			return
+
+	# Cono visivo ravvicinato con controllo muri (aiuta stazione Wi-Fi a parete e pannelli)
+	var fallback := _find_cone_interactable(reach)
+	if fallback != null:
+		if current_target != fallback:
+			current_target = fallback
+			EventBus.prompt_changed.emit(current_target.get_prompt())
+		return
 			
 	if current_target != null:
 		current_target = null
 		EventBus.prompt_changed.emit("")
+
+func _find_cone_interactable(reach: float) -> Interactable3D:
+	if camera == null or not is_inside_tree():
+		return null
+	var origin := camera.global_position
+	var forward := -camera.global_transform.basis.z.normalized()
+	var space := get_world_3d().direct_space_state if get_world_3d() else null
+	if space == null:
+		return null
+
+	var best: Interactable3D = null
+	var best_score := -1.0
+	var max_dist := reach + 0.35
+	for cand in get_tree().get_nodes_in_group("interactable"):
+		if not (cand is Interactable3D):
+			continue
+		var ic := cand as Interactable3D
+		if not ic.is_interactable or not ic.is_inside_tree():
+			continue
+		var tgt_pos := ic.global_position
+		var to_tgt := tgt_pos - origin
+		var dist := to_tgt.length()
+		if dist < 0.15 or dist > max_dist:
+			continue
+		var dir := to_tgt / dist
+		var align := forward.dot(dir)
+		if align < 0.87:
+			continue
+		# Verifica linea visiva non bloccata da pareti/muri (collision layer 1)
+		var q := PhysicsRayQueryParameters3D.create(origin, origin + dir * maxf(dist - 0.35, 0.1), 1)
+		q.exclude = [get_rid(), ic.get_rid()]
+		var hit := space.intersect_ray(q)
+		if not hit.is_empty():
+			continue
+		var score := align * 2.0 - (dist / max_dist) * 0.6
+		if score > best_score:
+			best_score = score
+			best = ic
+	return best

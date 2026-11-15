@@ -10,6 +10,7 @@ signal interacted(player: Node)
 func _ready() -> void:
 	collision_layer = 2 # Interactive layer
 	collision_mask = 0
+	add_to_group("interactable")
 
 func get_prompt() -> String:
 	return prompt_message if is_interactable else ""

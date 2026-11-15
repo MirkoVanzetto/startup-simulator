@@ -88,18 +88,21 @@ static func build_pizzeria(pizzeria: Node3D) -> void:
 	var holder := VillageProps.spawn_mesh_and_collisions(pizzeria, "BorgoPizzeria", sm, "tile")
 	_add_sign(holder, "PIZZERIA DA MARIO", Vector3(0, 3.12, 3.37), 0.0, 34, Color(1.0, 0.92, 0.65))
 
-	# Mario NPC sulla pedana rialzata dietro il bancone
+	# Mario NPC sulla pedana rialzata dietro il bancone (rif. 2: camicia lino crema mezza manica, grembiule rosso, toque pieghettato)
 	var mario := _spawn_npc(pizzeria, "MarioNPC", Vector3(0.0, 0.18, -1.95), 0.0, MARIO_SCRIPT, {
-		"shirt": "white", "pants": "iron", "hair": "hair_brown", "iris": "iris_brown",
-		"apron": "fabric_red", "hat": "chef", "mustache": true, "rolled_sleeves": true
+		"shirt": "shirt_linen_cream", "pants": "pants_charcoal", "shoes": "shoe_black",
+		"hair": "hair_brown", "iris": "iris_brown",
+		"apron": "apron_red", "hat": "chef", "mustache": true, "short_sleeves": true, "neck_style": "open_v"
 	}, "Mario Esposito\n★ Pizzeria Da Mario ★", Color(1.0, 0.9, 0.3))
 	mario.name = "MarioNPC"
 
 	# Cassa / Menu Pizzeria per comprare cibo (a fianco sul bancone)
 	_spawn_shop_trigger(holder, "PizzeriaShop", Vector3(1.5, 0.96, -1.15), "pizzeria", "Pizzeria Da Mario", Vector3(1.1, 0.9, 0.9))
 
-	# Luce calda interna & riverbero forno
-	_add_omni(holder, Vector3(0, 2.78, 0.2), Color(1.0, 0.87, 0.70), 0.82, 9.5)
+	# Luce calda interna, riverbero arancione vivo del forno a legna & key/rim light ritratto su Mario
+	_add_omni(holder, Vector3(0, 2.52, 0.75), Color(1.0, 0.89, 0.74), 0.36, 9.5)
+	_add_omni(holder, Vector3(-2.35, 1.12, -1.55), Color(1.0, 0.58, 0.22), 1.12, 5.2)
+	_add_npc_portrait_lighting(pizzeria, Vector3(0.0, 0.18, -1.95), 0.0, Color(1.0, 0.94, 0.84), Color(1.0, 0.72, 0.36), 1.05, 1.05)
 
 # ------------------------------------------------------------------ BORGO SAN CARLO + PARCO VALENTINO + VALDOCCO & MERCATO OGR
 static func build_village(street: Node3D) -> void:
@@ -257,12 +260,14 @@ static func build_village(street: Node3D) -> void:
 	VillageProps.spawn_mesh_and_collisions(cafe_venue, "CafeMesh", cafe_sm, "tile")
 	_add_sign(cafe_venue, "CAFFÈ SAN CARLO", Vector3(0, 3.12, 3.06), 0.0, 32, Color(1.0, 0.92, 0.70))
 	var elena := _spawn_npc(cafe_venue, "ElenaNPC", Vector3(-0.7, 0.18, -1.86), 0.0, ELENA_SCRIPT, {
-		"shirt": "fabric_red", "pants": "iron", "hair": "hair_blonde", "iris": "iris_green",
-		"apron": "white", "female": true, "hair_style": "ponytail"
+		"shirt": "shirt_burgundy", "pants": "pants_charcoal", "shoes": "shoe_black",
+		"hair": "hair_blonde", "iris": "iris_green",
+		"apron": "apron_white", "female": true, "hair_style": "ponytail", "neck_style": "crew"
 	}, "Elena Rossi\n★ Caffè San Carlo ★", Color(1.0, 0.85, 0.45))
 	elena.name = "ElenaNPC"
 	_spawn_shop_trigger(cafe_venue, "CafeShop", Vector3(1.2, 0.96, -1.05), "cafe", "Caffè San Carlo", Vector3(1.2, 0.9, 0.9))
-	_add_omni(cafe_venue, Vector3(0, 2.7, 0.5), Color(1.0, 0.88, 0.68), 0.55, 8.5)
+	_add_omni(cafe_venue, Vector3(0, 2.52, 0.75), Color(1.0, 0.88, 0.68), 0.34, 8.5)
+	_add_npc_portrait_lighting(cafe_venue, Vector3(-0.7, 0.18, -1.86), 0.0, Color(1.0, 0.93, 0.82), Color(0.96, 0.84, 0.66), 0.95, 0.85)
 
 	var tech_venue := Node3D.new()
 	tech_venue.name = "TechShopVenue"
@@ -282,12 +287,14 @@ static func build_village(street: Node3D) -> void:
 	VillageProps.spawn_mesh_and_collisions(tech_venue, "TechMesh", tech_sm, "tile")
 	_add_sign(tech_venue, "ELETTRONICA TO", Vector3(0, 3.12, 3.06), 0.0, 32, Color(0.78, 0.94, 1.0))
 	var davide := _spawn_npc(tech_venue, "DavideNPC", Vector3(0.0, 0.18, -1.86), 0.0, DAVIDE_SCRIPT, {
-		"shirt": "fabric_blue", "pants": "denim", "hair": "hair_dark", "iris": "iris_brown",
+		"shirt": "shirt_sky", "pants": "denim", "shoes": "sneaker_white",
+		"hair": "hair_dark", "iris": "iris_brown",
 		"hair_style": "quiff", "glasses": true, "vest": "vest_charcoal"
 	}, "Davide Ferrero\n★ Elettronica TO ★", Color(0.65, 0.88, 1.0))
 	davide.name = "DavideNPC"
 	_spawn_shop_trigger(tech_venue, "TechHardwareShop", Vector3(-1.8, 0.96, -1.05), "elettronica_componenti", "Elettronica TO — Hardware Clienti", Vector3(1.6, 1.0, 1.0))
-	_add_omni(tech_venue, Vector3(0, 2.7, 0.5), Color(0.85, 0.94, 1.0), 0.55, 8.5)
+	_add_omni(tech_venue, Vector3(0, 2.52, 0.75), Color(0.85, 0.94, 1.0), 0.34, 8.5)
+	_add_npc_portrait_lighting(tech_venue, Vector3(0.0, 0.18, -1.86), 0.0, Color(0.96, 0.98, 1.0), Color(0.70, 0.88, 1.0), 0.95, 0.85)
 
 	# 4. Negozi del Borgo: Forno Bruno, Alimentari Rosa, Edicola Sabrina
 	var panificio := Node3D.new()
@@ -339,11 +346,13 @@ static func build_village(street: Node3D) -> void:
 	VillageProps.spawn_mesh_and_collisions(panificio, "PanificioMesh", pan_sm, "wood")
 	_add_sign(panificio, "FORNO BRUNO", Vector3(0, 3.12, 2.76), 0.0, 30, Color(1.0, 0.92, 0.60))
 	_spawn_npc(panificio, "BrunoNPC", Vector3(0.0, 0.18, -1.75), 0.0, SHOP_SCRIPT, {
-		"shirt": "shirt_ochre", "pants": "denim", "hair": "hair_salt", "iris": "iris_brown",
-		"apron": "white", "hat": "baker", "mustache": true, "rolled_sleeves": true
+		"shirt": "shirt_oatmeal", "pants": "pants_charcoal", "shoes": "leather",
+		"skin": "skin_warm", "hair": "hair_brown", "iris": "iris_brown",
+		"apron": "apron_cream", "hat": "baker", "mustache": true, "rolled_sleeves": true, "neck_style": "open_v"
 	}, "Bruno\n★ Forno Bruno ★", Color(1.0, 0.88, 0.50), {"shop_id": "panificio", "shop_title": "Forno Bruno"})
 	_spawn_shop_trigger(panificio, "PanificioShop", Vector3(0.0, 0.96, -0.9), "panificio", "Forno Bruno", Vector3(2.8, 0.9, 0.9))
-	_add_omni(panificio, Vector3(0.0, 2.74, 0.35), Color(1.0, 0.85, 0.60), 1.15, 9.5)
+	_add_omni(panificio, Vector3(0.0, 2.52, 0.75), Color(1.0, 0.87, 0.65), 0.36, 9.5)
+	_add_npc_portrait_lighting(panificio, Vector3(0.0, 0.18, -1.75), 0.0, Color(1.0, 0.94, 0.84), Color(1.0, 0.82, 0.56), 1.05, 0.95)
 
 	var alimentari := Node3D.new()
 	alimentari.name = "AlimentariVenue"
@@ -366,11 +375,13 @@ static func build_village(street: Node3D) -> void:
 	VillageProps.spawn_mesh_and_collisions(alimentari, "AlimentariMesh", ali_sm, "tile")
 	_add_sign(alimentari, "ALIMENTARI ROSA", Vector3(0, 3.12, 2.76), 0.0, 28, Color(0.84, 1.0, 0.84))
 	_spawn_npc(alimentari, "RosaNPC", Vector3(0.0, 0.18, -1.75), 0.0, SHOP_SCRIPT, {
-		"shirt": "vest_sage", "pants": "iron", "hair": "hair_chestnut", "iris": "iris_brown",
-		"apron": "white", "female": true, "hair_style": "bob", "skirt": true
+		"shirt": "shirt_olive_sage", "pants": "pants_charcoal", "shoes": "shoe_black",
+		"hair": "hair_chestnut", "iris": "iris_brown",
+		"apron": "apron_white", "female": true, "hair_style": "updo_wavy", "skirt": true, "neck_style": "crew"
 	}, "Rosa\n★ Alimentari Rosa ★", Color(0.75, 1.0, 0.75), {"shop_id": "alimentari", "shop_title": "Alimentari Rosa"})
 	_spawn_shop_trigger(alimentari, "AlimentariShop", Vector3(0.0, 0.96, -0.9), "alimentari", "Alimentari Rosa", Vector3(2.8, 0.9, 0.9))
-	_add_omni(alimentari, Vector3(0.0, 2.74, 0.35), Color(1.0, 0.91, 0.72), 0.95, 9.0)
+	_add_omni(alimentari, Vector3(0.0, 2.52, 0.75), Color(1.0, 0.91, 0.74), 0.35, 9.0)
+	_add_npc_portrait_lighting(alimentari, Vector3(0.0, 0.18, -1.75), 0.0, Color(1.0, 0.95, 0.86), Color(0.92, 0.95, 0.84), 1.05, 0.95)
 
 	var edicola := Node3D.new()
 	edicola.name = "EdicolaVenue"
@@ -382,10 +393,12 @@ static func build_village(street: Node3D) -> void:
 	VillageProps.spawn_mesh_and_collisions(edicola, "EdicolaMesh", edi_sm, "stone")
 	_add_sign(edicola, "EDICOLA SABRINA", Vector3(0, 2.40, 1.74), 0.0, 24, Color(0.85, 0.95, 1.0))
 	_spawn_npc(edicola, "SabrinaNPC", Vector3(0.0, 0.24, 0.08), 0.0, SHOP_SCRIPT, {
-		"shirt": "fabric_cream", "pants": "denim", "hair": "hair_auburn", "iris": "iris_blue",
-		"vest": "vest_charcoal", "female": true, "hair_style": "bob", "glasses": true
+		"shirt": "shirt_linen_cream", "pants": "denim", "shoes": "shoe_black",
+		"hair": "hair_auburn", "iris": "iris_blue",
+		"vest": "vest_charcoal", "female": true, "hair_style": "bob", "glasses": true, "neck_style": "collar"
 	}, "Sabrina\n★ Edicola ★", Color(0.80, 0.92, 1.0), {"shop_id": "edicola", "shop_title": "Edicola Sabrina"})
 	_spawn_shop_trigger(edicola, "EdicolaShop", Vector3(0, 1.1, 0.95), "edicola", "Edicola Sabrina", Vector3(2.2, 1.4, 1.2))
+	_add_npc_portrait_lighting(edicola, Vector3(0.0, 0.24, 0.08), 0.0, Color(0.96, 0.96, 1.0), Color(0.84, 0.92, 1.0), 0.80, 0.75)
 
 	# 4b. OFFICINA MECCANICA BELLINI (Borgo Valdocco Est, accessibile da Ovest)
 	var factory_venue := Node3D.new()
@@ -401,9 +414,11 @@ static func build_village(street: Node3D) -> void:
 	_add_sign(factory_venue, "OFFICINA MECCANICA BELLINI", Vector3(0, 3.44, 4.96), 0.0, 32, Color(1.0, 0.88, 0.30))
 
 	_spawn_npc(factory_venue, "BelliniNPC", Vector3(2.10, 0.04, -1.80), -0.35, BELLINI_SCRIPT, {
-		"shirt": "shirt_ochre", "pants": "denim", "hair": "hair_salt", "iris": "iris_brown",
+		"shirt": "shirt_ochre", "pants": "pants_charcoal", "shoes": "shoe_black",
+		"skin": "skin_warm", "hair": "hair_salt", "iris": "iris_brown",
 		"vest": "vest_charcoal", "hat": "hardhat", "mustache": true, "glasses": true, "rolled_sleeves": true
 	}, "Ing. Gianluca Bellini\n★ Officina Valdocco ★", Color(1.0, 0.84, 0.32))
+	_add_npc_portrait_lighting(factory_venue, Vector3(2.10, 0.04, -1.80), -0.35, Color(1.0, 0.96, 0.88), Color(0.76, 0.90, 1.0), 1.05, 0.95)
 
 	# 4 Zone Sopralluogo (perlustrazione fabbrica senza sovrapposizione con le stazioni hardware)
 	_spawn_factory_interactable(factory_venue, "ScoutZone_Ingresso", Vector3(-1.45, 1.05, 2.40), {
@@ -548,9 +563,11 @@ static func build_village(street: Node3D) -> void:
 
 	# Referente OGR Enterprise (Ing. Andrea Viale) & 2 coworker ambientali interni
 	_spawn_npc(street, "AndreaVialeNPC", Vector3(104.8, 0.04, 2.2), -PI * 0.5, OGR_VIALE_SCRIPT, {
-		"shirt": "white", "pants": "suit_navy", "vest": "suit_navy", "tie": "fabric_blue",
+		"shirt": "shirt_white", "pants": "suit_navy", "shoes": "shoe_black",
+		"vest": "suit_navy", "tie": "shirt_sky",
 		"hair": "hair_salt", "iris": "iris_blue", "glasses": true
 	}, "Ing. Andrea Viale\n★ OGR Tech Hub ★", Color(0.55, 0.94, 1.0))
+	_add_npc_portrait_lighting(street, Vector3(104.8, 0.04, 2.2), -PI * 0.5, Color(0.98, 0.96, 0.93), Color(0.76, 0.90, 1.0), 1.15, 1.05)
 
 	var ogr_cw := Node3D.new()
 	ogr_cw.name = "OGRCoworkers"
@@ -566,7 +583,7 @@ static func build_village(street: Node3D) -> void:
 	cw2.position = Vector3(103.6, 0.04, 10.35)
 	cw2.rotation.y = PI * 0.85
 	ogr_cw.add_child(cw2)
-	VillageProps.add_npc_model(cw2, {"shirt": "hoodie_teal", "pants": "denim", "hair": "hair_dark", "hair_style": "quiff", "glasses": true})
+	VillageProps.add_npc_model(cw2, {"shirt": "hoodie_teal", "pants": "denim", "shoes": "sneaker_white", "hair": "hair_dark", "hair_style": "quiff", "glasses": true})
 
 	# Luce diffusa dai lucernari della navata OGR
 	for lx in [103.0, 110.5, 118.0]:
@@ -792,6 +809,48 @@ static func _add_omni(parent: Node3D, pos: Vector3, col: Color, energy: float, r
 	if group_name != "":
 		l.add_to_group(group_name)
 	parent.add_child(l)
+
+static func _add_npc_portrait_lighting(parent: Node3D, npc_pos: Vector3, npc_rot_y: float, key_col: Color, rim_col: Color, key_energy: float = 1.0, rim_energy: float = 0.90) -> void:
+	var fwd := Vector3(0, 0, 1).rotated(Vector3.UP, npc_rot_y)
+	var right := Vector3(1, 0, 0).rotated(Vector3.UP, npc_rot_y)
+	var aim_face := npc_pos + Vector3(0.0, 1.45, 0.0)
+	var aim_shoulders := npc_pos + Vector3(0.0, 1.44, 0.0)
+
+	# 1. Key-light 3/4 laterale sul volto (d_face ~1.27m, range 1.66m, half-angle 20° -> zero aloni sui muri dietro!)
+	var key := SpotLight3D.new()
+	key.name = "PortraitKeyLight"
+	key.light_color = key_col
+	key.light_energy = key_energy * 0.98
+	key.spot_range = 1.66
+	key.spot_angle = 20.0
+	key.spot_attenuation = 1.35
+	key.shadow_enabled = true
+	key.shadow_bias = 0.008
+	key.shadow_normal_bias = 0.04
+	key.distance_fade_enabled = true
+	key.distance_fade_begin = 9.0
+	key.distance_fade_shadow = 8.0
+	key.distance_fade_length = 3.0
+	var key_pos := npc_pos + fwd * 0.84 + right * 0.74 + Vector3(0.0, 2.04, 0.0)
+	key.transform = Transform3D(Basis.looking_at((aim_face - key_pos).normalized(), Vector3.UP), key_pos)
+	key.add_to_group("npc_portrait_light")
+	parent.add_child(key)
+
+	# 2. Rim-light dall'alto/retro per staccare capelli, cappello e spalle dal fondo (zero proiezione sul muro!)
+	var rim := SpotLight3D.new()
+	rim.name = "PortraitRimLight"
+	rim.light_color = rim_col
+	rim.light_energy = rim_energy * 0.76
+	rim.spot_range = 1.48
+	rim.spot_angle = 22.0
+	rim.spot_attenuation = 1.40
+	rim.distance_fade_enabled = true
+	rim.distance_fade_begin = 9.0
+	rim.distance_fade_length = 3.0
+	var rim_pos := npc_pos - fwd * 0.40 - right * 0.42 + Vector3(0.0, 2.26, 0.0)
+	rim.transform = Transform3D(Basis.looking_at((aim_shoulders - rim_pos).normalized(), Vector3.UP), rim_pos)
+	rim.add_to_group("npc_portrait_light")
+	parent.add_child(rim)
 
 static func _spawn_shop_trigger(parent: Node3D, node_name: String, pos: Vector3, shop_id: String, shop_title: String, size: Vector3) -> void:
 	var sb := StaticBody3D.new()

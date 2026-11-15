@@ -344,6 +344,222 @@ func lathe_oval(key: String, center: Vector3, profile: Array, stretch_x: float =
 			var i3 := i2 + 1
 			s["i"].append_array([i0, i1, i2, i1, i3, i2])
 
+func _smoothstep(edge0: float, edge1: float, x: float) -> float:
+	var t := clampf((x - edge0) / maxf(edge1 - edge0, 0.0001), 0.0, 1.0)
+	return t * t * (3.0 - 2.0 * t)
+
+func _recompute_smooth_grid_normals(s: Dictionary, base: int, rows_count: int, cols_stride: int, start_idx: int, closed_u: bool = true) -> void:
+	var n_verts := rows_count * cols_stride
+	var acc := PackedVector3Array()
+	acc.resize(n_verts)
+	var indices: PackedInt32Array = s["i"]
+	var verts: PackedVector3Array = s["v"]
+	for ti in range(start_idx, indices.size(), 3):
+		var a := indices[ti]
+		var b := indices[ti + 1]
+		var c := indices[ti + 2]
+		# Scala 10000x per prevenire underflow float32 su triangoli sub-centimetrici (volto, pieghe, fettucce)
+		var fn := (verts[c] - verts[a]).cross(verts[b] - verts[a]) * 10000.0
+		acc[a - base] += fn
+		acc[b - base] += fn
+		acc[c - base] += fn
+	if closed_u:
+		# Media esattamente la cucitura azimutale k=0 e k=segs lungo ogni anello chiuso
+		for r in range(rows_count):
+			var row_off: int = r * cols_stride
+			var seam_n := acc[row_off] + acc[row_off + cols_stride - 1]
+			acc[row_off] = seam_n
+			acc[row_off + cols_stride - 1] = seam_n
+		# Se il primo o ultimo anello collassa su un polo (r < 2mm), uniforma la normale polare
+		var pole_rows: Array[int] = [0, rows_count - 1]
+		for pole_r in pole_rows:
+			var row_off: int = pole_r * cols_stride
+			if verts[base + row_off].distance_squared_to(verts[base + row_off + cols_stride / 2]) < 0.000004:
+				var pole_sum := Vector3.ZERO
+				for k in range(cols_stride - 1):
+					pole_sum += acc[row_off + k]
+				for k in range(cols_stride):
+					acc[row_off + k] = pole_sum
+	var nrms: PackedVector3Array = s["n"]
+	for vi in range(n_verts):
+		var nn := acc[vi]
+		nrms[base + vi] = nn.normalized() if nn.length_squared() > 1e-12 else Vector3.UP
+	s["n"] = nrms
+
+## Tornio plissettato a normali morbide per grembiuli, cappelli da cuoco/panettiere e copricapi.
+## profile: Array di Vector3(radius, y, pleat_weight) o Vector2(radius, y).
+func lathe_pleated(key: String, center: Vector3, profile: Array, stretch_x: float = 1.0, stretch_z: float = 1.0, segs: int = 32, pleat_freq: int = 14, pleat_amp: float = 0.010, rot_euler: Vector3 = Vector3.ZERO, phase: float = 0.0) -> void:
+	if profile.size() < 2:
+		return
+	var s := _s(key)
+	var base: int = s["v"].size()
+	var start_i: int = s["i"].size()
+	var rb := Basis.from_euler(rot_euler) if rot_euler != Vector3.ZERO else Basis.IDENTITY
+	var stride := segs + 1
+	for i in range(profile.size()):
+		var raw = profile[i]
+		var r_cur: float = maxf(raw.x, 0.0004)
+		var y_cur: float = raw.y
+		var pw: float = raw.z if raw is Vector3 else 1.0
+		for k in range(stride):
+			var ang := TAU * float(k) / float(segs)
+			var fold := sin(ang * float(pleat_freq) + phase) * 0.68 + sin(ang * float(pleat_freq * 2) + phase * 1.3) * 0.24
+			var r_mod := maxf(r_cur + pleat_amp * pw * fold, 0.0004)
+			var lp := Vector3(cos(ang) * r_mod * stretch_x, y_cur, sin(ang) * r_mod * stretch_z)
+			s["v"].append(center + rb * lp)
+			s["n"].append(Vector3.UP)
+			s["uv"].append(Vector2(float(k) / float(segs), y_cur * 1.4))
+	for i in range(profile.size() - 1):
+		for k in range(segs):
+			var i0 := base + i * stride + k
+			var i1 := i0 + 1
+			var i2 := i0 + stride
+			var i3 := i2 + 1
+			s["i"].append_array([i0, i1, i2, i1, i3, i2])
+	_recompute_smooth_grid_normals(s, base, profile.size(), stride, start_i)
+
+## Fettuccia/bretella piatta aderente lungo una polilinea 3D con sezione arrotondata sartoriale.
+func cloth_strap(key: String, points: Array, half_w: float = 0.016, half_t: float = 0.0045, segs: int = 8) -> void:
+	if points.size() < 2:
+		return
+	var s := _s(key)
+	var base: int = s["v"].size()
+	var start_i: int = s["i"].size()
+	var stride := segs + 1
+	var dist_acc := 0.0
+	for i in range(points.size()):
+		var p: Vector3 = points[i]
+		var tan_dir: Vector3
+		if i == 0:
+			tan_dir = points[1] - p
+		elif i == points.size() - 1:
+			tan_dir = p - points[i - 1]
+		else:
+			dist_acc += p.distance_to(points[i - 1])
+			tan_dir = points[i + 1] - points[i - 1]
+		if tan_dir.length_squared() < 0.000001:
+			tan_dir = Vector3.UP
+		tan_dir = tan_dir.normalized()
+		if i == points.size() - 1 and i > 0:
+			dist_acc += p.distance_to(points[i - 1])
+		# Normale esterna radiale rispetto all'asse centrale del busto (0, p.y, 0)
+		var out_raw := Vector3(p.x, 0.14 if absf(tan_dir.z) > 0.65 else 0.0, p.z)
+		var out_dir := (out_raw - tan_dir * out_raw.dot(tan_dir))
+		if out_dir.length_squared() < 0.0001:
+			out_dir = Vector3.FORWARD - tan_dir * Vector3.FORWARD.dot(tan_dir)
+		out_dir = out_dir.normalized()
+		var side_dir := tan_dir.cross(out_dir).normalized()
+		for k in range(stride):
+			var ang := TAU * float(k) / float(segs)
+			var offset := side_dir * (cos(ang) * half_w) + out_dir * (sin(ang) * half_t)
+			s["v"].append(p + offset)
+			s["n"].append(offset.normalized())
+			s["uv"].append(Vector2(float(k) / float(segs), dist_acc * 3.0))
+	for i in range(points.size() - 1):
+		for k in range(segs):
+			var i0 := base + i * stride + k
+			var i1 := i0 + 1
+			var i2 := i0 + stride
+			var i3 := i2 + 1
+			s["i"].append_array([i0, i1, i2, i1, i3, i2])
+	_recompute_smooth_grid_normals(s, base, points.size(), stride, start_i)
+
+## Testa umana scolpita ad alta risoluzione con orbite oculari incavate, arcata sopraccigliare,
+## zigomi, mascella mandibolare, filtro nasale e mento definito (normali continue senza cuciture).
+func sculpt_head_mesh(key: String, hc: Vector3, radii: Vector3, segs: int = 36, rings: int = 24, female: bool = false) -> void:
+	var s := _s(key)
+	var base: int = s["v"].size()
+	var start_i: int = s["i"].size()
+	var stride := segs + 1
+	for r in range(rings + 1):
+		var phi := PI * float(r) / float(rings)
+		var sp := sin(phi)
+		var ny := cos(phi)
+		for k in range(stride):
+			var th := TAU * float(k) / float(segs)
+			var nx := sp * cos(th)
+			var nz := sp * sin(th)
+			var lx := nx * radii.x
+			var ly := ny * radii.y
+			var lz := nz * radii.z
+
+			# 1. Affusolamento ovale mascella/mento & angolo mandibolare pulito (zero guance cadenti a pera)
+			var jaw_t := _smoothstep(0.02, -0.90, ny)
+			var width_mul := lerpf(1.0, 0.48 if female else 0.55, jaw_t)
+			var gx := (absf(nx) - 0.52) / 0.20
+			var gy := (ny + 0.38) / 0.16
+			var gonial := (0.015 if female else 0.028) * exp(-(gx * gx + gy * gy)) * _smoothstep(-0.25, 0.35, nz)
+			lx *= (width_mul + gonial)
+
+			# Leggero appiattimento temporale sulle tempie & occipite posteriore naturale
+			var temple_t := _smoothstep(0.08, 0.52, ny) * _smoothstep(0.62, 0.94, absf(nx)) * _smoothstep(-0.2, 0.5, nz)
+			lx *= (1.0 - 0.022 * temple_t)
+			if nz < -0.10:
+				var occ := _smoothstep(-0.10, -0.85, nz) * _smoothstep(-0.45, 0.40, ny)
+				lz -= radii.z * 0.08 * occ
+				# Rientro nuca sotto la calotta occipitale
+				if ny < -0.25:
+					var nape := _smoothstep(-0.25, -0.90, ny) * _smoothstep(0.15, -0.75, nz)
+					lz += radii.z * 0.18 * nape
+					ly += radii.y * 0.05 * nape
+
+			# 2. Modellazione frontale del volto (piano viso, orbite incavate, arcata, zigomi, filtro, mento)
+			if nz > 0.12:
+				var front := _smoothstep(0.12, 0.85, nz)
+				lz *= (1.0 - 0.055 * front)
+				# Rientro latero-inferiore del volto verso mascella e collo (profilo pulito senza guance gonfie)
+				var lower_taper := _smoothstep(-0.14, -0.78, ny)
+				lz *= (1.0 - 0.12 * lower_taper * (1.0 - _smoothstep(0.0, 0.35, 1.0 - absf(nx))))
+
+				# Orbite oculari incavate simmetriche (±0.345, +0.065)
+				var ex := (absf(nx) - 0.345) / 0.22
+				var ey := (ny - 0.065) / 0.15
+				var socket := 0.155 * radii.z * exp(-(ex * ex + ey * ey) * 1.45) * _smoothstep(0.32, 0.72, nz)
+				lz -= socket
+
+				# Arcata sopraccigliare (supraorbital brow ridge)
+				var bx := (absf(nx) - 0.26) / 0.28
+				var by := (ny - 0.24) / 0.092
+				var brow := (0.040 if female else 0.058) * radii.z * exp(-(bx * bx * 0.65 + by * by * 1.55)) * _smoothstep(0.38, 0.78, nz)
+				lz += brow
+
+				# Piano zigomatico alto (malar eminence scolpita subito sotto gli angoli esterni degli occhi)
+				var cx := (absf(nx) - 0.46) / 0.20
+				var cy := (ny + 0.01) / 0.13
+				var malar := (0.064 if female else 0.054) * radii.z * exp(-(cx * cx + cy * cy * 1.45)) * _smoothstep(0.34, 0.74, nz)
+				lz += malar
+
+				# Cuscinetto periorale morbido & leggera piega labbra
+				var mx := nx / 0.23
+				var my := (ny + 0.39) / 0.17
+				var muzzle := 0.028 * radii.z * exp(-(mx * mx + my * my)) * _smoothstep(0.42, 0.80, nz)
+				lz += muzzle
+				var crease := 0.010 * radii.z * exp(-pow(nx / 0.17, 2.0) - pow((ny + 0.42) / 0.050, 2.0)) * _smoothstep(0.55, 0.85, nz)
+				lz -= crease
+
+				# Filtro nasale (piccolo solco tra naso e labbro superiore)
+				var philtrum := 0.011 * radii.z * exp(-pow(nx / 0.055, 2.0) - pow((ny + 0.24) / 0.085, 2.0)) * _smoothstep(0.60, 0.88, nz)
+				lz -= philtrum
+
+				# Mento definito, affusolato e naturale
+				var chx := nx / 0.17
+				var chy := (ny + 0.72) / 0.13
+				var chin := (0.060 if female else 0.078) * radii.z * exp(-(chx * chx + chy * chy)) * _smoothstep(0.26, 0.68, nz)
+				lz += chin
+
+			s["v"].append(hc + Vector3(lx, ly, lz))
+			s["n"].append(Vector3.UP)
+			s["uv"].append(Vector2(float(k) / float(segs), float(r) / float(rings)))
+	for r in range(rings):
+		for k in range(segs):
+			var i0 := base + r * stride + k
+			var i1 := i0 + 1
+			var i2 := i0 + stride
+			var i3 := i2 + 1
+			s["i"].append_array([i0, i2, i1, i1, i2, i3])
+	_recompute_smooth_grid_normals(s, base, rings + 1, stride, start_i)
+
+
 ## Tubo/ramo continuo lungo una polilinea `points: Array[Vector3]` con raggi variabili `radii: Array[float]`.
 func tube_path(key: String, points: Array, radii: Array, segs: int = 8, cap_ends: bool = true, uv_scale_len: float = 1.0) -> void:
 	if points.size() < 2 or radii.size() < points.size():
@@ -584,7 +800,7 @@ func _compute_tangents(v: PackedVector3Array, n: PackedVector3Array, uv: PackedV
 		var y1 := w1.y - w0.y
 		var y2 := w2.y - w0.y
 		var det := x1 * y2 - x2 * y1
-		if absf(det) < 0.000001:
+		if absf(det) < 1e-9:
 			continue
 		var r := 1.0 / det
 		var sdir := (e1 * y2 - e2 * y1) * r
@@ -602,7 +818,7 @@ func _compute_tangents(v: PackedVector3Array, n: PackedVector3Array, uv: PackedV
 		var nn := n[vi].normalized()
 		var t := tan1[vi]
 		t = t - nn * nn.dot(t)
-		if t.length_squared() < 0.00001:
+		if t.length_squared() < 1e-9:
 			var fallback := Vector3.RIGHT if absf(nn.dot(Vector3.UP)) > 0.9 else Vector3.UP
 			t = fallback.cross(nn)
 		t = t.normalized()

@@ -260,8 +260,10 @@ func test_officina_clearance_and_character_anatomy() -> void:
 				str(t["node"]), str(hit_node.name) if hit_node else "null"
 			])
 
-	# Verifica gerarchia anatomica VillageCharacters (Standing + Seated + Hands + Head + AnimationPlayer)
-	var standing_npcs: Array[String] = ["MarioNPC", "ElenaNPC", "DavideNPC", "BelliniNPC", "AndreaVialeNPC"]
+	# Verifica gerarchia anatomica VillageCharacters, materiali StandardMaterial3D PBR, SSS solo su pelle e NoiseTexture2D
+	var skin_keys: Array[String] = ["skin", "skin_warm", "skin_cheek", "skin_crevice", "lip_warm", "lip_rose"]
+	var eye_keys: Array[String] = ["eye_white", "iris_brown", "iris_blue", "iris_green", "limbal_dark", "eye_glint", "badge_cyan"]
+	var standing_npcs: Array[String] = ["MarioNPC", "BrunoNPC", "RosaNPC", "ElenaNPC", "DavideNPC", "SabrinaNPC", "BelliniNPC", "AndreaVialeNPC"]
 	for nname in standing_npcs:
 		var npc: Node = world.find_child(nname, true, false)
 		var model: Node = npc.get_node_or_null("Model") if npc else null
@@ -271,17 +273,65 @@ func test_officina_clearance_and_character_anatomy() -> void:
 		var armr_mi: MeshInstance3D = model.get_node_or_null("ArmRPivot/Mesh") as MeshInstance3D if model else null
 		var ap: AnimationPlayer = model.get_node_or_null("AnimationPlayer") as AnimationPlayer if model else null
 		var face_count: int = 0
-		if body_mi and body_mi.mesh:
-			face_count += body_mi.mesh.get_faces().size()
-		if head_mi and head_mi.mesh:
-			face_count += head_mi.mesh.get_faces().size()
-		check(model != null and body_mi != null and head_mi != null and arml_mi != null and armr_mi != null and ap != null and face_count > 1500,
+		var all_char_pbr: bool = true
+		var sss_rule_ok: bool = true
+		var noise_tex_ok: bool = true
+		var bad_detail := ""
+		var rig_meshes: Array[MeshInstance3D] = [body_mi, head_mi, arml_mi, armr_mi]
+		for mi in rig_meshes:
+			if mi == null or mi.mesh == null:
+				continue
+			if mi == body_mi or mi == head_mi:
+				face_count += mi.mesh.get_faces().size()
+			for si in range(mi.mesh.get_surface_count()):
+				var sname: String = mi.mesh.surface_get_name(si)
+				var smat: Material = mi.mesh.surface_get_material(si)
+				if not (smat is StandardMaterial3D):
+					all_char_pbr = false
+					bad_detail = "%s:%s not StandardMaterial3D" % [mi.name, sname]
+					break
+				var pbr: StandardMaterial3D = smat as StandardMaterial3D
+				var is_skin: bool = sname in skin_keys
+				var is_eye: bool = sname in eye_keys
+				if is_skin:
+					if not pbr.subsurf_scatter_enabled or not pbr.subsurf_scatter_skin_mode:
+						sss_rule_ok = false
+						bad_detail = "%s:%s missing SSS" % [mi.name, sname]
+				else:
+					if pbr.subsurf_scatter_enabled:
+						sss_rule_ok = false
+						bad_detail = "%s:%s has SSS enabled on non-skin" % [mi.name, sname]
+				if is_eye:
+					if not pbr.clearcoat_enabled:
+						noise_tex_ok = false
+						bad_detail = "%s:%s missing eye clearcoat" % [mi.name, sname]
+				else:
+					var nt := pbr.normal_texture as NoiseTexture2D
+					var rt := pbr.roughness_texture as NoiseTexture2D
+					if nt == null or rt == null or nt.width > 512 or rt.width > 512:
+						noise_tex_ok = false
+						bad_detail = "%s:%s invalid NoiseTexture2D" % [mi.name, sname]
+		check(model != null and body_mi != null and head_mi != null and arml_mi != null and armr_mi != null and ap != null and face_count > 3500,
 			"%s uses high-detail sculpted VillageCharacters rig (%d tri vertices, rig complete)" % [nname, face_count / 3])
+		check(all_char_pbr and sss_rule_ok and noise_tex_ok,
+			"%s uses 100%% StandardMaterial3D PBR, skin-only SSS & <=512 NoiseTexture2D (%s)" % [nname, bad_detail if bad_detail != "" else "ok"])
 
 	var cw_seated: Node = world.find_child("CoworkerSeated", true, false)
 	var cw_ap: AnimationPlayer = cw_seated.get_node_or_null("Model/AnimationPlayer") as AnimationPlayer if cw_seated else null
 	check(cw_seated != null and cw_ap != null and cw_ap.has_animation("Sit_Chair_Idle"),
 		"OGR CoworkerSeated uses seated VillageCharacters rig with Sit_Chair_Idle")
+
+	var luca_emp: Node = world.find_child("EmployeeModel", true, false)
+	var luca_body: MeshInstance3D = luca_emp.get_node_or_null("Model/BodyMesh") as MeshInstance3D if luca_emp else null
+	check(luca_body != null and luca_body.mesh != null and luca_body.mesh.get_surface_count() >= 4,
+		"Studio Luca Workstation EmployeeModel built with sculpted multi-surface PBR rig")
+
+	var portrait_lights: Array[Node] = get_tree().get_nodes_in_group("npc_portrait_light")
+	var spot_cnt: int = 0
+	for pl in portrait_lights:
+		if pl is SpotLight3D:
+			spot_cnt += 1
+	check(spot_cnt >= 18, "At least 18 portrait Key/Rim SpotLight3Ds configured across Borgo/Studio/OGR NPCs (got %d)" % spot_cnt)
 
 	world.queue_free()
 	await get_tree().process_frame

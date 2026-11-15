@@ -16,6 +16,7 @@ static var _alpine_shader: Shader = null
 static var _water_shader: Shader = null
 static var _cache: Dictionary = {}
 static var _tex_cache: Dictionary = {}
+static var _noise_tex_cache: Dictionary = {}
 
 static func _get_shader() -> Shader:
 	if _shader == null:
@@ -53,15 +54,160 @@ static func _get_tex(name: String) -> Texture2D:
 			_tex_cache[name] = null
 	return _tex_cache[name]
 
+static func _get_noise_tex(cache_key: String, size: int, is_normal: bool, cfg: Dictionary) -> NoiseTexture2D:
+	var full_key := "%s_%d_%s" % [cache_key, size, "nrm" if is_normal else "rgh"]
+	if _noise_tex_cache.has(full_key):
+		return _noise_tex_cache[full_key]
+
+	var fnl := FastNoiseLite.new()
+	fnl.seed = int(cfg.get("seed", 1337))
+	fnl.noise_type = int(cfg.get("noise_type", FastNoiseLite.TYPE_SIMPLEX_SMOOTH))
+	fnl.frequency = float(cfg.get("freq", 0.14))
+	fnl.fractal_type = int(cfg.get("fractal_type", FastNoiseLite.FRACTAL_FBM))
+	fnl.fractal_octaves = int(cfg.get("octaves", 4))
+	fnl.fractal_lacunarity = float(cfg.get("lacunarity", 2.2))
+	fnl.fractal_gain = float(cfg.get("gain", 0.52))
+	if cfg.has("cellular_dist"):
+		fnl.cellular_distance_function = int(cfg["cellular_dist"])
+		fnl.cellular_jitter = float(cfg.get("cellular_jitter", 0.65))
+	if bool(cfg.get("warp", false)):
+		fnl.domain_warp_enabled = true
+		fnl.domain_warp_amplitude = float(cfg.get("warp_amp", 14.0))
+		fnl.domain_warp_frequency = float(cfg.get("warp_freq", 0.05))
+
+	var nt := NoiseTexture2D.new()
+	nt.width = size
+	nt.height = size
+	nt.seamless = true
+	nt.seamless_blend_skirt = 0.25
+	nt.generate_mipmaps = true
+	nt.normalize = true
+	nt.as_normal_map = is_normal
+	if is_normal:
+		nt.bump_strength = float(cfg.get("bump", 3.2))
+	else:
+		var rmin := clampf(float(cfg.get("rmin", 0.72)), 0.0, 1.0)
+		var rmax := clampf(float(cfg.get("rmax", 1.0)), rmin, 1.0)
+		var grad := Gradient.new()
+		grad.set_color(0, Color(rmin, rmin, rmin, 1.0))
+		grad.set_color(1, Color(rmax, rmax, rmax, 1.0))
+		nt.color_ramp = grad
+	nt.noise = fnl
+	_noise_tex_cache[full_key] = nt
+	return nt
+
+static func _build_character_pbr_material(spec: Dictionary) -> StandardMaterial3D:
+	var smat := StandardMaterial3D.new()
+	smat.albedo_color = spec.get("tint", Color.WHITE)
+	smat.diffuse_mode = BaseMaterial3D.DIFFUSE_BURLEY
+	smat.specular_mode = BaseMaterial3D.SPECULAR_SCHLICK_GGX
+	smat.roughness = clampf(float(spec.get("rough", 0.78)), 0.05, 1.0)
+	smat.metallic = clampf(float(spec.get("metal", 0.0)), 0.0, 1.0)
+	smat.metallic_specular = clampf(float(spec.get("spec_val", 0.34)), 0.0, 1.0)
+
+	var kind: String = str(spec.get("kind", "cloth"))
+	var uv_s := float(spec.get("uv", 5.0))
+	smat.uv1_scale = Vector3(uv_s, float(spec.get("uv_y", uv_s)), uv_s)
+	smat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+
+	if kind == "skin":
+		var skin_cfg := {
+			"seed": 4102, "noise_type": FastNoiseLite.TYPE_SIMPLEX_SMOOTH,
+			"freq": 0.28, "octaves": 4, "lacunarity": 2.4, "gain": 0.58,
+			"bump": 3.0, "rmin": 0.68, "rmax": 1.0
+		}
+		smat.normal_enabled = true
+		smat.normal_scale = float(spec.get("nscale", 0.34))
+		smat.normal_texture = _get_noise_tex("skin_pores", 256, true, skin_cfg)
+		smat.roughness_texture = _get_noise_tex("skin_pores", 256, false, skin_cfg)
+		smat.subsurf_scatter_enabled = true
+		smat.subsurf_scatter_strength = float(spec.get("sss", 0.36))
+		smat.subsurf_scatter_skin_mode = true
+		smat.subsurf_scatter_transmittance_enabled = false
+		smat.backlight_enabled = false
+		smat.rim_enabled = true
+		smat.rim = float(spec.get("rim", 0.10))
+		smat.rim_tint = float(spec.get("rim_tint", 0.55))
+	elif kind == "cloth" or kind == "denim":
+		var is_denim := (kind == "denim")
+		var cloth_cfg := {
+			"seed": 7219 if is_denim else 5831,
+			"noise_type": FastNoiseLite.TYPE_SIMPLEX_SMOOTH,
+			"freq": 0.20 if is_denim else 0.18,
+			"octaves": 4, "lacunarity": 2.5, "gain": 0.58,
+			"warp": not is_denim, "warp_amp": 5.0, "warp_freq": 0.12,
+			"bump": 4.4 if is_denim else 3.6, "rmin": 0.80, "rmax": 1.0
+		}
+		var nkey := "fabric_denim" if is_denim else "fabric_linen"
+		smat.normal_enabled = true
+		smat.normal_scale = float(spec.get("nscale", 0.56 if is_denim else 0.46))
+		smat.normal_texture = _get_noise_tex(nkey, 256, true, cloth_cfg)
+		smat.roughness_texture = _get_noise_tex(nkey, 256, false, cloth_cfg)
+		smat.subsurf_scatter_enabled = false
+		smat.rim_enabled = true
+		smat.rim = float(spec.get("rim", 0.11))
+		smat.rim_tint = float(spec.get("rim_tint", 0.28))
+	elif kind == "hair":
+		var hair_cfg := {
+			"seed": 9041, "noise_type": FastNoiseLite.TYPE_SIMPLEX_SMOOTH,
+			"freq": 0.14, "octaves": 4, "lacunarity": 2.2, "gain": 0.55,
+			"warp": true, "warp_amp": 18.0, "warp_freq": 0.055,
+			"bump": 3.8, "rmin": 0.80, "rmax": 1.0
+		}
+		smat.normal_enabled = true
+		smat.normal_scale = float(spec.get("nscale", 0.44))
+		smat.normal_texture = _get_noise_tex("hair_strands", 256, true, hair_cfg)
+		smat.roughness_texture = _get_noise_tex("hair_strands", 256, false, hair_cfg)
+		smat.subsurf_scatter_enabled = false
+		smat.rim_enabled = true
+		smat.rim = float(spec.get("rim", 0.10))
+		smat.rim_tint = float(spec.get("rim_tint", 0.25))
+	elif kind == "leather":
+		var lth_cfg := {
+			"seed": 3187, "noise_type": FastNoiseLite.TYPE_CELLULAR,
+			"freq": 0.16, "octaves": 2,
+			"cellular_dist": FastNoiseLite.DISTANCE_EUCLIDEAN, "cellular_jitter": 0.85,
+			"bump": 3.4, "rmin": 0.76, "rmax": 1.0
+		}
+		smat.normal_enabled = true
+		smat.normal_scale = float(spec.get("nscale", 0.44))
+		smat.normal_texture = _get_noise_tex("leather_grain", 256, true, lth_cfg)
+		smat.roughness_texture = _get_noise_tex("leather_grain", 256, false, lth_cfg)
+		smat.subsurf_scatter_enabled = false
+	elif kind == "eye":
+		smat.subsurf_scatter_enabled = false
+		smat.clearcoat_enabled = true
+		smat.clearcoat = float(spec.get("clearcoat", 0.88))
+		smat.clearcoat_roughness = 0.05
+	elif kind == "metal":
+		var met_cfg := {
+			"seed": 6611, "noise_type": FastNoiseLite.TYPE_SIMPLEX_SMOOTH,
+			"freq": 0.18, "octaves": 2, "bump": 1.8, "rmin": 0.80, "rmax": 1.0
+		}
+		smat.normal_enabled = true
+		smat.normal_scale = 0.22
+		smat.normal_texture = _get_noise_tex("metal_micro", 256, true, met_cfg)
+		smat.roughness_texture = _get_noise_tex("metal_micro", 256, false, met_cfg)
+		smat.subsurf_scatter_enabled = false
+
+	return smat
+
 static func clear_cache() -> void:
 	_cache.clear()
+	_noise_tex_cache.clear()
 
-static func mat(key: String) -> ShaderMaterial:
+static func mat(key: String) -> Material:
 	if _cache.has(key):
 		return _cache[key]
 	var spec := _spec_for(key)
-	var m := ShaderMaterial.new()
 	var mode: String = str(spec.get("mode", "pbr"))
+
+	if mode == "char_pbr":
+		var smat := _build_character_pbr_material(spec)
+		_cache[key] = smat
+		return smat
+
+	var m := ShaderMaterial.new()
 
 	if mode == "holo" or bool(spec.get("holo", false)):
 		m.shader = _get_holo_shader()
@@ -262,38 +408,59 @@ static func _spec_for(key: String) -> Dictionary:
 		"lemon":             return {"tint": Color("#ecc938"), "rough": 0.42, "spec_val": 0.45}
 		"orange":            return {"tint": Color("#e47820"), "rough": 0.48, "spec_val": 0.40}
 
-		# Personaggi (ombreggiatura morbida organica PBR + trama tessuti)
-		"skin":              return {"tint": Color("#e2ad84"), "rough": 0.64, "spec_val": 0.26, "grain": 0.004, "macro": 0.02}
-		"skin_warm":         return {"tint": Color("#d19268"), "rough": 0.64, "spec_val": 0.26, "grain": 0.004, "macro": 0.02}
-		"skin_cheek":        return {"tint": Color("#db8274"), "rough": 0.66, "spec_val": 0.22, "grain": 0.004}
-		"hair_brown":        return {"tint": Color("#543320"), "rough": 0.60, "spec_val": 0.34, "grain": 0.01}
-		"hair_chestnut":     return {"tint": Color("#703e26"), "rough": 0.58, "spec_val": 0.36, "grain": 0.01}
-		"hair_blonde":       return {"tint": Color("#d8a346"), "rough": 0.56, "spec_val": 0.38, "grain": 0.01}
-		"hair_auburn":       return {"tint": Color("#943f26"), "rough": 0.58, "spec_val": 0.36, "grain": 0.01}
-		"hair_dark":         return {"tint": Color("#211e24"), "rough": 0.55, "spec_val": 0.38, "grain": 0.008}
-		"hair_salt":         return {"tint": Color("#6d727b"), "rough": 0.62, "spec_val": 0.30, "grain": 0.01}
-		"eye_white":         return {"tint": Color("#f6f4ef"), "rough": 0.24, "spec_val": 0.62, "grain": 0.0}
-		"iris_brown":        return {"tint": Color("#4d2e19"), "rough": 0.20, "spec_val": 0.68, "grain": 0.0}
-		"iris_blue":         return {"tint": Color("#2966a8"), "rough": 0.20, "spec_val": 0.68, "grain": 0.0}
-		"iris_green":        return {"tint": Color("#2a754c"), "rough": 0.20, "spec_val": 0.68, "grain": 0.0}
-		"lip_warm":          return {"tint": Color("#b45c52"), "rough": 0.52, "spec_val": 0.32, "grain": 0.0}
+		# Personaggi v1.5: StandardMaterial3D semi-realistico (Pelle SSS + pori, Capelli con fibre, Occhi corneali, Tessuti tramati NoiseTexture2D)
+		"skin":              return {"mode": "char_pbr", "kind": "skin", "tint": Color("#cca084"), "rough": 0.70, "spec_val": 0.22, "nscale": 0.34, "uv": 5.5, "sss": 0.36, "rim": 0.08}
+		"skin_warm":         return {"mode": "char_pbr", "kind": "skin", "tint": Color("#c49272"), "rough": 0.71, "spec_val": 0.21, "nscale": 0.36, "uv": 5.5, "sss": 0.38, "rim": 0.08}
+		"skin_cheek":        return {"mode": "char_pbr", "kind": "skin", "tint": Color("#c78b78"), "rough": 0.71, "spec_val": 0.19, "nscale": 0.28, "uv": 5.5, "sss": 0.36, "rim": 0.07}
+		"skin_crevice":      return {"mode": "char_pbr", "kind": "skin", "tint": Color("#a06f57"), "rough": 0.84, "spec_val": 0.12, "nscale": 0.22, "uv": 5.5, "sss": 0.22, "rim": 0.04}
+		"lip_warm":          return {"mode": "char_pbr", "kind": "skin", "tint": Color("#b3786a"), "rough": 0.64, "spec_val": 0.23, "nscale": 0.20, "uv": 6.0, "sss": 0.32, "rim": 0.07}
+		"lip_rose":          return {"mode": "char_pbr", "kind": "skin", "tint": Color("#b86f68"), "rough": 0.58, "spec_val": 0.26, "nscale": 0.20, "uv": 6.0, "sss": 0.32, "rim": 0.08}
 
-		"suit_navy":         return {"tex": "fabric", "tint": Color("#2c3d56"), "uv": 1.5, "ndepth": 0.90, "rough": 0.84}
-		"hoodie_teal":       return {"tex": "fabric", "tint": Color("#2d6e80"), "uv": 1.5, "ndepth": 0.90, "rough": 0.86}
-		"vest_sage":         return {"tex": "fabric", "tint": Color("#447751"), "uv": 1.5, "ndepth": 0.90, "rough": 0.86}
-		"vest_charcoal":     return {"tex": "fabric", "tint": Color("#323944"), "uv": 1.5, "ndepth": 0.90, "rough": 0.84}
-		"shirt_ruby":        return {"tex": "fabric", "tint": Color("#b03a37"), "uv": 1.5, "ndepth": 0.90, "rough": 0.84}
-		"shirt_ochre":       return {"tex": "fabric", "tint": Color("#d0903a"), "uv": 1.5, "ndepth": 0.90, "rough": 0.85}
-		"apron_white":       return {"tex": "fabric", "tint": Color("#ebe7de"), "uv": 1.6, "ndepth": 0.85, "rough": 0.88}
-		"denim":             return {"tex": "fabric", "tint": Color("#344e70"), "uv": 1.6, "ndepth": 1.15, "rough": 0.90}
-		"leather":           return {"tint": Color("#422a1e"), "rough": 0.48, "spec_val": 0.45}
-		"sneaker_white":     return {"tint": Color("#e5e1d9"), "rough": 0.62, "spec_val": 0.32}
+		"hair_brown":        return {"mode": "char_pbr", "kind": "hair", "tint": Color("#462a1a"), "rough": 0.68, "spec_val": 0.24, "uv": 3.5, "uv_y": 12.0, "nscale": 0.44, "rim": 0.10}
+		"hair_chestnut":     return {"mode": "char_pbr", "kind": "hair", "tint": Color("#5d331f"), "rough": 0.66, "spec_val": 0.26, "uv": 3.5, "uv_y": 12.0, "nscale": 0.46, "rim": 0.11}
+		"hair_blonde":       return {"mode": "char_pbr", "kind": "hair", "tint": Color("#b48742"), "rough": 0.66, "spec_val": 0.26, "uv": 3.5, "uv_y": 12.0, "nscale": 0.44, "rim": 0.11}
+		"hair_auburn":       return {"mode": "char_pbr", "kind": "hair", "tint": Color("#7d3620"), "rough": 0.66, "spec_val": 0.26, "uv": 3.5, "uv_y": 12.0, "nscale": 0.46, "rim": 0.11}
+		"hair_dark":         return {"mode": "char_pbr", "kind": "hair", "tint": Color("#242024"), "rough": 0.70, "spec_val": 0.22, "uv": 3.5, "uv_y": 12.0, "nscale": 0.42, "rim": 0.09}
+		"hair_salt":         return {"mode": "char_pbr", "kind": "hair", "tint": Color("#6d727a"), "rough": 0.68, "spec_val": 0.24, "uv": 3.5, "uv_y": 12.0, "nscale": 0.44, "rim": 0.10}
+		"eyebrow_dark":      return {"mode": "char_pbr", "kind": "hair", "tint": Color("#34241c"), "rough": 0.84, "spec_val": 0.14, "uv": 4.2, "uv_y": 8.0, "nscale": 0.34, "rim": 0.04}
+
+		"eye_white":         return {"mode": "char_pbr", "kind": "eye", "tint": Color("#d8d1c7"), "rough": 0.16, "spec_val": 0.68, "clearcoat": 0.80}
+		"iris_brown":        return {"mode": "char_pbr", "kind": "eye", "tint": Color("#4a2b17"), "rough": 0.12, "spec_val": 0.85, "clearcoat": 0.92}
+		"iris_blue":         return {"mode": "char_pbr", "kind": "eye", "tint": Color("#2c629e"), "rough": 0.12, "spec_val": 0.85, "clearcoat": 0.92}
+		"iris_green":        return {"mode": "char_pbr", "kind": "eye", "tint": Color("#2d6f49"), "rough": 0.12, "spec_val": 0.85, "clearcoat": 0.92}
+		"limbal_dark":       return {"mode": "char_pbr", "kind": "eye", "tint": Color("#141216"), "rough": 0.10, "spec_val": 0.88, "clearcoat": 0.95}
+		"eye_glint":         return {"mode": "char_pbr", "kind": "eye", "tint": Color("#ffffff"), "rough": 0.05, "spec_val": 1.0, "clearcoat": 1.0}
+		"glass_frame":       return {"mode": "char_pbr", "kind": "metal", "tint": Color("#282320"), "rough": 0.32, "metal": 0.42, "spec_val": 0.62, "uv": 4.0}
+
+		"suit_navy":         return {"mode": "char_pbr", "kind": "cloth", "tint": Color("#243248"), "rough": 0.86, "spec_val": 0.22, "uv": 7.5, "nscale": 0.46, "rim": 0.11}
+		"hoodie_teal":       return {"mode": "char_pbr", "kind": "cloth", "tint": Color("#2a5f6f"), "rough": 0.88, "spec_val": 0.20, "uv": 7.0, "nscale": 0.50, "rim": 0.12}
+		"vest_sage":         return {"mode": "char_pbr", "kind": "cloth", "tint": Color("#3b6647"), "rough": 0.86, "spec_val": 0.22, "uv": 7.5, "nscale": 0.48, "rim": 0.12}
+		"vest_charcoal":     return {"mode": "char_pbr", "kind": "cloth", "tint": Color("#2b313b"), "rough": 0.85, "spec_val": 0.22, "uv": 7.5, "nscale": 0.48, "rim": 0.11}
+		"shirt_ruby":        return {"mode": "char_pbr", "kind": "cloth", "tint": Color("#94302e"), "rough": 0.85, "spec_val": 0.22, "uv": 7.2, "nscale": 0.46, "rim": 0.12}
+		"shirt_burgundy":    return {"mode": "char_pbr", "kind": "cloth", "tint": Color("#822b2c"), "rough": 0.86, "spec_val": 0.22, "uv": 7.2, "nscale": 0.48, "rim": 0.12}
+		"shirt_ochre":       return {"mode": "char_pbr", "kind": "cloth", "tint": Color("#ba823c"), "rough": 0.87, "spec_val": 0.22, "uv": 7.2, "nscale": 0.48, "rim": 0.12}
+		"shirt_oatmeal":     return {"mode": "char_pbr", "kind": "cloth", "tint": Color("#b49a74"), "rough": 0.89, "spec_val": 0.20, "uv": 8.0, "nscale": 0.52, "rim": 0.12}
+		"shirt_linen_cream": return {"mode": "char_pbr", "kind": "cloth", "tint": Color("#cec3ae"), "rough": 0.89, "spec_val": 0.20, "uv": 8.0, "nscale": 0.50, "rim": 0.12}
+		"shirt_olive_sage":  return {"mode": "char_pbr", "kind": "cloth", "tint": Color("#36593d"), "rough": 0.89, "spec_val": 0.20, "uv": 8.0, "nscale": 0.52, "rim": 0.12}
+		"shirt_sky":         return {"mode": "char_pbr", "kind": "cloth", "tint": Color("#4d7094"), "rough": 0.85, "spec_val": 0.24, "uv": 7.5, "nscale": 0.46, "rim": 0.12}
+		"shirt_white":       return {"mode": "char_pbr", "kind": "cloth", "tint": Color("#ddd8ce"), "rough": 0.86, "spec_val": 0.22, "uv": 8.0, "nscale": 0.44, "rim": 0.10}
+		"apron_white":       return {"mode": "char_pbr", "kind": "cloth", "tint": Color("#e0d9ce"), "rough": 0.87, "spec_val": 0.20, "uv": 7.2, "nscale": 0.52, "rim": 0.12}
+		"apron_cream":       return {"mode": "char_pbr", "kind": "cloth", "tint": Color("#dfd5c3"), "rough": 0.87, "spec_val": 0.19, "uv": 7.2, "nscale": 0.54, "rim": 0.12}
+		"apron_red":         return {"mode": "char_pbr", "kind": "cloth", "tint": Color("#8c2623"), "rough": 0.88, "spec_val": 0.20, "uv": 7.2, "nscale": 0.54, "rim": 0.12}
+		"ribbon_red":        return {"mode": "char_pbr", "kind": "cloth", "tint": Color("#9f302c"), "rough": 0.72, "spec_val": 0.34, "uv": 6.5, "nscale": 0.34, "rim": 0.12}
+		"denim":             return {"mode": "char_pbr", "kind": "denim", "tint": Color("#2e4460"), "rough": 0.90, "spec_val": 0.20, "uv": 7.0, "nscale": 0.58, "rim": 0.12}
+		"pants_charcoal":    return {"mode": "char_pbr", "kind": "denim", "tint": Color("#262b33"), "rough": 0.88, "spec_val": 0.20, "uv": 7.0, "nscale": 0.54, "rim": 0.10}
+		"leather":           return {"mode": "char_pbr", "kind": "leather", "tint": Color("#40271b"), "rough": 0.44, "spec_val": 0.54, "uv": 5.5, "nscale": 0.46}
+		"shoe_black":        return {"mode": "char_pbr", "kind": "leather", "tint": Color("#232428"), "rough": 0.42, "spec_val": 0.56, "uv": 5.5, "nscale": 0.42}
+		"sneaker_white":     return {"mode": "char_pbr", "kind": "leather", "tint": Color("#d6d2c8"), "rough": 0.58, "spec_val": 0.34, "uv": 5.0, "nscale": 0.28}
+		"belt_brass":        return {"mode": "char_pbr", "kind": "metal", "tint": Color("#cfa046"), "rough": 0.28, "metal": 0.86, "spec_val": 0.80, "uv": 4.0}
+		"badge_cyan":        return {"mode": "char_pbr", "kind": "eye", "tint": Color("#2cc6e8"), "rough": 0.22, "spec_val": 0.88, "clearcoat": 0.92}
 		"gaming_black":      return {"tint": Color("#1d2026"), "rough": 0.44, "metal": 0.25, "spec_val": 0.55}
 		"cyan_accent":       return {"tint": Color("#2cc6e8"), "emit": Color("#1aa3c8"), "emit_e": 0.45, "rough": 0.28}
 		"white":             return {"tint": Color("#ece8df"), "rough": 0.78, "spec_val": 0.25}
 
 		# Borgo Valdocco, Mercato OGR & Officina Bellini
-		"safety_yellow":     return {"tint": Color("#deb022"), "rough": 0.46, "metal": 0.15, "spec_val": 0.52}
+		"safety_yellow":     return {"mode": "char_pbr", "kind": "metal", "tint": Color("#deb022"), "rough": 0.42, "metal": 0.12, "spec_val": 0.56, "uv": 4.0}
 		"metal_panel":       return {"tex": "plaster_rough", "tint": Color("#8b95a3"), "uv": 0.45, "ndepth": 0.90, "rough": 0.44, "metal": 0.55, "spec_val": 0.68}
 		"road_line":         return {"tex": "asphalt", "tint": Color("#ecebe4"), "uv": 0.4, "ndepth": 0.4, "rough": 0.84}
 
@@ -311,5 +478,4 @@ static func _spec_for(key: String) -> Dictionary:
 		"grate_dark":        return {"tex": "tile_check_gray", "tint": Color("#383f48"), "uv": 1.45, "ndepth": 1.55, "metal": 0.68, "rough": 0.50, "spec_val": 0.62, "ao": 0.92}
 		"lounge_sofa":       return {"tex": "fabric", "tint": Color("#424852"), "uv": 1.50, "ndepth": 1.05, "rough": 0.88}
 		"smoke_soft":        return {"tint": Color("#8c867f"), "rough": 0.96, "macro": 0.08}
-		"limbal_dark":       return {"tint": Color("#171519"), "rough": 0.25, "spec_val": 0.55}
 		_:                   return {"tint": Color("#cccccc"), "rough": 0.82}

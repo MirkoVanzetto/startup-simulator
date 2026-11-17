@@ -14,6 +14,9 @@ const FACTORY_SYNC_SCRIPT = preload("res://scripts/world/factory_venue_sync.gd")
 const SIDEJOB_SCRIPT = preload("res://scripts/world/side_job_interactable.gd")
 const OGR_GATE_SYNC_SCRIPT = preload("res://scripts/world/ogr_gate_sync.gd")
 const OGR_VIALE_SCRIPT = preload("res://scripts/world/ogr_viale_interactable.gd")
+const TECH_OPS_SCRIPT = preload("res://scripts/world/tech_ops_interactable.gd")
+const CITY_LIFE_SCRIPT = preload("res://scripts/world/city_life_manager.gd")
+
 
 # ------------------------------------------------------------------ STUDIO
 static func build_studio(studio: Node3D) -> void:
@@ -285,13 +288,13 @@ static func build_village(street: Node3D) -> void:
 	_add_sign(street, "BORGO SAN CARLO ➔", Vector3(-24.28, 3.52, 36.8), -PI * 0.5, 24, Color(1.0, 0.90, 0.52))
 	_add_sign(street, "▲ MERCATO NORD · POSTE · OGR", Vector3(79.0, 3.52, 14.28), 0.0, 22, Color(0.84, 0.94, 1.0))
 	_add_sign(street, "▼ BORGO VALDOCCO · OFFICINA", Vector3(79.0, 3.52, 13.72), PI, 22, Color(1.0, 0.90, 0.52))
-	_add_sign(street, "▼ BORGO PO · LUNGO PO · I3P", Vector3(8.2, 3.52, 41.72), PI, 22, Color(0.68, 0.94, 1.0))
+	_add_sign(street, "▼ BORGO PO · LUNGO PO · INCUBATORE", Vector3(8.2, 3.52, 41.72), PI, 22, Color(0.68, 0.94, 1.0))
 	_add_sign(street, "▲ BORGO SAN CARLO", Vector3(8.2, 3.52, 42.28), 0.0, 22, Color(1.0, 0.90, 0.52))
 	_add_sign(street, "BORGO VALDOCCO ➔\nOfficina Bellini (40m)", Vector3(21.70, 2.05, 24.0), -PI * 0.5, 20, Color(1.0, 0.95, 0.80))
 	_add_sign(street, "★ BORGO VALDOCCO ★\nOfficina Bellini", Vector3(61.40, 2.05, 24.4), -PI * 0.5, 20, Color(1.0, 0.95, 0.72))
 	_add_sign(street, "← PARCO VALENTINO\nLaghetto & Ville", Vector3(-21.10, 2.05, 32.8), PI * 0.5, 20, Color(0.82, 0.98, 0.78))
 	_add_sign(street, "MERCATO & OGR ➔\nUfficio Postale", Vector3(74.4, 2.05, 15.92), 0.0, 20, Color(0.88, 0.96, 1.0))
-	_add_sign(street, "BORGO PO & FIUME PO ▼\nI3P · Lab Droni · Molo", Vector3(4.5, 2.05, 39.68), PI, 19, Color(0.76, 0.95, 1.0))
+	_add_sign(street, "BORGO PO & FIUME PO ▼\nIncubatore · Lab Droni · Molo", Vector3(4.5, 2.05, 39.68), PI, 19, Color(0.76, 0.95, 1.0))
 	_add_sign(street, "★ MOLO SUL PO ★", Vector3(16.0, 1.15, 65.80), PI, 22, Color(0.84, 0.95, 1.0))
 
 	# 2. Contenitore Collisions compatibilità
@@ -606,9 +609,10 @@ static func build_village(street: Node3D) -> void:
 	VillageProps.add_house(houses_sm, Vector3(66.5, 0, 39.2), 5.8, 4.8, 2, {"wall": "plaster_cream", "roof": "roof_slate", "shutter": "fabric_blue", "rot": PI})
 	VillageProps.add_house(houses_sm, Vector3(74.2, 0, 39.2), 5.6, 4.8, 2, {"wall": "plaster_terracotta", "roof": "roof_terracotta", "shutter": "fabric_green", "rot": PI})
 
-	# Borgo Po / Lungo Po Meridionale (I3P PoliTO, Residenze, Lab Droni Torino, Torrefazione Po)
+	# Borgo Po / Lungo Po Meridionale (Incubatore Startup Torino, Residenze, Lab Droni Torino, Torrefazione Po)
 	VillageProps.add_i3p_incubator(houses_sm, Vector3(-13.5, 0.0, 48.0), 0.0)
-	_add_sign(street, "INCUBATORE POLITO · I3P", Vector3(-13.5, 4.45, 51.34), 0.0, 24, Color(0.68, 0.94, 1.0))
+	_add_sign(street, "INCUBATORE STARTUP TORINO", Vector3(-13.5, 4.45, 51.34), 0.0, 24, Color(0.68, 0.94, 1.0))
+
 	VillageProps.add_house(houses_sm, Vector3(-2.6, 0.0, 48.2), 6.0, 5.2, 2, {"wall": "plaster_rose", "roof": "roof_terracotta", "shutter": "fabric_green"})
 	VillageProps.add_drone_lab(houses_sm, Vector3(24.0, 0.0, 48.2), 0.0)
 	_add_sign(street, "LAB DRONI TORINO · AERO R&D", Vector3(24.0, 3.65, 51.32), 0.0, 22, Color(0.76, 0.95, 1.0))
@@ -835,11 +839,15 @@ static func build_village(street: Node3D) -> void:
 	# 7. Bacheche Lavori Rapidi + 24 Punti Attività Ripetibili (SideJobs)
 	_build_side_jobs_world(street)
 
+	# 8. Post-OGR Tech Ops (Polo Materiali, Robot MK1/MK2, Lab Droni, Incubatore, Mobilità, CityLife)
+	_build_post_ogr_and_city_life(street)
+
 	# Luci su fontana, pozzo, laghetto Parco Valentino & Mercato OGR
 	_add_omni(street, Vector3(0, 2.6, 21.0), Color(0.68, 0.88, 1.0), 0.42, 9.0)
 	_add_omni(street, Vector3(68.5, 2.8, 22.8), Color(1.0, 0.92, 0.72), 0.85, 10.0)
 	_add_omni(street, Vector3(-47.5, 2.4, 26.8), Color(0.68, 0.88, 1.0), 0.38, 10.0)
 	_add_omni(street, Vector3(78.5, 3.0, 3.0), Color(1.0, 0.92, 0.76), 1.0, 12.0)
+
 
 static func _build_side_jobs_world(street: Node3D) -> void:
 	var sj_holder := Node3D.new()
@@ -1115,4 +1123,404 @@ static func _scatter_grass_tufts(sm: StyleMesh) -> void:
 		sm.grass_tuft("grass_tuft", Vector3(float(kx_bp), 0.0, 42.48), rnd.randf_range(0.64, 0.92), rnd.randf() * TAU)
 	for vx_po in [-16.0, -4.0, 18.0, 31.0, 47.0]:
 		sm.grass_tuft("grass_tuft", Vector3(vx_po, 0.0, 54.82), rnd.randf_range(0.52, 0.80), rnd.randf() * TAU)
+
+
+static func _build_post_ogr_and_city_life(street: Node3D) -> void:
+	# 1. POLO MATERIALI & AUTOMAZIONE OGR (Cortile Sud OGR: X=88.2..95.4, Z=6.4..13.4)
+	# Totalmente fuori dai corridoi raycast (Z=2.75 e X>=96.15).
+	var yard := Node3D.new()
+	yard.name = "OGRTechOpsYard"
+	street.add_child(yard)
+
+	var ysm := StyleMesh.new()
+	# Piazzale industriale cemento + cordolo giallo/nero sicurezza
+	ysm.box("concrete", Vector3(91.8, 0.02, 10.2), Vector3(7.6, 0.04, 6.6))
+	ysm.box("safety_yellow", Vector3(91.8, 0.05, 6.95), Vector3(7.5, 0.03, 0.14))
+	ysm.box("safety_yellow", Vector3(91.8, 0.05, 13.45), Vector3(7.5, 0.03, 0.14))
+	# Tettoia in acciaio industriale sopra i banchi di estrazione (Z=12.2)
+	for px in [88.3, 95.3]:
+		ysm.box("iron_dark", Vector3(px, 1.85, 12.2), Vector3(0.18, 3.7, 0.18), {"col": true, "surface": "metal"})
+	ysm.box("factory_roof", Vector3(91.8, 3.68, 12.2), Vector3(7.4, 0.18, 2.2))
+	ysm.box("orange_accent", Vector3(91.8, 3.60, 11.12), Vector3(7.35, 0.08, 0.06))
+
+	# Strutture fisse dei 3 banchi di estrazione (Z=12.2)
+	var vein_positions := [
+		{"pos": Vector3(89.2, 0.0, 12.2), "mat": "terracotta", "core": "orange_accent"},
+		{"pos": Vector3(91.8, 0.0, 12.2), "mat": "server_glow", "core": "cyan_accent"},
+		{"pos": Vector3(94.4, 0.0, 12.2), "mat": "purple_accent", "core": "safety_yellow"}
+	]
+	for vp in vein_positions:
+		var p: Vector3 = vp["pos"]
+		ysm.box("iron_dark", p + Vector3(0, 0.42, 0), Vector3(1.55, 0.84, 1.15), {"col": true, "surface": "metal"})
+		ysm.box("metal", p + Vector3(0, 0.86, 0), Vector3(1.62, 0.06, 1.22))
+		ysm.cyl(vp["mat"], p + Vector3(-0.35, 1.08, 0.05), 0.18, 0.24, 0.38, 8)
+		ysm.cyl(vp["core"], p + Vector3(0.32, 1.12, -0.08), 0.16, 0.22, 0.44, 8)
+
+	# Stazione Raffineria & Smistamento OGR (X=89.2, Z=8.4)
+	var ref_p := Vector3(89.2, 0.0, 8.4)
+	ysm.box("server_body", ref_p + Vector3(0, 0.65, 0), Vector3(1.55, 1.30, 1.10), {"col": true, "surface": "metal"})
+	ysm.box("orange_accent", ref_p + Vector3(0, 1.32, 0), Vector3(1.60, 0.08, 1.14))
+	ysm.cyl("metal", ref_p + Vector3(-0.42, 1.68, -0.15), 0.20, 0.24, 0.65, 10)
+	ysm.box("cyan_accent", ref_p + Vector3(0.30, 1.05, -0.56), Vector3(0.55, 0.34, 0.04))
+
+	# Basamenti per Mining Robot MK1 (X=92.0, Z=8.4) e MK2 (X=94.4, Z=8.4)
+	for rx in [92.0, 94.4]:
+		ysm.box("iron_dark", Vector3(rx, 0.08, 8.4), Vector3(1.45, 0.16, 1.45), {"col": true, "surface": "metal"})
+		ysm.cyl("safety_yellow", Vector3(rx, 0.17, 8.4), 0.56, 0.58, 0.03, 14)
+
+	VillageProps.spawn_mesh_and_collisions(yard, "OGRYardStaticMesh", ysm, "metal")
+	_add_sign(yard, "★ POLO MATERIALI & AUTOMAZIONE OGR ★", Vector3(91.8, 3.92, 11.02), PI, 20, Color(1.0, 0.86, 0.38))
+	_add_sign(yard, "RAFFINERIA RC & MAGAZZINO", Vector3(89.2, 1.88, 7.80), PI, 14, Color(0.45, 0.95, 1.0))
+	_add_omni(yard, Vector3(91.8, 3.3, 10.2), Color(1.0, 0.88, 0.68), 0.95, 11.0)
+
+	# Capotecnico Ferrero NPC
+	_spawn_npc(yard, "FerreroNPC", Vector3(88.8, 0.04, 6.4), PI, TECH_OPS_SCRIPT, {
+		"shirt": "orange_accent", "pants": "npc_pants_navy", "hair": "hair_gray", "apron": "iron_dark", "glasses": true
+	}, "Ing. Dario Ferrero\n[E] Polo Materiali OGR", Color(1.0, 0.82, 0.38), {
+		"station_type": "npc_ferrero",
+		"station_title": "Ing. Dario Ferrero (Polo Materiali OGR)"
+	})
+
+	# 3 Nodi di Estrazione Interattivi
+	var extraction_defs := [
+		{"name": "ExtractionNode_Copper", "id": "node_copper", "title": "Banco Rame & Circuiti", "pos": Vector3(89.2, 0.0, 12.2), "mat": "orange_accent"},
+		{"name": "ExtractionNode_Silicon", "id": "node_silicon", "title": "Cristalli Silicio & Alluminio", "pos": Vector3(91.8, 0.0, 12.2), "mat": "cyan_accent"},
+		{"name": "ExtractionNode_Alloy", "id": "node_alloy", "title": "Selettore Terre Rare & Compositi", "pos": Vector3(94.4, 0.0, 12.2), "mat": "purple_accent"}
+	]
+	for ed in extraction_defs:
+		var sb := _spawn_tech_ops_interactable(yard, ed["name"], ed["pos"] + Vector3(0, 0.9, 0), {
+			"station_type": "extraction_node",
+			"node_id": ed["id"],
+			"station_title": ed["title"]
+		}, Vector3(1.65, 1.8, 1.45), true)
+		var y_icon := Node3D.new()
+		y_icon.name = "YieldIcon"
+		y_icon.position = Vector3(0, 0.52, 0)
+		var ism := StyleMesh.new()
+		ism.ellipsoid(ed["mat"], Vector3.ZERO, Vector3(0.24, 0.30, 0.24), 7, 10)
+		var imi := MeshInstance3D.new()
+		imi.mesh = ism.to_mesh(Callable(VillageMaterials, "mat"))
+		y_icon.add_child(imi)
+		sb.add_child(y_icon)
+		sb.set("visual_root_path", NodePath("YieldIcon"))
+
+	# Raffineria Interattiva
+	_spawn_tech_ops_interactable(yard, "ProcessingStation_OGR", ref_p + Vector3(0, 0.9, 0), {
+		"station_type": "processing_station",
+		"station_title": "Raffineria & Smistamento OGR"
+	}, Vector3(1.75, 1.8, 1.45), true)
+
+	# Mining Robot Pads (MK1 & MK2)
+	for idx in [1, 2]:
+		var rx := 92.0 if idx == 1 else 94.4
+		var pad_sb := _spawn_tech_ops_interactable(yard, "MiningRobotPad_%d" % idx, Vector3(rx, 0.9, 8.4), {
+			"station_type": "robot_pad",
+			"robot_slot": idx,
+			"station_title": "Mining Robot MK%d" % idx
+		}, Vector3(1.6, 1.8, 1.6), true)
+		# GhostRoot (visibile prima del montaggio)
+		var ghost := Node3D.new()
+		ghost.name = "GhostRoot"
+		var gsm := StyleMesh.new()
+		gsm.cyl("ghost_pad", Vector3(0, -0.55, 0), 0.45, 0.48, 0.35, 12)
+		gsm.box("ghost_ready", Vector3(0, -0.15, 0), Vector3(0.68, 0.55, 0.68))
+		var gmi := MeshInstance3D.new()
+		gmi.mesh = gsm.to_mesh(Callable(VillageMaterials, "mat"))
+		ghost.add_child(gmi)
+		pad_sb.add_child(ghost)
+		pad_sb.set("ghost_root_path", NodePath("GhostRoot"))
+
+		# VisualRoot (il vero Robot 3D autonomo con testa rotante DrillHead)
+		var vroot := Node3D.new()
+		vroot.name = "VisualRoot"
+		var rsm := StyleMesh.new()
+		var body_mat := "orange_accent" if idx == 1 else "cyan_accent"
+		rsm.cyl("iron_dark", Vector3(0, -0.60, 0), 0.50, 0.54, 0.28, 12)
+		rsm.box(body_mat, Vector3(0, -0.22, 0), Vector3(0.76, 0.52, 0.76))
+		rsm.box("server_body", Vector3(0, 0.14, 0), Vector3(0.56, 0.24, 0.56))
+		if idx == 2:
+			# Nastro trasportatore / ponte collegamento verso la raffineria
+			rsm.box("iron_dark", Vector3(-2.6, -0.52, 0.0), Vector3(4.6, 0.12, 0.42))
+		var rmi := MeshInstance3D.new()
+		rmi.mesh = rsm.to_mesh(Callable(VillageMaterials, "mat"))
+		vroot.add_child(rmi)
+
+		var drill := Node3D.new()
+		drill.name = "DrillHead"
+		drill.position = Vector3(0, 0.38, 0)
+		var dsm := StyleMesh.new()
+		dsm.box("metal", Vector3(0, 0.06, 0), Vector3(0.65, 0.10, 0.18))
+		dsm.cyl("safety_yellow", Vector3(-0.26, 0.16, 0), 0.08, 0.12, 0.22, 8)
+		dsm.cyl("cyan_accent", Vector3(0.26, 0.16, 0), 0.08, 0.12, 0.22, 8)
+		var dmi := MeshInstance3D.new()
+		dmi.mesh = dsm.to_mesh(Callable(VillageMaterials, "mat"))
+		drill.add_child(dmi)
+		vroot.add_child(drill)
+		vroot.visible = false
+		pad_sb.add_child(vroot)
+		pad_sb.set("visual_root_path", NodePath("VisualRoot"))
+
+	# 2. LAB DRONI TORINO (Borgo Po: X=21..27, Z=52..53.5)
+	var drone_ops := Node3D.new()
+	drone_ops.name = "DroneLabOps"
+	street.add_child(drone_ops)
+
+	var dlab_sm := StyleMesh.new()
+	var bench_pos := Vector3(26.6, 0.0, 52.0)
+	dlab_sm.box("iron_dark", bench_pos + Vector3(0, 0.44, 0), Vector3(1.75, 0.88, 1.05), {"col": true, "surface": "metal"})
+	dlab_sm.box("desk_top", bench_pos + Vector3(0, 0.90, 0), Vector3(1.85, 0.06, 1.15))
+	dlab_sm.box("cyan_accent", bench_pos + Vector3(0, 1.28, -0.50), Vector3(1.55, 0.65, 0.06))
+	VillageProps.spawn_mesh_and_collisions(drone_ops, "DroneBenchStatic", dlab_sm, "metal")
+	_add_sign(drone_ops, "BANCO ASSEMBLAGGIO TO-DRONE MK1", bench_pos + Vector3(0, 1.82, -0.45), 0.0, 15, Color(0.45, 0.95, 1.0))
+
+	_spawn_npc(drone_ops, "ChiaraNPC", Vector3(21.2, 0.04, 52.0), 0.0, TECH_OPS_SCRIPT, {
+		"shirt": "cyan_accent", "pants": "npc_pants_dark", "hair": "hair_brown", "glasses": true
+	}, "Dr.ssa Chiara Conti\n[E] Lab Droni & Avionica", Color(0.45, 0.95, 1.0), {
+		"station_type": "npc_chiara",
+		"station_title": "Dr.ssa Chiara Conti (Lab Droni Torino)"
+	})
+
+	var bench_sb := _spawn_tech_ops_interactable(drone_ops, "DroneAssemblyBench", bench_pos + Vector3(0, 0.95, 0), {
+		"station_type": "drone_bench",
+		"station_title": "Banco Assemblaggio TO-Drone MK1"
+	}, Vector3(1.9, 1.8, 1.4), true)
+	var bench_vis := _build_segmented_drone_visual()
+	bench_vis.name = "VisualRoot"
+	bench_vis.position = Vector3(0, 0.12, 0)
+	bench_sb.add_child(bench_vis)
+	bench_sb.set("visual_root_path", NodePath("VisualRoot"))
+
+	# Eliporto Drone (X=24.0, Z=53.05) per lanciare missioni di volo
+	var heli_pos := Vector3(24.0, 0.0, 53.05)
+	var heli_pad_sm := StyleMesh.new()
+	heli_pad_sm.cyl("iron_dark", heli_pos + Vector3(0, 0.03, 0), 0.96, 1.00, 0.06, 16)
+	heli_pad_sm.box("safety_yellow", heli_pos + Vector3(-0.22, 0.065, 0), Vector3(0.08, 0.015, 0.54))
+	heli_pad_sm.box("safety_yellow", heli_pos + Vector3(0.22, 0.065, 0), Vector3(0.08, 0.015, 0.54))
+	heli_pad_sm.box("safety_yellow", heli_pos + Vector3(0, 0.065, 0), Vector3(0.46, 0.015, 0.08))
+	VillageProps.spawn_mesh_and_collisions(drone_ops, "DroneHelipadPadMesh", heli_pad_sm, "metal")
+	var heli_sb := _spawn_tech_ops_interactable(drone_ops, "DroneHelipadStation", heli_pos + Vector3(0, 0.85, 0), {
+		"station_type": "drone_helipad",
+		"station_title": "Piazzola H Operativa TO-Drone MK1"
+	}, Vector3(2.4, 1.7, 2.4), true)
+	var heli_drone := _build_complete_drone_mesh()
+	heli_drone.name = "VisualRoot"
+	heli_drone.position = Vector3(0, -0.77, 0)
+	heli_drone.visible = false
+	heli_sb.add_child(heli_drone)
+	heli_sb.set("visual_root_path", NodePath("VisualRoot"))
+
+	# 3. INCUBATORE STARTUP TORINO — TERMINALE DIREZIONALE CEO (X=-13.5, Z=51.8)
+	var inc_ops := Node3D.new()
+	inc_ops.name = "IncubatorOps"
+	street.add_child(inc_ops)
+	var ism_term := StyleMesh.new()
+	var tpos := Vector3(-13.5, 0.0, 51.8)
+	ism_term.box("server_body", tpos + Vector3(0, 0.58, 0), Vector3(0.95, 1.16, 0.72), {"col": true, "surface": "metal"})
+	ism_term.box("cyan_accent", tpos + Vector3(0, 1.24, 0.05), Vector3(0.82, 0.42, 0.08))
+	VillageProps.spawn_mesh_and_collisions(inc_ops, "IncubatorKioskMesh", ism_term, "metal")
+	_add_sign(inc_ops, "★ INCUBATORE STARTUP — BOARD CEO ★", tpos + Vector3(0, 1.76, 0), 0.0, 16, Color(0.55, 0.92, 1.0))
+	_spawn_tech_ops_interactable(inc_ops, "IncubatorTerminal", tpos + Vector3(0, 0.95, 0), {
+		"station_type": "incubator_terminal",
+		"station_title": "Terminale Direzionale Incubatore Startup"
+	}, Vector3(1.5, 1.8, 1.5), true)
+
+	# 4. MOBILITÀ URBANA (Bici Tech, Auto EV, 4 Fermate GTT Bus)
+	var mob_holder := Node3D.new()
+	mob_holder.name = "UrbanMobilityWorld"
+	street.add_child(mob_holder)
+
+	# 4a. Bici Tech Pieghevole fuori dallo Studio (X=3.6, Z=3.6)
+	var bike_pos := Vector3(3.6, 0.0, 3.6)
+	var bike_rack_sm := StyleMesh.new()
+	bike_rack_sm.box("iron_dark", bike_pos + Vector3(0, 0.25, 0), Vector3(0.95, 0.50, 0.12))
+	VillageProps.spawn_mesh_and_collisions(mob_holder, "BikeRackMesh", bike_rack_sm, "metal")
+	var bike_sb := _spawn_tech_ops_interactable(mob_holder, "BikeStation_Studio", bike_pos + Vector3(0, 0.85, 0), {
+		"station_type": "vehicle",
+		"vehicle_id": "bike",
+		"station_title": "Bicicletta Tech Elettrica"
+	}, Vector3(1.5, 1.7, 1.5), true)
+	var bike_vis := Node3D.new()
+	bike_vis.name = "VisualRoot"
+	var bsm := StyleMesh.new()
+	bsm.cyl("iron_dark", Vector3(-0.38, -0.52, 0), 0.28, 0.28, 0.06, 12)
+	bsm.cyl("iron_dark", Vector3(0.38, -0.52, 0), 0.28, 0.28, 0.06, 12)
+	bsm.box("cyan_accent", Vector3(0, -0.35, 0), Vector3(0.76, 0.07, 0.07))
+	bsm.box("iron_dark", Vector3(0.32, -0.10, 0), Vector3(0.06, 0.45, 0.36))
+	var bmi := MeshInstance3D.new()
+	bmi.mesh = bsm.to_mesh(Callable(VillageMaterials, "mat"))
+	bike_vis.add_child(bmi)
+	bike_sb.add_child(bike_vis)
+	bike_sb.set("visual_root_path", NodePath("VisualRoot"))
+	_add_sign(mob_holder, "🚲 BICI TECH STARTUP", bike_pos + Vector3(0, 1.55, 0), 0.0, 14, Color(0.45, 0.95, 0.68))
+
+	# 4b. Minicar Elettrica Aziendale in Piazza San Carlo (X=-10.8, Z=11.8)
+	var ev_pos := Vector3(-10.8, 0.0, 11.8)
+	var ev_totem_sm := StyleMesh.new()
+	ev_totem_sm.box("server_body", ev_pos + Vector3(-1.45, 0.65, 0), Vector3(0.32, 1.30, 0.32), {"col": true, "surface": "metal"})
+	ev_totem_sm.box("cyan_accent", ev_pos + Vector3(-1.45, 1.05, 0.17), Vector3(0.22, 0.32, 0.04))
+	VillageProps.spawn_mesh_and_collisions(mob_holder, "EVChargerTotem", ev_totem_sm, "metal")
+	var ev_sb := _spawn_tech_ops_interactable(mob_holder, "CompanyEV_SanCarlo", ev_pos + Vector3(0, 0.9, 0), {
+		"station_type": "vehicle",
+		"vehicle_id": "company_ev",
+		"station_title": "Auto Elettrica Aziendale TO-EV"
+	}, Vector3(2.4, 1.8, 3.6), true)
+	var ev_vis := Node3D.new()
+	ev_vis.name = "VisualRoot"
+	var ev_sm := StyleMesh.new()
+	VillageProps.add_car(ev_sm, Vector3(0, -0.9, 0), 0.0, "cyan_accent")
+	var ev_mi := MeshInstance3D.new()
+	ev_mi.mesh = ev_sm.to_mesh(Callable(VillageMaterials, "mat"))
+	ev_vis.add_child(ev_mi)
+	ev_sb.add_child(ev_vis)
+	ev_sb.set("visual_root_path", NodePath("VisualRoot"))
+	_add_sign(mob_holder, "⚡ AUTO ELETTRICA STARTUP", ev_pos + Vector3(0, 2.05, 0), 0.0, 15, Color(0.45, 0.95, 1.0))
+
+	# 4c. 4 Fermate GTT Bus (Fast Travel Urbano)
+	var bus_stops := [
+		{"name": "BusStop_SanCarlo", "id": "bus_sancarlo", "title": "Fermata GTT — Piazza San Carlo", "pos": Vector3(10.8, 0.0, 14.5), "rot": PI},
+		{"name": "BusStop_Valdocco", "id": "bus_valdocco", "title": "Fermata GTT — Borgo Valdocco", "pos": Vector3(38.0, 0.0, 24.3), "rot": 0.0},
+		{"name": "BusStop_OGR", "id": "bus_ogr", "title": "Fermata GTT — OGR & Mercato Est", "pos": Vector3(82.5, 0.0, 14.5), "rot": PI},
+		{"name": "BusStop_BorgoPo", "id": "bus_borgopo", "title": "Fermata GTT — Lungo Po & Incubatore", "pos": Vector3(13.5, 0.0, 55.2), "rot": 0.0}
+	]
+	var bus_sm := StyleMesh.new()
+	for bs in bus_stops:
+		var bp: Vector3 = bs["pos"]
+		bus_sm.cyl("iron_dark", bp + Vector3(0, 1.25, 0), 0.06, 0.06, 2.50, 8)
+		bus_sm.box("safety_yellow", bp + Vector3(0, 2.25, 0), Vector3(0.68, 0.42, 0.08))
+		bus_sm.box("cyan_accent", bp + Vector3(0, 1.82, 0), Vector3(0.56, 0.28, 0.06))
+		_add_sign(mob_holder, "🚌 GTT BUS\n" + str(bs["title"]).replace("Fermata GTT — ", ""), bp + Vector3(0, 2.68, 0), float(bs["rot"]), 14, Color(1.0, 0.90, 0.35))
+		_spawn_tech_ops_interactable(mob_holder, bs["name"], bp + Vector3(0, 1.0, 0), {
+			"station_type": "bus_stop",
+			"bus_stop_id": bs["id"],
+			"station_title": bs["title"]
+		}, Vector3(1.5, 2.0, 1.5), false)
+	VillageProps.spawn_mesh_and_collisions(mob_holder, "BusStopsStaticMesh", bus_sm, "metal")
+
+	# 5. MIGLIORAMENTI SCENOGRAFICI BORGO SAN CARLO, BORGO PO & FIUME PO
+	var scenic := StyleMesh.new()
+	# Ponti monumentali in pietra sul Fiume Po a Ovest (X=-32) e a Est (X=52)
+	for bx in [-32.0, 52.0]:
+		scenic.box("cobble", Vector3(bx, 0.45, 69.5), Vector3(6.4, 0.55, 8.6))
+		scenic.box("wall_garden", Vector3(bx - 3.0, 1.05, 69.5), Vector3(0.35, 0.75, 8.6))
+		scenic.box("wall_garden", Vector3(bx + 3.0, 1.05, 69.5), Vector3(0.35, 0.75, 8.6))
+		scenic.cyl("stone_dark", Vector3(bx, -0.35, 67.2), 1.2, 1.4, 1.4, 10)
+		scenic.cyl("stone_dark", Vector3(bx, -0.35, 71.8), 1.2, 1.4, 1.4, 10)
+	# Seconda barca ormeggiata sul Po (X=-8.0, Z=68.8)
+	scenic.box("wood_dark", Vector3(-8.0, -0.50, 68.8), Vector3(3.4, 0.32, 1.25))
+	scenic.box("plaster_cream", Vector3(-8.0, -0.26, 68.8), Vector3(1.8, 0.24, 0.92))
+	# Fioriere sabaude in Borgo San Carlo e Lungo Po (lontane dai corridoi raycast)
+	for fp in [Vector3(-6.2, 0.0, 14.5), Vector3(6.2, 0.0, 14.5), Vector3(-6.2, 0.0, 55.2), Vector3(32.0, 0.0, 55.2)]:
+		scenic.box("stone_trim", fp + Vector3(0, 0.26, 0), Vector3(1.15, 0.52, 0.65), {"col": true, "surface": "stone"})
+		scenic.box("grass_Rich", fp + Vector3(0, 0.54, 0), Vector3(1.02, 0.08, 0.52))
+		scenic.ellipsoid("flower_red", fp + Vector3(-0.25, 0.65, 0), Vector3(0.18, 0.16, 0.18), 6, 8)
+		scenic.ellipsoid("flower_yellow", fp + Vector3(0.25, 0.65, 0), Vector3(0.18, 0.16, 0.18), 6, 8)
+	VillageProps.spawn_mesh_and_collisions(street, "BorgoAndRiverEnhancements", scenic, "stone")
+
+	# 6. CITY LIFE MANAGER (NPC negozi reattivi, passanti, auto in movimento)
+	var city_life := Node3D.new()
+	city_life.name = "CityLifeManager"
+	city_life.set_script(CITY_LIFE_SCRIPT)
+	street.add_child(city_life)
+	city_life.call("setup_city_life", street)
+
+
+static func _spawn_tech_ops_interactable(parent: Node3D, node_name: String, pos: Vector3, props: Dictionary, box_size: Vector3, with_beacon: bool) -> StaticBody3D:
+	var sb := StaticBody3D.new()
+	sb.name = node_name
+	sb.position = pos
+	sb.set_script(TECH_OPS_SCRIPT)
+	for k in props:
+		sb.set(k, props[k])
+	var cs := CollisionShape3D.new()
+	var box := BoxShape3D.new()
+	box.size = box_size
+	cs.shape = box
+	sb.add_child(cs)
+
+	if with_beacon:
+		var beacon := Node3D.new()
+		beacon.name = "Beacon"
+		var bsm := StyleMesh.new()
+		bsm.cyl("safety_yellow", Vector3(0, -0.82, 0), 0.36, 0.36, 0.05, 12)
+		bsm.ellipsoid("cyan_accent", Vector3(0, 0.62, 0), Vector3(0.14, 0.22, 0.14), 6, 10)
+		var bmi := MeshInstance3D.new()
+		bmi.mesh = bsm.to_mesh(Callable(VillageMaterials, "mat"))
+		beacon.add_child(bmi)
+		sb.add_child(beacon)
+		sb.set("beacon_path", NodePath("Beacon"))
+
+	parent.add_child(sb)
+	return sb
+
+
+static func _build_segmented_drone_visual() -> Node3D:
+	var root := Node3D.new()
+	# Part1: Telaio X in carbonio/alluminio
+	var p1 := MeshInstance3D.new()
+	p1.name = "Part1"
+	var sm1 := StyleMesh.new()
+	sm1.box("iron_dark", Vector3(0, 0.04, 0), Vector3(0.85, 0.04, 0.12), {"rot_y": PI * 0.25})
+	sm1.box("iron_dark", Vector3(0, 0.04, 0), Vector3(0.85, 0.04, 0.12), {"rot_y": -PI * 0.25})
+	p1.mesh = sm1.to_mesh(Callable(VillageMaterials, "mat"))
+	p1.visible = false
+	root.add_child(p1)
+
+	# Part2: 4 Motori Brushless + Eliche
+	var p2 := MeshInstance3D.new()
+	p2.name = "Part2"
+	var sm2 := StyleMesh.new()
+	for arm in [Vector3(-0.28, 0.08, -0.28), Vector3(0.28, 0.08, -0.28), Vector3(-0.28, 0.08, 0.28), Vector3(0.28, 0.08, 0.28)]:
+		sm2.cyl("metal", arm, 0.06, 0.06, 0.08, 10)
+		sm2.box("cyan_accent", arm + Vector3(0, 0.05, 0), Vector3(0.28, 0.015, 0.04))
+	p2.mesh = sm2.to_mesh(Callable(VillageMaterials, "mat"))
+	p2.visible = false
+	root.add_child(p2)
+
+	# Part3: Cablaggio Rame HV
+	var p3 := MeshInstance3D.new()
+	p3.name = "Part3"
+	var sm3 := StyleMesh.new()
+	sm3.box("orange_accent", Vector3(0, 0.065, 0), Vector3(0.52, 0.025, 0.06), {"rot_y": PI * 0.25})
+	sm3.box("orange_accent", Vector3(0, 0.065, 0), Vector3(0.52, 0.025, 0.06), {"rot_y": -PI * 0.25})
+	p3.mesh = sm3.to_mesh(Callable(VillageMaterials, "mat"))
+	p3.visible = false
+	root.add_child(p3)
+
+	# Part4: Flight Controller PCB
+	var p4 := MeshInstance3D.new()
+	p4.name = "Part4"
+	var sm4 := StyleMesh.new()
+	sm4.box("server_glow", Vector3(0, 0.09, 0), Vector3(0.24, 0.04, 0.24))
+	p4.mesh = sm4.to_mesh(Callable(VillageMaterials, "mat"))
+	p4.visible = false
+	root.add_child(p4)
+
+	# Part5: Batteria LiPo + Cupola LiDAR
+	var p5 := MeshInstance3D.new()
+	p5.name = "Part5"
+	var sm5 := StyleMesh.new()
+	sm5.box("server_body", Vector3(0, 0.14, 0), Vector3(0.20, 0.07, 0.28))
+	sm5.ellipsoid("cyan_accent", Vector3(0, 0.20, 0), Vector3(0.10, 0.08, 0.10), 6, 10)
+	p5.mesh = sm5.to_mesh(Callable(VillageMaterials, "mat"))
+	p5.visible = false
+	root.add_child(p5)
+
+	# Part6: Anello LED stato attivo (Firmware & Test)
+	var p6 := MeshInstance3D.new()
+	p6.name = "Part6"
+	var sm6 := StyleMesh.new()
+	sm6.cyl("safety_yellow", Vector3(0, 0.18, 0), 0.15, 0.15, 0.02, 12)
+	p6.mesh = sm6.to_mesh(Callable(VillageMaterials, "mat"))
+	p6.visible = false
+	root.add_child(p6)
+	return root
+
+
+static func _build_complete_drone_mesh() -> Node3D:
+	var root := _build_segmented_drone_visual()
+	for ch in root.get_children():
+		if ch is Node3D:
+			ch.visible = true
+	return root
+
 

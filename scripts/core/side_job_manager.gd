@@ -95,8 +95,9 @@ const DEFAULT_SPOTS: Dictionary = {
 	"mailbox_parco_villa_sud": {"label": "Cassetta Residenza Parco Est", "pos": Vector3(-31.4, 0.0, 29.2), "kind": "mailbox"},
 	"mailbox_valdocco_casa": {"label": "Cassetta Borgo Valdocco", "pos": Vector3(64.5, 0.0, 19.6), "kind": "mailbox"},
 	"mailbox_mercato_nord": {"label": "Cassetta Coworking OGR", "pos": Vector3(87.8, 0.0, 6.8), "kind": "mailbox"},
-	"mailbox_borgopo_i3p": {"label": "Cassetta Incubatore I3P", "pos": Vector3(-7.6, 0.0, 52.0), "kind": "mailbox"},
+	"mailbox_borgopo_i3p": {"label": "Cassetta Incubatore Startup", "pos": Vector3(-7.6, 0.0, 52.0), "kind": "mailbox"},
 	"mailbox_torrefazione_po": {"label": "Cassetta Torrefazione Po", "pos": Vector3(36.8, 0.0, 52.0), "kind": "mailbox"},
+
 
 	"pickup_pizzeria_rider": {"label": "Ritiro Pizzeria Da Mario", "pos": Vector3(-4.8, 0.0, 27.6), "kind": "pickup"},
 	"pickup_cafe_rider": {"label": "Ritiro Caffè San Carlo", "pos": Vector3(-9.6, 0.0, 23.6), "kind": "pickup"},

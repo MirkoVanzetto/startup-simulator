@@ -54,6 +54,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("interact"):
 		if current_target != null:
 			current_target.interact(self)
+			if is_instance_valid(current_target):
+				EventBus.prompt_changed.emit(current_target.get_prompt())
 
 func _physics_process(delta: float) -> void:
 	if GameManager.current_state != GameManager.GameState.FIRST_PERSON:
@@ -80,12 +82,14 @@ func _physics_process(delta: float) -> void:
 	var is_sprinting = Input.is_action_pressed("sprint") and NeedsManager.get_energy() > 0.0
 	var gadget_mult: float = 1.18 if ShopManager.has_gadget("gadget_scarpe_pro") else 1.0
 	var skill_mult: float = UpgradeManager.get_speed_mult() if is_instance_valid(UpgradeManager) else 1.0
-	var speed = (sprint_speed if is_sprinting else walk_speed) * NeedsManager.get_speed_multiplier() * gadget_mult * skill_mult
+	var vehicle_mult: float = TechOpsManager.get_vehicle_speed_mult() if is_instance_valid(TechOpsManager) else 1.0
+	var speed = (sprint_speed if is_sprinting else walk_speed) * NeedsManager.get_speed_multiplier() * gadget_mult * skill_mult * vehicle_mult
 	
 	if direction:
 		if is_sprinting and is_on_floor():
 			var drain_mult: float = UpgradeManager.get_sprint_drain_mult() if is_instance_valid(UpgradeManager) else 1.0
-			NeedsManager.consume_sprint(delta * drain_mult) # lo scatto consuma un po' di energia
+			var veh_drain: float = TechOpsManager.get_vehicle_sprint_drain_mult() if is_instance_valid(TechOpsManager) else 1.0
+			NeedsManager.consume_sprint(delta * drain_mult * veh_drain) # lo scatto consuma un po' di energia
 		velocity.x = direction.x * speed
 		velocity.z = direction.z * speed
 		is_moving = true
@@ -93,6 +97,7 @@ func _physics_process(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, 0, speed * 8.0 * delta)
 		velocity.z = move_toward(velocity.z, 0, speed * 8.0 * delta)
 		is_moving = false
+
 		
 	move_and_slide()
 

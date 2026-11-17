@@ -62,3 +62,12 @@ signal stars_changed(current_stars: int, delta: int, reason: String)
 signal upgrade_purchased(upgrade_id: String, new_rank: int)
 signal ogr_hub_unlocked()
 signal knowledge_upgraded(track_id: String, new_rank: int)
+
+# Post-OGR TechOps, Materials, Automation, Drone & Mobility signals (v1.5)
+signal research_credits_changed(current_rc: int, delta: int, reason: String)
+signal materials_changed()
+signal tech_ops_updated()
+signal incident_changed()
+signal vehicle_changed(vehicle_id: String)
+signal employee_task_updated()
+

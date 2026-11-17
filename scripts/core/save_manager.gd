@@ -19,7 +19,7 @@ func save_game() -> bool:
 		player_rot = GameManager.player_node.rotation.y
 		
 	var save_dict: Dictionary = {
-		"version": "1.4.0",
+		"version": "1.5.0",
 		"timestamp": Time.get_datetime_string_from_system(),
 		"economy": {
 			"balance": EconomyManager.balance,
@@ -33,6 +33,7 @@ func save_game() -> bool:
 		},
 		"upgrades": UpgradeManager.serialize(),
 		"knowledge": KnowledgeManager.serialize(),
+		"tech_ops": TechOpsManager.serialize() if is_instance_valid(TechOpsManager) else {},
 		"calendar": {
 			"day": CalendarSystem.current_day,
 			"hour": CalendarSystem.current_hour,
@@ -120,6 +121,12 @@ func load_game() -> bool:
 	else:
 		KnowledgeManager.reset()
 
+	if is_instance_valid(TechOpsManager):
+		if data.has("tech_ops") and data["tech_ops"] is Dictionary:
+			TechOpsManager.deserialize(data["tech_ops"])
+		else:
+			TechOpsManager.reset()
+
 	if data.has("calendar") and data["calendar"] is Dictionary:
 		var cal: Dictionary = data["calendar"]
 		CalendarSystem.current_day = maxi(1, int(cal.get("day", GameManager.days_elapsed)))
@@ -182,3 +189,4 @@ func load_game() -> bool:
 	GameManager.change_state(GameManager.GameState.FIRST_PERSON)
 	EventBus.notification_posted.emit("Partita Caricata", "Bentornato nella tua startup!", "success")
 	return true
+

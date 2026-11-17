@@ -452,8 +452,14 @@ func complete_marketplace_contract(contract_id: String) -> bool:
 			reward *= KnowledgeManager.get_contract_payout_mult(c)
 		if EmployeeManager.is_employee_hired("emp_marco"):
 			reward *= 1.20
-		if c.get("execution_type", "") == "netshield" and ShopManager.has_gadget("gadget_scanner_wifi"):
-			reward *= 1.10
+		if c.get("execution_type", "") == "netshield":
+			if ShopManager.has_gadget("gadget_scanner_wifi"):
+				reward *= 1.10
+			if is_instance_valid(TechOpsManager):
+				reward *= TechOpsManager.get_netshield_tech_mult()
+		if is_instance_valid(TechOpsManager) and TechOpsManager.get_tech_rank("tech_cloud_infra") > 0:
+			reward *= (1.0 + 0.10 * float(TechOpsManager.get_tech_rank("tech_cloud_infra")))
+
 
 		var rep = int(c["reputation_reward"])
 		var star_gain := int(c.get("star_reward", 1))

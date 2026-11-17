@@ -108,11 +108,37 @@ func get_shop_subtitle(shop_id: String) -> String:
 		return ""
 	return str(SHOPS[shop_id].get("subtitle", ""))
 
+const SHOP_HOURS: Dictionary = {
+	"pizzeria": {"open": 8, "close": 23},
+	"cafe": {"open": 6, "close": 22},
+	"panificio": {"open": 6, "close": 20},
+	"alimentari": {"open": 7, "close": 21},
+	"edicola": {"open": 6, "close": 21},
+	"elettronica_componenti": {"open": 8, "close": 21},
+	"fridge": {"open": 0, "close": 24}
+}
+
+func is_shop_open(shop_id: String, hour: int = -1) -> bool:
+	if shop_id == "fridge" or not SHOP_HOURS.has(shop_id):
+		return true
+	var h := hour if hour >= 0 else (CalendarSystem.current_hour if is_instance_valid(CalendarSystem) else 9)
+	var hrs: Dictionary = SHOP_HOURS[shop_id]
+	var open_h := int(hrs.get("open", 7))
+	var close_h := int(hrs.get("close", 21))
+	return h >= open_h and h < close_h
+
+func get_shop_hours_text(shop_id: String) -> String:
+	if shop_id == "fridge" or not SHOP_HOURS.has(shop_id):
+		return "00:00 - 24:00"
+	var hrs: Dictionary = SHOP_HOURS[shop_id]
+	return "%02d:00 - %02d:00" % [int(hrs.get("open", 7)), int(hrs.get("close", 21))]
+
 func is_fridge_stockable(shop_id: String) -> bool:
 	return SHOPS.has(shop_id) and bool(SHOPS[shop_id].get("fridge_stockable", false))
 
 func is_hardware_shop(shop_id: String) -> bool:
 	return SHOPS.has(shop_id) and bool(SHOPS[shop_id].get("is_hardware_shop", false))
+
 
 ## Elenco articoli del negozio. Per 'fridge' elenca solo gli articoli in scorta (con campo 'stock').
 func get_items(shop_id: String) -> Array:

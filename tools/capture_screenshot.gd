@@ -1,7 +1,7 @@
 extends Node
 ## Multi-screen capture utility for Visual QA (fast cadence for Mesa llvmpipe)
 ## Covers: Borgo San Carlo, Parco Valentino Ovest, Viale Est, Borgo Valdocco,
-## Mercato Nord / OGR / Poste, Borgo Po / Viale Lungo Po / Molo sul Po / I3P / Lab Droni,
+## Mercato Nord / OGR / Poste, Borgo Po / Viale Lungo Po / Molo sul Po / Incubatore / Lab Droni,
 ## Officina Bellini 3D Holograms vs Installed Hardware, MakeHuman CC0 NPCs + light PBR,
 ## Pizzeria oven CPUParticles3D smoke, SideJob HUD + Beacon, WorldMap 19 POIs,
 ## TO-OS Conoscenza R&D & WebForge 5.0.

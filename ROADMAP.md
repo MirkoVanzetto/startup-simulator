@@ -106,4 +106,17 @@ Questo documento definisce il piano di produzione dettagliato per **Startup Simu
 ## MILESTONE 10: POLISH, BENCHMARK & DISTRIBUZIONE
 - Profiling prestazionale (CPU frame time, VRAM, RAM footprint < 2.5GB).
 - Localizzazione bilingue completa (Italiano & Inglese).
-- Build desktop Windows (e Linux nativo) pronta per la distribuzione.
+- [x] Build desktop Windows x86_64 (`build/StartupSimulator.exe` / `build/StartupSimulator_Windows_x86_64.zip`).
+
+---
+
+## v1.5.0: EVOLUZIONE POST-OGR, AUTOMAZIONE, RICERCA, DRONI & CEO (COMPLETATA ✔)
+- [x] Ridenominazione istituzionale neutra in `Incubatore Startup Torino` (POIs, SideJob, cartelli 3D e terminale).
+- [x] Fase 3 Post-OGR al Cortile Sud OGR (`Ing. Andrea Viale` & `Ing. Dario Ferrero`): 3 banchi di estrazione fisica, trasporto in cassa e Stazione di Raffinazione (`🔬 RC` / `€` / Magazzino).
+- [x] Albero di Ricerca Tecnologica a 6 rami sbloccabile con Crediti di Ricerca (`🔬 RC`) in Conoscenza R&D su TO-OS.
+- [x] Costruzione 3D, produzione nel tempo (e durante il sonno), usura, manutenzione e potenziamento per `Mining Robot MK1`, `Mining Robot MK2` e `Nastro Trasportatore`.
+- [x] Costruzione fisica 3D in 7 fasi del quadricottero `TO-Drone MK1` al Lab Droni di Borgo Po (`Dr.ssa Chiara Conti`) e missioni di volo operative sulla Piazzola H.
+- [x] Fase 4 CEO: 3 Dipartimenti direzionali all'`Incubatore Startup Torino` e gestione imprevisti dinamici.
+- [x] Dipendenti autonomi su Freelance Hub in tempo reale/sonno + 3 rami di potenziamento abilità su Talent HR.
+- [x] Orari negozi (`CHIUSO`), commessi reattivi, passanti e auto in movimento (`CityLifeManager`), trasporti urbani (`Bicicletta Tech Elettrica`, `4 Fermate Bus GTT`, `Auto Elettrica TO-EV`).
+- [x] Suite automatizzata dedicata `tests/v1_5_post_ogr_tests.gd` (91/91 PASS).

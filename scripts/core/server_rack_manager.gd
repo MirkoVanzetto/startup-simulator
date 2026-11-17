@@ -244,7 +244,12 @@ func calculate_daily_hosting_revenue() -> float:
 	if is_instance_valid(KnowledgeManager):
 		total *= KnowledgeManager.get_rack_hosting_mult()
 
+	# Bonus Ricerca Tecnologica Post-OGR (TechOpsManager, 1.0x a Rank 0)
+	if is_instance_valid(TechOpsManager):
+		total *= TechOpsManager.get_rack_tech_mult()
+
 	return total
+
 
 func _on_contract_completed(contract_id: String, _reward: float, _rep: int) -> void:
 	if not is_rack_unlocked:

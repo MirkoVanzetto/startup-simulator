@@ -221,7 +221,9 @@ func get_all_tracks() -> Array[Dictionary]:
 
 # --- Moltiplicatori rigorosamente neutri a Rank 0 ---
 func get_webforge_speed_bonus() -> float:
-	return 0.30 * float(get_rank("web_architecture"))
+	var tech_b := TechOpsManager.get_webforge_tech_speed_bonus() if is_instance_valid(TechOpsManager) else 0.0
+	return 0.30 * float(get_rank("web_architecture")) + tech_b
+
 
 func get_rack_hosting_mult() -> float:
 	return 1.0 + 0.10 * float(get_rank("cloud_devops"))

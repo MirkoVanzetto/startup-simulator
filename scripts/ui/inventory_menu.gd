@@ -62,8 +62,15 @@ func _ready() -> void:
 	if ShopManager.has_signal("hardware_changed"):
 		ShopManager.hardware_changed.connect(_on_inventory_changed)
 	EventBus.item_purchased.connect(func(_id, _c): _on_inventory_changed())
+	if EventBus.has_signal("materials_changed"):
+		EventBus.materials_changed.connect(_on_inventory_changed)
+	if EventBus.has_signal("research_credits_changed"):
+		EventBus.research_credits_changed.connect(func(_r, _d, _rs): _on_inventory_changed())
+	if EventBus.has_signal("vehicle_changed"):
+		EventBus.vehicle_changed.connect(func(_v): _on_inventory_changed())
 	get_viewport().size_changed.connect(_fit_to_viewport)
 	_fit_to_viewport()
+
 
 func _on_inventory_changed() -> void:
 	if visible:
@@ -265,10 +272,12 @@ func _select_category(cat: String) -> void:
 func _refresh_stats() -> void:
 	var h := int(roundf(NeedsManager.get_hunger()))
 	var e := int(roundf(NeedsManager.get_energy()))
-	_stats_lbl.text = "Saldo: € %0.2f  ·  Fame: %d%%  ·  Energia: %d%%  ·  Zaino: %d  ·  Hardware: %d  ·  Studio: %s" % [
-		EconomyManager.balance, h, e,
-		ShopManager.get_backpack_count(), ShopManager.get_hardware_count(),
-		GameManager.get_company_tier_name()
+	var rc := TechOpsManager.research_credits if is_instance_valid(TechOpsManager) else 0
+	var carried := TechOpsManager.get_carried_total() if is_instance_valid(TechOpsManager) else 0
+	var cap := TechOpsManager.get_carry_capacity() if is_instance_valid(TechOpsManager) else 6
+	var v_name := TechOpsManager.get_active_vehicle_name() if is_instance_valid(TechOpsManager) else "A Piedi"
+	_stats_lbl.text = "€ %0.2f · 🔬 %d RC · Fame: %d%% · Energia: %d%% · Cassa: %d/%d · Mezzo: %s" % [
+		EconomyManager.balance, rc, h, e, carried, cap, v_name
 	]
 
 func _collect_entries() -> Array[Dictionary]:
@@ -313,6 +322,27 @@ func _collect_entries() -> Array[Dictionary]:
 				"item": hw
 			})
 
+	# 2b. Polo Materiali OGR (Rame, Silicio, Alluminio, Circuiti, Terre Rare, Compositi)
+	if is_instance_valid(TechOpsManager):
+		for mid in TechOpsManager.MATERIAL_ORDER:
+			var mdef: Dictionary = TechOpsManager.MATERIALS[mid]
+			var c_qty := TechOpsManager.get_carried_count(mid)
+			var w_qty := TechOpsManager.get_warehouse_count(mid)
+			if c_qty > 0 or w_qty > 0 or TechOpsManager.ogr_tech_mission_started:
+				out.append({
+					"kind": CATEGORY_HARDWARE,
+					"id": "mat_" + mid,
+					"name": "%s %s" % [str(mdef["icon"]), str(mdef["name"])],
+					"qty": w_qty + c_qty,
+					"required": 0,
+					"badge": "RISORSA TECNOLOGICA OGR",
+					"color": Color(1.0, 0.84, 0.36),
+					"subtitle": "In cassa trasporto: x%d · In magazzino OGR: x%d · Valore: € %0.0f / +%d RC" % [
+						c_qty, w_qty, float(mdef["sell_price"]), int(mdef["rc_value"])
+					],
+					"item": {"desc": str(mdef["desc"])}
+				})
+
 	# 3. Gadgets & Studio Upgrades
 	for hw in hw_catalog:
 		if not bool(hw.get("is_gadget", false)):
@@ -330,6 +360,22 @@ func _collect_entries() -> Array[Dictionary]:
 			"subtitle": str(hw.get("desc", "")),
 			"item": hw
 		})
+
+	if is_instance_valid(TechOpsManager):
+		for vid in ["bike", "bus_pass", "company_ev"]:
+			var vdef: Dictionary = TechOpsManager.VEHICLES[vid]
+			var v_owned := TechOpsManager.has_vehicle(vid)
+			out.append({
+				"kind": CATEGORY_GEAR,
+				"id": "veh_" + vid,
+				"name": "%s %s" % [str(vdef.get("icon", "🚲")), str(vdef["name"])],
+				"qty": 1 if v_owned else 0,
+				"owned": v_owned,
+				"badge": "MOBILITÀ URBANA ATTIVA" if v_owned else "SBLOCCABILE IN CITTÀ (€ %0.0f)" % float(vdef["cost"]),
+				"color": Color(0.45, 0.95, 0.78) if v_owned else Color(0.62, 0.68, 0.78),
+				"subtitle": str(vdef["desc"]),
+				"item": {"desc": str(vdef["desc"])}
+			})
 
 	var seen_upg := {}
 	for upg_id in GameManager.studio_upgrades_installed:
@@ -352,6 +398,7 @@ func _collect_entries() -> Array[Dictionary]:
 		})
 
 	return out
+
 
 func _compute_required_hardware() -> Dictionary:
 	var req := {}

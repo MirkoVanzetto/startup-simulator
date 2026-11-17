@@ -152,14 +152,14 @@ static func get_pois() -> Array[Dictionary]:
 		},
 		{
 			"id": "coworking_ogr",
-			"name": "OGR Tech Hub Torino (Enterprise)",
+			"name": "OGR Tech Hub & Polo Estrazione",
 			"short": "OGR Hub",
 			"district": "Mercato & OGR",
 			"pos": Vector3(110.25, 0.0, 2.75),
 			"footprint": Vector2(27.5, 24.5),
 			"color": Color(0.32, 0.88, 0.96),
 			"label_dir": "bottom",
-			"desc": "Grande navata OGR Enterprise: Bay 01 aperta per la tua startup, Pod 02-04 riservati, Ing. Andrea Viale e maxi-bandi corporate (si apre dopo Via Po & Officina Bellini)."
+			"desc": "Grande navata OGR Enterprise + Polo Estrazione Materiali & Mining Robot nel cortile Sud: Ing. Andrea Viale, Ing. Dario Ferrero, Raffinazione e maxi-bandi corporate."
 		},
 		{
 			"id": "arco_borgopo",
@@ -174,14 +174,14 @@ static func get_pois() -> Array[Dictionary]:
 		},
 		{
 			"id": "incubatore_i3p",
-			"name": "Incubatore PoliTO · I3P",
-			"short": "I3P PoliTO",
+			"name": "Incubatore Startup Torino",
+			"short": "Incubatore",
 			"district": "Borgo Po",
 			"pos": Vector3(-13.5, 0.0, 48.0),
 			"footprint": Vector2(11.0, 6.4),
 			"color": Color(0.26, 0.86, 0.98),
 			"label_dir": "bottom",
-			"desc": "Polo innovazione R&D su Viale Lungo Po: ospita startup deep-tech, laboratori e cassette volantini."
+			"desc": "Incubatore Startup & Direzione Dipartimenti (Fase 4 CEO) su Viale Lungo Po: fonda le divisioni Hardware, Cloud AI e Droni."
 		},
 		{
 			"id": "lab_droni",
@@ -192,7 +192,7 @@ static func get_pois() -> Array[Dictionary]:
 			"footprint": Vector2(8.6, 6.0),
 			"color": Color(0.45, 0.82, 1.0),
 			"label_dir": "bottom",
-			"desc": "Centro collaudi aeromobili elettrici con piazzola H frontale su Lungo Po e consegne rider."
+			"desc": "Laboratorio Aero R&D con Dr.ssa Chiara Conti, Banco Assemblaggio Fisico TO-Drone MK1 (7 fasi) e Piazzola H per missioni di volo."
 		},
 		{
 			"id": "torrefazione_po",
@@ -219,8 +219,9 @@ static func get_pois() -> Array[Dictionary]:
 	]
 
 static func get_poi(poi_id: String) -> Dictionary:
+	var lookup := "incubatore_i3p" if poi_id == "incubatore" else poi_id
 	for p in get_pois():
-		if p["id"] == poi_id:
+		if p["id"] == lookup:
 			return p
 	return {}
 
@@ -250,11 +251,12 @@ static func get_roads_and_zones() -> Dictionary:
 		"slabs": [
 			Rect2(Vector2(87.9, -0.35), Vector2(8.7, 6.2)),     # Promenade Mercato -> Cancello OGR
 			Rect2(Vector2(96.5, -9.5), Vector2(27.5, 24.5)),    # Pavimentazione Navata OGR Tech Hub
-			Rect2(Vector2(-17.8, 51.1), Vector2(8.6, 4.2)),     # Sagrato I3P
+			Rect2(Vector2(-17.8, 51.1), Vector2(8.6, 4.2)),     # Sagrato Incubatore
 			Rect2(Vector2(20.2, 51.1), Vector2(7.6, 4.2)),      # Sagrato Lab Droni
 			Rect2(Vector2(37.7, 51.1), Vector2(7.6, 4.2)),      # Sagrato Torrefazione Po
 			Rect2(Vector2(-24.0, 60.7), Vector2(80.0, 5.1))     # Promenade Murazzi Lungo Po
 		],
+
 		"asphalt": [
 			Rect2(Vector2(-19.0, 9.1), Vector2(7.6, 5.4)),      # Parcheggio W
 			Rect2(Vector2(11.4, 9.1), Vector2(7.6, 5.4)),       # Parcheggio E

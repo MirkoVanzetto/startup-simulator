@@ -53,6 +53,10 @@ func _ready() -> void:
 	EventBus.side_job_cancelled.connect(func(_j): _update_side_job_panel())
 	if ShopManager.has_signal("hardware_changed"):
 		ShopManager.hardware_changed.connect(_update_hints_label)
+	if EventBus.has_signal("materials_changed"):
+		EventBus.materials_changed.connect(_update_hints_label)
+	if EventBus.has_signal("vehicle_changed"):
+		EventBus.vehicle_changed.connect(func(_v): _update_hints_label())
 	get_viewport().size_changed.connect(_update_hints_label)
 	
 	if reputation_label:
@@ -96,6 +100,8 @@ func _update_needs_display(hunger: float, energy: float) -> void:
 
 func _update_reputation_label() -> void:
 	var txt = FameManager.get_hud_label()
+	if is_instance_valid(TechOpsManager) and (TechOpsManager.research_credits > 0 or TechOpsManager.ogr_tech_mission_started):
+		txt += " · 🔬 %d RC" % TechOpsManager.research_credits
 	if txt != _last_rep_text:
 		_last_rep_text = txt
 		reputation_label.text = txt
@@ -170,11 +176,19 @@ func _update_hints_label() -> void:
 	if not is_instance_valid(hints_label):
 		return
 	var total := ShopManager.get_total_inventory_count()
+	var extra := ""
+	if is_instance_valid(TechOpsManager):
+		var c_tot := TechOpsManager.get_carried_total()
+		if c_tot > 0:
+			extra += " · 📦 %d/%d" % [c_tot, TechOpsManager.get_carry_capacity()]
+		if TechOpsManager.active_vehicle != "foot":
+			extra += " · " + TechOpsManager.get_active_vehicle_name()
 	var vp := get_viewport_rect().size
 	if vp.x > 0 and vp.x < 780.0:
-		hints_label.text = "[TAB] Zaino (%d) · [M] Mappa · [ESC]" % total
+		hints_label.text = "[TAB] Zaino (%d)%s · [M] Mappa · [ESC]" % [total, extra]
 	else:
-		hints_label.text = "[TAB] Zaino (%d) · [CAPS/M] Mappa · [B] Arreda · [ESC] Pausa" % total
+		hints_label.text = "[TAB] Zaino (%d)%s · [CAPS/M] Mappa · [B] Arreda · [ESC] Pausa" % [total, extra]
+
 
 const MAX_TOASTS := 3
 

@@ -830,7 +830,13 @@ func _update_top_bar() -> void:
 	top_balance_label.text = "Fondi: € %0.2f" % EconomyManager.balance
 	clock_label.text = "%s - Giorno %d (%s)" % [CalendarSystem.get_formatted_time(), CalendarSystem.current_day, CalendarSystem.get_day_name()]
 	if stars_label:
-		stars_label.text = "★ %d" % (UpgradeManager.get_stars() if is_instance_valid(UpgradeManager) else 0)
+		var st := UpgradeManager.get_stars() if is_instance_valid(UpgradeManager) else 0
+		var rc := TechOpsManager.research_credits if is_instance_valid(TechOpsManager) else 0
+		if rc > 0 or (is_instance_valid(TechOpsManager) and TechOpsManager.ogr_tech_mission_started):
+			stars_label.text = "★ %d · 🔬 %d RC" % [st, rc]
+		else:
+			stars_label.text = "★ %d" % st
+
 
 func _on_funds_changed(new_balance: float, _delta: float, _reason: String) -> void:
 	top_balance_label.text = "Fondi: € %0.2f" % new_balance
@@ -988,6 +994,8 @@ func _update_knowledge_display() -> void:
 	var tot_rk := KnowledgeManager.get_total_rank()
 	var max_tot := tracks.size() * KnowledgeManager.MAX_RANK
 
+	var rc_avail := TechOpsManager.research_credits if is_instance_valid(TechOpsManager) else 0
+	var tech_rk := TechOpsManager.get_total_tech_rank() if is_instance_valid(TechOpsManager) else 0
 	if knowledge_banner_label:
 		if not unlocked:
 			knowledge_banner_label.text = "🔒 RICERCA R&D BLOCCATA — Completa prima il Maxi-Appalto Officina Bellini (Borgo Valdocco Est: Sopralluogo %d/4, Wi-Fi %s, Web %s, Server %s, PC %s)." % [
@@ -998,8 +1006,8 @@ func _update_knowledge_display() -> void:
 				"✔" if bool(fac.get("pcs_done", false)) else "○"
 			]
 		else:
-			knowledge_banner_label.text = "📘 RICERCA & CONOSCENZA ATTIVA — Padronanza: %d / %d | Fondi: € %0.2f | Reputazione: %d — Ogni livello sblocca commesse specialistiche su Freelance Hub e bonus dominio permanenti." % [
-				tot_rk, max_tot, EconomyManager.balance, GameManager.reputation_points
+			knowledge_banner_label.text = "📘 RICERCA & SVILUPPO TECNOLOGICO — Conoscenza: %d/%d · Tech Tree: %d/18 · 🔬 Crediti Ricerca: %d RC · Fondi: € %0.2f — Sblocca tecnologie per Mining Robot, TO-Drone MK1, AI e Cloud." % [
+				tot_rk, max_tot, tech_rk, rc_avail, EconomyManager.balance
 			]
 
 	if knowledge_banner_actions:
@@ -1014,6 +1022,11 @@ func _update_knowledge_display() -> void:
 			wf_btn.focus_mode = Control.FOCUS_NONE
 			wf_btn.pressed.connect(_launch_webforge)
 			knowledge_banner_actions.add_child(wf_btn)
+			var ogr_btn := Button.new()
+			ogr_btn.text = "🏢 Apri OGR & Tech Ops"
+			ogr_btn.focus_mode = Control.FOCUS_NONE
+			ogr_btn.pressed.connect(func(): _open_window(ogr_window))
+			knowledge_banner_actions.add_child(ogr_btn)
 
 	for tr in tracks:
 		var tid := str(tr["id"])
@@ -1101,6 +1114,87 @@ func _update_knowledge_display() -> void:
 		cv.add_child(act_btn)
 		knowledge_grid.add_child(card)
 
+	# Rami Tecnologici Post-OGR (6 Rami sbloccabili con 🔬 Crediti di Ricerca + €)
+	if is_instance_valid(TechOpsManager):
+		var tech_branches: Array = TechOpsManager.get_all_tech_branches()
+		var ogr_open: bool = ContractManager.is_ogr_unlocked() or bool(TechOpsManager.ogr_tech_mission_started)
+		for tb in tech_branches:
+			var bid := str(tb["id"])
+			var rk := int(tb["rank"])
+			var max_rk := int(tb["max_rank"])
+			var rc_cost := int(tb["next_rc_cost"])
+			var euro_cost := float(tb["next_euro_cost"])
+			var can_res := bool(tb["can_research"])
+			var labels: Array = tb.get("effect_labels", [])
+
+			var b_col := Color(0.45, 0.52, 0.62, 0.50) if not ogr_open else (Color(0.35, 1.0, 0.58, 0.78) if rk >= max_rk else (Color(1.0, 0.84, 0.32, 0.90) if can_res else Color(0.38, 0.55, 0.78, 0.65)))
+			var card := _make_hub_card(Color(0.12, 0.15, 0.23, 0.95), b_col)
+			card.custom_minimum_size = Vector2(220, 152)
+
+			var cv := VBoxContainer.new()
+			cv.add_theme_constant_override("separation", 5)
+			card.add_child(cv)
+
+			var top := HBoxContainer.new()
+			var t_lbl := Label.new()
+			t_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			t_lbl.text = "%s %s" % [str(tb["icon"]), str(tb["title"])]
+			t_lbl.add_theme_font_size_override("font_size", 14)
+			t_lbl.add_theme_color_override("font_color", Color(1.0, 0.86, 0.38) if ogr_open else Color(0.68, 0.75, 0.84))
+			t_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			top.add_child(t_lbl)
+
+			var rk_badge := Label.new()
+			rk_badge.text = "🔬 Lv.%d/%d" % [rk, max_rk]
+			rk_badge.add_theme_font_size_override("font_size", 12)
+			rk_badge.add_theme_color_override("font_color", Color(1.0, 0.86, 0.35))
+			top.add_child(rk_badge)
+			cv.add_child(top)
+
+			var sum_lbl := Label.new()
+			sum_lbl.size_flags_vertical = Control.SIZE_EXPAND_FILL
+			sum_lbl.text = str(tb["summary"])
+			sum_lbl.add_theme_font_size_override("font_size", 11)
+			sum_lbl.add_theme_color_override("font_color", Color(0.80, 0.86, 0.94))
+			sum_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			cv.add_child(sum_lbl)
+
+			var cur_eff := str(labels[rk]) if rk < labels.size() else "Attivo"
+			var eff_lbl := Label.new()
+			eff_lbl.add_theme_font_size_override("font_size", 11)
+			eff_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			if rk < max_rk and (rk + 1) < labels.size():
+				eff_lbl.text = "Attuale: %s  ➔  Prossimo: %s" % [cur_eff, str(labels[rk + 1])]
+				eff_lbl.add_theme_color_override("font_color", Color(0.65, 0.96, 0.75))
+			else:
+				eff_lbl.text = "Attuale: %s (Livello Massimo)" % cur_eff
+				eff_lbl.add_theme_color_override("font_color", Color(0.38, 1.0, 0.62))
+			cv.add_child(eff_lbl)
+
+			var act_btn := Button.new()
+			act_btn.custom_minimum_size = Vector2(0, 32)
+			act_btn.focus_mode = Control.FOCUS_NONE
+			act_btn.clip_text = true
+			if rk >= max_rk:
+				act_btn.text = "✔ TECNOLOGIA AL MASSIMO (Lv.3/3)"
+				act_btn.disabled = true
+			else:
+				act_btn.text = ("🔬 Sblocca Lv.%d/%d — %d RC" % [rk + 1, max_rk, rc_cost]) if euro_cost <= 0.0 else ("🔬 Sblocca Lv.%d/%d — %d RC + € %0.0f" % [rk + 1, max_rk, rc_cost, euro_cost])
+				act_btn.disabled = not can_res
+				if can_res:
+					act_btn.add_theme_color_override("font_color", Color(1.0, 0.88, 0.32))
+				var bid_copy := bid
+				act_btn.pressed.connect(func():
+					if TechOpsManager.research_branch(bid_copy):
+						_update_knowledge_display()
+						_update_ogr_display()
+						_update_top_bar()
+						_refresh_desktop_badges()
+				)
+			cv.add_child(act_btn)
+			knowledge_grid.add_child(card)
+
+
 # ==============================================================================
 # OGR ENTERPRISE UI
 # ==============================================================================
@@ -1157,9 +1251,12 @@ func _update_ogr_display() -> void:
 
 	var ent_tier := UpgradeManager.get_enterprise_tier() if is_instance_valid(UpgradeManager) else 1
 	var ent_bonus_pct := roundi((UpgradeManager.get_enterprise_payout_mult() - 1.0) * 100.0) if is_instance_valid(UpgradeManager) else 0
+	var rc_now: int = int(TechOpsManager.research_credits) if is_instance_valid(TechOpsManager) else 0
 	if ogr_banner_label:
-		ogr_banner_label.text = "🏢 OGR TECH HUB APERTO — Appalti Corporate Attivi | Livello Appalti: Tier %d/4 (+%d%% compenso extra) · %d bandi disponibili" % [
-			ent_tier, ent_bonus_pct, ContractManager.enterprise_contracts.size()
+		ogr_banner_label.text = "🏢 OGR TECH HUB & POLO TECNOLOGICO — Appalti Tier %d/4 (+%d%%) · 🔬 %d RC · Magazzino: %d mat. · Dipartimenti: +€ %0.0f/g" % [
+			ent_tier, ent_bonus_pct, rc_now,
+			int(TechOpsManager.get_stored_total()) if is_instance_valid(TechOpsManager) else 0,
+			float(TechOpsManager.calculate_departments_daily_revenue()) if is_instance_valid(TechOpsManager) else 0.0
 		]
 
 	if ogr_banner_actions:
@@ -1170,6 +1267,11 @@ func _update_ogr_display() -> void:
 			_update_ogr_display()
 		)
 		ogr_banner_actions.add_child(ref_btn)
+		var rd_btn := Button.new()
+		rd_btn.text = "🔬 Albero Ricerca (%d RC)" % rc_now
+		rd_btn.add_theme_color_override("font_color", Color(0.45, 0.95, 1.0))
+		rd_btn.pressed.connect(func(): _open_window(knowledge_window))
+		ogr_banner_actions.add_child(rd_btn)
 		if ent_tier < 4:
 			var up_btn := Button.new()
 			up_btn.text = "★ Potenzia Appalti OGR (Attuale Tier %d)" % ent_tier
@@ -1177,7 +1279,11 @@ func _update_ogr_display() -> void:
 			up_btn.pressed.connect(func(): _open_window(upgrades_window))
 			ogr_banner_actions.add_child(up_btn)
 
+	if is_instance_valid(TechOpsManager):
+		_append_ogr_tech_ops_cards()
+
 	# Contratti Enterprise attivi
+
 	var active_ent: Array[Dictionary] = []
 	for cid in ContractManager.active_contracts:
 		var c = ContractManager.active_contracts[cid]
@@ -1335,6 +1441,189 @@ func _update_ogr_display() -> void:
 		ml.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		v.add_child(ml)
 		ogr_content_vbox.add_child(card)
+
+
+func _append_ogr_tech_ops_cards() -> void:
+	# 1. Imprevisti Attivi (se presenti)
+	if not TechOpsManager.active_incidents.is_empty():
+		var inc_card := _make_hub_card(Color(0.24, 0.12, 0.14, 0.95), Color(1.0, 0.38, 0.35, 0.90))
+		var iv := VBoxContainer.new()
+		iv.add_theme_constant_override("separation", 6)
+		inc_card.add_child(iv)
+
+		var ih := Label.new()
+		ih.text = "⚠ IMPREVISTI & CRITICITÀ AZIENDALI ATTIVE (%d):" % TechOpsManager.active_incidents.size()
+		ih.add_theme_font_size_override("font_size", 13)
+		ih.add_theme_color_override("font_color", Color(1.0, 0.55, 0.45))
+		ih.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		iv.add_child(ih)
+
+		for inc_id in TechOpsManager.active_incidents.keys():
+			var inc: Dictionary = TechOpsManager.active_incidents[inc_id]
+			var irow := HFlowContainer.new()
+			irow.add_theme_constant_override("h_separation", 8)
+			irow.add_theme_constant_override("v_separation", 4)
+			var ilbl := Label.new()
+			ilbl.custom_minimum_size = Vector2(220, 0)
+			ilbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			ilbl.text = "• %s: %s" % [str(inc.get("title", inc_id)), str(inc.get("desc", ""))]
+			ilbl.add_theme_font_size_override("font_size", 11)
+			ilbl.add_theme_color_override("font_color", Color(0.96, 0.86, 0.84))
+			ilbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			irow.add_child(ilbl)
+
+			var ibtn := Button.new()
+			var rcost := float(inc.get("fix_cost_eur", 60.0))
+			ibtn.text = "🔧 Risolvi Ora (Gratis)" if rcost <= 0.0 else ("🔧 Risolvi da Remoto (€ %0.0f)" % rcost)
+			ibtn.disabled = (rcost > 0.0 and not EconomyManager.can_afford(rcost))
+			var id_copy := str(inc_id)
+			ibtn.pressed.connect(func():
+				if TechOpsManager.resolve_incident(id_copy, false):
+					_update_ogr_display()
+					_update_top_bar()
+			)
+			irow.add_child(ibtn)
+			iv.add_child(irow)
+		ogr_content_vbox.add_child(inc_card)
+
+	# 2. Polo Materiali, Mining Robot & Progetto TO-Drone MK1
+	var ops_card := _make_hub_card(Color(0.11, 0.17, 0.25, 0.94), Color(0.38, 0.88, 0.95, 0.80))
+	var ov := VBoxContainer.new()
+	ov.add_theme_constant_override("separation", 6)
+	ops_card.add_child(ov)
+
+	var oh := Label.new()
+	oh.text = "🔬 POLO TECNOLOGICO OGR — MATERIALI, MINING ROBOT & PROGETTO DRONE MK1"
+	oh.add_theme_font_size_override("font_size", 13)
+	oh.add_theme_color_override("font_color", Color(0.48, 0.95, 1.0))
+	oh.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	ov.add_child(oh)
+
+	var mat_lbl := Label.new()
+	mat_lbl.text = "📦 Magazzino Materiali: Rame x%d · Silicio x%d · Alluminio x%d · Circuiti x%d · Terre Rare x%d · Compositi x%d" % [
+		int(TechOpsManager.get_stored_count("copper")),
+		int(TechOpsManager.get_stored_count("silicon")),
+		int(TechOpsManager.get_stored_count("aluminum")),
+		int(TechOpsManager.get_stored_count("circuits")),
+		int(TechOpsManager.get_stored_count("rare_earths")),
+		int(TechOpsManager.get_stored_count("composites"))
+	]
+	mat_lbl.add_theme_font_size_override("font_size", 11)
+	mat_lbl.add_theme_color_override("font_color", Color(0.84, 0.90, 0.96))
+	mat_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	ov.add_child(mat_lbl)
+
+	var r1_txt := "Da installare nel Cortile Sud OGR"
+	if TechOpsManager.is_robot_built(1):
+		var st1 := TechOpsManager.get_robot_state(1)
+		r1_txt = "Attivo Lv.%d (Cond. %d%% · Cassa %d/%d)" % [
+			int(st1.get("level", 1)),
+			int(roundf(float(st1.get("condition", 100.0)))),
+			int(TechOpsManager.get_robot_hopper_total(1)),
+			int(st1.get("hopper_cap", 18))
+		]
+	var r2_txt := "Non installato"
+	if TechOpsManager.is_robot_built(2):
+		var st2 := TechOpsManager.get_robot_state(2)
+		r2_txt = "Attivo Lv.%d (Cond. %d%% · Cassa %d/%d%s)" % [
+			int(st2.get("level", 1)),
+			int(roundf(float(st2.get("condition", 100.0)))),
+			int(TechOpsManager.get_robot_hopper_total(2)),
+			int(st2.get("hopper_cap", 32)),
+			" · Nastro ON" if TechOpsManager.conveyor_installed else ""
+		]
+	var dr_txt := "Assemblaggio: %d/7 step al Lab Droni (Borgo Po)" % int(TechOpsManager.drone_assembly_step)
+	if TechOpsManager.drone_built:
+		if not TechOpsManager.active_drone_mission.is_empty():
+			dr_txt = "IN VOLO: %s (%d min)" % [
+				str(TechOpsManager.active_drone_mission.get("title", "Missione")),
+				int(TechOpsManager.active_drone_mission.get("remaining_mins", 0))
+			]
+		else:
+			dr_txt = "OPERATIVO ✔ (Missioni completate: %d)" % int(TechOpsManager.completed_drone_missions_count)
+
+	var st_lbl := Label.new()
+	st_lbl.text = "🤖 Mining Robot MK1: %s  |  MK2: %s  |  🚁 TO-Drone MK1: %s" % [r1_txt, r2_txt, dr_txt]
+	st_lbl.add_theme_font_size_override("font_size", 11)
+	st_lbl.add_theme_color_override("font_color", Color(0.55, 0.96, 0.72))
+	st_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	ov.add_child(st_lbl)
+
+	var act_row := HFlowContainer.new()
+	act_row.add_theme_constant_override("h_separation", 8)
+	act_row.add_theme_constant_override("v_separation", 6)
+
+	if TechOpsManager.drone_built:
+		var in_flight := not TechOpsManager.active_drone_mission.is_empty()
+		for mid in TechOpsManager.DRONE_MISSION_ORDER:
+			var mdef: Dictionary = TechOpsManager.DRONE_MISSIONS[mid]
+			var mbtn := Button.new()
+			if in_flight:
+				mbtn.text = "🚁 %s (Drone in volo)" % str(mdef["title"])
+				mbtn.disabled = true
+			else:
+				mbtn.text = "🚁 %s (+€ %0.0f · +%d RC)" % [str(mdef["title"]), float(mdef["reward_eur"]), int(mdef["reward_rc"])]
+				mbtn.add_theme_color_override("font_color", Color(0.40, 1.0, 0.65))
+				var mid_copy: String = str(mid)
+				mbtn.pressed.connect(func():
+					if TechOpsManager.start_drone_mission(mid_copy):
+						_update_ogr_display()
+						_update_top_bar()
+				)
+			act_row.add_child(mbtn)
+
+	if act_row.get_child_count() > 0:
+		ov.add_child(act_row)
+	ogr_content_vbox.add_child(ops_card)
+
+	# 3. Fase 4: Dipartimenti Aziendali & Investimenti (Incubatore Startup Torino)
+	var dept_card := _make_hub_card(Color(0.13, 0.15, 0.24, 0.94), Color(0.85, 0.72, 1.0, 0.75))
+	var dv := VBoxContainer.new()
+	dv.add_theme_constant_override("separation", 6)
+	dept_card.add_child(dv)
+
+	var dh := Label.new()
+	dh.text = "🏛 FASE 4 — DIPARTIMENTI DIREZIONALI & CEO (%d/3 · +€ %0.0f/g · +%d RC/g · INCUBATORE)" % [
+		TechOpsManager.unlocked_departments.size(),
+		TechOpsManager.calculate_departments_daily_revenue(),
+		TechOpsManager.calculate_departments_daily_rc()
+	]
+	dh.add_theme_font_size_override("font_size", 13)
+	dh.add_theme_color_override("font_color", Color(0.86, 0.75, 1.0))
+	dh.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	dv.add_child(dh)
+
+	var d_flow := HFlowContainer.new()
+	d_flow.add_theme_constant_override("h_separation", 8)
+	d_flow.add_theme_constant_override("v_separation", 6)
+	for did in TechOpsManager.DEPT_ORDER:
+		var def: Dictionary = TechOpsManager.DEPARTMENTS[did]
+		var is_open := TechOpsManager.is_department_unlocked(did)
+		var chk: Dictionary = TechOpsManager.can_unlock_department(did)
+		var dbtn := Button.new()
+		dbtn.focus_mode = Control.FOCUS_NONE
+		if is_open:
+			dbtn.text = "✔ %s (+€ %0.0f/g · +%d RC/g)" % [str(def["title"]), float(def["daily_eur"]), int(def["daily_rc"])]
+			dbtn.disabled = true
+		else:
+			var c_euro := float(def.get("cost_eur", 2400.0))
+			var c_rc := int(def.get("cost_rc", 30))
+			dbtn.text = "🏛 Fonda %s (€ %0.0f · %d RC)" % [str(def["title"]), c_euro, c_rc]
+			dbtn.disabled = not bool(chk.get("allowed", false))
+			if bool(chk.get("allowed", false)):
+				dbtn.add_theme_color_override("font_color", Color(0.85, 0.75, 1.0))
+			else:
+				dbtn.tooltip_text = str(chk.get("reason", ""))
+			var did_copy: String = str(did)
+			dbtn.pressed.connect(func():
+				if TechOpsManager.unlock_department(did_copy):
+					_update_ogr_display()
+					_update_top_bar()
+			)
+		d_flow.add_child(dbtn)
+	dv.add_child(d_flow)
+	ogr_content_vbox.add_child(dept_card)
+
 
 # ==============================================================================
 # MAIL, FREELANCE HUB, SHOP, BANK
@@ -2186,10 +2475,47 @@ func _update_talent_display() -> void:
 		action_btn.size_flags_vertical = SIZE_SHRINK_CENTER
 
 		if is_hired:
+			var auto_lbl := Label.new()
+			auto_lbl.text = EmployeeManager.get_employee_task_status_text(cand["id"])
+			auto_lbl.add_theme_font_size_override("font_size", 11)
+			auto_lbl.add_theme_color_override("font_color", Color(0.55, 0.95, 1.0))
+			auto_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			vbox.add_child(auto_lbl)
+
+			var sk_row := HFlowContainer.new()
+			sk_row.add_theme_constant_override("h_separation", 6)
+			sk_row.add_theme_constant_override("v_separation", 4)
+			for track_id in ["speed", "value", "quality"]:
+				var tdef: Dictionary = EmployeeManager.SKILL_TRACKS[track_id]
+				var cur_rk: int = int(EmployeeManager.get_employee_skill(str(cand["id"]), str(track_id)))
+				var chk: Dictionary = EmployeeManager.can_upgrade_employee_skill(str(cand["id"]), str(track_id))
+				var sbtn := Button.new()
+				sbtn.focus_mode = Control.FOCUS_NONE
+				if cur_rk >= int(EmployeeManager.MAX_SKILL_RANK):
+					sbtn.text = "✔ %s Lv.3/3" % str(tdef["title"]).split(" ")[0]
+					sbtn.disabled = true
+				else:
+					var ucost := float(chk.get("cost", 0.0))
+					sbtn.text = "%s %s Lv.%d/3 (€ %0.0f)" % [str(tdef["icon"]), str(tdef["title"]).split(" ")[0], cur_rk, ucost]
+					sbtn.disabled = not bool(chk.get("allowed", false))
+					if bool(chk.get("allowed", false)):
+						sbtn.add_theme_color_override("font_color", Color(1.0, 0.88, 0.35))
+					var emp_copy: String = str(cand["id"])
+					var tr_copy: String = str(track_id)
+					sbtn.pressed.connect(func():
+						if EmployeeManager.upgrade_employee_skill(emp_copy, tr_copy):
+							_update_talent_display()
+							_update_top_bar()
+					)
+				sk_row.add_child(sbtn)
+			vbox.add_child(sk_row)
+
+
 			action_btn.text = "Licenzia"
 			action_btn.add_theme_color_override("font_color", Color(1, 0.4, 0.4, 1))
 			var cid = cand["id"]
 			action_btn.pressed.connect(func(): EmployeeManager.fire_employee(cid); _update_talent_display())
+
 		else:
 			var hire_check: Dictionary = EmployeeManager.can_hire_employee(cand["id"])
 			var can_hire: bool = hire_check.get("allowed", false)

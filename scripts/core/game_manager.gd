@@ -118,6 +118,17 @@ func get_recommended_quest_poi_id() -> String:
 			return "officina_bellini"
 		return "studio"
 	if ContractManager.is_ogr_unlocked() and not ContractManager.has_pending_contracts():
+		if is_instance_valid(TechOpsManager):
+			var st := TechOpsManager.get_post_ogr_stage()
+			match st:
+				"talk_viale", "gather_materials", "build_robot_mk1":
+					return "coworking_ogr"
+				"unlock_robot_tech", "unlock_drone_tech":
+					return "studio"
+				"assemble_drone":
+					return "lab_droni"
+				"expand_departments":
+					return "incubatore_i3p"
 		return "coworking_ogr"
 	return "studio"
 
@@ -138,6 +149,8 @@ func start_new_game() -> void:
 	SideJobManager.reset()
 	UpgradeManager.reset()
 	KnowledgeManager.reset()
+	if is_instance_valid(TechOpsManager):
+		TechOpsManager.reset()
 	EmployeeManager.reset()
 	ServerRackManager.reset()
 	EconomyManager.reset_economy(120.0) # Tight realistic starting capital: 120 EUR
@@ -146,6 +159,7 @@ func start_new_game() -> void:
 	EventBus.time_tick.emit(9, 0, 1)
 	EventBus.waypoint_changed.emit({})
 	EventBus.notification_posted.emit("Nuova Avventura", "Benvenuto a Torino! Capitale iniziale € 120: cerca Mario o i Lavoretti Rapidi alla Bacheca.", "info")
+
 
 func _on_computer_opened() -> void:
 	change_state(GameState.COMPUTER)

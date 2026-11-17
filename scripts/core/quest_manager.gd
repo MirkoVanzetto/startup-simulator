@@ -33,6 +33,14 @@ func _ready() -> void:
 			EventBus.needs_changed.connect(_on_needs_changed)
 		if EventBus.has_signal("ogr_hub_unlocked"):
 			EventBus.ogr_hub_unlocked.connect(func(): refresh_objective())
+		if EventBus.has_signal("tech_ops_updated"):
+			EventBus.tech_ops_updated.connect(func(): refresh_objective())
+		if EventBus.has_signal("materials_changed"):
+			EventBus.materials_changed.connect(func(): refresh_objective())
+		if EventBus.has_signal("research_credits_changed"):
+			EventBus.research_credits_changed.connect(func(_r, _d, _rs): refresh_objective())
+		if EventBus.has_signal("incident_changed"):
+			EventBus.incident_changed.connect(func(): refresh_objective())
 
 var _last_needs_hint: String = ""
 
@@ -170,7 +178,8 @@ func _get_story_objective() -> String:
 			return "%s: consegna '%s' tramite TO-OS per riscuotere il compenso." % [prefix, c.get("title", cid)]
 
 	if ContractManager.is_ogr_unlocked():
-		return "OGR Tech Hub aperto! Visita Ing. Andrea Viale a Mercato Est o accetta un bando su OGR Enterprise / B2B (TO-OS)."
+		return TechOpsManager.get_post_ogr_objective_text()
+
 
 	if not fac["accepted"] and not fac["completed"]:
 		return "Accetta incarichi B2B su Freelance Hub (TO-OS) o raggiungi l'Officina Bellini a Borgo Valdocco (Est)!"

@@ -42,9 +42,138 @@ func _ready() -> void:
 	ground_ray.enabled = true
 	add_child(ground_ray)
 
+var _bike_cockpit: Node3D = null
+var _bike_handlebar: Node3D = null
+var _bike_front_wheel: Node3D = null
+var _bike_speed: float = 0.0
+var _bike_steer: float = 0.0
+var _bike_wheel_spin: float = 0.0
+var _bike_cam_cache: Camera3D = null
+var _bike_head_cache: Node3D = null
+var _bike_signal_bound: bool = false
+
+func _ensure_bike_cockpit() -> void:
+	if _bike_cockpit == null or not is_instance_valid(_bike_cockpit):
+		_bike_cockpit = get_node_or_null("BikeCockpit") as Node3D
+		if _bike_cockpit == null:
+			_bike_cockpit = VillageProps.add_bicycle_cockpit(self)
+		_bike_handlebar = _bike_cockpit.get_node_or_null("HandlebarPivot") as Node3D
+		_bike_front_wheel = _bike_cockpit.get_node_or_null("HandlebarPivot/FrontWheelPivot") as Node3D
+		_bike_head_cache = get_node_or_null("Neck") as Node3D
+		if _bike_head_cache == null:
+			_bike_head_cache = get_node_or_null("Head") as Node3D
+		_bike_cam_cache = get_node_or_null("Neck/Camera3D") as Camera3D
+		if _bike_cam_cache == null:
+			_bike_cam_cache = get_node_or_null("Head/Camera3D") as Camera3D
+		if _bike_cam_cache == null:
+			_bike_cam_cache = find_child("Camera3D", true, false) as Camera3D
+	if not _bike_signal_bound and is_instance_valid(EventBus) and EventBus.has_signal("vehicle_changed"):
+		EventBus.vehicle_changed.connect(_on_vehicle_changed_bike)
+		_bike_signal_bound = true
+	if _bike_cockpit and is_instance_valid(TechOpsManager):
+		_bike_cockpit.visible = (TechOpsManager.active_vehicle == "bike")
+
+func _on_vehicle_changed_bike(v_id: String) -> void:
+	var on_bike := (v_id == "bike")
+	if _bike_cockpit and is_instance_valid(_bike_cockpit):
+		_bike_cockpit.visible = on_bike
+	if not on_bike:
+		_bike_speed = 0.0
+		_bike_steer = 0.0
+		if _bike_head_cache and is_instance_valid(_bike_head_cache):
+			_bike_head_cache.rotation.z = 0.0
+		if _bike_cam_cache and is_instance_valid(_bike_cam_cache):
+			_bike_cam_cache.fov = 75.0
+
+func dismount_and_park_bike() -> bool:
+	if not is_instance_valid(TechOpsManager) or TechOpsManager.active_vehicle != "bike":
+		return false
+	var world_root := get_tree().root
+	var bike_sb := world_root.find_child("BikeStation_Studio", true, false) as Node3D
+	if bike_sb:
+		var cand_offsets: Array[Vector3] = [
+			transform.basis.x * 1.15 - transform.basis.z * 0.35,
+			-transform.basis.x * 1.15 - transform.basis.z * 0.35,
+			-transform.basis.z * 1.35,
+			Vector3.ZERO
+		]
+		var chosen: Vector3 = global_position + cand_offsets[0]
+		var space := get_world_3d().direct_space_state if get_world_3d() else null
+		for off in cand_offsets:
+			var test_p: Vector3 = global_position + off
+			if space == null or off == Vector3.ZERO:
+				chosen = test_p
+				break
+			var rq := PhysicsRayQueryParameters3D.create(global_position + Vector3(0, 0.9, 0), test_p + Vector3(0, 0.9, 0))
+			rq.exclude = [get_rid()]
+			if space.intersect_ray(rq).is_empty():
+				chosen = test_p
+				break
+		bike_sb.global_position = Vector3(chosen.x, global_position.y + 0.85, chosen.z)
+		bike_sb.rotation.y = rotation.y + PI * 0.5
+	TechOpsManager.active_vehicle = "foot"
+	if is_instance_valid(EventBus):
+		EventBus.vehicle_changed.emit("foot")
+		EventBus.tech_ops_updated.emit()
+		EventBus.notification_posted.emit("Bicicletta Parcheggiata", "Premi [E] vicino alla bici per risalire.", "info")
+	return true
+
+func _apply_bike_physics(delta: float, input_dir: Vector2) -> void:
+	var forward_in := -input_dir.y
+	var steer_in := -input_dir.x
+	var is_boosting := Input.is_action_pressed("sprint") and is_instance_valid(NeedsManager) and NeedsManager.get_energy() > 0.0
+	var max_fwd := 9.1 if is_boosting else 7.8
+	if forward_in > 0.05:
+		_bike_speed = move_toward(_bike_speed, max_fwd * forward_in, 6.8 * delta)
+		if is_boosting and is_on_floor():
+			var drain_mult: float = UpgradeManager.get_sprint_drain_mult() if is_instance_valid(UpgradeManager) else 1.0
+			var veh_drain: float = TechOpsManager.get_vehicle_sprint_drain_mult() if is_instance_valid(TechOpsManager) else 1.0
+			NeedsManager.consume_sprint(delta * drain_mult * veh_drain * 0.65)
+	elif forward_in < -0.05:
+		if _bike_speed > 0.2:
+			_bike_speed = move_toward(_bike_speed, 0.0, 13.5 * delta)
+		else:
+			_bike_speed = move_toward(_bike_speed, -2.2, 4.5 * delta)
+	else:
+		_bike_speed = move_toward(_bike_speed, 0.0, 2.2 * delta)
+
+	_bike_steer = lerpf(_bike_steer, steer_in, clampf(delta * 8.0, 0.0, 1.0))
+	if absf(_bike_speed) > 0.35 and absf(steer_in) > 0.05:
+		var turn_sign := 1.0 if _bike_speed >= 0.0 else -1.0
+		rotate_y(steer_in * turn_sign * 1.45 * delta)
+
+	var fwd_vec := (-transform.basis.z).normalized()
+	var strafe_vec := (transform.basis.x).normalized()
+	var side_slip := -steer_in * 1.35 if absf(_bike_speed) < 0.8 else 0.0
+	velocity.x = fwd_vec.x * _bike_speed + strafe_vec.x * side_slip
+	velocity.z = fwd_vec.z * _bike_speed + strafe_vec.z * side_slip
+	is_moving = absf(_bike_speed) > 0.35
+
+	_bike_wheel_spin -= (_bike_speed * delta) / 0.33
+	if _bike_handlebar and is_instance_valid(_bike_handlebar):
+		_bike_handlebar.rotation.y = _bike_steer * 0.30
+	if _bike_front_wheel and is_instance_valid(_bike_front_wheel):
+		_bike_front_wheel.rotation.x = _bike_wheel_spin
+	if _bike_cockpit and is_instance_valid(_bike_cockpit):
+		_bike_cockpit.rotation.z = -_bike_steer * clampf(absf(_bike_speed) / 7.8, 0.0, 1.0) * 0.055
+	if _bike_head_cache and is_instance_valid(_bike_head_cache):
+		var target_roll := -_bike_steer * clampf(absf(_bike_speed) / 7.8, 0.0, 1.0) * 0.045
+		_bike_head_cache.rotation.z = lerpf(_bike_head_cache.rotation.z, target_roll, clampf(delta * 8.0, 0.0, 1.0))
+	if _bike_cam_cache and is_instance_valid(_bike_cam_cache):
+		var target_fov := 75.0 + clampf(absf(_bike_speed) / 9.0, 0.0, 1.0) * 5.5
+		_bike_cam_cache.fov = lerpf(_bike_cam_cache.fov, target_fov, clampf(delta * 6.0, 0.0, 1.0))
+
 func _unhandled_input(event: InputEvent) -> void:
 	if GameManager.current_state != GameManager.GameState.FIRST_PERSON:
 		return
+	if event is InputEventKey and event.pressed and not event.echo:
+		var kev := event as InputEventKey
+		if kev.keycode == KEY_F and is_instance_valid(TechOpsManager) and TechOpsManager.active_vehicle == "bike":
+			if dismount_and_park_bike():
+				return
+		elif kev.keycode == KEY_G and is_instance_valid(TechOpsManager) and TechOpsManager.active_vehicle == "bike":
+			if is_instance_valid(SoundManager) and SoundManager.has_method("play_bike_bell"):
+				SoundManager.play_bike_bell()
 		
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		rotate_y(-event.relative.x * mouse_sensitivity)
@@ -76,29 +205,33 @@ func _physics_process(delta: float) -> void:
 			_peak_fall_speed = 0.0
 			
 	# Movement input
+	_ensure_bike_cockpit()
 	var input_dir = Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
-	var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-	
+	var riding_bike := is_instance_valid(TechOpsManager) and TechOpsManager.active_vehicle == "bike" and GameManager.current_state == GameManager.GameState.FIRST_PERSON
 	var is_sprinting = Input.is_action_pressed("sprint") and NeedsManager.get_energy() > 0.0
-	var gadget_mult: float = 1.18 if ShopManager.has_gadget("gadget_scarpe_pro") else 1.0
-	var skill_mult: float = UpgradeManager.get_speed_mult() if is_instance_valid(UpgradeManager) else 1.0
-	var vehicle_mult: float = TechOpsManager.get_vehicle_speed_mult() if is_instance_valid(TechOpsManager) else 1.0
-	var speed = (sprint_speed if is_sprinting else walk_speed) * NeedsManager.get_speed_multiplier() * gadget_mult * skill_mult * vehicle_mult
-	
-	if direction:
-		if is_sprinting and is_on_floor():
-			var drain_mult: float = UpgradeManager.get_sprint_drain_mult() if is_instance_valid(UpgradeManager) else 1.0
-			var veh_drain: float = TechOpsManager.get_vehicle_sprint_drain_mult() if is_instance_valid(TechOpsManager) else 1.0
-			NeedsManager.consume_sprint(delta * drain_mult * veh_drain) # lo scatto consuma un po' di energia
-		velocity.x = direction.x * speed
-		velocity.z = direction.z * speed
-		is_moving = true
-	else:
-		velocity.x = move_toward(velocity.x, 0, speed * 8.0 * delta)
-		velocity.z = move_toward(velocity.z, 0, speed * 8.0 * delta)
-		is_moving = false
 
-		
+	if riding_bike:
+		_apply_bike_physics(delta, input_dir)
+	else:
+		var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+		var gadget_mult: float = 1.18 if ShopManager.has_gadget("gadget_scarpe_pro") else 1.0
+		var skill_mult: float = UpgradeManager.get_speed_mult() if is_instance_valid(UpgradeManager) else 1.0
+		var vehicle_mult: float = TechOpsManager.get_vehicle_speed_mult() if is_instance_valid(TechOpsManager) else 1.0
+		var speed = (sprint_speed if is_sprinting else walk_speed) * NeedsManager.get_speed_multiplier() * gadget_mult * skill_mult * vehicle_mult
+
+		if direction:
+			if is_sprinting and is_on_floor():
+				var drain_mult: float = UpgradeManager.get_sprint_drain_mult() if is_instance_valid(UpgradeManager) else 1.0
+				var veh_drain: float = TechOpsManager.get_vehicle_sprint_drain_mult() if is_instance_valid(TechOpsManager) else 1.0
+				NeedsManager.consume_sprint(delta * drain_mult * veh_drain) # lo scatto consuma un po' di energia
+			velocity.x = direction.x * speed
+			velocity.z = direction.z * speed
+			is_moving = true
+		else:
+			velocity.x = move_toward(velocity.x, 0, speed * 8.0 * delta)
+			velocity.z = move_toward(velocity.z, 0, speed * 8.0 * delta)
+			is_moving = false
+
 	move_and_slide()
 
 	var grounded_now := is_on_floor()
@@ -108,7 +241,8 @@ func _physics_process(delta: float) -> void:
 	_peak_fall_speed = 0.0 if grounded_now else maxf(_peak_fall_speed, -velocity.y)
 	_was_on_floor = grounded_now
 
-	_handle_footsteps(delta, is_sprinting)
+	if not riding_bike:
+		_handle_footsteps(delta, is_sprinting)
 	_handle_interaction_ray()
 
 func _handle_footsteps(delta: float, is_sprinting: bool) -> void:

@@ -128,3 +128,13 @@ Questo documento definisce il piano di produzione dettagliato per **Startup Simu
 - [x] Complesso estrattivo completo: pareti rocciose scolpite e pini alpini, `GALLERIA ESTRATTIVA 01` su rotaie con `MineCart` animato, 3 filoni cristallini con scintille (`MiningSparks`), Raffineria con `CrusherWheel` + fornace animata, `MiningRobotPad_1/2` con `BoomArm` & `DrillHead` animati, `ConveyorBelt`, `QuarryCrane` rotante, `QuarryCabin`, `QuarryTruck`, `FerreroNPC` (gilet alta visibilità + elmetto), fari da cantiere e 5ª fermata bus GTT (`BusStop_Miniera`).
 - [x] Pedoni MakeHuman ancorati a `Y = 0.0` con ciclo `"Walk"`/`"Idle"` sincronizzato e rotazione verso il waypoint prima del movimento (zero slittamento laterale), NPC reattivi con `"Interact"`, ruote rotanti sulle auto e `TO-Drone MK1` volante con 4 rotori indipendenti sopra Piazzola H.
 - [x] WorldMap estesa a **20 POI** con tab filtro dedicato **Miniera** (`7` tab totali responsivi) e tutte le suite automatizzate verificate (`945/945 PASS`, `0 FAIL` su 7 runner; `tests/v1_5_post_ogr_tests.gd` a `106/106 PASS`).
+
+---
+
+## v1.7.0: POLISH ANIMAZIONI, PICCONE TEMPORIZZATO, BICI 3D GUIDABILE, TORREFAZIONE & MARIO CUSTOM (COMPLETATA ✔)
+- [x] Camminata pedoni e cucitura maglietta/pantaloni ripuliti (`VillageCharacters._get_cleaned_mesh`, piedi paralleli, zero papera) e custom GLB pizzaiolo `mario compresso_edited.glb` per `MarioNPC`.
+- [x] Estrazione mineraria interattiva temporizzata con piccone 3D animato (`PickaxeAnim`), barra HUD, scintille, audio sintetizzato e colpo critico `[E]` (`+1` materiale bonus nella zona `55%–88%`).
+- [x] `Bicicletta Tech Elettrica` trasformata in vero mezzo 3D guidabile con cockpit in prima persona (`BikeCockpit`), sterzo e ruota animati, fisica con slancio/frenata, campanello `[G]` e parcheggio libero `[F]` ovunque in città.
+- [x] Traffico auto ristretto esclusivamente a **Lungo Po**, modelli auto migliorati (cerchi a razze, parafanghi, calandra, fari), piazzola ovest spostata fuori dall'ingresso di `Forno Bruno` e rimozione EV acquistabile da Piazza San Carlo.
+- [x] Postazione **Coworking OGR** dotata di tastiere/mouse/tazze con coworker in animazione `Sit_Typing`; **Torrefazione Po** aperta con tostatrice in rame, `TorrefattoreNPC` e catalogo caffè portatile; acqua fontana e laghetto potenziata con getti parabolici, shader increspato e particelle.
+- [x] Verifiche automatizzate aggiornate: `821/821 PASS`, `0 FAIL` e `0 SCRIPT_ERR` su tutti i 7 runner (`tests/v1_5_post_ogr_tests.gd` `118/118 PASS`).

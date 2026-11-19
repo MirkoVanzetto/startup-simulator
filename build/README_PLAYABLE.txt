@@ -1,5 +1,5 @@
 ================================================================================
-STARTUP SIMULATOR — v1.6.0 "MINIERA ALPINA VAL DI SUSA & TORINO ANIMATA"
+STARTUP SIMULATOR — v1.7.0 "TORINO VIVA, PICCONE 3D, BICI GUIDABILE & TORREFAZIONE"
 Release Windows x86_64
 ================================================================================
 
@@ -9,39 +9,38 @@ quartieri di Torino e le Alpi occidentali: Borgo San Carlo, Parco Valentino Oves
 Miniera Alpina · Polo Estrattivo Val di Susa, Borgo Valdocco, Mercato Nord / OGR
 Tech Hub Torino e Borgo Po / Lungo Po con il Fiume Po.
 
-NOVITA' PRINCIPALI v1.6.0 (MINIERA ALPINA, PEDONI REALI & ANIMAZIONI 3D):
+NOVITA' v1.7.0:
 --------------------------------------------------------------------------------
-1. NUOVA AREA DEDICATA: MINIERA ALPINA · POLO ESTRATTIVO VAL DI SUSA:
-   - Una volta sbloccato l'OGR Tech Hub, parla con l'Ing. Andrea Viale per
-     raggiungere la nuova cava alpina a Nord-Ovest oltre l'arco nord di Parco
-     Valentino Ovest (o tramite la nuova 5a fermata Bus GTT "Miniera Alpina").
-   - Ambiente montano completo: pareti rocciose scolpite, 16 pini alpini,
-     Galleria Estrattiva 01 con carrello animato su rotaia, Gru gialla rotante,
-     3 filoni cristallini (Rame, Silicio, Alluminio, Circuiti, Terre Rare,
-     Compositi), Raffineria animata, Ufficio Cava, Camion e Capocava Ferrero.
-   - Installa fisicamente Mining Robot MK1/MK2 con bracci/trapani animati e
-     Nastro Trasportatore automatico verso la Raffineria.
+1. ESTRAZIONE MINERARIA TEMPORIZZATA CON PICCONE 3D & COLPO CRITICO:
+   - Filoni cristallini naturali senza segnali/palloni gialli a terra.
+   - Estrazione interattiva animata (~2s) con piccone 3D, scintille, barra HUD
+     e colpo preciso [E] nella zona dorata (55%-88%) per +1 materiale bonus!
 
-2. PEDONI CAMMINANTI REALI & ANIMAZIONI COMPLETE IN TORINO:
-   - Passanti 3D con scheletro MakeHuman animato (Walk/Idle sincronizzati,
-     contatto a terra Y=0 e rotazione prima del passo, senza slittamenti).
-   - NPC e commessi con animazione Interact, veicoli con 4 ruote rotanti e
-     TO-Drone MK1 volante sopra la Piazzola H con rotori indipendenti.
+2. BICICLETTA TECH ELETTRICA 3D REALMENTE GUIDABILE:
+   - Cockpit 3D in prima persona con manubrio sterzante, display LCD e ruota
+     anteriore rotante. Premi [F] per scendere e parcheggiarla ovunque in citta',
+     e [G] per suonare il campanello in sella!
 
-3. RICERCA R&D 6 RAMI, DRONE 7 FASI, FASE 4 CEO & DIPENDENTI AUTONOMI (v1.5+):
-   - Sull'app Conoscenza R&D (TO-OS) 6 rami sbloccabili con Crediti 🔬 RC.
-   - Lab Droni Torino in Borgo Po (Dr.ssa Chiara Conti): assemblaggio fisico in
-     7 fasi del quadricottero TO-Drone MK1 e missioni di volo automatiche.
-   - Incubatore Startup Torino (Fase 4 CEO): 3 Dipartimenti + Imprevisti.
-   - Dipendenti autonomi su Freelance Hub, orari negozi e mobilità urbana:
-     A Piedi -> Bici Tech Elettrica -> 5 Fermate GTT Bus -> Auto Elettrica TO-EV.
+3. TORINO ANCORA PIU' CURATA & DETTAGLIATA:
+   - Camminata naturale pedoni e zero clip vestiti; nuovo modello custom per
+     Mario il Pizzaiolo in Pizzeria Da Mario.
+   - Torrefazione Po (Borgo Po) aperta e presidiata da Giacomo Conti con espresso
+     e cold brew portatili; Coworking OGR con tastiere/mouse e coworker al PC.
+   - Fontana San Carlo con getti d'acqua parabolici e schizzi animati; auto
+     ridisegnate solo su Lungo Po e accesso libero a Forno Bruno.
+
+4. MINIERA ALPINA, R&D 6 RAMI, DRONE 7 FASI, FASE 4 CEO & DIPENDENTI (v1.5-v1.6):
+   - Miniera Alpina Val di Susa, Mining Robot MK1/MK2, Nastro Trasportatore,
+     Albero Conoscenza R&D, Lab Droni (TO-Drone MK1), Incubatore CEO e 5 Bus GTT.
 
 COMANDI:
 --------------------------------------------------------------------------------
-- WASD / Frecce     : Movimento (velocita' aumentata su Bici Tech / Auto EV)
-- Shift             : Corsa
+- WASD / Frecce     : Movimento / Pedala, frena e sterza in Bicicletta Tech 3D
+- Shift             : Corsa / Pedalata assistita
 - Spazio            : Salto
-- E / Click SX      : Interagisci (macchinari, banco drone, NPC, negozi, mezzi)
+- E / Click SX      : Interagisci · Colpo Preciso piccone nella barra dorata
+- F                 : Scendi e parcheggia la Bicicletta 3D ovunque in citta'
+- G                 : Suona il campanello della Bicicletta 3D
 - TAB               : Apri / Chiudi Zaino, Materiali Tecnologici & Dotazioni
 - CAPS LOCK / M     : Apri / Chiudi Mappa del Territorio (20 POI · Tab Miniera)
 - B                 : Modalita' Arredo in Studio

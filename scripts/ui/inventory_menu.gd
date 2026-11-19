@@ -365,13 +365,14 @@ func _collect_entries() -> Array[Dictionary]:
 		for vid in ["bike", "bus_pass", "company_ev"]:
 			var vdef: Dictionary = TechOpsManager.VEHICLES[vid]
 			var v_owned := TechOpsManager.has_vehicle(vid)
+			var badge_txt := "MOBILITÀ URBANA ATTIVA" if v_owned else ("CONCESSIONARIA TORINO (PROSSIMAMENTE)" if vid == "company_ev" else "SBLOCCABILE IN CITTÀ (€ %0.0f)" % float(vdef["cost"]))
 			out.append({
 				"kind": CATEGORY_GEAR,
 				"id": "veh_" + vid,
 				"name": "%s %s" % [str(vdef.get("icon", "🚲")), str(vdef["name"])],
 				"qty": 1 if v_owned else 0,
 				"owned": v_owned,
-				"badge": "MOBILITÀ URBANA ATTIVA" if v_owned else "SBLOCCABILE IN CITTÀ (€ %0.0f)" % float(vdef["cost"]),
+				"badge": badge_txt,
 				"color": Color(0.45, 0.95, 0.78) if v_owned else Color(0.62, 0.68, 0.78),
 				"subtitle": str(vdef["desc"]),
 				"item": {"desc": str(vdef["desc"])}

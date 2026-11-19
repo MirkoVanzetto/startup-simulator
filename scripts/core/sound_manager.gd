@@ -15,6 +15,9 @@ const FOOTSTEP_MIX_RATE: int = 44100
 var footstep_variants: Dictionary = {}
 var land_variants: Dictionary = {}
 var jump_stream: AudioStreamWAV = null
+var pickaxe_hit_stream: AudioStreamWAV = null
+var pickaxe_crit_stream: AudioStreamWAV = null
+var bike_bell_stream: AudioStreamWAV = null
 var _last_footstep_variant: int = -1
 var _use_alt_player: bool = false
 
@@ -130,6 +133,23 @@ func play_land(surface: String, impact_speed: float = 4.0) -> void:
 	foley_player.volume_db = lerpf(-13.5, -5.5, strength)
 	foley_player.play()
 
+func play_pickaxe_hit(is_crit: bool = false) -> void:
+	var st := pickaxe_crit_stream if (is_crit and pickaxe_crit_stream != null) else pickaxe_hit_stream
+	if st == null:
+		return
+	foley_player.stream = st
+	foley_player.pitch_scale = randf_range(0.96, 1.06) if not is_crit else 1.12
+	foley_player.volume_db = -5.5 if is_crit else -8.0
+	foley_player.play()
+
+func play_bike_bell() -> void:
+	if bike_bell_stream == null:
+		return
+	ui_player.stream = bike_bell_stream
+	ui_player.pitch_scale = randf_range(0.98, 1.02)
+	ui_player.volume_db = -6.0
+	ui_player.play()
+
 ## Parametri fisici per superficie (zero sinusoidi pure: solo impulsi filtrati, risonatori Biquad smorzati e micro-grana)
 func _footstep_params(surface: String) -> Dictionary:
 	match surface:
@@ -193,6 +213,48 @@ func _generate_jump_and_lands() -> void:
 	for surface in FOOTSTEP_SURFACES:
 		land_variants[surface] = _make_land_sound(surface, rng)
 	jump_stream = _make_jump_sound(rng)
+	pickaxe_hit_stream = _make_pickaxe_sound(rng, false)
+	pickaxe_crit_stream = _make_pickaxe_sound(rng, true)
+	bike_bell_stream = _make_bike_bell_sound()
+
+func _make_pickaxe_sound(rng: RandomNumberGenerator, is_crit: bool) -> AudioStreamWAV:
+	var rate := float(FOOTSTEP_MIX_RATE)
+	var dur := 0.24 if is_crit else 0.18
+	var n := int(dur * rate)
+	var samples := PackedFloat32Array()
+	samples.resize(n)
+	var sum_sq := 0.0
+	var lp := 0.0
+	var base_f := 1820.0 if is_crit else 1280.0
+	for i in range(n):
+		var t := float(i) / rate
+		var env_ping := minf(t / 0.002, 1.0) * exp(-t / (0.09 if is_crit else 0.055))
+		var env_crunch := minf(t / 0.004, 1.0) * exp(-t / 0.032)
+		var ring := sin(TAU * base_f * t) * 0.45 + sin(TAU * (base_f * 1.49) * t) * 0.35 + sin(TAU * (base_f * 2.18) * t) * 0.20
+		var w := rng.randf_range(-1.0, 1.0)
+		lp += 0.22 * (w - lp)
+		var s := ring * env_ping * 0.55 + (w - lp * 0.6) * env_crunch * 0.65
+		samples[i] = s
+		sum_sq += s * s
+	return _finalize_wav(samples, n, sum_sq, 0.16 if is_crit else 0.13, 0.001, 0.015)
+
+func _make_bike_bell_sound() -> AudioStreamWAV:
+	var rate := float(FOOTSTEP_MIX_RATE)
+	var dur := 0.42
+	var n := int(dur * rate)
+	var samples := PackedFloat32Array()
+	samples.resize(n)
+	var sum_sq := 0.0
+	for i in range(n):
+		var t := float(i) / rate
+		var hit1 := minf(t / 0.003, 1.0) * exp(-t / 0.14)
+		var t2 := maxf(0.0, t - 0.11)
+		var hit2 := (minf(t2 / 0.003, 1.0) * exp(-t2 / 0.16)) if t > 0.11 else 0.0
+		var chime := sin(TAU * 2120.0 * t) * 0.6 + sin(TAU * 4265.0 * t) * 0.3 + sin(TAU * 3180.0 * t) * 0.15
+		var s := chime * (hit1 * 0.75 + hit2)
+		samples[i] = s
+		sum_sq += s * s
+	return _finalize_wav(samples, n, sum_sq, 0.12, 0.002, 0.02)
 
 func _make_footstep(surface: String, rng: RandomNumberGenerator) -> AudioStreamWAV:
 	var p = _footstep_params(surface)

@@ -100,11 +100,10 @@ static func build_pizzeria(pizzeria: Node3D) -> void:
 	_add_sign(holder, "PIZZERIA DA MARIO", Vector3(0, 3.12, 3.37), 0.0, 34, Color(1.0, 0.92, 0.65))
 	VillageProps.add_oven_smoke_particles(holder, Vector3(-2.64, 1.58, -1.52))
 
-	# Mario NPC sulla pedana rialzata dietro il bancone (rif. 2: camicia lino crema mezza manica, grembiule rosso, toque pieghettato)
+	# Mario NPC sulla pedana rialzata dietro il bancone (modello custom 3D pizzaiolo)
 	var mario := _spawn_npc(pizzeria, "MarioNPC", Vector3(0.0, 0.18, -1.95), 0.0, MARIO_SCRIPT, {
-		"shirt": "shirt_linen_cream", "pants": "pants_charcoal", "shoes": "shoe_black",
-		"hair": "hair_brown", "iris": "iris_brown",
-		"apron": "apron_red", "hat": "chef", "mustache": true, "short_sleeves": true, "neck_style": "open_v"
+		"custom_glb": "res://assets/characters/mario compresso_edited.glb",
+		"height": 1.74
 	}, "Mario Esposito\n★ Pizzeria Da Mario ★", Color(1.0, 0.9, 0.3))
 	mario.name = "MarioNPC"
 
@@ -136,8 +135,8 @@ static func build_village(street: Node3D) -> void:
 	terrain_sm.box("slabs", Vector3(0, -0.04, 3.6), Vector3(7.4, 0.10, 2.0), {"col": true, "surface": "stone"})
 	terrain_sm.box("slabs", Vector3(-4.5, -0.04, 8.5), Vector3(1.6, 0.10, 9.5), {"col": true, "surface": "stone"})
 	terrain_sm.box("slabs", Vector3(4.5, -0.04, 8.5), Vector3(1.6, 0.10, 9.5), {"col": true, "surface": "stone"})
-	# Piazzole parcheggio in asfalto libere dagli edifici
-	terrain_sm.box("asphalt", Vector3(-15.2, -0.045, 11.8), Vector3(7.6, 0.09, 5.4), {"col": true, "surface": "asphalt"})
+	# Piazzole parcheggio in asfalto libere dagli edifici (ben staccate da Forno Bruno!)
+	terrain_sm.box("asphalt", Vector3(-15.9, -0.045, 11.8), Vector3(8.0, 0.09, 5.4), {"col": true, "surface": "asphalt"})
 	terrain_sm.box("asphalt", Vector3(15.2, -0.045, 11.8), Vector3(7.6, 0.09, 5.4), {"col": true, "surface": "asphalt"})
 	# Sentieri parchetto San Carlo & Raccordo Parco Valentino Ovest (varco ovest Z=36.8 + raccordo Nord Miniera X=-41.5!)
 	terrain_sm.box("gravel", Vector3(-7.5, -0.04, 30.0), Vector3(4.2, 0.08, 6.0), {"col": true, "surface": "stone"})
@@ -625,14 +624,60 @@ static func build_village(street: Node3D) -> void:
 	VillageProps.add_house(houses_sm, Vector3(-2.6, 0.0, 48.2), 6.0, 5.2, 2, {"wall": "plaster_rose", "roof": "roof_terracotta", "shutter": "fabric_green"})
 	VillageProps.add_drone_lab(houses_sm, Vector3(24.0, 0.0, 48.2), 0.0)
 	_add_sign(street, "LAB DRONI TORINO · AERO R&D", Vector3(24.0, 3.65, 51.32), 0.0, 22, Color(0.76, 0.95, 1.0))
-	VillageProps.add_shop_building(houses_sm, Vector3(41.5, 0.0, 48.2), 7.6, 5.8, {
+	var torrefazione_venue := Node3D.new()
+	torrefazione_venue.name = "TorrefazioneVenue"
+	torrefazione_venue.position = Vector3(41.5, 0.0, 48.2)
+	street.add_child(torrefazione_venue)
+
+	var torr_sm := StyleMesh.new()
+	VillageProps.add_shop_building(torr_sm, Vector3.ZERO, 7.6, 5.8, {
 		"wall": "plaster_ochre", "floor": "tile_cafe", "awning": "awning_red", "roof": "roof_terracotta"
 	})
-	VillageProps.add_table_set(houses_sm, Vector3(39.1, 0.0, 53.0), "fabric_cream")
-	VillageProps.add_parasol(houses_sm, Vector3(39.1, 0.0, 53.0), "fabric_cream")
-	VillageProps.add_table_set(houses_sm, Vector3(43.9, 0.0, 53.0), "fabric_cream")
-	VillageProps.add_parasol(houses_sm, Vector3(43.9, 0.0, 53.0), "fabric_cream")
-	_add_sign(street, "TORREFAZIONE PO · STORICA", Vector3(41.5, 3.12, 51.26), 0.0, 24, Color(1.0, 0.92, 0.65))
+	VillageProps.add_torrefazione_interior(torr_sm)
+	VillageProps.add_table_set(torr_sm, Vector3(-2.4, 0.0, 4.8), "fabric_cream")
+	VillageProps.add_parasol(torr_sm, Vector3(-2.4, 0.0, 4.8), "fabric_cream")
+	VillageProps.add_table_set(torr_sm, Vector3(2.4, 0.0, 4.8), "fabric_cream")
+	VillageProps.add_parasol(torr_sm, Vector3(2.4, 0.0, 4.8), "fabric_cream")
+	VillageProps.spawn_mesh_and_collisions(torrefazione_venue, "TorrefazioneMesh", torr_sm, "stone")
+
+	_add_sign(torrefazione_venue, "TORREFAZIONE PO · STORICA", Vector3(0.0, 3.12, 3.06), 0.0, 24, Color(1.0, 0.92, 0.65))
+
+	var torr_light := OmniLight3D.new()
+	torr_light.name = "TorrefazioneWarmLight"
+	torr_light.position = Vector3(0.0, 2.75, 0.15)
+	torr_light.light_color = Color(1.0, 0.87, 0.66)
+	torr_light.light_energy = 1.65
+	torr_light.omni_range = 8.0
+	torr_light.shadow_enabled = false
+	torrefazione_venue.add_child(torr_light)
+
+	var barista := Node3D.new()
+	barista.name = "TorrefattoreNPC"
+	barista.position = Vector3(-0.45, 0.0, -1.82)
+	barista.rotation.y = 0.0
+	torrefazione_venue.add_child(barista)
+	VillageProps.add_npc_model(barista, {
+		"preset": "male_tech_vest",
+		"shirt": "shirt_white",
+		"pants": "pants_charcoal",
+		"hair": "hair_dark",
+		"hair_style": "short",
+		"mustache": true
+	})
+
+	var torr_shop := StaticBody3D.new()
+	torr_shop.name = "TorrefazioneShop"
+	torr_shop.position = Vector3(0.0, 1.0, -0.78)
+	torr_shop.collision_layer = 3
+	torr_shop.collision_mask = 0
+	var torr_col := CollisionShape3D.new()
+	var torr_box := BoxShape3D.new()
+	torr_box.size = Vector3(2.8, 1.5, 1.4)
+	torr_col.shape = torr_box
+	torr_shop.add_child(torr_col)
+	torr_shop.set_script(load("res://scripts/world/shop_interactable.gd"))
+	torr_shop.set("shop_id", "torrefazione")
+	torrefazione_venue.add_child(torr_shop)
 	VillageProps.add_house(houses_sm, Vector3(51.2, 0.0, 48.2), 5.8, 5.2, 2, {"wall": "plaster_cream", "roof": "roof_slate", "shutter": "fabric_blue"})
 
 	# Parco Valentino Ovest (Laghetto delle anatre, Gazebo in ferro, 2 Ville + Dehor con ombrelloni)
@@ -717,10 +762,10 @@ static func build_village(street: Node3D) -> void:
 	street.add_child(ogr_cw)
 	var cw1 := Node3D.new()
 	cw1.name = "CoworkerSeated"
-	cw1.position = Vector3(107.27, 0.04, -2.47)
+	cw1.position = Vector3(107.27, 0.04, -2.23)
 	cw1.rotation.y = 0.0
 	ogr_cw.add_child(cw1)
-	VillageProps.add_npc_model(cw1, {"seated": true, "female": true, "shirt": "shirt_ruby", "pants": "denim", "hair": "hair_auburn", "hair_style": "ponytail"})
+	VillageProps.add_npc_model(cw1, {"seated": true, "typing": true, "female": true, "shirt": "shirt_ruby", "pants": "denim", "hair": "hair_auburn", "hair_style": "ponytail"})
 	var cw2 := Node3D.new()
 	cw2.name = "CoworkerPod1"
 	cw2.position = Vector3(103.6, 0.04, 10.35)
@@ -734,6 +779,8 @@ static func build_village(street: Node3D) -> void:
 
 	# Fontana al centro della Piazzetta San Carlo (0, 0, 21.0)
 	VillageProps.add_fountain(houses_sm, Vector3(0, 0, 21.0))
+	VillageProps.add_fountain_particles(street, "FountainWaterParticles", Vector3(0, 1.98, 21.0), false)
+	VillageProps.add_fountain_particles(street, "PondWaterParticles", Vector3(-47.5, 0.58, 26.8), true)
 
 	# Panchine e tavolini nei cinque quartieri + Lungo Po Murazzi
 	VillageProps.add_bench(houses_sm, Vector3(-4.2, 0, 21.0), PI * 0.5)
@@ -828,13 +875,11 @@ static func build_village(street: Node3D) -> void:
 	street.add_child(street_props)
 
 	var cars := [
-		{"name": "CarHatchback", "pos": Vector3(-13.6, 0.0, 11.8), "rot": 0.0, "color": "car_red", "van": false},
-		{"name": "CarSedan", "pos": Vector3(-16.6, 0.0, 11.8), "rot": PI, "color": "car_blue", "van": false},
+		{"name": "CarHatchback", "pos": Vector3(-14.2, 0.0, 11.8), "rot": 0.0, "color": "car_red", "van": false},
+		{"name": "CarSedan", "pos": Vector3(-17.2, 0.0, 11.8), "rot": PI, "color": "car_blue", "van": false},
 		{"name": "CarTaxi", "pos": Vector3(13.6, 0.0, 11.8), "rot": 0.0, "color": "car_cream", "van": false},
 		{"name": "CarStationWagon", "pos": Vector3(16.6, 0.0, 11.8), "rot": PI, "color": "car_sage", "van": false},
 		{"name": "DeliveryVanValdocco", "pos": Vector3(43.0, 0.0, 22.8), "rot": PI * 0.5, "color": "car_cream", "van": true},
-		{"name": "CarBorgopoBlue", "pos": Vector3(-9.5, 0.0, 56.8), "rot": PI * 0.5, "color": "car_blue", "van": false},
-		{"name": "CarBorgopoRed", "pos": Vector3(33.5, 0.0, 59.2), "rot": -PI * 0.5, "color": "car_red", "van": false},
 	]
 	for c in cars:
 		var c_sm := StyleMesh.new()
@@ -1329,24 +1374,40 @@ static func _build_post_ogr_and_city_life(street: Node3D) -> void:
 	crane_root.add_child(jib_pivot)
 	yard.add_child(crane_root)
 
-	# c) 3 Nodi di Estrazione Interattivi con cristallo fluttuante YieldIcon + scintille MiningSparks
+	# c) 3 Nodi di Estrazione Interattivi con piccolo cristallo YieldIcon, piccone animato e scintille sul filone
 	for ed in extraction_defs:
 		var sb := _spawn_tech_ops_interactable(yard, ed["name"], ed["pos"] + Vector3(0, 0.9, 0), {
 			"station_type": "extraction_node",
 			"node_id": ed["id"],
 			"station_title": ed["title"]
-		}, Vector3(2.4, 1.9, 2.2), true)
+		}, Vector3(2.4, 1.9, 2.2), false)
 		var y_icon := Node3D.new()
 		y_icon.name = "YieldIcon"
-		y_icon.position = Vector3(0, 0.56, 0)
+		y_icon.position = Vector3(0, 1.48, 0)
 		var ism := StyleMesh.new()
-		ism.ellipsoid(ed["ore"], Vector3.ZERO, Vector3(0.24, 0.30, 0.24), 7, 10)
+		ism.cyl(ed["ore"], Vector3(0, 0.0, 0), 0.085, 0.004, 0.13, 5)
+		ism.cyl(ed["ore"], Vector3(0, -0.12, 0), 0.004, 0.085, 0.12, 5)
 		var imi := MeshInstance3D.new()
 		imi.mesh = ism.to_mesh(Callable(VillageMaterials, "mat"))
 		y_icon.add_child(imi)
 		sb.add_child(y_icon)
 		sb.set("visual_root_path", NodePath("YieldIcon"))
-		VillageProps.add_spark_particles(sb, "MiningSparks", Vector3(0, 0.25, 0), ed["spark"], true)
+
+		var pick_anim := Node3D.new()
+		pick_anim.name = "PickaxeAnim"
+		pick_anim.position = Vector3(0.42, 0.08, 0.56)
+		pick_anim.visible = false
+		var pick_pivot := Node3D.new()
+		pick_pivot.name = "PickaxePivot"
+		pick_anim.add_child(pick_pivot)
+		var pmi := MeshInstance3D.new()
+		pmi.name = "PickaxeMesh"
+		pmi.scale = Vector3.ONE * 1.35
+		pmi.mesh = VillageProps.add_pickaxe_mesh()
+		pick_pivot.add_child(pmi)
+		sb.add_child(pick_anim)
+
+		VillageProps.add_spark_particles(sb, "MiningSparks", Vector3(0.0, -0.1, 0.35), ed["spark"], true)
 
 	# d) Stazione Raffineria Interattiva + sotto-albero animato RefineryAnim
 	_spawn_tech_ops_interactable(yard, "ProcessingStation_OGR", ref_p + Vector3(0, 0.9, 0), {
@@ -1546,51 +1607,30 @@ static func _build_post_ogr_and_city_life(street: Node3D) -> void:
 	mob_holder.name = "UrbanMobilityWorld"
 	street.add_child(mob_holder)
 
-	# 4a. Bici Tech Pieghevole fuori dallo Studio (X=3.6, Z=3.6)
-	var bike_pos := Vector3(3.6, 0.0, 3.6)
+	# 4a. Bici Tech Elettrica reale fuori dallo Studio (X=4.0, Z=4.35)
+	var bike_pos := Vector3(4.0, 0.0, 4.35)
 	var bike_rack_sm := StyleMesh.new()
-	bike_rack_sm.box("iron_dark", bike_pos + Vector3(0, 0.25, 0), Vector3(0.95, 0.50, 0.12))
+	bike_rack_sm.box("iron_dark", bike_pos + Vector3(-0.35, 0.22, -0.35), Vector3(0.75, 0.44, 0.10))
 	VillageProps.spawn_mesh_and_collisions(mob_holder, "BikeRackMesh", bike_rack_sm, "metal")
 	var bike_sb := _spawn_tech_ops_interactable(mob_holder, "BikeStation_Studio", bike_pos + Vector3(0, 0.85, 0), {
 		"station_type": "vehicle",
 		"vehicle_id": "bike",
 		"station_title": "Bicicletta Tech Elettrica"
-	}, Vector3(1.5, 1.7, 1.5), true)
+	}, Vector3(1.5, 1.7, 1.5), false)
+	bike_sb.set_meta("home_pos", bike_pos + Vector3(0, 0.85, 0))
+	bike_sb.set_meta("home_rot", 0.0)
 	var bike_vis := Node3D.new()
 	bike_vis.name = "VisualRoot"
 	var bsm := StyleMesh.new()
-	bsm.cyl("iron_dark", Vector3(-0.38, -0.52, 0), 0.28, 0.28, 0.06, 12)
-	bsm.cyl("iron_dark", Vector3(0.38, -0.52, 0), 0.28, 0.28, 0.06, 12)
-	bsm.box("cyan_accent", Vector3(0, -0.35, 0), Vector3(0.76, 0.07, 0.07))
-	bsm.box("iron_dark", Vector3(0.32, -0.10, 0), Vector3(0.06, 0.45, 0.36))
+	VillageProps.add_bicycle_mesh(bsm, Vector3(0.0, -0.85, 0.0), -PI * 0.25)
 	var bmi := MeshInstance3D.new()
 	bmi.mesh = bsm.to_mesh(Callable(VillageMaterials, "mat"))
 	bike_vis.add_child(bmi)
 	bike_sb.add_child(bike_vis)
 	bike_sb.set("visual_root_path", NodePath("VisualRoot"))
-	_add_sign(mob_holder, "🚲 BICI TECH STARTUP", bike_pos + Vector3(0, 1.55, 0), 0.0, 14, Color(0.45, 0.95, 0.68))
+	_add_sign(mob_holder, "🚲 BICI TECH STARTUP", bike_pos + Vector3(-0.35, 1.38, -0.35), 0.0, 14, Color(0.45, 0.95, 0.68))
 
-	# 4b. Minicar Elettrica Aziendale in Piazza San Carlo (X=-10.8, Z=11.8)
-	var ev_pos := Vector3(-10.8, 0.0, 11.8)
-	var ev_totem_sm := StyleMesh.new()
-	ev_totem_sm.box("server_body", ev_pos + Vector3(-1.45, 0.65, 0), Vector3(0.32, 1.30, 0.32), {"col": true, "surface": "metal"})
-	ev_totem_sm.box("cyan_accent", ev_pos + Vector3(-1.45, 1.05, 0.17), Vector3(0.22, 0.32, 0.04))
-	VillageProps.spawn_mesh_and_collisions(mob_holder, "EVChargerTotem", ev_totem_sm, "metal")
-	var ev_sb := _spawn_tech_ops_interactable(mob_holder, "CompanyEV_SanCarlo", ev_pos + Vector3(0, 0.9, 0), {
-		"station_type": "vehicle",
-		"vehicle_id": "company_ev",
-		"station_title": "Auto Elettrica Aziendale TO-EV"
-	}, Vector3(2.4, 1.8, 3.6), true)
-	var ev_vis := Node3D.new()
-	ev_vis.name = "VisualRoot"
-	var ev_sm := StyleMesh.new()
-	VillageProps.add_car(ev_sm, Vector3(0, -0.9, 0), 0.0, "cyan_accent")
-	var ev_mi := MeshInstance3D.new()
-	ev_mi.mesh = ev_sm.to_mesh(Callable(VillageMaterials, "mat"))
-	ev_vis.add_child(ev_mi)
-	ev_sb.add_child(ev_vis)
-	ev_sb.set("visual_root_path", NodePath("VisualRoot"))
-	_add_sign(mob_holder, "⚡ AUTO ELETTRICA STARTUP", ev_pos + Vector3(0, 2.05, 0), 0.0, 15, Color(0.45, 0.95, 1.0))
+	# 4b. EV aziendale rimossa temporaneamente da Piazza San Carlo (verrà spostata in concessionaria dedicata)
 
 	# 4c. 5 Fermate GTT Bus (Fast Travel Urbano incl. Miniera Alpina)
 	var bus_stops := [

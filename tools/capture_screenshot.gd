@@ -41,6 +41,9 @@ func _process(_delta: float) -> void:
 	if "--v16-part2" in OS.get_cmdline_user_args():
 		_process_v16_part2()
 		return
+	if "--v17-visual" in OS.get_cmdline_user_args():
+		_process_v17_visual()
+		return
 
 	if frame_count == 4:
 		var menu = get_tree().root.find_child("MainMenu", true, false)
@@ -539,3 +542,106 @@ func _process_v16_part2() -> void:
 		if player:
 			player.set_physics_process(true)
 		get_tree().quit(0)
+
+
+func _process_v17_visual() -> void:
+	if frame_count == 3:
+		var menu = get_tree().root.find_child("MainMenu", true, false)
+		if menu:
+			menu.visible = false
+		player = get_tree().root.find_child("PlayerCharacter", true, false)
+		if player:
+			player.set_physics_process(false)
+		GameManager.start_new_game()
+		TechOpsManager.start_ogr_tech_mission()
+		NeedsManager.energy = 100.0
+		var cl = get_tree().root.find_child("CityLifeManager", true, false)
+		if cl:
+			for _i in range(18):
+				cl._process(0.05)
+		var ped := get_tree().root.find_child("Pedestrian_Piazza_2", true, false) as Node3D
+		if ped == null:
+			ped = get_tree().root.find_child("Pedestrian_Piazza_1", true, false) as Node3D
+		if ped:
+			var ppos: Vector3 = ped.global_position
+			var ped_side := Vector3(cos(ped.rotation.y), 0.0, -sin(ped.rotation.y))
+			var ped_fwd := Vector3(sin(ped.rotation.y), 0.0, cos(ped.rotation.y))
+			_look_at_flat(ppos + ped_side * 1.9 + ped_fwd * 1.35 + Vector3(0, -0.15, 0), ppos + Vector3(0, 0.85, 0), -5.0)
+
+	if frame_count == 6:
+		_cap("v17_pedestrians_walk.png", "Pedestrian Upright Walk & Clean Waist Textures")
+		var mario := get_tree().root.find_child("MarioNPC", true, false) as Node3D
+		if mario:
+			var mpos: Vector3 = mario.global_position
+			var mfwd: Vector3 = (mario.global_transform.basis.z).normalized()
+			if mfwd.length_squared() < 0.1:
+				mfwd = Vector3(0, 0, 1)
+			print("MARIO CAPTURE gpos=", mpos, " mfwd=", mfwd, " modelVis=", (mario.get_node_or_null("Model") as Node3D).is_visible_in_tree() if mario.get_node_or_null("Model") else false)
+			var geom := mario.find_child("geometry_0", true, false) as MeshInstance3D
+			if geom:
+				print("  geom gpos=", geom.global_position, " visTree=", geom.is_visible_in_tree(), " scale=", geom.global_transform.basis.get_scale())
+			_look_at_flat(mpos + mfwd * 2.4 + mario.global_transform.basis.x * 0.45 + Vector3(0, 0.05, 0), mpos + Vector3(0, 1.05, 0), -3.0)
+
+	if frame_count == 9:
+		_cap("v17_mario_pizzeria.png", "Custom Pizzaiolo Mario GLB Behind Counter")
+		var cw := get_tree().root.find_child("CoworkerSeated", true, false) as Node3D
+		if cw:
+			var ap := cw.find_child("AnimationPlayer", true, false) as AnimationPlayer
+			if ap and ap.has_animation("Sit_Typing"):
+				ap.play("Sit_Typing")
+				ap.advance(0.18)
+			var cpos: Vector3 = cw.global_position
+			_look_at_flat(cpos + Vector3(1.15, 0.15, 1.15), cpos + Vector3(0.0, 0.88, 0.42), -10.0)
+
+	if frame_count == 12:
+		_cap("v17_ogr_coworker.png", "OGR Coworker Sit_Typing Hands Over Keyboard")
+		var cu_node := get_tree().root.find_child("ExtractionNode_Copper", true, false) as Node3D
+		if cu_node and player:
+			var cpos2: Vector3 = cu_node.global_position
+			_look_at_flat(cpos2 + Vector3(1.25, 0.25, 2.35), cpos2 + Vector3(0.0, -0.05, 0.0), -11.0)
+			cu_node.call("interact", player)
+			for _s in range(13):
+				cu_node.call("_process", 0.1)
+
+	if frame_count == 15:
+		_cap("v17_miniera_vein_pickaxe.png", "Miniera Crystal Veins, Animated Pickaxe & Sweet-Spot HUD")
+		var cu_node2 := get_tree().root.find_child("ExtractionNode_Copper", true, false) as Node3D
+		if cu_node2 and cu_node2.has_method("_cancel_extraction"):
+			cu_node2.call("_cancel_extraction")
+		_look_at_flat(Vector3(-4.5, 0.45, 16.5), Vector3(-11.5, 0.7, 11.2), -6.0)
+
+	if frame_count == 18:
+		_cap("v17_sancarlo_cars_forno.png", "San Carlo Upgraded Cars & Clear Forno Bruno Facade")
+		_look_at_flat(Vector3(5.2, 0.55, 15.8), Vector3(0.0, 1.15, 21.0), -6.0)
+
+	if frame_count == 21:
+		_cap("v17_fountain_water.png", "San Carlo Fountain Water Arcs & Droplet Particles")
+		var torr := get_tree().root.find_child("TorrefattoreNPC", true, false) as Node3D
+		if torr:
+			var tpos: Vector3 = torr.global_position
+			_look_at_flat(Vector3(41.5, 0.20, 50.8), tpos + Vector3(0.25, 0.95, 0.15), -4.0)
+
+	if frame_count == 24:
+		_cap("v17_torrefazione_barista.png", "Borgo Po Torrefazione Interior & TorrefattoreNPC")
+		_look_at_flat(Vector3(2.4, 0.15, 5.4), Vector3(4.0, 0.65, 4.35), -9.0)
+
+	if frame_count == 27:
+		_cap("v17_parked_bike.png", "Studio 3D E-Bike Parked Beside Rack")
+		if player:
+			EconomyManager.balance += 300.0
+			if not TechOpsManager.has_vehicle("bike"):
+				TechOpsManager.buy_or_toggle_vehicle("bike")
+			else:
+				TechOpsManager.active_vehicle = "bike"
+				EventBus.vehicle_changed.emit("bike")
+			if player.has_method("_ensure_bike_cockpit"):
+				player.call("_ensure_bike_cockpit")
+			_set_cam(Vector3(0.0, 0.05, 8.5), Vector3(0, 180, 0), Vector3(-14, 0, 0))
+			if player.has_method("_apply_bike_physics"):
+				for _b in range(6):
+					player.call("_apply_bike_physics", 0.05, Vector2(-0.5, -1.0))
+
+	if frame_count == 30:
+		_cap("v17_bike_cockpit.png", "1st-Person Rideable E-Bike Cockpit")
+		get_tree().quit(0)
+

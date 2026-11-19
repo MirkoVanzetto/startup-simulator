@@ -21,6 +21,13 @@ extends Interactable3D
 
 var _anim_time: float = 0.0
 var _visual_node: Node3D = null
+var _stored_col_layer: int = 1
+var _extract_active: bool = false
+var _extract_timer: float = 0.0
+var _extract_duration: float = 2.0
+var _extract_player: Node = null
+var _extract_hit_idx: int = 0
+var _extract_crit_awarded: bool = false
 
 func _resolve_visual_node() -> Node3D:
 	if not is_instance_valid(_visual_node):
@@ -31,6 +38,7 @@ func _resolve_visual_node() -> Node3D:
 	return _visual_node
 
 func _ready() -> void:
+	_stored_col_layer = collision_layer
 	super._ready()
 	if is_instance_valid(EventBus):
 		EventBus.tech_ops_updated.connect(_refresh_visuals)
@@ -86,6 +94,50 @@ func _process(delta: float) -> void:
 					var rs := p2_h.get_node_or_null("Rotor_%d" % ri) as Node3D
 					if rs:
 						rs.rotation.y += delta * 3.0 * (1.0 if ri % 2 == 0 else -1.0)
+	elif station_type == "extraction_node" and _extract_active:
+		if is_instance_valid(GameManager) and GameManager.current_state != GameManager.GameState.FIRST_PERSON:
+			_cancel_extraction()
+			return
+		if is_instance_valid(_extract_player) and _extract_player is Node3D:
+			if (_extract_player as Node3D).global_position.distance_to(global_position) > 4.2:
+				_cancel_extraction()
+				return
+		_extract_timer += delta
+		var p := clampf(_extract_timer / maxf(_extract_duration, 0.01), 0.0, 1.0)
+		var pick_anim := get_node_or_null("PickaxeAnim") as Node3D
+		var pick_pivot := get_node_or_null("PickaxeAnim/PickaxePivot") as Node3D
+		if pick_anim:
+			pick_anim.visible = true
+		if pick_pivot:
+			var beat := fmod(p * 3.0, 1.0)
+			var swing_ang := 0.0
+			if beat < 0.62:
+				swing_ang = lerpf(-0.15, 0.72, beat / 0.62)
+			elif beat < 0.84:
+				swing_ang = lerpf(0.72, -0.78, (beat - 0.62) / 0.22)
+			else:
+				swing_ang = lerpf(-0.78, -0.15, (beat - 0.84) / 0.16)
+			pick_pivot.rotation = Vector3(-0.35 + swing_ang, -0.58, 0.24)
+		var strike_ts := [0.25, 0.55, 0.85]
+		while _extract_hit_idx < strike_ts.size() and p >= float(strike_ts[_extract_hit_idx]):
+			_extract_hit_idx += 1
+			var sparks := get_node_or_null("MiningSparks") as CPUParticles3D
+			if sparks:
+				sparks.emitting = false
+				sparks.restart()
+				sparks.emitting = true
+			if is_instance_valid(SoundManager) and SoundManager.has_method("play_pickaxe_hit"):
+				SoundManager.play_pickaxe_hit(false)
+			if is_instance_valid(vnode):
+				vnode.scale = Vector3.ONE * 1.35
+		if is_instance_valid(vnode):
+			vnode.scale = vnode.scale.lerp(Vector3.ONE, clampf(delta * 10.0, 0.0, 1.0))
+		var in_sweet := (p >= 0.55 and p <= 0.88)
+		var info := "⚡ COLPO CRITICO ATTIVO! (+1 Bonus)" if _extract_crit_awarded else ("[E] Colpo Preciso Ora! (+1 Bonus)" if in_sweet else "Estrazione filone...")
+		if is_instance_valid(EventBus) and EventBus.has_signal("extraction_progress_changed"):
+			EventBus.extraction_progress_changed.emit(true, station_title if station_title != "" else "Filone Minerario", p, in_sweet, info)
+		if p >= 1.0:
+			_complete_extraction()
 
 func get_prompt() -> String:
 	if not is_interactable:
@@ -95,6 +147,11 @@ func get_prompt() -> String:
 
 	match station_type:
 		"extraction_node":
+			if _extract_active:
+				var p := clampf(_extract_timer / maxf(_extract_duration, 0.01), 0.0, 1.0)
+				if not _extract_crit_awarded and p >= 0.55 and p <= 0.88:
+					return "⛏ [E] COLPO PRECISO ORA! (+1 Bonus)"
+				return "⛏ Estrazione in corso... %d%%" % int(roundf(p * 100.0))
 			var cur := TechOpsManager.get_carried_total()
 			var cap := TechOpsManager.get_max_carry_capacity()
 			if cur >= cap:
@@ -165,6 +222,8 @@ func get_prompt() -> String:
 				return "[E] Acquista & Usa %s (€ %.0f)" % [vname, float(vdef.get("cost", 240.0))]
 			if TechOpsManager.active_vehicle == vehicle_id:
 				return "[E] Scendi da %s (Torna a piedi)" % vname
+			if vehicle_id == "bike":
+				return "[E] 🚲 Sali su %s (Guida 3D · [F] Parcheggia · [G] Campanello)" % vname
 			return "[E] Sali su %s (+%d%% Velocità)" % [vname, int(roundf((float(vdef.get("speed_mult", 1.0)) - 1.0) * 100.0))]
 
 		"bus_stop":
@@ -182,19 +241,110 @@ func _format_reqs(reqs: Dictionary) -> String:
 		parts.append("%s %d/%d" % [TechOpsManager.get_material_short(str(k)), have, need])
 	return ", ".join(parts)
 
+func _start_extraction(player: Node) -> void:
+	if TechOpsManager.get_carried_total() >= TechOpsManager.get_max_carry_capacity():
+		TechOpsManager.extract_from_node(node_id)
+		return
+	if is_instance_valid(NeedsManager) and NeedsManager.get_energy() < 5.0:
+		TechOpsManager.extract_from_node(node_id)
+		return
+	var lv := 0
+	if TechOpsManager.has_method("get_tech_level"):
+		lv = int(TechOpsManager.call("get_tech_level", "tech_extraction"))
+	elif TechOpsManager.has_method("get_tech_rank"):
+		lv = int(TechOpsManager.call("get_tech_rank", "tech_extraction"))
+	else:
+		var tdict = TechOpsManager.get("tech_levels")
+		if tdict == null:
+			tdict = TechOpsManager.get("tech_ranks")
+		if typeof(tdict) == TYPE_DICTIONARY:
+			lv = int((tdict as Dictionary).get("tech_extraction", 0))
+	_extract_duration = clampf(2.0 - float(lv) * 0.25, 1.25, 2.0)
+	_extract_active = true
+	_extract_timer = 0.0
+	_extract_hit_idx = 0
+	_extract_crit_awarded = false
+	_extract_player = player
+	var pick_anim := get_node_or_null("PickaxeAnim") as Node3D
+	if pick_anim:
+		pick_anim.visible = true
+	if is_instance_valid(EventBus) and EventBus.has_signal("extraction_progress_changed"):
+		EventBus.extraction_progress_changed.emit(true, station_title if station_title != "" else "Filone Minerario", 0.0, false, "Estrazione filone...")
+
+func _cancel_extraction() -> void:
+	_extract_active = false
+	_extract_timer = 0.0
+	_extract_player = null
+	var pick_anim := get_node_or_null("PickaxeAnim") as Node3D
+	if pick_anim:
+		pick_anim.visible = false
+	var vnode := _resolve_visual_node()
+	if is_instance_valid(vnode):
+		vnode.scale = Vector3.ONE
+	if is_instance_valid(EventBus) and EventBus.has_signal("extraction_progress_changed"):
+		EventBus.extraction_progress_changed.emit(false, "", 0.0, false, "")
+
+func _complete_extraction() -> void:
+	var was_crit := _extract_crit_awarded
+	_extract_active = false
+	_extract_timer = 0.0
+	_extract_player = null
+	var pick_anim := get_node_or_null("PickaxeAnim") as Node3D
+	if pick_anim:
+		pick_anim.visible = false
+	var vnode := _resolve_visual_node()
+	if is_instance_valid(vnode):
+		vnode.scale = Vector3.ONE
+	if is_instance_valid(EventBus) and EventBus.has_signal("extraction_progress_changed"):
+		EventBus.extraction_progress_changed.emit(false, "", 0.0, false, "")
+	var sparks := get_node_or_null("MiningSparks") as CPUParticles3D
+	if sparks:
+		sparks.emitting = false
+		sparks.restart()
+		sparks.emitting = true
+	var ok := TechOpsManager.extract_from_node(node_id)
+	if ok and was_crit and TechOpsManager.get_carried_total() < TechOpsManager.get_max_carry_capacity():
+		var crit_mat := "copper" if node_id == "node_copper" else ("silicon" if node_id == "node_silicon" else "aluminum")
+		var cm = TechOpsManager.get("carried_materials")
+		if typeof(cm) == TYPE_DICTIONARY:
+			var cmd := cm as Dictionary
+			cmd[crit_mat] = int(cmd.get(crit_mat, 0)) + 1
+			if is_instance_valid(EventBus):
+				EventBus.materials_changed.emit()
+				EventBus.notification_posted.emit("Colpo Critico", "+1 %s bonus!" % TechOpsManager.get_material_short(crit_mat), "success")
+	if is_instance_valid(SoundManager) and SoundManager.has_method("play_pickaxe_hit"):
+		SoundManager.play_pickaxe_hit(was_crit)
+	_refresh_visuals()
+
 func _on_interact(_player: Node) -> void:
 	if not is_instance_valid(TechOpsManager):
 		return
 
 	match station_type:
 		"extraction_node":
-			var sparks := get_node_or_null("MiningSparks") as CPUParticles3D
-			if sparks:
-				sparks.emitting = false
-				sparks.restart()
-				sparks.emitting = true
-			TechOpsManager.extract_from_node(node_id)
-			_refresh_visuals()
+			if _player == null:
+				var sparks := get_node_or_null("MiningSparks") as CPUParticles3D
+				if sparks:
+					sparks.emitting = false
+					sparks.restart()
+					sparks.emitting = true
+				TechOpsManager.extract_from_node(node_id)
+				_refresh_visuals()
+			elif _extract_active:
+				var p := clampf(_extract_timer / maxf(_extract_duration, 0.01), 0.0, 1.0)
+				if not _extract_crit_awarded and p >= 0.52 and p <= 0.90:
+					_extract_crit_awarded = true
+					var sparks := get_node_or_null("MiningSparks") as CPUParticles3D
+					if sparks:
+						sparks.emitting = false
+						sparks.restart()
+						sparks.emitting = true
+					if is_instance_valid(SoundManager) and SoundManager.has_method("play_pickaxe_hit"):
+						SoundManager.play_pickaxe_hit(true)
+					if is_instance_valid(EventBus) and EventBus.has_signal("extraction_progress_changed"):
+						EventBus.extraction_progress_changed.emit(true, station_title if station_title != "" else "Filone Minerario", p, true, "⚡ COLPO CRITICO ATTIVO! (+1 Bonus)")
+			else:
+				_start_extraction(_player)
 
 		"processing_station":
 			if TechOpsManager.active_incidents.has("inc_power_dip"):
@@ -402,3 +552,8 @@ func _refresh_visuals() -> void:
 					part.visible = (step >= i) and not TechOpsManager.drone_built
 		"drone_helipad":
 			vnode.visible = TechOpsManager.drone_built or TechOpsManager.drone_assembly_step >= 6
+		"vehicle":
+			if vehicle_id == "bike":
+				var mounted := (TechOpsManager.active_vehicle == "bike")
+				visible = not mounted
+				collision_layer = 0 if mounted else _stored_col_layer

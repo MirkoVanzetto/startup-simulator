@@ -70,4 +70,4 @@ signal tech_ops_updated()
 signal incident_changed()
 signal vehicle_changed(vehicle_id: String)
 signal employee_task_updated()
-
+signal extraction_progress_changed(active: bool, title: String, progress: float, in_sweet_spot: bool, info: String)

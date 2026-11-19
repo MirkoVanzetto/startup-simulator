@@ -2,14 +2,14 @@
 
 [![Engine: Godot 4.3](https://img.shields.io/badge/Engine-Godot_4.3-478cbf?logo=godotengine&logoColor=white)](https://godotengine.org)
 [![Platform: Windows Desktop](https://img.shields.io/badge/Platform-Windows_x86__64-0078d7?logo=windows&logoColor=white)](https://github.com/MirkoVanzetto/startup-simulator/tree/main/build)
-[![Version: v1.6.0 Miniera Alpina & Animations](https://img.shields.io/badge/Version-v1.6.0_Miniera_Alpina-success)](https://github.com/MirkoVanzetto/startup-simulator/blob/main/ROADMAP.md)
+[![Version: v1.7.0 Gameplay & Visual Overhaul](https://img.shields.io/badge/Version-v1.7.0_Gameplay_%26_Visuals-success)](https://github.com/MirkoVanzetto/startup-simulator/blob/main/ROADMAP.md)
 
 **Startup Simulator** è un simulatore gestionale in prima persona in 3D ambientato in una versione contemporanea e stilizzata di **Torino, Italia**.  
 Interpreti un neo-laureato in Informatica con 110 e Lode che parte dal proprio garage con **120 €** fino a costruire una vera impresa tecnologica industriale.
 
 ---
 
-## ⬇️ DOWNLOAD PLAYABLE DEMO (WINDOWS .EXE — v1.6.0)
+## ⬇️ DOWNLOAD PLAYABLE DEMO (WINDOWS .EXE — v1.7.0)
 
 Puoi scaricare l'eseguibile giocabile aggiornato direttamente da GitHub ai seguenti link:
 
@@ -35,11 +35,13 @@ Puoi scaricare l'eseguibile giocabile aggiornato direttamente da GitHub ai segue
 
 | Tasto | Azione |
 | :--- | :--- |
-| **W, A, S, D** | Movimento del personaggio nello spazio 3D (potenziato con Bici Tech / Auto EV) |
+| **W, A, S, D** | Movimento in prima persona / Pedala, frena e sterza in sella alla **Bici Tech 3D** |
 | **Mouse** | Controllo orientamento telecamera |
-| **E / Click Sinistro** | Interazione tattile (Laptop, NPC, Estrazione, Robot, Drone, Negozi, Fermate GTT) |
+| **E / Click Sinistro** | Interazione tattile · Premi nella zona oro (`55%-88%`) durante l'estrazione per un **Colpo Critico** (`+1 Bonus`) |
+| **F** | Scendi e parcheggia fisicamente la **Bicicletta Tech Elettrica** ovunque in città |
+| **G** | Suona il campanello della bicicletta in sella |
 | **Spazio** | Salto |
-| **Shift Sinistro** | Scatto / Corsa rapida |
+| **Shift Sinistro** | Scatto / Pedalata assistita |
 | **TAB** | Zaino, Materiali Tecnologici & Mobilità Urbana |
 | **CAPS LOCK / M** | Mappa Interattiva di Torino (20 POI · Tab Miniera) & Segnavia GPS 3D |
 | **B** | Modalità Arredo libero in Studio |
@@ -47,26 +49,27 @@ Puoi scaricare l'eseguibile giocabile aggiornato direttamente da GitHub ai segue
 
 ---
 
-## 🚀 NOVITÀ v1.6.0 — MINIERA ALPINA VAL DI SUSA & ANIMAZIONI TORINO VIVA
+## 🚀 NOVITÀ v1.7.0 — ANIMAZIONI NATURA, MINIERA INTERATTIVA, BICI 3D & TORINO VIVA
 
-1. **Nuova Area Dedicata — Miniera Alpina · Polo Estrattivo Val di Susa (Nord-Ovest oltre Parco Valentino):**
-   - Raggiungibile dall'arco nord di Parco Valentino Ovest e dalla nuova 5ª fermata bus GTT (`BusStop_Miniera`): cava alpina circondata dalle Alpi, **Galleria Estrattiva 01** con carrello minerario animato su rotaie, **3 filoni cristallini** (`Rame`, `Silicio`, `Terre Rare`, ecc.), **Gru di cava rotante**, **Ufficio di cava**, **Raffineria** con ruota frantumatrice e fornace accesa, e `Capocava Ing. Dario Ferrero` (gilet alta visibilità + elmetto).
-2. **Animazioni Complete su Pedoni, NPC, Veicoli, Macchinari & Droni (`v1.6.0`):**
-   - **Pedoni 3D MakeHuman reali**: passo sincronizzato (`"Walk"`/`"Idle"`), contatto a terra (`Y = 0.0`) e rotazione verso il waypoint prima di muoversi (zero effetto slittamento).
-   - **NPC, Veicoli & Macchinari Industriali**: animazioni `"Interact"` su NPC/commercianti, 4 ruote rotanti + curve fluide sui veicoli, animazioni continue `MineOpsAnimator` su `MineCart`, `ConveyorBelt`, `QuarryCrane`, `CrusherWheel`, trapani dei Mining Robot MK1/MK2 con scintille e volo autonomo del `TO-Drone MK1` con 4 rotori indipendenti.
-3. **Albero R&D a 6 Rami, Droni, Fase 4 CEO & Dipendenti Autonomi (`v1.5.0+`):**
-   - Ricerca Tecnologica a 6 rami con `🔬 Crediti di Ricerca (RC)`, assemblaggio fisico 3D in 7 fasi del `TO-Drone MK1` al Lab Droni di Borgo Po, Dipartimenti direzionali all'`Incubatore Startup Torino`, imprevisti dinamici, collaboratori autonomi su Freelance Hub, Mappa Interattiva estesa a **20 POI** (con filtro **Miniera**) e **5 Fermate Bus GTT**.
+1. **Estrazione Mineraria Temporizzata con Piccone 3D & Colpo Critico:**
+   - Rimossi i vecchi segnali tondi/a terra; nuovi **filoni cristallini sfaccettati** con piccone 3D animato a 3 colpi, barra di progresso HUD, scintille e **finestra temporale critica `[E]`** (`+1` materiale bonus e audio sintetizzato).
+2. **Bicicletta Tech Elettrica 3D Realmente Guidabile:**
+   - Salendo in sella appare il **cockpit 3D in prima persona** (`BikeCockpit`) con manubrio sterzante, display LCD, forcella e ruota anteriore rotante, inerzia di pedalata/frenata, campanello `[G]` e parcheggio fisico `[F]` ovunque per Torino.
+3. **Pedoni naturali, Custom Pizzaiolo Mario & Dettagli Torino:**
+   - Camminata MakeHuman corretta senza andatura a papera né compenetrazioni maglietta/pantaloni; **Mario Esposito** utilizza ora il modello custom `mario compresso_edited.glb`.
+   - **Coworking OGR**: scrivanie con tastiere meccaniche, mouse, tappetini, tazze e coworker animata `Sit_Typing` con le mani sopra i tasti.
+   - **Torrefazione Po (Borgo Po)**: locale arredato con tostatrice storica in rame, barista `TorrefattoreNPC` e catalogo caffetteria portatile per recuperare energia.
+   - **Fontana San Carlo, Fiume Po & Traffico:** shader acqua potenziato con getti parabolici e particelle spruzzo, traffico auto ristretto al **Lungo Po**, auto ridisegnate e piazzola ovest liberata dall'ingombro davanti a **Forno Bruno**.
 
 ---
 
 ## 🛠️ ARCHITETTURA TECNICA & TEST
 
-- **Test Automatizzati (945/945 PASS — 0 FAIL across 7 suites):**
-  - `godot --headless scenes/v1_5_post_ogr_runner.tscn` (106/106 test Post-OGR, Miniera Alpina, Animazioni, Droni, Robot, R&D, CEO & UI)
-  - `godot --headless scenes/v1_4_overhaul_runner.tscn` (179/179 test OGR Gate, PBR, Mappa 20 POI, TO-OS 4-Res & Knowledge)
-  - `godot --headless scenes/v1_2_overhaul_runner.tscn` (167/167 test WebForge 5.0, Parco Valentino, Mercato Nord & UI)
-  - `godot --headless scenes/v1_1_gameplay_runner.tscn` (184/184 test Footsteps, Zaino [TAB], Mappa [CAPS] 20 POI & HUD)
-  - `godot --headless scenes/v1_expansion_runner.tscn` (131/131 test Borgo Valdocco & Officina Bellini)
-  - `godot --headless scenes/needs_runner.tscn` (72/72 test Needs, Shops & Fame)
-  - `godot --headless scenes/test_runner.tscn` (106/106 Core Foundation & End-to-End tests)
-
+- **Test Automatizzati Verificati (`821/821 PASS` — `0 FAIL` su 7 runner headless):**
+  - `godot --headless scenes/v1_5_post_ogr_runner.tscn` (`118/118` test Post-OGR, Piccone, Bici 3D, Torrefazione, Droni, Robot & CEO)
+  - `godot --headless scenes/v1_4_overhaul_runner.tscn` (`118/118` test OGR Gate, Custom Mario, PBR, Mappa 20 POI & TO-OS)
+  - `godot --headless scenes/v1_2_overhaul_runner.tscn` (`124/124` test WebForge 5.0, Parco Valentino, Mercato Nord & UI)
+  - `godot --headless scenes/v1_1_gameplay_runner.tscn` (`160/160` test Footsteps, Zaino [TAB], Mappa [CAPS] & HUD)
+  - `godot --headless scenes/v1_expansion_runner.tscn` (`123/123` test Borgo Valdocco & Officina Bellini)
+  - `godot --headless scenes/needs_runner.tscn` (`72/72` test Needs, Shops & Fame)
+  - `godot --headless scenes/test_runner.tscn` (`106/106` Core Foundation & End-to-End tests)

@@ -275,7 +275,7 @@ func test_officina_clearance_and_character_anatomy() -> void:
 			shared_fabric_tex.noise.frequency if (shared_fabric_tex and shared_fabric_tex.noise) else -1.0
 		])
 
-	var standing_npcs: Array[String] = ["MarioNPC", "BrunoNPC", "RosaNPC", "ElenaNPC", "DavideNPC", "SabrinaNPC", "BelliniNPC", "AndreaVialeNPC", "FerreroNPC", "ChiaraNPC"]
+	var standing_npcs: Array[String] = ["TorrefattoreNPC", "BrunoNPC", "RosaNPC", "ElenaNPC", "DavideNPC", "SabrinaNPC", "BelliniNPC", "AndreaVialeNPC", "FerreroNPC", "ChiaraNPC"]
 	for nname in standing_npcs:
 		var npc: Node = world.find_child(nname, true, false)
 		var model: Node = npc.get_node_or_null("Model") if npc else null
@@ -327,10 +327,29 @@ func test_officina_clearance_and_character_anatomy() -> void:
 		check(pbr_ok,
 			"%s follows Request #10 light PBR rules (zero SSS/Height/Detail, shared fabric normal, rim=0.25) (%s)" % [nname, bad_detail if bad_detail != "" else "ok"])
 
+	var mario_npc: Node = world.find_child("MarioNPC", true, false)
+	var mario_model: Node = mario_npc.get_node_or_null("Model") if mario_npc else null
+	var mario_custom: Node3D = mario_model.get_node_or_null("CustomVisual") as Node3D if mario_model else null
+	var mario_ap: AnimationPlayer = mario_model.find_child("AnimationPlayer", true, false) as AnimationPlayer if mario_model else null
+	var mario_mis: Array[Node] = mario_custom.find_children("*", "MeshInstance3D", true, false) if mario_custom else []
+	var mario_tex_ok := false
+	for mm in mario_mis:
+		var mi := mm as MeshInstance3D
+		if mi and mi.mesh:
+			for si in range(mi.mesh.get_surface_count()):
+				var sm := mi.mesh.surface_get_material(si)
+				if sm is StandardMaterial3D and (sm as StandardMaterial3D).albedo_texture != null:
+					mario_tex_ok = true
+	var mario_h := mario_custom.scale.y if mario_custom else 0.0
+	check(mario_custom != null and mario_mis.size() >= 1 and mario_tex_ok and mario_h >= 1.65 and mario_ap != null and mario_ap.has_animation("Idle"),
+		"MarioNPC uses custom pizzaiolo GLB (CustomVisual=%s, meshes=%d, textured=%s, scale=%.2f, Idle=%s)" % [
+			str(mario_custom != null), mario_mis.size(), str(mario_tex_ok), mario_h, str(mario_ap != null and mario_ap.has_animation("Idle"))
+		])
+
 	var cw_seated: Node = world.find_child("CoworkerSeated", true, false)
 	var cw_ap: AnimationPlayer = cw_seated.find_child("AnimationPlayer", true, false) as AnimationPlayer if cw_seated else null
-	check(cw_seated != null and cw_ap != null and cw_ap.has_animation("Sit_Chair_Idle"),
-		"OGR CoworkerSeated uses MakeHuman seated .glb rig with Sit_Chair_Idle")
+	check(cw_seated != null and cw_ap != null and cw_ap.has_animation("Sit_Chair_Idle") and cw_ap.has_animation("Sit_Typing") and cw_ap.current_animation == "Sit_Typing",
+		"OGR CoworkerSeated uses MakeHuman seated .glb rig playing Sit_Typing")
 
 	var luca_emp: Node = world.find_child("EmployeeModel", true, false)
 	var luca_body: MeshInstance3D = luca_emp.find_child("BodyMesh", true, false) as MeshInstance3D if luca_emp else null

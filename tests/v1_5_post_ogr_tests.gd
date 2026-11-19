@@ -126,7 +126,25 @@ func _test_suite_1_incubatore_and_3d_world(main_inst: Node) -> void:
 	var city_life := main_inst.find_child("CityLifeManager", true, false)
 	_assert(city_life != null, "CityLifeManager active in Street")
 	_assert(city_life.get("_pedestrians").size() >= 7, "All 7 walking pedestrians spawned incl. Parco & Miniera Alpina (%d)" % city_life.get("_pedestrians").size())
-	_assert(city_life.get("_moving_cars").size() >= 4, "All 4 moving street cars spawned incl. MovingCar_Miniera_Haul (%d)" % city_life.get("_moving_cars").size())
+	var mcars: Array = city_life.get("_moving_cars") if city_life else []
+	var lungopo_only := (mcars.size() == 2)
+	for mc in mcars:
+		var mnode: Node3D = mc.get("node") as Node3D
+		if mnode == null or mnode.position.z < 50.0:
+			lungopo_only = false
+	_assert(lungopo_only, "Traffic restricted strictly to 2 Lungo Po street cars (got %d)" % mcars.size())
+	_assert(main_inst.find_child("MovingCar_Viale_Est", true, false) == null and main_inst.find_child("MovingCar_Miniera_Haul", true, false) == null,
+		"Viale Est and Miniera moving cars removed")
+	_assert(main_inst.find_child("CompanyEV_SanCarlo", true, false) == null and main_inst.find_child("EVChargerTotem", true, false) == null,
+		"Buyable CompanyEV_SanCarlo & EVChargerTotem removed from Piazza San Carlo (no Forno Bruno clip)")
+	var torr_npc := main_inst.find_child("TorrefattoreNPC", true, false)
+	var torr_shop := main_inst.find_child("TorrefazioneShop", true, false)
+	_assert(torr_npc != null and torr_shop != null and str(torr_shop.get("shop_id")) == "torrefazione",
+		"Torrefazione Po staffed by TorrefattoreNPC with interactive TorrefazioneShop")
+	var f_part := main_inst.find_child("FountainWaterParticles", true, false) as CPUParticles3D
+	var p_part := main_inst.find_child("PondWaterParticles", true, false) as CPUParticles3D
+	_assert(f_part != null and f_part.emitting and p_part != null and p_part.emitting,
+		"FountainWaterParticles & PondWaterParticles active")
 
 
 func _test_suite_2_extraction_and_refinery(main_inst: Node) -> void:
@@ -414,13 +432,16 @@ func _test_suite_9_miniera_alpina_and_animations(main_inst: Node) -> void:
 	var rotor_y0 := heli_r0.rotation.y
 	var car0_pos0 := car0_node.position
 	var car0_wrot0 := car0_w0.rotation.x
+	var car0_dw := 0.0
 
 	# Advance simulation 20 frames (wait 20 physics/process steps at simulated delta via real process ticks)
 	for _i in range(20):
+		var prev_car_rx := car0_w0.rotation.x
 		city_life._process(0.05)
 		yard._process(0.05)
 		pad1._process(0.05)
 		heli._process(0.05)
+		car0_dw += absf(angle_difference(prev_car_rx, car0_w0.rotation.x))
 		await get_tree().process_frame
 
 	# Check Pedestrian Walk state & forward orientation (zero sideways slide)
@@ -434,9 +455,9 @@ func _test_suite_9_miniera_alpina_and_animations(main_inst: Node) -> void:
 		])
 
 	# Verify moving car position & spinning wheel
-	_assert(car0_node.position.distance_to(car0_pos0) > 1.0 and absf(car0_w0.rotation.x - car0_wrot0) > 1.0,
+	_assert(car0_node.position.distance_to(car0_pos0) > 1.0 and car0_dw > 5.0,
 		"Street car moves cleanly and spins Wheel_0 (dpos=%.2fm, dw=%.2frad)" % [
-			car0_node.position.distance_to(car0_pos0), absf(car0_w0.rotation.x - car0_wrot0)
+			car0_node.position.distance_to(car0_pos0), car0_dw
 		])
 
 	# Verify MineOpsAnimator machinery
@@ -452,5 +473,65 @@ func _test_suite_9_miniera_alpina_and_animations(main_inst: Node) -> void:
 		"Mining Robot MK1 spins DrillHead & articulates BoomArm")
 	_assert(heli_vis.position.y > 1.5 and absf(heli_r0.rotation.y - rotor_y0) > 5.0,
 		"TO-Drone MK1 takes off (Y=%.2fm) and spins rotors on active mission" % heli_vis.position.y)
+
+	# Verify Torrefazione Po shop catalog & hours + Forno Bruno clear facade
+	CalendarSystem.current_hour = 11
+	_assert(ShopManager.SHOPS.has("torrefazione") and (ShopManager.SHOPS["torrefazione"]["items"] as Array).size() >= 4 and ShopManager.is_shop_open("torrefazione"),
+		"Torrefazione Po shop registered with >=4 coffee items and open at 11:00")
+
+	var panificio := main_inst.find_child("PanificioVenue", true, false) as Node3D
+	var hit_forno := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(-8.2, 0.8, 12.8), Vector3(-8.2, 0.8, 11.05), 1))
+	var hit_ev_old := space.intersect_ray(PhysicsRayQueryParameters3D.create(Vector3(-10.8, 0.8, 12.8), Vector3(-10.8, 0.8, 11.05), 1))
+	_assert(panificio != null and hit_forno.is_empty() and hit_ev_old.is_empty(),
+		"Forno Bruno storefront entrance & former EV corner clear of parked cars/obstructions")
+
+	# Verify timed extraction, pickaxe animation, sweet-spot critical bonus, and no floor Beacon
+	var player := GameManager.player_node as Node3D
+	if player == null:
+		player = get_tree().get_first_node_in_group("player") as Node3D
+	var copper_ext := main_inst.find_child("ExtractionNode_Copper", true, false)
+	_assert(copper_ext != null and copper_ext.get_node_or_null("Beacon") == null and copper_ext.get_node_or_null("PickaxeAnim/PickaxePivot") != null,
+		"ExtractionNode_Copper removes yellow floor Beacon and includes animated PickaxeAnim rig")
+	if player and copper_ext:
+		TechOpsManager.reset()
+		TechOpsManager.start_ogr_tech_mission()
+		NeedsManager.energy = 100.0
+		player.global_position = (copper_ext as Node3D).global_position + Vector3(0, 0, 1.8)
+		var carried_before := TechOpsManager.get_carried_total()
+		copper_ext.interact(player)
+		var pick_anim := copper_ext.get_node_or_null("PickaxeAnim") as Node3D
+		_assert(bool(copper_ext.get("_extract_active")) and pick_anim != null and pick_anim.visible,
+			"Player mining starts timed extraction & reveals animated 3D Pickaxe")
+		for _s in range(14):
+			copper_ext._process(0.1)
+		copper_ext.interact(player) # hit inside 0.55..0.88 golden sweet-spot!
+		_assert(bool(copper_ext.get("_extract_crit_awarded")), "Timing [E] inside golden sweet spot awards critical strike")
+		for _s in range(10):
+			if bool(copper_ext.get("_extract_active")):
+				copper_ext._process(0.1)
+		var carried_after := TechOpsManager.get_carried_total()
+		_assert(not bool(copper_ext.get("_extract_active")) and (pick_anim == null or not pick_anim.visible) and carried_after >= carried_before + 2,
+			"Timed mining completes cleanly with critical bonus (carried %d -> %d)" % [carried_before, carried_after])
+
+	# Verify real 3D BikeCockpit + BikeStation_Studio hide on ride + [F] re-parking beside player
+	var bike_sb := main_inst.find_child("BikeStation_Studio", true, false) as Node3D
+	if player and bike_sb:
+		EconomyManager.balance += 300.0
+		if not TechOpsManager.has_vehicle("bike"):
+			TechOpsManager.buy_or_toggle_vehicle("bike")
+		else:
+			TechOpsManager.active_vehicle = "bike"
+			EventBus.vehicle_changed.emit("bike")
+		player.global_position = Vector3(12.0, 0.0, 18.0)
+		if player.has_method("_ensure_bike_cockpit"):
+			player.call("_ensure_bike_cockpit")
+		await get_tree().process_frame
+		var cockpit := player.get_node_or_null("BikeCockpit") as Node3D
+		_assert(cockpit != null and cockpit.visible and not bike_sb.visible and (bike_sb as CollisionObject3D).collision_layer == 0,
+			"Riding Bici Tech reveals 1st-person BikeCockpit and hides sidewalk BikeStation_Studio")
+		var parked_ok: bool = player.call("dismount_and_park_bike") if player.has_method("dismount_and_park_bike") else false
+		await get_tree().process_frame
+		_assert(parked_ok and TechOpsManager.active_vehicle == "foot" and not cockpit.visible and bike_sb.visible and bike_sb.global_position.distance_to(player.global_position) < 2.5,
+			"Dismount & Park ([F]) hides BikeCockpit and spawns parked 3D bike next to player")
 
 

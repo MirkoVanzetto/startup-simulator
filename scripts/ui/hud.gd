@@ -57,6 +57,8 @@ func _ready() -> void:
 		EventBus.materials_changed.connect(_update_hints_label)
 	if EventBus.has_signal("vehicle_changed"):
 		EventBus.vehicle_changed.connect(func(_v): _update_hints_label())
+	if EventBus.has_signal("extraction_progress_changed"):
+		EventBus.extraction_progress_changed.connect(_on_extraction_progress_changed)
 	get_viewport().size_changed.connect(_update_hints_label)
 	
 	if reputation_label:
@@ -177,18 +179,118 @@ func _update_hints_label() -> void:
 		return
 	var total := ShopManager.get_total_inventory_count()
 	var extra := ""
+	var on_bike := false
 	if is_instance_valid(TechOpsManager):
 		var c_tot := TechOpsManager.get_carried_total()
 		if c_tot > 0:
 			extra += " · 📦 %d/%d" % [c_tot, TechOpsManager.get_carry_capacity()]
-		if TechOpsManager.active_vehicle != "foot":
+		if TechOpsManager.active_vehicle == "bike":
+			on_bike = true
+		elif TechOpsManager.active_vehicle != "foot":
 			extra += " · " + TechOpsManager.get_active_vehicle_name()
 	var vp := get_viewport_rect().size
+	if on_bike:
+		if vp.x > 0 and vp.x < 780.0:
+			hints_label.text = "[W/S] Pedala · [F] Parcheggia · [G] Campanello · [M]"
+		else:
+			hints_label.text = "[W/S] Pedala/Frena · [F] Scendi & Parcheggia Bici · [G] Campanello · [CAPS/M] Mappa%s" % extra
+		return
 	if vp.x > 0 and vp.x < 780.0:
 		hints_label.text = "[TAB] Zaino (%d)%s · [M] Mappa · [ESC]" % [total, extra]
 	else:
 		hints_label.text = "[TAB] Zaino (%d)%s · [CAPS/M] Mappa · [B] Arreda · [ESC] Pausa" % [total, extra]
 
+
+var _mining_panel: PanelContainer = null
+var _mining_title_lbl: Label = null
+var _mining_info_lbl: Label = null
+var _mining_fill_rect: ColorRect = null
+var _mining_sweet_rect: ColorRect = null
+
+func _ensure_mining_progress_ui() -> void:
+	if _mining_panel and is_instance_valid(_mining_panel):
+		return
+	_mining_panel = PanelContainer.new()
+	_mining_panel.name = "MiningProgressPanel"
+	_mining_panel.visible = false
+	_mining_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_mining_panel.anchor_left = 0.5
+	_mining_panel.anchor_right = 0.5
+	_mining_panel.anchor_top = 0.72
+	_mining_panel.anchor_bottom = 0.72
+	_mining_panel.offset_left = -155.0
+	_mining_panel.offset_right = 155.0
+	_mining_panel.offset_top = -36.0
+	_mining_panel.offset_bottom = 36.0
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.08, 0.11, 0.16, 0.90)
+	sb.border_color = Color(0.28, 0.78, 0.95, 0.85)
+	sb.set_border_width_all(2)
+	sb.set_corner_radius_all(8)
+	sb.set_content_margin_all(10)
+	_mining_panel.add_theme_stylebox_override("panel", sb)
+
+	var vbox := VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 5)
+	_mining_panel.add_child(vbox)
+
+	_mining_title_lbl = Label.new()
+	_mining_title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_mining_title_lbl.add_theme_font_size_override("font_size", 13)
+	_mining_title_lbl.add_theme_color_override("font_color", Color(0.92, 0.96, 1.0))
+	vbox.add_child(_mining_title_lbl)
+
+	var track := ColorRect.new()
+	track.name = "Track"
+	track.custom_minimum_size = Vector2(280.0, 14.0)
+	track.color = Color(0.16, 0.20, 0.28, 1.0)
+	vbox.add_child(track)
+
+	_mining_sweet_rect = ColorRect.new()
+	_mining_sweet_rect.name = "SweetSpot"
+	_mining_sweet_rect.color = Color(1.0, 0.78, 0.15, 0.38)
+	_mining_sweet_rect.anchor_left = 0.55
+	_mining_sweet_rect.anchor_right = 0.88
+	_mining_sweet_rect.anchor_top = 0.0
+	_mining_sweet_rect.anchor_bottom = 1.0
+	track.add_child(_mining_sweet_rect)
+
+	_mining_fill_rect = ColorRect.new()
+	_mining_fill_rect.name = "Fill"
+	_mining_fill_rect.color = Color(0.22, 0.82, 0.96, 0.95)
+	_mining_fill_rect.anchor_left = 0.0
+	_mining_fill_rect.anchor_right = 0.0
+	_mining_fill_rect.anchor_top = 0.0
+	_mining_fill_rect.anchor_bottom = 1.0
+	track.add_child(_mining_fill_rect)
+
+	_mining_info_lbl = Label.new()
+	_mining_info_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_mining_info_lbl.add_theme_font_size_override("font_size", 12)
+	_mining_info_lbl.add_theme_color_override("font_color", Color(0.75, 0.88, 1.0))
+	vbox.add_child(_mining_info_lbl)
+
+	add_child(_mining_panel)
+
+func _on_extraction_progress_changed(active: bool, title: String, progress: float, in_sweet_spot: bool, info: String) -> void:
+	_ensure_mining_progress_ui()
+	if not is_instance_valid(_mining_panel):
+		return
+	_mining_panel.visible = active
+	if not active:
+		return
+	_mining_title_lbl.text = "⛏ %s · %d%%" % [title, int(roundf(clampf(progress, 0.0, 1.0) * 100.0))]
+	_mining_fill_rect.anchor_right = clampf(progress, 0.0, 1.0)
+	if "CRITICO" in info:
+		_mining_fill_rect.color = Color(0.25, 0.95, 0.55, 0.98)
+		_mining_info_lbl.add_theme_color_override("font_color", Color(0.45, 1.0, 0.65))
+	elif in_sweet_spot:
+		_mining_fill_rect.color = Color(1.0, 0.82, 0.22, 0.98)
+		_mining_info_lbl.add_theme_color_override("font_color", Color(1.0, 0.88, 0.35))
+	else:
+		_mining_fill_rect.color = Color(0.25, 0.80, 0.96, 0.95)
+		_mining_info_lbl.add_theme_color_override("font_color", Color(0.76, 0.88, 1.0))
+	_mining_info_lbl.text = info
 
 const MAX_TOASTS := 3
 

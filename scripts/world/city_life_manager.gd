@@ -30,7 +30,8 @@ func _register_standing_npcs(street: Node3D, pizzeria: Node3D) -> void:
 		{"node": street.find_child("BelliniNPC", true, false), "shop_id": ""},
 		{"node": street.find_child("AndreaVialeNPC", true, false), "shop_id": ""},
 		{"node": street.find_child("FerreroNPC", true, false), "shop_id": ""},
-		{"node": street.find_child("ChiaraNPC", true, false), "shop_id": ""}
+		{"node": street.find_child("ChiaraNPC", true, false), "shop_id": ""},
+		{"node": street.find_child("TorrefattoreNPC", true, false), "shop_id": "torrefazione"}
 	]
 	for item in npc_defs:
 		var n := item["node"] as Node3D
@@ -54,43 +55,43 @@ func _spawn_walking_pedestrians() -> void:
 		{
 			"name": "Pedestrian_SanCarlo_1",
 			"waypoints": [Vector3(-3.2, 0.0, 5.5), Vector3(-3.2, 0.0, 17.5), Vector3(3.2, 0.0, 17.5), Vector3(3.2, 0.0, 5.5)],
-			"speed": 1.42,
+			"speed": 1.38,
 			"style": {"shirt": "shirt_sky", "pants": "denim", "shoes": "sneaker_white", "hair": "hair_brown", "hair_style": "quiff"}
 		},
 		{
 			"name": "Pedestrian_Piazza_2",
 			"waypoints": [Vector3(-7.5, 0.0, 16.5), Vector3(-7.5, 0.0, 25.0), Vector3(6.0, 0.0, 25.0), Vector3(6.0, 0.0, 16.5)],
-			"speed": 1.34,
+			"speed": 1.32,
 			"style": {"female": true, "shirt": "shirt_ruby", "pants": "pants_charcoal", "shoes": "shoe_black", "hair": "hair_blonde", "hair_style": "ponytail"}
 		},
 		{
 			"name": "Pedestrian_Valdocco_3",
 			"waypoints": [Vector3(64.0, 0.0, 20.5), Vector3(74.5, 0.0, 20.5), Vector3(74.5, 0.0, 33.5), Vector3(64.0, 0.0, 33.5)],
-			"speed": 1.48,
+			"speed": 1.44,
 			"style": {"shirt": "hoodie_teal", "pants": "denim", "shoes": "sneaker_white", "hair": "hair_dark", "glasses": true}
 		},
 		{
 			"name": "Pedestrian_Mercato_4",
 			"waypoints": [Vector3(71.0, 0.0, 0.5), Vector3(85.0, 0.0, 0.5), Vector3(85.0, 0.0, 8.5), Vector3(71.0, 0.0, 8.5)],
-			"speed": 1.38,
+			"speed": 1.36,
 			"style": {"female": true, "shirt": "shirt_olive_sage", "pants": "denim", "shoes": "shoe_black", "hair": "hair_chestnut", "hair_style": "bob"}
 		},
 		{
 			"name": "Pedestrian_LungoPo_5",
 			"waypoints": [Vector3(-14.0, 0.0, 62.5), Vector3(12.0, 0.0, 62.5), Vector3(36.0, 0.0, 62.5), Vector3(12.0, 0.0, 62.5)],
-			"speed": 1.52,
+			"speed": 1.48,
 			"style": {"shirt": "shirt_linen_cream", "pants": "suit_navy", "shoes": "leather", "hair": "hair_auburn"}
 		},
 		{
 			"name": "Pedestrian_Parco_6",
 			"waypoints": [Vector3(-37.5, 0.0, 34.5), Vector3(-37.5, 0.0, 21.2), Vector3(-42.5, 0.0, 21.2), Vector3(-42.5, 0.0, 9.5), Vector3(-42.5, 0.0, 21.2), Vector3(-37.5, 0.0, 21.2)],
-			"speed": 1.38,
+			"speed": 1.36,
 			"style": {"shirt": "shirt_oatmeal", "pants": "denim", "shoes": "sneaker_white", "hair": "hair_chestnut", "hair_style": "quiff"}
 		},
 		{
 			"name": "Pedestrian_Miniera_7",
 			"waypoints": [Vector3(-49.5, 0.0, -11.5), Vector3(-49.5, 0.0, -16.0), Vector3(-40.5, 0.0, -16.0), Vector3(-40.5, 0.0, -11.5)],
-			"speed": 1.35,
+			"speed": 1.34,
 			"style": {"shirt": "shirt_sky", "pants": "denim", "shoes": "shoe_black", "hair": "hair_dark", "hat": "hardhat", "vest": "vest_safety"}
 		}
 	]
@@ -113,7 +114,7 @@ func _spawn_walking_pedestrians() -> void:
 		if anim:
 			if anim.has_animation("Walk"):
 				anim.set_meta("base_loop_anim", "Walk")
-				anim.speed_scale = clampf(spd / 1.38, 0.8, 1.35)
+				anim.speed_scale = clampf(spd / 1.36, 0.85, 1.25)
 				anim.play("Walk")
 				anim.advance(float(_pedestrians.size()) * 0.19)
 			elif anim.has_animation("Idle"):
@@ -132,6 +133,7 @@ func _spawn_walking_pedestrians() -> void:
 		})
 
 func _spawn_moving_traffic() -> void:
+	# Traffico automobilistico limitato alla strada a due corsie di Viale Lungo Po
 	var lanes := [
 		{
 			"name": "MovingCar_LungoPo_East",
@@ -148,22 +150,6 @@ func _spawn_moving_traffic() -> void:
 			"rot_y": -PI * 0.5,
 			"speed": 5.8,
 			"color": "car_sage"
-		},
-		{
-			"name": "MovingCar_VialeEst",
-			"start": Vector3(26.5, 0.0, 29.2),
-			"end": Vector3(58.0, 0.0, 29.2),
-			"rot_y": PI * 0.5,
-			"speed": 5.2,
-			"color": "car_blue"
-		},
-		{
-			"name": "MovingCar_Miniera_Haul",
-			"start": Vector3(-40.2, 0.0, 10.5),
-			"end": Vector3(-40.2, 0.0, -7.0),
-			"rot_y": PI,
-			"speed": 3.4,
-			"color": "car_red"
 		}
 	]
 

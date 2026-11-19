@@ -333,7 +333,7 @@ static func add_edicola(sm: StyleMesh, pos: Vector3, rot: float = 0.0) -> void:
 
 # ------------------------------------------------------------------ Fontana del Borgo
 static func add_fountain(sm: StyleMesh, pos: Vector3) -> void:
-	# Vasca ottagonale con fondo scuro umido, cordoli scolpiti, acqua increspata e getti schiumosi
+	# Vasca ottagonale con fondo scuro umido, cordoli scolpiti, acqua increspata e getti parabolici
 	sm.cyl("stone_dark", pos + Vector3(0, 0.01, 0), 1.92, 1.92, 0.10, 12, {"smooth": false})
 	sm.cyl("stone_trim", pos, 2.15, 2.22, 0.36, 8, {"smooth": false})
 	for k in range(8):
@@ -342,19 +342,29 @@ static func add_fountain(sm: StyleMesh, pos: Vector3) -> void:
 		var seg := StyleMesh.new()
 		seg.beveled_curb_block("stone_trim", Vector3.ZERO, 0.38, 1.64, 0.24, 0.0)
 		_merge_transformed(sm, seg, bp - Vector3(0, 0.12, 0), -a)
-	sm.cyl("water", pos + Vector3(0, 0.40, 0), 1.84, 1.84, 0.06, 16, {"smooth": true})
+	sm.cyl("water", pos + Vector3(0, 0.40, 0), 1.84, 1.84, 0.06, 20, {"smooth": true})
 	# Colonna centrale tornita e vasca superiore
 	sm.lathe_oval("stone_trim", pos + Vector3(0, 0.42, 0), [
 		Vector2(0.56, 0.0), Vector2(0.46, 0.14), Vector2(0.32, 0.48),
 		Vector2(0.48, 0.78), Vector2(0.92, 0.94), Vector2(0.86, 1.02), Vector2(0.10, 0.98)
-	], 1.0, 1.0, 14)
-	sm.cyl("water", pos + Vector3(0, 1.41, 0), 0.76, 0.76, 0.04, 14, {"smooth": true})
+	], 1.0, 1.0, 16)
+	sm.cyl("water", pos + Vector3(0, 1.41, 0), 0.78, 0.78, 0.04, 16, {"smooth": true})
 	sm.lathe_oval("stone_trim", pos + Vector3(0, 1.42, 0), [
 		Vector2(0.24, 0.0), Vector2(0.18, 0.24), Vector2(0.22, 0.42), Vector2(0.12, 0.54)
-	], 1.0, 1.0, 12)
-	# Zampilli d'acqua slanciati semi-trasparenti con velature di caduta naturali
-	sm.cyl("water_spray", pos + Vector3(0, 1.92, 0), 0.05, 0.14, 0.46, 10, {"smooth": true, "cap_top": false})
-	sm.cyl("water_spray", pos + Vector3(0, 1.15, 0), 0.78, 0.72, 0.28, 12, {"smooth": true, "cap_top": false, "cap_bottom": false})
+	], 1.0, 1.0, 14)
+	# Zampillo verticale sottile + 8 archi d'acqua parabolici dalla tazza superiore alla vasca
+	sm.cyl("water_spray", pos + Vector3(0, 1.94, 0), 0.032, 0.09, 0.54, 12, {"smooth": true, "cap_top": false})
+	for ji in range(8):
+		var ang := TAU * float(ji) / 8.0
+		var dir_xz := Vector3(cos(ang), 0.0, sin(ang))
+		var arc_pts: Array[Vector3] = []
+		var arc_r: Array[float] = [0.022, 0.026, 0.030, 0.034, 0.040]
+		for si in range(5):
+			var u := float(si) / 4.0
+			var rad := 0.80 + u * 0.48
+			var y := 1.43 + sin(u * PI * 0.5) * 0.10 - u * u * 1.04
+			arc_pts.append(pos + dir_xz * rad + Vector3(0.0, y, 0.0))
+		sm.tube_path("water_spray", arc_pts, arc_r, 6, false)
 	sm.add_collider_cyl(pos + Vector3(0, 0.55, 0), 2.25, 1.1)
 
 # ------------------------------------------------------------------ Natura & Arredo Urbano
@@ -458,36 +468,85 @@ static func _merge_rotated_x_cyl(sm: StyleMesh, center: Vector3, radius: float, 
 
 static func add_car_wheel_mesh(tire_key: String = "tire", rim_key: String = "steel", radius: float = 0.30, width: float = 0.22) -> ArrayMesh:
 	var m := StyleMesh.new()
-	_merge_rotated_x_cyl(m, Vector3.ZERO, radius, width, 16, tire_key, rim_key)
+	_merge_rotated_x_cyl(m, Vector3.ZERO, radius, width, 18, tire_key, rim_key)
+	for si in range(3):
+		var a := float(si) * PI / 3.0
+		m.box("iron", Vector3(width * 0.505, 0.0, 0.0), Vector3(0.018, radius * 1.12, 0.036), {"rot": 0.0})
+		var sp := StyleMesh.new()
+		sp.box("iron", Vector3(width * 0.505, 0.0, 0.0), Vector3(0.018, 0.036, radius * 1.10))
+		for key in sp._surf:
+			var s_src: Dictionary = sp._surf[key]
+			var s_dst: Dictionary = m._s(key)
+			var base: int = s_dst["v"].size()
+			var sv: PackedVector3Array = s_src["v"]
+			var sn: PackedVector3Array = s_src["n"]
+			var suv: PackedVector2Array = s_src["uv"]
+			for k in range(sv.size()):
+				s_dst["v"].append(sv[k].rotated(Vector3.RIGHT, a))
+				s_dst["n"].append(sn[k].rotated(Vector3.RIGHT, a))
+				s_dst["uv"].append(suv[k])
+			for idx in s_src["i"]:
+				s_dst["i"].append(base + idx)
+		m.box("iron", Vector3(-width * 0.505, 0.0, 0.0), Vector3(0.018, radius * 0.4, radius * 0.4))
 	return m.to_mesh(Callable(VillageMaterials, "mat"))
 
 static func add_car_body(sm: StyleMesh, pos: Vector3, rot: float = 0.0, color_key: String = "car_red") -> void:
 	var m := StyleMesh.new()
-	# Scocca scolpita + passaruota + paraurti + cofano inclinato e abitacolo vetrato
-	m.box(color_key, Vector3(0, 0.54, 0), Vector3(1.62, 0.46, 3.40))
-	m.add_collider_box(Vector3(0, 0.66, 0), Vector3(1.62, 1.15, 3.40))
+	m.add_collider_box(Vector3(0, 0.68, 0), Vector3(1.68, 1.24, 3.60))
+	# Fondo scocca scuro + passaruota + minigonne laterali
+	m.box("iron_dark", Vector3(0, 0.34, 0), Vector3(1.48, 0.14, 3.36))
+	for sx in [-0.74, 0.74]:
+		m.box("iron_dark", Vector3(sx, 0.38, 0.0), Vector3(0.16, 0.14, 1.32))
+		for wz in [-1.08, 1.08]:
+			m.box("iron_dark", Vector3(sx, 0.42, wz), Vector3(0.18, 0.34, 0.72))
+			m.box("iron_dark", Vector3(sx + signf(sx) * 0.09, 0.56, wz), Vector3(0.05, 0.14, 0.76))
+	# Scocca principale divisa attorno ai passaruota (anteriore, centrale tra le ruote, coda posteriore)
+	m.box(color_key, Vector3(0, 0.56, 0.0), Vector3(1.64, 0.44, 1.46))
+	m.box(color_key, Vector3(0, 0.58, 1.44), Vector3(1.60, 0.40, 0.48))
+	m.box(color_key, Vector3(0, 0.58, -1.44), Vector3(1.60, 0.42, 0.48))
+	m.box(color_key, Vector3(0, 0.69, 0.0), Vector3(1.66, 0.20, 3.52))
+	# Cofano sagomato inclinato (+Z fronte) + linea di cintura
 	m.hexa(color_key, [
-		Vector3(-0.78, 0.76, 0.58), Vector3(0.78, 0.76, 0.58), Vector3(0.76, 0.68, 1.66), Vector3(-0.76, 0.68, 1.66),
-		Vector3(-0.74, 0.80, 0.62), Vector3(0.74, 0.80, 0.62), Vector3(0.72, 0.72, 1.62), Vector3(-0.72, 0.72, 1.62),
+		Vector3(-0.80, 0.76, 0.66), Vector3(0.80, 0.76, 0.66), Vector3(0.76, 0.66, 1.78), Vector3(-0.76, 0.66, 1.78),
+		Vector3(-0.74, 0.85, 0.70), Vector3(0.74, 0.85, 0.70), Vector3(0.70, 0.72, 1.72), Vector3(-0.70, 0.72, 1.72),
 	])
-	# Abitacolo con parabrezza e lunotto inclinati
+	# Portabagagli / lunotto posteriore (-Z coda)
 	m.hexa(color_key, [
-		Vector3(-0.74, 0.76, -1.08), Vector3(0.74, 0.76, -1.08), Vector3(0.74, 0.76, 0.70), Vector3(-0.74, 0.76, 0.70),
-		Vector3(-0.62, 1.28, -0.78), Vector3(0.62, 1.28, -0.78), Vector3(0.62, 1.28, 0.35), Vector3(-0.62, 1.28, 0.35),
+		Vector3(-0.79, 0.76, -1.76), Vector3(0.79, 0.76, -1.76), Vector3(0.80, 0.76, -1.06), Vector3(-0.80, 0.76, -1.06),
+		Vector3(-0.72, 0.84, -1.72), Vector3(0.72, 0.84, -1.72), Vector3(0.74, 0.84, -1.06), Vector3(-0.74, 0.84, -1.06),
 	])
-	# Vetri scuri riflettenti laterali + parabrezza
+	# Abitacolo rastremato e vetrato con montanti A, B, C e tetto profilato
+	m.hexa(color_key, [
+		Vector3(-0.76, 0.78, -1.14), Vector3(0.76, 0.78, -1.14), Vector3(0.76, 0.78, 0.74), Vector3(-0.76, 0.78, 0.74),
+		Vector3(-0.62, 1.32, -0.84), Vector3(0.62, 1.32, -0.84), Vector3(0.62, 1.32, 0.36), Vector3(-0.62, 1.32, 0.36),
+	])
 	m.hexa("glass_exterior", [
-		Vector3(-0.75, 0.80, -0.96), Vector3(0.75, 0.80, -0.96), Vector3(0.75, 0.80, 0.66), Vector3(-0.75, 0.80, 0.66),
-		Vector3(-0.635, 1.22, -0.72), Vector3(0.635, 1.22, -0.72), Vector3(0.635, 1.22, 0.32), Vector3(-0.635, 1.22, 0.32),
+		Vector3(-0.77, 0.82, -1.02), Vector3(0.77, 0.82, -1.02), Vector3(0.77, 0.82, 0.68), Vector3(-0.77, 0.82, 0.68),
+		Vector3(-0.635, 1.26, -0.78), Vector3(0.635, 1.26, -0.78), Vector3(0.635, 1.26, 0.33), Vector3(-0.635, 1.26, 0.33),
 	])
-	# Specchietti retrovisori, griglia anteriore, paraurti e fari
-	for sx in [-0.84, 0.84]:
-		m.box(color_key, Vector3(sx, 0.84, 0.42), Vector3(0.14, 0.08, 0.12))
-	m.box("iron", Vector3(0, 0.52, 1.71), Vector3(0.92, 0.22, 0.04))
-	m.box("iron", Vector3(0, 0.32, 1.72), Vector3(1.62, 0.16, 0.12))
-	m.box("iron", Vector3(0, 0.32, -1.72), Vector3(1.62, 0.16, 0.12))
-	m.box("lamp_glow", Vector3(-0.58, 0.56, 1.71), Vector3(0.24, 0.14, 0.04))
-	m.box("lamp_glow", Vector3(0.58, 0.56, 1.71), Vector3(0.24, 0.14, 0.04))
+	# Montante B verticale & barre tetto
+	m.box("iron_dark", Vector3(0, 1.05, -0.14), Vector3(1.43, 0.44, 0.08))
+	for rx in [-0.52, 0.52]:
+		m.box("iron_dark", Vector3(rx, 1.34, -0.24), Vector3(0.04, 0.03, 1.05))
+	# Specchietti su stelo, maniglie porte cromate & fascioni paracolpi
+	for sx in [-0.88, 0.88]:
+		m.box("iron_dark", Vector3(sx - signf(sx) * 0.06, 0.85, 0.44), Vector3(0.10, 0.035, 0.05))
+		m.box(color_key, Vector3(sx, 0.88, 0.43), Vector3(0.14, 0.08, 0.11))
+		m.box("steel", Vector3(sx * 0.96, 0.71, 0.12), Vector3(0.03, 0.03, 0.15))
+		m.box("steel", Vector3(sx * 0.96, 0.71, -0.52), Vector3(0.03, 0.03, 0.15))
+		m.box("iron_dark", Vector3(sx * 0.955, 0.54, 0.0), Vector3(0.03, 0.06, 1.38))
+	# Paraurti anteriore & posteriore + calandra + targhe + fari LED + stop posteriori
+	m.box("iron_dark", Vector3(0, 0.34, 1.77), Vector3(1.64, 0.18, 0.14))
+	m.box("iron_dark", Vector3(0, 0.34, -1.77), Vector3(1.64, 0.18, 0.14))
+	m.box("iron_dark", Vector3(0, 0.56, 1.77), Vector3(0.86, 0.18, 0.04))
+	m.box("steel", Vector3(0, 0.57, 1.79), Vector3(0.76, 0.03, 0.02))
+	m.box("white", Vector3(0, 0.37, 1.845), Vector3(0.42, 0.09, 0.02))
+	m.box("white", Vector3(0, 0.44, -1.845), Vector3(0.42, 0.09, 0.02))
+	for fx in [-0.58, 0.58]:
+		m.box("lamp_glow", Vector3(fx, 0.60, 1.77), Vector3(0.26, 0.12, 0.04))
+		m.box("awning_yellow", Vector3(fx + signf(fx) * 0.14, 0.60, 1.765), Vector3(0.07, 0.11, 0.045))
+		m.box("fabric_red", Vector3(fx, 0.64, -1.77), Vector3(0.28, 0.12, 0.04))
+		m.box("awning_yellow", Vector3(fx + signf(fx) * 0.12, 0.58, -1.775), Vector3(0.10, 0.06, 0.042))
 	_merge_transformed(sm, m, pos, rot)
 
 static func add_car(sm: StyleMesh, pos: Vector3, rot: float = 0.0, color_key: String = "car_red") -> void:
@@ -1165,11 +1224,22 @@ static func _add_ogr_desk_island(m: StyleMesh, center: Vector3, w: float, d: flo
 	m.box("wood_plank", center + Vector3(0, 0.76, 0), Vector3(w, 0.065, d), {"col": true})
 	for px in [-w * 0.28, w * 0.28]:
 		for pz in [-0.36, 0.36]:
-			var face_sign := signf(pz)
-			m.box("gaming_black", center + Vector3(px, 1.02, pz * 0.38), Vector3(0.52, 0.32, 0.035))
-			m.box("glass_cool", center + Vector3(px, 1.02, pz * 0.45), Vector3(0.46, 0.27, 0.02))
+			var face_sign := signf(float(pz))
+			# Monitor più vicino su piedistallo + schermo luminoso
+			var mz: float = float(pz) * 0.46
+			m.box("iron", center + Vector3(px, 0.80, mz), Vector3(0.18, 0.02, 0.14))
+			m.box("iron", center + Vector3(px, 0.90, mz - face_sign * 0.02), Vector3(0.04, 0.18, 0.04))
+			m.box("gaming_black", center + Vector3(px, 1.05, mz), Vector3(0.54, 0.34, 0.035))
+			m.box("glass_cool", center + Vector3(px, 1.05, mz + face_sign * 0.02), Vector3(0.48, 0.28, 0.02))
+			# Tastiera meccanica + tasti chiari + tappetino & mouse davanti alla seduta
+			var kz: float = float(pz) + face_sign * 0.18
+			m.box("iron_dark", center + Vector3(px - 0.04, 0.803, kz), Vector3(0.38, 0.018, 0.135))
+			m.box("steel", center + Vector3(px - 0.04, 0.815, kz), Vector3(0.35, 0.008, 0.105))
+			m.box("gaming_black", center + Vector3(px + 0.24, 0.796, kz), Vector3(0.18, 0.005, 0.20))
+			m.box("steel", center + Vector3(px + 0.24, 0.808, kz + face_sign * 0.01), Vector3(0.055, 0.022, 0.09))
+			m.cyl("ogr_orange", center + Vector3(px - 0.32, 0.793, kz - face_sign * 0.05), 0.035, 0.035, 0.075, 10)
 			# Sedia girevole con schienale arancione OGR
-			var cz: float = pz + face_sign * 0.76
+			var cz: float = pz + face_sign * 0.70
 			m.cyl("iron", center + Vector3(px, 0.0, cz), 0.26, 0.04, 0.14, 5)
 			m.cyl("iron", center + Vector3(px, 0.14, cz), 0.032, 0.032, 0.32, 8)
 			m.box("gaming_black", center + Vector3(px, 0.47, cz), Vector3(0.44, 0.06, 0.44), {"col": true})
@@ -1439,32 +1509,36 @@ static func add_minecart_body(sm: StyleMesh, ore_mat: String = "ore_copper") -> 
 
 static func add_ore_vein_outcrop(sm: StyleMesh, pos: Vector3, ore_mat: String = "ore_copper", rot: float = 0.0) -> void:
 	var m := StyleMesh.new()
-	# Massiccio roccioso di cava con filoni cristallini incastonati e piccone appoggiato
-	m.blob("quarry_rock", Vector3(0, 0.45, 0), Vector3(1.15, 0.56, 0.95), 5, 9, 0.24, 31)
-	m.blob("quarry_rock", Vector3(-0.58, 0.68, -0.18), Vector3(0.68, 0.66, 0.62), 4, 8, 0.22, 41)
-	m.blob("quarry_rock", Vector3(0.62, 0.34, 0.26), Vector3(0.54, 0.38, 0.48), 4, 7, 0.22, 53)
-	m.add_collider_box(Vector3(0, 0.60, 0), Vector3(2.05, 1.20, 1.65))
+	# Massiccio roccioso di cava stratificato con venature minerali angolari (niente capsule arrotondate né coperchi gialli!)
+	m.blob("quarry_rock", Vector3(0, 0.42, 0), Vector3(1.18, 0.50, 0.96), 5, 9, 0.25, 31)
+	m.blob("quarry_slate", Vector3(-0.56, 0.62, -0.18), Vector3(0.70, 0.58, 0.62), 4, 8, 0.24, 41)
+	m.blob("quarry_slate", Vector3(0.58, 0.34, 0.26), Vector3(0.56, 0.36, 0.50), 4, 7, 0.24, 53)
+	m.add_collider_box(Vector3(0, 0.58, 0), Vector3(2.10, 1.18, 1.70))
 
-	# Cristalli di minerale grezzo emergenti dalla matrice rocciosa
-	var crystals := [
-		[Vector3(-0.32, 0.92, 0.08), 0.14, 0.05, 0.58, Vector3(0.24, 0.2, 0.30)],
-		[Vector3(0.05, 0.96, -0.10), 0.16, 0.04, 0.72, Vector3(-0.18, 0.5, -0.22)],
-		[Vector3(0.36, 0.78, 0.18), 0.13, 0.04, 0.52, Vector3(0.32, -0.3, -0.18)],
-		[Vector3(-0.08, 0.72, 0.42), 0.11, 0.04, 0.44, Vector3(0.45, 0.1, 0.12)],
+	# Cristalli sfaccettati a prisma esagonale che emergono dalle spaccature della roccia
+	var seams := [
+		[Vector3(-0.24, 0.72, 0.24), Vector3(-0.46, 1.06, 0.42), 0.095],
+		[Vector3(-0.02, 0.78, 0.06), Vector3(-0.08, 1.24, 0.22), 0.115],
+		[Vector3(0.22, 0.70, 0.28), Vector3(0.42, 1.04, 0.46), 0.090],
+		[Vector3(0.08, 0.62, -0.22), Vector3(0.26, 0.98, -0.34), 0.085],
+		[Vector3(-0.34, 0.66, -0.14), Vector3(-0.54, 0.96, -0.28), 0.080],
 	]
-	for cr in crystals:
-		var cp: Vector3 = cr[0]
-		var tilt: Vector3 = cr[4]
-		m.capsule_seg(ore_mat, cp - Vector3(0, 0.18, 0), cp + Vector3(tilt.z * 0.4, float(cr[3]), tilt.x * 0.4), float(cr[1]), float(cr[2]), 6)
+	for cr in seams:
+		var p0: Vector3 = cr[0]
+		var p1: Vector3 = cr[1]
+		var r0: float = float(cr[2])
+		var mid := p0.lerp(p1, 0.68)
+		m.tube_path(ore_mat, [p0, mid, p1], [r0, r0 * 0.84, 0.008], 5, false)
+	# Venatura metallica incastonata nella fronte rocciosa
+	m.box(ore_mat, Vector3(0.05, 0.56, 0.42), Vector3(0.68, 0.14, 0.48), {"rot": 0.38})
 
-	# Cassetta attrezzature + faretto da lavoro giallo accanto al filone
-	m.box("mine_timber", Vector3(-1.12, 0.22, 0.52), Vector3(0.56, 0.40, 0.40), {"col": true})
-	m.box("safety_yellow", Vector3(-1.12, 0.43, 0.52), Vector3(0.58, 0.04, 0.42))
-	m.capsule_seg("wood_mid", Vector3(1.05, 0.04, 0.55), Vector3(0.78, 0.94, 0.28), 0.025, 0.025, 6)
-	m.box("rail_steel", Vector3(0.78, 0.92, 0.28), Vector3(0.42, 0.07, 0.07), {"rot": 0.4})
-	m.cyl("iron_dark", Vector3(1.18, 0.0, -0.45), 0.26, 0.05, 1.32, 6)
-	m.box("safety_yellow", Vector3(1.18, 1.34, -0.45), Vector3(0.26, 0.20, 0.20), {"rot": -0.5})
-	m.box("lamp_glow", Vector3(1.10, 1.34, -0.37), Vector3(0.20, 0.16, 0.05), {"rot": -0.5})
+	# Cassetta mineraria in legno scuro con rinforzi in ferro + cavalletto faro alogeno
+	m.box("mine_timber", Vector3(-1.14, 0.22, 0.52), Vector3(0.56, 0.38, 0.40), {"col": true})
+	m.box("iron_dark", Vector3(-1.14, 0.42, 0.52), Vector3(0.58, 0.035, 0.42))
+	m.box("iron_dark", Vector3(-1.14, 0.22, 0.725), Vector3(0.58, 0.05, 0.02))
+	m.cyl("iron_dark", Vector3(1.18, 0.0, -0.45), 0.22, 0.045, 1.28, 6)
+	m.box("iron_dark", Vector3(1.18, 1.30, -0.45), Vector3(0.24, 0.18, 0.18), {"rot": -0.5})
+	m.box("lamp_glow", Vector3(1.11, 1.30, -0.38), Vector3(0.18, 0.14, 0.04), {"rot": -0.5})
 	_merge_transformed(sm, m, pos, rot)
 
 static func add_ore_refinery_static(sm: StyleMesh, pos: Vector3, rot: float = 0.0) -> void:
@@ -1613,6 +1687,163 @@ static func add_spark_particles(parent: Node3D, node_name: String, pos: Vector3,
 	p.mesh = qm
 	parent.add_child(p)
 	return p
+
+static func add_pickaxe_mesh() -> ArrayMesh:
+	var m := StyleMesh.new()
+	# Piccone da cava con manico in legno e testa curva in acciaio temperato (pivot al manico base)
+	m.capsule_seg("wood_mid", Vector3(0, 0.0, 0), Vector3(0, 0.72, 0), 0.022, 0.024, 8)
+	m.box("iron_dark", Vector3(0, 0.68, 0), Vector3(0.08, 0.08, 0.09))
+	m.capsule_seg("rail_steel", Vector3(0, 0.68, 0.03), Vector3(0, 0.61, 0.30), 0.032, 0.008, 6)
+	m.capsule_seg("rail_steel", Vector3(0, 0.68, -0.03), Vector3(0, 0.63, -0.24), 0.032, 0.024, 6)
+	return m.to_mesh(Callable(VillageMaterials, "mat"))
+
+static func add_fountain_particles(parent: Node3D, node_name: String, pos: Vector3, is_pond: bool = false) -> CPUParticles3D:
+	var p := CPUParticles3D.new()
+	p.name = node_name
+	p.position = pos
+	p.amount = 34 if not is_pond else 22
+	p.lifetime = 0.85
+	p.preprocess = 0.8
+	p.randomness = 0.35
+	p.emitting = true
+	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
+	p.emission_sphere_radius = 0.07 if not is_pond else 0.12
+	p.direction = Vector3(0.0, 1.0, 0.0)
+	p.spread = 22.0 if not is_pond else 28.0
+	p.gravity = Vector3(0.0, -7.8, 0.0)
+	p.initial_velocity_min = 2.1 if not is_pond else 1.7
+	p.initial_velocity_max = 3.1 if not is_pond else 2.5
+	p.scale_amount_min = 0.45
+	p.scale_amount_max = 0.95
+
+	var grad := Gradient.new()
+	grad.set_color(0, Color(0.82, 0.95, 1.0, 0.85))
+	grad.add_point(0.6, Color(0.68, 0.90, 0.98, 0.65))
+	grad.set_color(1, Color(0.90, 0.98, 1.0, 0.0))
+	p.color_ramp = grad
+
+	var mat := StandardMaterial3D.new()
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	mat.vertex_color_use_as_albedo = true
+	mat.albedo_color = Color(0.88, 0.96, 1.0, 0.85)
+	mat.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_DISABLED
+	var qm := QuadMesh.new()
+	qm.size = Vector2(0.085, 0.085)
+	qm.material = mat
+	p.mesh = qm
+	parent.add_child(p)
+	return p
+
+static func add_torrefazione_interior(sm: StyleMesh) -> void:
+	# Macchina espresso a doppia leva + macinacaffè + mensola barattoli di miscele
+	sm.box("steel", Vector3(1.15, 1.18, -1.04), Vector3(0.62, 0.44, 0.42))
+	sm.box("brass", Vector3(1.15, 1.38, -0.88), Vector3(0.56, 0.08, 0.14))
+	sm.box("iron_dark", Vector3(0.45, 1.10, -1.06), Vector3(0.24, 0.28, 0.24))
+	sm.cyl("copper", Vector3(0.45, 1.32, -1.06), 0.12, 0.08, 0.24, 10)
+	# Tostatrice storica in rame & ghisa sulla sinistra del locale
+	sm.box("iron_dark", Vector3(-2.35, 0.46, 0.65), Vector3(0.95, 0.92, 1.25), {"col": true})
+	_merge_rotated_x_cyl(sm, Vector3(-2.35, 1.12, 0.65), 0.34, 0.78, 14, "copper", "brass")
+	sm.cyl("copper", Vector3(-2.35, 1.48, 0.65), 0.28, 0.08, 0.38, 12)
+	sm.cyl("iron_dark", Vector3(-2.35, 1.46, 0.25), 0.09, 0.09, 1.85, 10)
+	# Sacchi di juta di caffè verde crudo + mensole con latte torrefazione oro & rosse
+	sm.lathe_oval("burlap", Vector3(2.35, 0.04, -1.25), [
+		Vector2(0.24, 0.0), Vector2(0.27, 0.18), Vector2(0.23, 0.40), Vector2(0.16, 0.52)
+	], 1.0, 0.95, 12)
+	sm.box("wood_dark", Vector3(1.75, 1.42, -2.52), Vector3(1.55, 0.08, 0.34))
+	sm.box("wood_dark", Vector3(-1.75, 1.42, -2.52), Vector3(1.55, 0.08, 0.34))
+	for sx in [-2.15, -1.75, -1.35, 1.35, 1.75, 2.15]:
+		var tmat := "tin_gold" if absf(sx) > 1.5 else "tin_red"
+		sm.cyl(tmat, Vector3(sx, 1.47, -2.52), 0.09, 0.09, 0.22, 10)
+		sm.cyl("brass", Vector3(sx, 1.69, -2.52), 0.095, 0.095, 0.03, 10)
+	# Lavagna menu storiche torrefazioni torinesi sul fondo
+	sm.box("wood_dark", Vector3(0.0, 2.05, -2.62), Vector3(2.2, 0.92, 0.06))
+	sm.box("iron", Vector3(0.0, 2.05, -2.58), Vector3(1.96, 0.74, 0.03))
+
+static func add_bicycle_mesh(sm: StyleMesh, pos: Vector3, rot: float = 0.0) -> void:
+	var m := StyleMesh.new()
+	var wr := 0.33
+	# Ruote ant. (+Z) e post. (-Z) a contatto suolo esatto Y=0.0
+	_merge_rotated_x_cyl(m, Vector3(0, wr, -0.54), wr, 0.06, 18, "tire", "steel")
+	_merge_rotated_x_cyl(m, Vector3(0, wr, 0.54), wr, 0.06, 18, "tire", "steel")
+	# Telaio e-bike in lega ciano/antracite + batteria integrata sul tubo obliquo
+	m.capsule_seg("cyan_accent", Vector3(0, wr, -0.54), Vector3(0, 0.84, -0.18), 0.022, 0.024, 8)
+	m.capsule_seg("cyan_accent", Vector3(0, 0.36, -0.08), Vector3(0, 0.86, -0.20), 0.026, 0.024, 8)
+	m.capsule_seg("cyan_accent", Vector3(0, 0.36, -0.08), Vector3(0, wr, -0.54), 0.018, 0.016, 8)
+	m.capsule_seg("iron_dark", Vector3(0, 0.38, -0.06), Vector3(0, 0.84, 0.32), 0.036, 0.034, 8)
+	m.capsule_seg("cyan_accent", Vector3(0, 0.82, -0.19), Vector3(0, 0.85, 0.31), 0.022, 0.024, 8)
+	# Forcella anteriore & cannotto sterzo
+	m.capsule_seg("iron_dark", Vector3(-0.045, wr, 0.54), Vector3(0, 0.88, 0.31), 0.016, 0.020, 8)
+	m.capsule_seg("iron_dark", Vector3(0.045, wr, 0.54), Vector3(0, 0.88, 0.31), 0.016, 0.020, 8)
+	m.capsule_seg("steel", Vector3(0, 0.86, 0.31), Vector3(0, 1.04, 0.25), 0.020, 0.018, 8)
+	# Manubrio ricurvo, manopole, display LED centrale e faro anteriore
+	m.capsule_seg("steel", Vector3(-0.27, 1.05, 0.19), Vector3(0.0, 1.06, 0.26), 0.016, 0.018, 8)
+	m.capsule_seg("steel", Vector3(0.27, 1.05, 0.19), Vector3(0.0, 1.06, 0.26), 0.016, 0.018, 8)
+	m.box("iron_dark", Vector3(-0.25, 1.05, 0.19), Vector3(0.11, 0.036, 0.036), {"rot": -0.25})
+	m.box("iron_dark", Vector3(0.25, 1.05, 0.19), Vector3(0.11, 0.036, 0.036), {"rot": 0.25})
+	m.box("cyan_accent", Vector3(0, 1.09, 0.27), Vector3(0.10, 0.035, 0.06))
+	m.box("lamp_glow", Vector3(0, 0.78, 0.42), Vector3(0.06, 0.06, 0.06))
+	# Sella ergonomica, guarnitura/pedali, cavalletto & fanalino rosso
+	m.box("iron_dark", Vector3(0, 0.90, -0.21), Vector3(0.15, 0.055, 0.25))
+	m.cyl("iron_dark", Vector3(0, 0.36, -0.08), 0.09, 0.09, 0.04, 12)
+	m.capsule_seg("iron_dark", Vector3(-0.08, 0.30, -0.14), Vector3(-0.18, 0.02, -0.22), 0.014, 0.012, 6)
+	m.box("fabric_red", Vector3(0, 0.66, -0.70), Vector3(0.06, 0.05, 0.05))
+	_merge_transformed(sm, m, pos, rot)
+
+static func add_bicycle_cockpit(parent: Node3D) -> Node3D:
+	# Cockpit in prima persona montato davanti al giocatore durante la guida (verso -Z)
+	var root := Node3D.new()
+	root.name = "BikeCockpit"
+	root.visible = false
+	parent.add_child(root)
+
+	var frame_sm := StyleMesh.new()
+	frame_sm.capsule_seg("cyan_accent", Vector3(0, 0.68, 0.02), Vector3(0, 0.96, -0.38), 0.025, 0.025, 8)
+	frame_sm.capsule_seg("iron_dark", Vector3(0, 0.50, -0.02), Vector3(0, 0.92, -0.38), 0.038, 0.034, 8)
+	var frame_mi := MeshInstance3D.new()
+	frame_mi.name = "FrameStub"
+	frame_mi.mesh = frame_sm.to_mesh(Callable(VillageMaterials, "mat"))
+	frame_mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	root.add_child(frame_mi)
+
+	var steer_pivot := Node3D.new()
+	steer_pivot.name = "HandlebarPivot"
+	steer_pivot.position = Vector3(0.0, 1.06, -0.42)
+	root.add_child(steer_pivot)
+
+	var hsm := StyleMesh.new()
+	hsm.capsule_seg("steel", Vector3(0, -0.14, 0.02), Vector3(0, 0.14, 0.0), 0.020, 0.020, 8)
+	hsm.capsule_seg("steel", Vector3(-0.30, 0.14, 0.05), Vector3(0.0, 0.15, -0.02), 0.016, 0.018, 8)
+	hsm.capsule_seg("steel", Vector3(0.30, 0.14, 0.05), Vector3(0.0, 0.15, -0.02), 0.016, 0.018, 8)
+	hsm.box("iron_dark", Vector3(-0.27, 0.14, 0.045), Vector3(0.13, 0.038, 0.038), {"rot": 0.20})
+	hsm.box("iron_dark", Vector3(0.27, 0.14, 0.045), Vector3(0.13, 0.038, 0.038), {"rot": -0.20})
+	hsm.box("steel", Vector3(-0.22, 0.125, -0.01), Vector3(0.10, 0.014, 0.024), {"rot": 0.15})
+	hsm.box("steel", Vector3(0.22, 0.125, -0.01), Vector3(0.10, 0.014, 0.024), {"rot": -0.15})
+	# Display LCD e-bike centrale & faro anteriore + bracci forcella
+	hsm.box("iron_dark", Vector3(0, 0.175, -0.01), Vector3(0.11, 0.025, 0.07))
+	hsm.box("cyan_accent", Vector3(0, 0.190, -0.01), Vector3(0.085, 0.008, 0.045))
+	hsm.box("lamp_glow", Vector3(0, -0.12, -0.08), Vector3(0.06, 0.06, 0.05))
+	hsm.capsule_seg("iron_dark", Vector3(-0.05, -0.10, 0.0), Vector3(-0.05, -0.58, -0.18), 0.016, 0.014, 8)
+	hsm.capsule_seg("iron_dark", Vector3(0.05, -0.10, 0.0), Vector3(0.05, -0.58, -0.18), 0.016, 0.014, 8)
+	var hmi := MeshInstance3D.new()
+	hmi.name = "HandlebarMesh"
+	hmi.mesh = hsm.to_mesh(Callable(VillageMaterials, "mat"))
+	hmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	steer_pivot.add_child(hmi)
+
+	var fw_pivot := Node3D.new()
+	fw_pivot.name = "FrontWheelPivot"
+	fw_pivot.position = Vector3(0.0, -0.58, -0.18)
+	steer_pivot.add_child(fw_pivot)
+	var wmi := MeshInstance3D.new()
+	wmi.name = "FrontWheelMesh"
+	wmi.mesh = add_car_wheel_mesh("tire", "steel", 0.33, 0.06)
+	wmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	fw_pivot.add_child(wmi)
+
+	return root
 
 # ------------------------------------------------------------------ Helper transform merge
 static func _merge_transformed(dst: StyleMesh, src: StyleMesh, pos: Vector3, rot: float) -> void:

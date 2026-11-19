@@ -74,6 +74,16 @@ const SHOPS: Dictionary = {
 			{"id": "gadget_scarpe_pro", "name": "Sneakers Tech Antiscivolo (+18% Velocità)", "price": 45.00, "is_gadget": true, "desc": "Dotazione da campo: +18% velocità di camminata e scatto nel borgo."},
 			{"id": "gadget_scanner_wifi", "name": "Analizzatore Spettro Wi-Fi 6", "price": 65.00, "is_gadget": true, "desc": "Strumento pro: -0.6s build WebForge, +10% premi NetShield & +1 Rep ai rilievi."}
 		]
+	},
+	"torrefazione": {
+		"title": "Torrefazione Po · Storica",
+		"subtitle": "Tostatura artigianale torinese dal 1924 sul Lungo Po",
+		"items": [
+			{"id": "torrefazione_espresso", "name": "Espresso Tostatura Sabauda", "price": 1.40, "hunger": 0.0, "energy": 30.0},
+			{"id": "torrefazione_cappuccino", "name": "Cappuccino & Gianduja", "price": 2.40, "hunger": 12.0, "energy": 34.0},
+			{"id": "torrefazione_coldbrew", "name": "Cold Brew da Viaggio (Zaino)", "price": 4.20, "hunger": 5.0, "energy": 44.0, "portable": true},
+			{"id": "torrefazione_biscotti", "name": "Biscotti Artigianali al Caffè", "price": 2.80, "hunger": 22.0, "energy": 14.0, "portable": true}
+		]
 	}
 }
 
@@ -114,6 +124,7 @@ const SHOP_HOURS: Dictionary = {
 	"panificio": {"open": 6, "close": 20},
 	"alimentari": {"open": 7, "close": 21},
 	"edicola": {"open": 6, "close": 21},
+	"torrefazione": {"open": 6, "close": 20},
 	"elettronica_componenti": {"open": 8, "close": 21},
 	"fridge": {"open": 0, "close": 24}
 }

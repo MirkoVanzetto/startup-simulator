@@ -275,7 +275,7 @@ func test_officina_clearance_and_character_anatomy() -> void:
 			shared_fabric_tex.noise.frequency if (shared_fabric_tex and shared_fabric_tex.noise) else -1.0
 		])
 
-	var standing_npcs: Array[String] = ["MarioNPC", "BrunoNPC", "RosaNPC", "ElenaNPC", "DavideNPC", "SabrinaNPC", "BelliniNPC", "AndreaVialeNPC"]
+	var standing_npcs: Array[String] = ["MarioNPC", "BrunoNPC", "RosaNPC", "ElenaNPC", "DavideNPC", "SabrinaNPC", "BelliniNPC", "AndreaVialeNPC", "FerreroNPC", "ChiaraNPC"]
 	for nname in standing_npcs:
 		var npc: Node = world.find_child(nname, true, false)
 		var model: Node = npc.get_node_or_null("Model") if npc else null
@@ -486,7 +486,7 @@ func test_ogr_gate_corridors_and_enterprise() -> void:
 func test_world_map_zoom_pan_and_resize() -> void:
 	print("\n[Suite 5] WorldMap Zoom, Pan Clamp, District Selection & Viewport Resize Fix")
 	GameManager.start_new_game()
-	check(MapData.get_pois().size() == 19, "WorldMapData defines all 19 POIs incl. OGR Tech Hub & Borgo Po")
+	check(MapData.get_pois().size() == 20, "WorldMapData defines all 20 POIs incl. Miniera Alpina, OGR Tech Hub & Borgo Po")
 
 	var vp := SubViewport.new()
 	vp.size = Vector2i(1280, 720)
@@ -505,10 +505,13 @@ func test_world_map_zoom_pan_and_resize() -> void:
 		var btn: Button = wmap._view_buttons[k] as Button
 		if btn.focus_mode != Control.FOCUS_NONE:
 			all_focus_none = false
-	check(all_focus_none and wmap._view_buttons.has("borgopo") and wmap._zoom_in_btn.focus_mode == Control.FOCUS_NONE and wmap._close_btn.focus_mode == Control.FOCUS_NONE,
-		"All 6 WorldMap filter tabs (incl. 'borgopo') & toolbar buttons use FOCUS_NONE")
+	check(all_focus_none and wmap._view_buttons.has("miniera") and wmap._view_buttons.has("borgopo") and wmap._zoom_in_btn.focus_mode == Control.FOCUS_NONE and wmap._close_btn.focus_mode == Control.FOCUS_NONE,
+		"All 7 WorldMap filter tabs (incl. 'miniera' & 'borgopo') & toolbar buttons use FOCUS_NONE")
 
-	# Seleziona distretti (Borgo Po + Mercato OGR) prima e dopo il resize
+	# Seleziona distretti (Miniera Alpina + Borgo Po + Mercato OGR) prima e dopo il resize
+	wmap._set_view("miniera")
+	wmap.select_poi("miniera_alpina")
+	check(wmap.selected_poi_id == "miniera_alpina", "Miniera Alpina view & 'miniera_alpina' POI selectable cleanly")
 	wmap._set_view("borgopo")
 	wmap.select_poi("molo_po")
 	check(wmap.selected_poi_id == "molo_po", "Borgo Po view & 'molo_po' POI selectable cleanly")

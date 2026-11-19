@@ -8,6 +8,7 @@ func _ready() -> void:
 
 func _on_interact(_player: Node) -> void:
 	# Notorietà: la prima chiacchierata con un cliente dà +1 reputazione
+	VillageCharacters.play_interact(self)
 	FameManager.register_talk("davide")
 	var c = ContractManager.get_contract("elettronica_to")
 	var status = c.get("status", "locked")

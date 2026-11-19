@@ -32,6 +32,8 @@ func _ready() -> void:
 
 func set_view_bounds(view_id: String, preserve_zoom: bool = false) -> void:
 	match view_id:
+		"miniera":
+			_view_bounds = MapData.MINIERA_BOUNDS
 		"sancarlo":
 			_view_bounds = MapData.SAN_CARLO_BOUNDS
 		"parco":
@@ -219,6 +221,18 @@ func _draw() -> void:
 		draw_rect(r, Color(0.11, 0.21, 0.15, 0.92), true)
 		draw_rect(r, Color(0.18, 0.34, 0.23, 0.9), false, 1.5)
 
+	# 1b. Quarry yard & Gravel paths (Miniera Alpina + Parco)
+	if geo.has("quarry"):
+		for qr in geo["quarry"]:
+			var qrect := world_rect_to_canvas(qr)
+			draw_rect(qrect, Color(0.28, 0.24, 0.19, 0.95), true)
+			draw_rect(qrect, Color(0.68, 0.56, 0.34, 0.90), false, 1.6)
+	if geo.has("gravel"):
+		for gv in geo["gravel"]:
+			var gvr := world_rect_to_canvas(gv)
+			draw_rect(gvr, Color(0.40, 0.37, 0.32, 0.92), true)
+			draw_rect(gvr, Color(0.56, 0.52, 0.45, 0.72), false, 1.0)
+
 	# 2. Cobblestones & plazas
 	for cb in geo["cobble"]:
 		var cr := world_rect_to_canvas(cb)
@@ -260,17 +274,28 @@ func _draw() -> void:
 		var b_s := world_to_canvas(Vector2(float(rx_s) + 1.9, 58.0))
 		draw_line(a_s, b_s, Color(0.95, 0.88, 0.55, 0.65), maxf(1.5, 0.22 * sc))
 
-	# 4. Houses (residential context blocks)
+	# 3b. Mine Cart Rail Track (Galleria 01)
+	if geo.has("rails"):
+		for rseg in geo["rails"]:
+			var ra := world_to_canvas(rseg[0])
+			var rb := world_to_canvas(rseg[1])
+			draw_line(ra, rb, Color(0.84, 0.88, 0.94, 0.92), maxf(2.0, 0.55 * sc))
+			draw_dashed_line(ra, rb, Color(0.36, 0.24, 0.14, 0.95), maxf(3.0, 0.95 * sc), maxf(3.0, 0.55 * sc))
+
+	# 4. Houses (residential & quarry buildings)
 	for hr in geo["houses"]:
 		var r := world_rect_to_canvas(hr)
 		draw_rect(r, Color(0.18, 0.22, 0.30, 0.95), true)
 		draw_rect(r, Color(0.30, 0.36, 0.46, 0.85), false, 1.2)
 
-	# 5. Perimeter walls
+	# 5. Perimeter walls & Parco->Miniera Archway indicator
 	for wseg in geo["walls"]:
 		var p1 := world_to_canvas(wseg[0])
 		var p2 := world_to_canvas(wseg[1])
 		draw_line(p1, p2, Color(0.48, 0.54, 0.64, 0.9), maxf(2.0, 0.4 * sc))
+	var mg_a := world_to_canvas(Vector2(-44.5, 12.0))
+	var mg_b := world_to_canvas(Vector2(-38.5, 12.0))
+	draw_line(mg_a, mg_b, Color(0.98, 0.80, 0.30, 0.95), maxf(2.2, 0.42 * sc))
 
 	# 5b. OGR Bay 01 vs Closed Pods floor detail + Gate line
 	var bay1 := world_rect_to_canvas(Rect2(Vector2(99.5, 9.0), Vector2(6.3, 5.5)))
@@ -297,6 +322,7 @@ func _draw() -> void:
 		draw_arc(cpos, cr + 2.0, 0.0, TAU, 24, Color(0.60, 0.88, 1.0, 0.7), 1.2)
 
 	# 7. District Watermarks
+	_draw_label_centered(font, world_to_canvas(Vector2(-47.0, -43.5)), "MINIERA ALPINA · VAL DI SUSA", 11, Color(1.0, 0.84, 0.45, 0.88))
 	_draw_label_centered(font, world_to_canvas(Vector2(-40.0, 44.0)), "PARCO VALENTINO", 11, Color(0.55, 0.90, 0.65, 0.75))
 	_draw_label_centered(font, world_to_canvas(Vector2(-1.0, -11.4)), "BORGO SAN CARLO", 12, Color(0.65, 0.78, 0.88, 0.72))
 	_draw_label_centered(font, world_to_canvas(Vector2(43.0, 20.8)), "VIALE EST", 11, Color(0.75, 0.78, 0.84, 0.6))
@@ -336,7 +362,8 @@ func _draw() -> void:
 		var bw := maxf(10.0, fp.x * sc)
 		var bh := maxf(10.0, fp.y * sc)
 		var brect := Rect2(c - Vector2(bw, bh) * 0.5, Vector2(bw, bh))
-		draw_rect(brect, Color(col.r, col.g, col.b, 0.30 if pid == "coworking_ogr" else 0.35), true)
+		var fill_alpha := 0.22 if pid == "miniera_alpina" else (0.30 if pid == "coworking_ogr" else 0.35)
+		draw_rect(brect, Color(col.r, col.g, col.b, fill_alpha), true)
 		draw_rect(brect, col, false, 2.0 if (pid == selected_poi_id or pid == hovered_poi_id) else 1.3)
 
 		var dot_r := 6.5 if (pid == selected_poi_id or pid == hovered_poi_id) else 5.0

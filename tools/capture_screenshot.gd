@@ -35,6 +35,13 @@ func _look_at_flat(from_pos: Vector3, target_pos: Vector3, pitch_deg: float = -6
 func _process(_delta: float) -> void:
 	frame_count += 1
 
+	if "--v16-only" in OS.get_cmdline_user_args():
+		_process_v16_only()
+		return
+	if "--v16-part2" in OS.get_cmdline_user_args():
+		_process_v16_part2()
+		return
+
 	if frame_count == 4:
 		var menu = get_tree().root.find_child("MainMenu", true, false)
 		if menu:
@@ -206,11 +213,10 @@ func _process(_delta: float) -> void:
 		if wmap:
 			wmap.open_map()
 			wmap._set_view("all")
-			wmap.select_poi("coworking_ogr")
-			wmap.zoom_in()
+			wmap.select_poi("miniera_alpina")
 
 	if frame_count == 157:
-		_cap("startup_simulator_world_map.png", "World Map Zoomed on OGR & 19 POIs (incl. Borgo Po)")
+		_cap("startup_simulator_world_map.png", "World Map All 20 POIs (Miniera Alpina, Parco, San Carlo, Valdocco, OGR, Borgo Po)")
 		var wmap = get_tree().root.find_child("WorldMapMenu", true, false)
 		if wmap:
 			wmap.close_map()
@@ -299,4 +305,237 @@ func _process(_delta: float) -> void:
 
 	if frame_count == 223:
 		_cap("startup_simulator_firewall.png", "NetShield Firewall Router")
+		# Chiude tutte le UI modali ed entra in gameplay per catturare pedoni, Miniera Alpina & Drone in volo!
+		for ui_name in ["FirewallRouter", "WebForge", "ComputerScreen", "ShopMenu", "InventoryMenu", "WorldMapMenu", "DialogueOverlay"]:
+			var unode = get_tree().root.find_child(ui_name, true, false)
+			if unode:
+				unode.visible = false
+		GameManager.change_state(GameManager.GameState.FIRST_PERSON)
+		# Popola TechOps (Robot MK1/MK2, Nastro Trasportatore & TO-Drone MK1 in volo attivo!)
+		EconomyManager.balance = 40000.0
+		TechOpsManager.start_ogr_tech_mission()
+		TechOpsManager.add_research_credits(250, "Visual QA")
+		for m in TechOpsManager.MATERIAL_ORDER:
+			TechOpsManager.materials_storage[m] = 35
+		TechOpsManager.research_branch("tech_automation")
+		TechOpsManager.research_branch("tech_automation")
+		TechOpsManager.research_branch("tech_automation")
+		TechOpsManager.research_branch("tech_drone_avionics")
+		TechOpsManager.research_branch("tech_drone_avionics")
+		TechOpsManager.build_mining_robot(1)
+		TechOpsManager.build_mining_robot(2)
+		TechOpsManager.unlock_conveyor()
+		for _step in range(7):
+			TechOpsManager.install_next_drone_step()
+		TechOpsManager.start_drone_mission("drone_lidar_survey")
+		# Avanza leggermente animazioni città e macchinari
+		var city_life = get_tree().root.find_child("CityLifeManager", true, false)
+		var yard = get_tree().root.find_child("OGRTechOpsYard", true, false)
+		for _k in range(12):
+			if city_life:
+				city_life._process(0.12)
+			if yard:
+				yard._process(0.12)
+		# Inquadra pedone in Piazza San Carlo (camminata reale su suolo Y=0)
+		var ped = get_tree().root.find_child("Pedestrian_Piazza_2", true, false) as Node3D
+		if ped:
+			var ppos: Vector3 = ped.global_position
+			_look_at_flat(ppos + Vector3(3.6, 0.25, 3.6), ppos + Vector3(0.0, 1.05, 0.0), -6.0)
+		else:
+			_look_at_flat(Vector3(-3.5, 0.25, 22.0), Vector3(-7.5, 1.0, 18.0), -6.0)
+
+	if frame_count == 234:
+		_cap("startup_simulator_pedestrians_walk.png", "Walking Pedestrians (MakeHuman Walk Cycle & Grounded)")
+		if player:
+			player.set_physics_process(false)
+		# Vista panoramica elevata da Parco Valentino verso l'arco Nord e tutta la Miniera Alpina con le Alpi
+		_look_at_flat(Vector3(-41.5, 5.2, 18.5), Vector3(-46.0, 1.8, -26.0), -11.0)
+
+	if frame_count == 242:
+		_cap("startup_simulator_mine_overview.png", "Parco Archway & Miniera Alpina Val di Susa Overview")
+		# Galleria Estrattiva 01, carrello minerario sui binari, gru di cava e filoni cristallini
+		_look_at_flat(Vector3(-42.2, 0.35, -23.0), Vector3(-46.5, 1.5, -36.5), -3.5)
+
+	if frame_count == 250:
+		_cap("startup_simulator_mine_tunnel_veins.png", "Miniera Alpina Galleria 01, MineCart, QuarryCrane & Veins")
+		# Zona operativa: FerreroNPC in caschetto, Mining Robot MK1/MK2, Nastro Trasportatore & Raffineria con camino fumante
+		_look_at_flat(Vector3(-48.5, 0.55, -10.5), Vector3(-42.5, 1.0, -19.5), -5.5)
+
+	if frame_count == 258:
+		_cap("startup_simulator_mine_robots_refinery.png", "Miniera Alpina FerreroNPC, Mining Robots MK1/2, Conveyor & Refinery")
+		# Lab Droni Borgo Po: Dr.ssa Chiara Conti & TO-Drone MK1 in volo circolare sopra Piazzola H!
+		_look_at_flat(Vector3(23.2, 0.25, 60.4), Vector3(24.0, 2.0, 52.8), 2.5)
+
+	if frame_count == 268:
+		_cap("startup_simulator_drone_flight.png", "Borgo Po Lab Droni · Flying TO-Drone MK1 & ChiaraNPC")
+		if player:
+			player.set_physics_process(true)
+		var wmap = get_tree().root.find_child("WorldMapMenu", true, false)
+		if wmap:
+			wmap.open_map()
+			wmap._set_view("miniera")
+			wmap.select_poi("miniera_alpina")
+
+	if frame_count == 275:
+		_cap("startup_simulator_world_map_miniera.png", "World Map Miniera Alpina District Focus")
+		get_tree().quit(0)
+
+
+func _setup_v16_demo_state() -> void:
+	for ui_name in ["FirewallRouter", "WebForge", "ComputerScreen", "ShopMenu", "InventoryMenu", "WorldMapMenu", "DialogueOverlay"]:
+		var unode = get_tree().root.find_child(ui_name, true, false)
+		if unode:
+			unode.visible = false
+	GameManager.change_state(GameManager.GameState.FIRST_PERSON)
+	EconomyManager.balance = 40000.0
+	ContractManager.advance_tutorial_to_in_progress()
+	ContractManager.complete_tutorial_contract()
+	ContractManager.advance_contract_to_in_progress("caffe_san_carlo")
+	ContractManager.complete_story_contract("caffe_san_carlo")
+	ContractManager.advance_contract_to_in_progress("elettronica_to")
+	ContractManager.complete_story_contract("elettronica_to")
+	ContractManager.accept_factory_commission()
+	for zid in ContractManager.FACTORY_SCOUT_ZONES:
+		ContractManager.scout_factory_zone(zid, zid)
+	ShopManager.buy_hardware("hw_wifi_router", 1)
+	ShopManager.buy_hardware("hw_server_tower", 1)
+	ShopManager.buy_hardware("hw_workstation_pc", 2)
+	ContractManager.mount_factory_wifi_hardware()
+	ContractManager.complete_factory_wifi_netshield()
+	ContractManager.install_factory_server()
+	ContractManager.install_factory_pcs()
+	ContractManager.mark_contract_built("factory_bellini_web", {"score": 98})
+	ContractManager.complete_marketplace_contract("factory_bellini_web")
+
+	TechOpsManager.start_ogr_tech_mission()
+	TechOpsManager.add_research_credits(400, "Visual QA")
+	for m in TechOpsManager.MATERIAL_ORDER:
+		TechOpsManager.materials_storage[m] = 35
+	TechOpsManager.research_branch("tech_automation")
+	TechOpsManager.research_branch("tech_automation")
+	TechOpsManager.research_branch("tech_automation")
+	TechOpsManager.research_branch("tech_drone_avionics")
+	TechOpsManager.research_branch("tech_drone_avionics")
+	TechOpsManager.build_mining_robot(1)
+	TechOpsManager.build_mining_robot(2)
+	TechOpsManager.unlock_conveyor()
+	for _step in range(7):
+		TechOpsManager.install_next_drone_step()
+	TechOpsManager.start_drone_mission("drone_lidar_survey")
+	var dnc = get_tree().root.find_child("DayNightController", true, false)
+	if dnc:
+		dnc.set_debug_hour(11.5)
+	var hud = get_tree().root.find_child("HUD", true, false)
+	if hud and hud.get("toast_container"):
+		for tc in hud.toast_container.get_children():
+			tc.queue_free()
+	EventBus.tech_ops_updated.emit()
+
+	var city_life = get_tree().root.find_child("CityLifeManager", true, false)
+	var yard = get_tree().root.find_child("OGRTechOpsYard", true, false)
+	var heli = get_tree().root.find_child("DroneHelipadStation", true, false)
+	for _k in range(18):
+		if city_life:
+			city_life._process(0.12)
+		if yard:
+			yard._process(0.12)
+		if heli:
+			heli._process(0.12)
+
+
+func _process_v16_only() -> void:
+	if frame_count == 3:
+		var menu = get_tree().root.find_child("MainMenu", true, false)
+		if menu:
+			menu.visible = false
+		GameManager.start_new_game()
+		player = get_tree().root.find_child("PlayerCharacter", true, false)
+		_setup_v16_demo_state()
+		var ped = get_tree().root.find_child("Pedestrian_Piazza_2", true, false) as Node3D
+		if ped:
+			var ppos: Vector3 = ped.global_position
+			_look_at_flat(ppos + Vector3(3.4, 0.20, 3.4), ppos + Vector3(0.0, 1.05, 0.0), -6.0)
+		else:
+			_look_at_flat(Vector3(-3.5, 0.20, 22.0), Vector3(-7.5, 1.0, 18.0), -6.0)
+
+	if frame_count == 7:
+		_cap("startup_simulator_pedestrians_walk.png", "Walking Pedestrians (MakeHuman Walk Cycle & Grounded)")
+		if player:
+			player.set_physics_process(false)
+		_look_at_flat(Vector3(-41.5, 5.2, 18.5), Vector3(-46.0, 1.8, -26.0), -11.0)
+
+	if frame_count == 11:
+		_cap("startup_simulator_mine_overview.png", "Parco Archway & Miniera Alpina Val di Susa Overview")
+		_look_at_flat(Vector3(-42.2, 0.35, -23.0), Vector3(-46.5, 1.5, -36.5), -3.5)
+
+	if frame_count == 15:
+		_cap("startup_simulator_mine_tunnel_veins.png", "Miniera Alpina Galleria 01, MineCart, QuarryCrane & Veins")
+		_look_at_flat(Vector3(-48.5, 0.55, -10.5), Vector3(-42.5, 1.0, -19.5), -5.5)
+
+	if frame_count == 19:
+		_cap("startup_simulator_mine_robots_refinery.png", "Miniera Alpina FerreroNPC, Mining Robots MK1/2, Conveyor & Refinery")
+		_look_at_flat(Vector3(23.2, 0.25, 60.4), Vector3(24.0, 2.0, 52.8), 2.5)
+
+	if frame_count == 23:
+		_cap("startup_simulator_drone_flight.png", "Borgo Po Lab Droni · Flying TO-Drone MK1 & ChiaraNPC")
+		if player:
+			player.set_physics_process(true)
+		var wmap = get_tree().root.find_child("WorldMapMenu", true, false)
+		if wmap:
+			wmap.open_map()
+			wmap._set_view("all")
+			wmap.select_poi("miniera_alpina")
+
+	if frame_count == 27:
+		_cap("startup_simulator_world_map.png", "World Map All 20 POIs (Miniera Alpina, Parco, San Carlo, Valdocco, OGR, Borgo Po)")
+		var wmap = get_tree().root.find_child("WorldMapMenu", true, false)
+		if wmap:
+			wmap._set_view("miniera")
+			wmap.select_poi("miniera_alpina")
+
+	if frame_count == 31:
+		_cap("startup_simulator_world_map_miniera.png", "World Map Miniera Alpina District Focus")
+		get_tree().quit(0)
+
+
+func _process_v16_part2() -> void:
+	if frame_count == 3:
+		var menu = get_tree().root.find_child("MainMenu", true, false)
+		if menu:
+			menu.visible = false
+		GameManager.start_new_game()
+		GameManager.studio_upgrades_installed.append("monitor_upgrade")
+		GameManager.studio_upgrades_installed.append("server_rack_upgrade")
+		player = get_tree().root.find_child("PlayerCharacter", true, false)
+		_setup_v16_demo_state()
+		var wmap = get_tree().root.find_child("WorldMapMenu", true, false)
+		if wmap:
+			wmap.open_map()
+			wmap._set_view("all")
+			wmap.select_poi("miniera_alpina")
+
+	if frame_count == 5:
+		_cap("startup_simulator_world_map.png", "World Map All 20 POIs (Miniera Alpina, Parco, San Carlo, Valdocco, OGR, Borgo Po)")
+		var wmap = get_tree().root.find_child("WorldMapMenu", true, false)
+		if wmap:
+			wmap._set_view("miniera")
+			wmap.select_poi("miniera_alpina")
+
+	if frame_count == 8:
+		_cap("startup_simulator_world_map_miniera.png", "World Map Miniera Alpina District Focus")
+		var wmap = get_tree().root.find_child("WorldMapMenu", true, false)
+		if wmap:
+			if wmap.has_method("close_map"):
+				wmap.close_map()
+			else:
+				wmap.visible = false
+		if player:
+			player.set_physics_process(false)
+		# Lab Droni Borgo Po: Dr.ssa Chiara Conti & TO-Drone MK1 in volo circolare sopra Piazzola H
+		_look_at_flat(Vector3(18.8, 0.35, 55.5), Vector3(24.0, 2.0, 52.5), 2.5)
+
+	if frame_count == 12:
+		_cap("startup_simulator_drone_flight.png", "Borgo Po Lab Droni · Flying TO-Drone MK1 & ChiaraNPC")
+		if player:
+			player.set_physics_process(true)
 		get_tree().quit(0)

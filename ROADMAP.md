@@ -119,4 +119,12 @@ Questo documento definisce il piano di produzione dettagliato per **Startup Simu
 - [x] Fase 4 CEO: 3 Dipartimenti direzionali all'`Incubatore Startup Torino` e gestione imprevisti dinamici.
 - [x] Dipendenti autonomi su Freelance Hub in tempo reale/sonno + 3 rami di potenziamento abilità su Talent HR.
 - [x] Orari negozi (`CHIUSO`), commessi reattivi, passanti e auto in movimento (`CityLifeManager`), trasporti urbani (`Bicicletta Tech Elettrica`, `4 Fermate Bus GTT`, `Auto Elettrica TO-EV`).
-- [x] Suite automatizzata dedicata `tests/v1_5_post_ogr_tests.gd` (91/91 PASS).
+- [x] Suite automatizzata dedicata `tests/v1_5_post_ogr_tests.gd` (91/91 PASS nella release iniziale).
+
+---
+
+## v1.6.0: MINIERA ALPINA VAL DI SUSA, PEDONI CAMMINANTI & ANIMAZIONI 3D (COMPLETATA ✔)
+- [x] Nuova macro-area dedicata **Miniera Alpina · Polo Estrattivo Val di Susa** a Nord-Ovest verso le Alpi (oltre l'arco nord di Parco Valentino Ovest), in sostituzione del compatto cortile OGR Sud.
+- [x] Complesso estrattivo completo: pareti rocciose scolpite e pini alpini, `GALLERIA ESTRATTIVA 01` su rotaie con `MineCart` animato, 3 filoni cristallini con scintille (`MiningSparks`), Raffineria con `CrusherWheel` + fornace animata, `MiningRobotPad_1/2` con `BoomArm` & `DrillHead` animati, `ConveyorBelt`, `QuarryCrane` rotante, `QuarryCabin`, `QuarryTruck`, `FerreroNPC` (gilet alta visibilità + elmetto), fari da cantiere e 5ª fermata bus GTT (`BusStop_Miniera`).
+- [x] Pedoni MakeHuman ancorati a `Y = 0.0` con ciclo `"Walk"`/`"Idle"` sincronizzato e rotazione verso il waypoint prima del movimento (zero slittamento laterale), NPC reattivi con `"Interact"`, ruote rotanti sulle auto e `TO-Drone MK1` volante con 4 rotori indipendenti sopra Piazzola H.
+- [x] WorldMap estesa a **20 POI** con tab filtro dedicato **Miniera** (`7` tab totali responsivi) e tutte le suite automatizzate verificate (`945/945 PASS`, `0 FAIL` su 7 runner; `tests/v1_5_post_ogr_tests.gd` a `106/106 PASS`).

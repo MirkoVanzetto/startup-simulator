@@ -6,7 +6,7 @@ extends Interactable3D
 ## - Piazzole Mining Robot MK1 & MK2 (Costruzione fisica, raccolta hopper, manutenzione, upgrade)
 ## - Banco Assemblaggio Fisico TO-Drone MK1 (7 fasi progressive con modello 3D) e Piazzola H
 ## - Terminale Dipartimenti CEO presso l'Incubatore Startup Torino
-## - NPC Specialisti (Ing. Dario Ferrero al Polo OGR, Dr.ssa Chiara Conti al Lab Droni)
+## - NPC Specialisti (Ing. Dario Ferrero alla Miniera Alpina, Dr.ssa Chiara Conti al Lab Droni)
 ## - Mezzi di trasporto 3D (Bicicletta Tech, Auto Elettrica Aziendale, Fermate Autobus GTT)
 
 @export var station_type: String = "extraction_node"
@@ -43,18 +43,49 @@ func _process(delta: float) -> void:
 	var vnode := _resolve_visual_node()
 	if station_type == "robot_pad" and is_instance_valid(vnode) and vnode.visible:
 		var head := vnode.get_node_or_null("DrillHead") as Node3D
-		if head and is_instance_valid(TechOpsManager):
+		var boom := vnode.get_node_or_null("BoomArm") as Node3D
+		var sparks := vnode.get_node_or_null("DrillSparks") as CPUParticles3D
+		if is_instance_valid(TechOpsManager):
 			var st := TechOpsManager.get_robot_state(robot_slot)
-			if not bool(st.get("jammed", false)) and float(st.get("condition", 100.0)) > 15.0:
-				head.rotation.y += delta * 2.6
-				head.position.y = 0.55 + sin(_anim_time * 4.0) * 0.04
+			var active := not bool(st.get("jammed", false)) and float(st.get("condition", 100.0)) > 15.0
+			if sparks:
+				sparks.emitting = active
+			if head and active:
+				head.rotation.y += delta * 6.5
+				head.position.y = 0.56 + sin(_anim_time * 5.2) * 0.05
+			if boom and active:
+				boom.rotation.x = sin(_anim_time * 2.4) * 0.14
+	elif station_type == "drone_bench" and is_instance_valid(vnode):
+		if is_instance_valid(TechOpsManager) and TechOpsManager.drone_assembly_step >= 2 and not TechOpsManager.drone_built:
+			var p2 := vnode.get_node_or_null("Part2") as Node3D
+			if p2 and p2.visible:
+				for ri in range(4):
+					var r := p2.get_node_or_null("Rotor_%d" % ri) as Node3D
+					if r:
+						r.rotation.y += delta * 12.0 * (1.0 if ri % 2 == 0 else -1.0)
 	elif station_type == "drone_helipad" and is_instance_valid(vnode) and vnode.visible:
+		var p2_h := vnode.get_node_or_null("Part2") as Node3D
 		if is_instance_valid(TechOpsManager) and not TechOpsManager.active_drone_mission.is_empty():
-			vnode.position.y = 1.35 + sin(_anim_time * 3.2) * 0.14
-			vnode.rotation.y += delta * 1.2
+			# Volo in circuito ellittico panoramico sopra Lab Droni / Borgo Po con rotori ad alta velocità
+			var ang := _anim_time * 1.15
+			var nx := cos(ang) * 2.8
+			var nz := sin(ang) * 1.9
+			vnode.position = Vector3(nx, 2.25 + sin(_anim_time * 3.0) * 0.24, nz)
+			vnode.rotation.y = atan2(-sin(ang) * 2.8, cos(ang) * 1.9)
+			vnode.rotation.x = -0.14
+			if p2_h:
+				for ri in range(4):
+					var rh := p2_h.get_node_or_null("Rotor_%d" % ri) as Node3D
+					if rh:
+						rh.rotation.y += delta * 28.0 * (1.0 if ri % 2 == 0 else -1.0)
 		else:
-			vnode.position.y = -0.77
-			vnode.rotation.y = 0.0
+			vnode.position = Vector3(0, -0.77, 0)
+			vnode.rotation = Vector3.ZERO
+			if is_instance_valid(TechOpsManager) and TechOpsManager.drone_built and p2_h:
+				for ri in range(4):
+					var rs := p2_h.get_node_or_null("Rotor_%d" % ri) as Node3D
+					if rs:
+						rs.rotation.y += delta * 3.0 * (1.0 if ri % 2 == 0 else -1.0)
 
 func get_prompt() -> String:
 	if not is_interactable:
@@ -67,16 +98,16 @@ func get_prompt() -> String:
 			var cur := TechOpsManager.get_carried_total()
 			var cap := TechOpsManager.get_max_carry_capacity()
 			if cur >= cap:
-				return "[Cassa Piena %d/%d] Consegna alla Stazione di Raffinazione OGR" % [cur, cap]
-			return "[E] Estrai da %s (Cassa: %d/%d)" % [station_title if station_title != "" else "Deposito Materiali", cur, cap]
+				return "[Cassa Piena %d/%d] Consegna alla Raffineria Miniera Alpina" % [cur, cap]
+			return "[E] Estrai da %s (Cassa: %d/%d)" % [station_title if station_title != "" else "Filone Minerario", cur, cap]
 
 		"processing_station":
 			if TechOpsManager.active_incidents.has("inc_power_dip"):
-				return "[E] ⚡ Riallinea Quadro Elettrico Raffinazione OGR (Risolvi Imprevisto)"
+				return "[E] ⚡ Riallinea Quadro Elettrico Raffineria Miniera (Risolvi Imprevisto)"
 			var cur := TechOpsManager.get_carried_total()
 			if cur > 0:
 				return "[E] Raffina & Consegna %d Materiali (+🔬 Crediti di Ricerca / Stock)" % cur
-			return "[E] Stazione di Raffinazione OGR (Stock: %d · 🔬 %d RC · Nastro / Vendita)" % [
+			return "[E] Raffineria Miniera Alpina (Stock: %d · 🔬 %d RC · Nastro / Vendita)" % [
 				TechOpsManager.get_stored_total(),
 				TechOpsManager.research_credits
 			]
@@ -122,7 +153,7 @@ func get_prompt() -> String:
 			return "[E] 🏛 Direzione Incubatore Startup Torino (Dipartimenti CEO: %d/3)" % TechOpsManager.unlocked_departments.size()
 
 		"npc_ferrero":
-			return "[E] Parla con Ing. Dario Ferrero (Responsabile Estrazione & Robotica OGR)"
+			return "[E] Parla con Ing. Dario Ferrero (Capo Cava · Miniera Alpina)"
 
 		"npc_chiara":
 			return "[E] Parla con Dr.ssa Chiara Conti (Capo Progetto Lab Droni Torino)"
@@ -157,6 +188,11 @@ func _on_interact(_player: Node) -> void:
 
 	match station_type:
 		"extraction_node":
+			var sparks := get_node_or_null("MiningSparks") as CPUParticles3D
+			if sparks:
+				sparks.emitting = false
+				sparks.restart()
+				sparks.emitting = true
 			TechOpsManager.extract_from_node(node_id)
 			_refresh_visuals()
 
@@ -205,11 +241,13 @@ func _on_interact(_player: Node) -> void:
 			_open_incubator_dialogue()
 
 		"npc_ferrero":
+			VillageCharacters.play_interact(self)
 			FameManager.register_talk("dario_ferrero")
 			TechOpsManager.start_post_ogr_expansion()
 			_open_ferrero_dialogue()
 
 		"npc_chiara":
+			VillageCharacters.play_interact(self)
 			FameManager.register_talk("chiara_conti")
 			_open_chiara_dialogue()
 
@@ -222,19 +260,19 @@ func _on_interact(_player: Node) -> void:
 
 func _open_processing_dialogue() -> void:
 	var lines := [
-		"Stazione di Raffinazione & Smistamento OGR — Crediti di Ricerca attuali: 🔬 %d RC | Materiali in magazzino: %d unità." % [
+		"Raffineria & Frantoio Miniera Alpina — Crediti di Ricerca: 🔬 %d RC | Materiali in magazzino: %d unità." % [
 			TechOpsManager.research_credits, TechOpsManager.get_stored_total()
 		],
 		"Quando trasporti materiali nella cassa e premi [E] qui, vengono raffinati nel magazzino aziendale e generano subito 🔬 Crediti di Ricerca.",
-		"Da questo pannello puoi anche vendere parte dello stock per liquidità immediata (€) o installare il Nastro Trasportatore Automatico."
+		"Da questo pannello puoi vendere parte dello stock per liquidità immediata (€) o installare il Nastro Trasportatore Automatico verso i robot."
 	]
 	var choices: Array = []
 	if not TechOpsManager.conveyor_installed:
-		choices.append({"text": "Installa Nastro Trasportatore OGR (4 Alluminio, 3 Rame, 2 Circuiti, € 600)", "action": "techops_build_conveyor"})
+		choices.append({"text": "Installa Nastro Trasportatore Miniera (4 Alluminio, 3 Rame, 2 Circuiti, € 600)", "action": "techops_build_conveyor"})
 	if TechOpsManager.get_stored_total() > 0:
 		choices.append({"text": "Vendi 1 lotto di materiali dal magazzino per denaro (€)", "action": "techops_sell_stock_batch"})
 	choices.append({"text": "Chiudi pannello", "action": "close"})
-	EventBus.dialogue_started.emit("Stazione Raffinazione OGR", lines, choices)
+	EventBus.dialogue_started.emit("Raffineria Miniera Alpina", lines, choices)
 
 func _open_robot_dialogue() -> void:
 	var r_name := "Mining Robot MK1" if robot_slot == 1 else "Mining Robot MK2"
@@ -244,7 +282,7 @@ func _open_robot_dialogue() -> void:
 	var prod := int(st.get("total_produced", 0))
 	var lines := [
 		"%s — Livello %d/3 | Condizione meccanica: %d%% | Totale estratto: %d unità." % [r_name, lvl, cond, prod],
-		"Il robot scava autonomamente nel tempo e mentre dormi. Svuota il deposito o installa il Nastro Trasportatore per non saturare l'hopper!"
+		"Il robot scava autonomamente nel tempo e mentre dormi. Svuota il deposito o installa il Nastro Trasportatore verso la raffineria!"
 	]
 	var choices: Array = []
 	if lvl < 3:
@@ -269,7 +307,7 @@ func _open_drone_helipad_dialogue() -> void:
 
 	var auto_str := "ATTIVA ✔" if TechOpsManager.drone_auto_logistics else "DISATTIVATA"
 	var lines := [
-		"Centro di Controllo Volo TO-Drone MK1 — Missioni completate: %d | Logistica Automatica OGR: %s." % [
+		"Centro di Controllo Volo TO-Drone MK1 — Missioni completate: %d | Logistica Automatica Miniera: %s." % [
 			TechOpsManager.completed_drone_missions_count, auto_str
 		],
 		"Seleziona un'operazione aerea industriale da avviare o attiva la navetta logistica per ritirare automaticamente i materiali dai Mining Robot."
@@ -277,8 +315,8 @@ func _open_drone_helipad_dialogue() -> void:
 	var choices: Array = [
 		{"text": "Avvia Rilievo LiDAR & Mappatura 3D (90m · € 680 + 12 🔬 RC)", "action": "drone_mission_lidar"},
 		{"text": "Avvia Ispezione Termografica Ponti Po (120m · € 920 + 16 🔬 RC)", "action": "drone_mission_inspect"},
-		{"text": "Avvia Ponte Radio & Telemetria OGR (150m · € 1.180 + 22 🔬 RC)", "action": "drone_mission_relay"},
-		{"text": "Attiva/Disattiva Logistica Materiali Automatica OGR", "action": "drone_toggle_logistics"},
+		{"text": "Avvia Ponte Radio & Telemetria Val di Susa (150m · € 1.180 + 22 🔬 RC)", "action": "drone_mission_relay"},
+		{"text": "Attiva/Disattiva Logistica Materiali Automatica", "action": "drone_toggle_logistics"},
 		{"text": "Chiudi", "action": "close"}
 	]
 	EventBus.dialogue_started.emit("Piazzola di Volo H · TO-Drone MK1", lines, choices)
@@ -306,22 +344,22 @@ func _open_incubator_dialogue() -> void:
 func _open_ferrero_dialogue() -> void:
 	var st := TechOpsManager.get_post_ogr_stage()
 	var lines := [
-		"Ciao! Sono l'Ing. Dario Ferrero, responsabile del Polo Estrazione & Recupero Materiali qui alle OGR.",
-		"Con i vecchi macchinari industriali recuperiamo Rame, Silicio, Alluminio, Circuiti, Terre Rare e Compositi ad altissima purezza.",
-		"1) Estrai i materiali dai 3 depositi qui nel cortile · 2) Consegnali alla Stazione di Raffinazione per ottenere 🔬 Crediti di Ricerca · 3) Sblocca 'Automazione & Robotica Lv.1' su TO-OS e costruisci il tuo primo Mining Robot MK1 sulla piazzola!"
+		"Ciao! Sono l'Ing. Dario Ferrero, responsabile della Miniera Alpina Val di Susa — il polo di estrazione e raffinazione della tua azienda ai piedi delle Alpi!",
+		"Da questi filoni cristallini estratti nella cava e nella Galleria 01 recuperiamo Rame, Silicio, Alluminio, Circuiti, Terre Rare e Compositi.",
+		"1) Estrai dai 3 filoni di cava · 2) Porta il carico alla Raffineria qui accanto per generare 🔬 Crediti di Ricerca · 3) Sblocca 'Automazione & Robotica Lv.1' su TO-OS e monta i Mining Robot sulle piazzole!"
 	]
 	if st == "assemble_drone" or st == "expand_departments" or st == "tech_giant":
-		lines.append("Ottimo lavoro con i Mining Robot! Con i materiali accumulati in magazzino puoi assemblare il TO-Drone MK1 al Lab Droni di Borgo Po!")
+		lines.append("Grandioso lavoro nella Miniera! Con i materiali accumulati in magazzino puoi assemblare il TO-Drone MK1 al Lab Droni di Borgo Po!")
 	var choices := [
-		{"text": "Perfetto Ing. Ferrero, vado ai depositi di estrazione!", "action": "close"}
+		{"text": "Perfetto Ing. Ferrero, vado ai filoni della miniera!", "action": "close"}
 	]
-	EventBus.dialogue_started.emit("Ing. Dario Ferrero (Polo Materiali OGR)", lines, choices)
+	EventBus.dialogue_started.emit("Ing. Dario Ferrero (Miniera Alpina)", lines, choices)
 
 func _open_chiara_dialogue() -> void:
 	var lines := [
 		"Benvenuto al Lab Droni Torino! Sono la Dr.ssa Chiara Conti, progettista capo di avionica e sistemi autonomi.",
 		"Sul nostro Banco Assemblaggio 3D puoi costruire fisicamente il quadricottero industriale TO-Drone MK1 in 7 fasi: Telaio, 4 Motori Brushless, Cablaggi, Scheda Flight Controller, Batteria & LiDAR, Firmware e Collaudo Finale!",
-		"Assicurati di aver sbloccato 'Hardware & Avionica Droni Lv.1' su TO-OS (Conoscenza R&D) e di avere Rame, Silicio, Alluminio, Circuiti, Terre Rare e Compositi nel magazzino OGR."
+		"Assicurati di aver sbloccato 'Hardware & Avionica Droni Lv.1' su TO-OS (Conoscenza R&D) e di avere Rame, Silicio, Alluminio, Circuiti, Terre Rare e Compositi dalla Miniera Alpina."
 	]
 	var choices := [
 		{"text": "Grazie Dr.ssa Conti, procedo al Banco Assemblaggio!", "action": "close"}
@@ -331,11 +369,11 @@ func _open_chiara_dialogue() -> void:
 func _open_bus_stop_dialogue() -> void:
 	var has_pass := TechOpsManager.has_vehicle("bus_pass")
 	var lines := [
-		"Rete Elettrica GTT Smart Mobility Torino — Spostamento rapido tra i quartieri della città.",
+		"Rete Elettrica GTT Smart Mobility Torino — Spostamento rapido tra quartieri e Miniera Alpina.",
 		"Stato titolo di viaggio: %s." % ("Abbonamento GTT Illimitato Attivo ✔" if has_pass else "Biglietto corsa singola € 2,00 (oppure acquista l'Abbonamento a € 90)")
 	]
 	var choices: Array = []
-	for sid in ["bus_sancarlo", "bus_valdocco", "bus_ogr", "bus_borgopo"]:
+	for sid in ["bus_sancarlo", "bus_valdocco", "bus_ogr", "bus_borgopo", "bus_miniera"]:
 		if sid == bus_stop_id:
 			continue
 		var sdef: Dictionary = TechOpsManager.BUS_STOPS[sid]

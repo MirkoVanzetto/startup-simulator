@@ -533,7 +533,7 @@ func test_expanded_districts_clearance_and_ui_4res() -> void:
 		wmap.visible = true
 		wmap.open_map()
 		await get_tree().process_frame
-		for vid in ["all", "parco", "sancarlo", "valdocco", "mercato", "borgopo"]:
+		for vid in ["all", "miniera", "parco", "sancarlo", "valdocco", "mercato", "borgopo"]:
 			wmap._set_view(vid)
 			await get_tree().process_frame
 			var wm_off: Array[String] = []

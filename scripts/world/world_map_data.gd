@@ -3,7 +3,8 @@ extends RefCounted
 ## WorldMapData - Coordinate geometriche reali di Borgo San Carlo, Viale Est, Borgo Valdocco e Officina Bellini.
 ## Allineato alle coordinate di scripts/world/village_builder.gd e scenes/world/game_world.tscn.
 
-const WORLD_BOUNDS := Rect2(Vector2(-68.0, -14.0), Vector2(198.0, 94.0)) # X: -68..130, Z: -14..80
+const WORLD_BOUNDS := Rect2(Vector2(-76.0, -52.0), Vector2(208.0, 132.0)) # X: -76..132, Z: -52..80
+const MINIERA_BOUNDS := Rect2(Vector2(-72.0, -48.0), Vector2(52.0, 62.0)) # X: -72..-20, Z: -48..14
 const SAN_CARLO_BOUNDS := Rect2(Vector2(-25.5, -10.5), Vector2(51.5, 54.0))
 const PARCO_BOUNDS := Rect2(Vector2(-57.5, 10.5), Vector2(36.0, 33.0))
 const VALDOCCO_BOUNDS := Rect2(Vector2(20.0, 10.0), Vector2(79.0, 35.0))
@@ -95,7 +96,18 @@ static func get_pois() -> Array[Dictionary]:
 			"footprint": Vector2(8.5, 6.5),
 			"color": Color(0.36, 0.86, 0.56),
 			"label_dir": "bottom",
-			"desc": "Parco occidentale con laghetto delle anatre, gazebo storico, ville residenziali, cassette postali e armadi fibra."
+			"desc": "Parco occidentale con laghetto delle anatre, gazebo storico, ville residenziali e sentiero verso l'Arco Nord per la Miniera Alpina."
+		},
+		{
+			"id": "miniera_alpina",
+			"name": "Miniera Alpina · Polo Estrattivo Val di Susa",
+			"short": "Miniera",
+			"district": "Miniera Alpina NO",
+			"pos": Vector3(-46.0, 0.0, -22.0),
+			"footprint": Vector2(40.0, 34.0),
+			"color": Color(0.95, 0.72, 0.24),
+			"label_dir": "bottom",
+			"desc": "Cava alpina ai piedi delle Alpi: Galleria Estrattiva 01 con carrello su rotaia, 3 filoni minerari (Rame, Silicio, Terre Rare), Mining Robot MK1/MK2, Raffineria, Gru di cava & Capocava Ferrero."
 		},
 		{
 			"id": "arco_valdocco",
@@ -152,14 +164,14 @@ static func get_pois() -> Array[Dictionary]:
 		},
 		{
 			"id": "coworking_ogr",
-			"name": "OGR Tech Hub & Polo Estrazione",
+			"name": "OGR Tech Hub · Torino Enterprise",
 			"short": "OGR Hub",
 			"district": "Mercato & OGR",
 			"pos": Vector3(110.25, 0.0, 2.75),
 			"footprint": Vector2(27.5, 24.5),
 			"color": Color(0.32, 0.88, 0.96),
 			"label_dir": "bottom",
-			"desc": "Grande navata OGR Enterprise + Polo Estrazione Materiali & Mining Robot nel cortile Sud: Ing. Andrea Viale, Ing. Dario Ferrero, Raffinazione e maxi-bandi corporate."
+			"desc": "Grande navata OGR Enterprise: Ing. Andrea Viale, Bay 01, coworking startup e grandi contratti B2B corporate."
 		},
 		{
 			"id": "arco_borgopo",
@@ -228,12 +240,26 @@ static func get_poi(poi_id: String) -> Dictionary:
 static func get_roads_and_zones() -> Dictionary:
 	return {
 		"grass": [
+			Rect2(Vector2(-72.0, -45.0), Vector2(50.0, 57.0)),  # Fascia Alpina & Miniera NO
 			Rect2(Vector2(-56.0, 12.0), Vector2(32.0, 30.0)),   # Parco Valentino Ovest
 			Rect2(Vector2(-24.0, -9.0), Vector2(48.0, 51.0)),   # San Carlo
 			Rect2(Vector2(24.0, 19.0), Vector2(35.0, 18.0)),    # Corridoio Viale Est
 			Rect2(Vector2(59.0, 14.0), Vector2(38.0, 28.0)),    # Borgo Valdocco
 			Rect2(Vector2(59.0, -12.0), Vector2(69.0, 29.0)),   # Piazza del Mercato & OGR Tech Hub
 			Rect2(Vector2(-24.0, 42.0), Vector2(80.0, 24.0))    # Borgo Po / Lungo Po
+		],
+		"quarry": [
+			Rect2(Vector2(-67.0, -39.0), Vector2(40.0, 34.0))   # Cava & Piazzale Miniera Alpina
+		],
+		"gravel": [
+			Rect2(Vector2(-44.0, -9.25), Vector2(5.0, 21.5)),   # Viale Ghiaia Parco -> Miniera Alpina
+			Rect2(Vector2(-43.6, 11.7), Vector2(4.2, 9.6)),     # Raccordo Arco Nord Parco
+			Rect2(Vector2(-39.6, 17.2), Vector2(4.2, 19.6)),    # Vialetto Ville Parco
+			Rect2(Vector2(-50.0, 34.6), Vector2(38.0, 4.4)),    # Passeggiata Parco Ovest
+			Rect2(Vector2(37.2, 20.9), Vector2(8.6, 3.8))       # Slargo Consegne Valdocco
+		],
+		"rails": [
+			[Vector2(-46.0, -39.6), Vector2(-46.0, -25.8)]      # Binario Galleria 01 -> Carrello
 		],
 		"cobble": [
 			Rect2(Vector2(-4.2, 2.4), Vector2(8.4, 11.2)),      # Via del Borgo
@@ -281,6 +307,8 @@ static func get_roads_and_zones() -> Dictionary:
 			Rect2(Vector2(71.4, 36.8), Vector2(5.6, 4.8)),
 			Rect2(Vector2(-37.4, 13.2), Vector2(6.8, 5.6)),     # Villa Parco Nord
 			Rect2(Vector2(-30.6, 23.4), Vector2(5.2, 6.2)),     # Villa Parco Sud-Est
+			Rect2(Vector2(-58.8, -16.1), Vector2(4.6, 3.2)),    # Ufficio Geologico Cava (Quarry Cabin)
+			Rect2(Vector2(-36.8, -18.8), Vector2(3.6, 2.5)),    # Raffineria & Frantoio Miniera
 			Rect2(Vector2(-5.6, 45.6), Vector2(6.0, 5.2)),      # Casa Borgo Po Ovest
 			Rect2(Vector2(48.3, 45.6), Vector2(5.8, 5.2))       # Casa Borgo Po Est
 		],
@@ -290,8 +318,15 @@ static func get_roads_and_zones() -> Dictionary:
 			{"pos": Vector2(-47.5, 26.8), "r": 4.0, "label": "Laghetto"}
 		],
 		"walls": [
-			# Parco Valentino border (varco Est Z=33.6..40.0 verso San Carlo)
-			[Vector2(-56.0, 12.0), Vector2(-24.0, 12.0)],
+			# Miniera Alpina perimeter (varco Sud X=-44.5..-38.5 verso Parco Valentino)
+			[Vector2(-67.0, -5.0), Vector2(-44.5, -5.0)],
+			[Vector2(-38.5, -5.0), Vector2(-27.0, -5.0)],
+			[Vector2(-67.0, -39.0), Vector2(-67.0, -5.0)],
+			[Vector2(-27.0, -39.0), Vector2(-27.0, -5.0)],
+			[Vector2(-67.0, -39.0), Vector2(-27.0, -39.0)],
+			# Parco Valentino border (varco Nord X=-44.5..-38.5 Miniera; varco Est Z=33.6..40.0 San Carlo)
+			[Vector2(-56.0, 12.0), Vector2(-44.5, 12.0)],
+			[Vector2(-38.5, 12.0), Vector2(-24.0, 12.0)],
 			[Vector2(-56.0, 42.0), Vector2(-24.0, 42.0)],
 			[Vector2(-56.0, 12.0), Vector2(-56.0, 42.0)],
 			# San Carlo border (varco Sud Borgo Po X=5.0..11.4)

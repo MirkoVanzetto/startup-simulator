@@ -38,5 +38,11 @@ func _on_interact(_player: Node) -> void:
 			"warning"
 		)
 		return
+	VillageCharacters.play_interact(self)
+	if get_parent():
+		for sib in get_parent().get_children():
+			if sib != self and sib.name.ends_with("NPC"):
+				VillageCharacters.play_interact(sib)
+				break
 	SoundManager.play_ui_click()
 	EventBus.shop_opened.emit(shop_id)

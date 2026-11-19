@@ -121,8 +121,10 @@ func get_recommended_quest_poi_id() -> String:
 		if is_instance_valid(TechOpsManager):
 			var st := TechOpsManager.get_post_ogr_stage()
 			match st:
-				"talk_viale", "gather_materials", "build_robot_mk1":
+				"talk_viale":
 					return "coworking_ogr"
+				"gather_materials", "build_robot_mk1":
+					return "miniera_alpina"
 				"unlock_robot_tech", "unlock_drone_tech":
 					return "studio"
 				"assemble_drone":

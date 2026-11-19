@@ -410,4 +410,29 @@ static func _spec_for(key: String) -> Dictionary:
 		"grate_dark":        return {"tex": "tile_check_gray", "tint": Color("#383f48"), "uv": 1.45, "ndepth": 1.55, "metal": 0.68, "rough": 0.50, "spec_val": 0.62, "ao": 0.92}
 		"lounge_sofa":       return {"tex": "fabric", "tint": Color("#424852"), "uv": 1.50, "ndepth": 1.05, "rough": 0.88}
 		"smoke_soft":        return {"tint": Color("#8c867f"), "rough": 0.96, "macro": 0.08}
+
+		# Chiavi architettoniche / hardware completate (v1.5+)
+		"concrete":          return {"tex": "concrete_ogr", "tint": Color("#b9bec4"), "uv": 0.34, "ndepth": 0.90, "rough": 0.84, "ao": 0.90, "macro": 0.14}
+		"iron_dark":         return {"tint": Color("#1e232a"), "rough": 0.52, "metal": 0.72, "spec_val": 0.54}
+		"metal":             return {"tint": Color("#7c8794"), "rough": 0.38, "metal": 0.74, "spec_val": 0.72}
+		"server_body":       return {"tint": Color("#191e26"), "rough": 0.42, "metal": 0.45, "spec_val": 0.58}
+		"server_glow":       return {"tint": Color("#2ee4ff"), "emit": Color("#1ec6eb"), "emit_e": 1.35, "rough": 0.22}
+		"orange_accent":     return {"tint": Color("#ea6624"), "emit": Color("#cc4814"), "emit_e": 0.35, "rough": 0.34, "spec_val": 0.60}
+		"purple_accent":     return {"tint": Color("#8b4ce6"), "emit": Color("#6d34c9"), "emit_e": 0.48, "rough": 0.28, "spec_val": 0.65}
+		"factory_roof":      return {"tex": "corrugated_metal", "tint": Color("#6c7782"), "uv": 0.46, "ndepth": 1.30, "rough": 0.54, "metal": 0.48, "spec_val": 0.56, "ao": 0.90}
+		"desk_top":          return {"tex": "planks_light", "tint": Color("#c99d66"), "uv": 0.58, "ndepth": 0.72, "rough": 0.54, "spec_val": 0.44, "ao": 0.86, "grain": 0.0}
+		"terracotta":        return {"tex": "roof_terracotta", "tint": Color("#bf5d42"), "uv": 0.48, "ndepth": 1.32, "rough": 0.82, "ao": 0.92}
+
+		# Miniera Alpina Val di Susa (v1.6)
+		"leaves_pine":       return {"tex": "leaves", "tint": Color("#2d5a34"), "uv": 0.72, "ndepth": 1.35, "sway": 0.02, "rough": 0.80}
+		"quarry_rock":       return {"tex": "plaster_rough", "tint": Color("#646b75"), "uv": 0.22, "ndepth": 1.90, "rough": 0.94, "ao": 0.98, "dirt": 0.38, "macro": 0.28}
+		"quarry_slate":      return {"tex": "plaster_rough", "tint": Color("#484f58"), "uv": 0.20, "ndepth": 2.00, "rough": 0.95, "ao": 0.98, "dirt": 0.42, "macro": 0.30}
+		"quarry_dirt":       return {"tex": "gravel", "tint": Color("#8e816e"), "uv": 0.68, "ndepth": 1.40, "rough": 0.96, "ao": 0.94, "macro": 0.20, "grain": 0.0}
+		"mine_timber":       return {"tex": "planks_dark", "tint": Color("#7d5432"), "uv": 0.55, "ndepth": 1.25, "rough": 0.86, "ao": 0.94, "macro": 0.14}
+		"rail_steel":        return {"tint": Color("#788390"), "rough": 0.30, "metal": 0.84, "spec_val": 0.82}
+		"ore_copper":        return {"tint": Color("#d47136"), "emit": Color("#c25216"), "emit_e": 0.72, "rough": 0.28, "metal": 0.58, "spec_val": 0.82}
+		"ore_silicon":       return {"tint": Color("#38d6f0"), "emit": Color("#1cb8e0"), "emit_e": 0.92, "rough": 0.20, "metal": 0.22, "spec_val": 0.90}
+		"ore_rare":          return {"tint": Color("#b45eff"), "emit": Color("#9436ef"), "emit_e": 0.95, "rough": 0.22, "metal": 0.25, "spec_val": 0.92}
+		"furnace_core":      return {"tint": Color("#ff942e"), "emit": Color("#ff5b0f"), "emit_e": 1.95, "rough": 0.35}
+		"vest_safety":       return {"mode": "char_pbr", "kind": "cloth", "tint": Color("#d45d18"), "rough": 0.75, "spec_val": 0.22}
 		_:                   return {"tint": Color("#cccccc"), "rough": 0.82}

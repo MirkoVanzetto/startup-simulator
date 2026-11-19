@@ -33,9 +33,9 @@ func _on_interact(_player: Node) -> void:
 
 	var lines := [
 		"Benvenuto alle Officine Grandi Riparazioni — il trampolino di lancio verso l'industria tecnologica torinese!",
-		"Oltre ai bandi corporate sulla Bay 01, ho appena autorizzato la tua startup ad accedere al Polo Estrazione & Robotica nel cortile Sud delle OGR (con l'Ing. Dario Ferrero) e al Lab Droni di Borgo Po!",
+		"Oltre ai bandi corporate sulla Bay 01, ho appena autorizzato la tua startup ad accedere alla nuova Miniera Alpina Val di Susa (oltre l'arco Nord di Parco Valentino, con l'Ing. Dario Ferrero) e al Lab Droni di Borgo Po!",
 		"Stato: Bandi Tier %d/4 (%d disponibili) | Stelle ★: %d | Crediti di Ricerca: 🔬 %d RC." % [tier, avail_count, stars, rc],
-		"Obiettivo Tecnologico attuale: %s" % (stage_txt if stage_txt != "" else "Raccogli materiali al Polo OGR, sblocca il Mining Robot MK1 e costruisci il TO-Drone MK1!")
+		"Obiettivo Tecnologico attuale: %s" % (stage_txt if stage_txt != "" else "Raccogli materiali alla Miniera Alpina, sblocca il Mining Robot MK1 e costruisci il TO-Drone MK1!")
 	]
 	var choices := [
 		{"text": "Spiegami il piano Materiali, Mining Robot MK1 e Costruzione Drone 3D!", "action": "details_post_ogr"},

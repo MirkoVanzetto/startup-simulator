@@ -7,6 +7,7 @@ func _ready() -> void:
 	prompt_message = "[E] Parla con Ing. Bellini (Officina)"
 
 func _on_interact(_player: Node) -> void:
+	VillageCharacters.play_interact(self)
 	FameManager.register_talk("bellini")
 	var fac := ContractManager.get_factory_progress_summary()
 	var lines: Array = []

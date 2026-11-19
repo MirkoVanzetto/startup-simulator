@@ -346,7 +346,7 @@ const VEHICLES: Dictionary = {
 		"cost": 90.0,
 		"speed_mult": 1.0,
 		"carry_bonus": 0,
-		"desc": "Viaggio rapido istantaneo gratuito tra tutte le 4 Fermate Autobus GTT della città."
+		"desc": "Viaggio rapido istantaneo gratuito tra tutte le 5 Fermate Autobus GTT della città (incl. Miniera Alpina)."
 	},
 	"company_ev": {
 		"id": "company_ev",
@@ -383,6 +383,12 @@ const BUS_STOPS: Dictionary = {
 		"name": "Fermata GTT · Borgo Po & Lab Droni / Incubatore",
 		"pos": Vector3(11.5, 0.2, 53.5),
 		"poi_id": "lab_droni"
+	},
+	"bus_miniera": {
+		"id": "bus_miniera",
+		"name": "Fermata GTT · Miniera Alpina Val di Susa",
+		"pos": Vector3(-42.8, 0.2, 6.2),
+		"poi_id": "miniera_alpina"
 	}
 }
 
@@ -403,14 +409,14 @@ const INCIDENT_DEFS: Dictionary = {
 		"id": "inc_robot_jam",
 		"category": "productive",
 		"title": "Inceppamento Testa di Scavo Mining Robot",
-		"desc": "Detriti metallici bloccano il Mining Robot al Polo OGR. Esegui manutenzione sul posto o da TO-OS.",
+		"desc": "Detriti rocciosi bloccano il Mining Robot alla Miniera Alpina. Esegui manutenzione sul posto o da TO-OS.",
 		"fix_cost_eur": 65.0
 	},
 	"inc_power_dip": {
 		"id": "inc_power_dip",
 		"category": "productive",
-		"title": "Calo Tensione Cabina Raffinazione OGR",
-		"desc": "Sbalzo elettrico nella linea d'estrazione (-35% velocità). Riallinea il quadro alla Stazione OGR.",
+		"title": "Calo Tensione Cabina Raffineria Miniera",
+		"desc": "Sbalzo elettrico nella linea d'estrazione (-35% velocità). Riallinea il quadro alla Raffineria Miniera Alpina.",
 		"fix_cost_eur": 50.0
 	},
 	"inc_cyber_breach": {
@@ -564,8 +570,8 @@ func start_post_ogr_expansion() -> void:
 	if not post_ogr_quest_started:
 		post_ogr_quest_started = true
 		EventBus.notification_posted.emit(
-			"Fase 3 Avviata: Polo Tecnologico & Materiali OGR!",
-			"L'Ing. Andrea Viale e l'Ing. Dario Ferrero ti hanno aperto il Polo Estrazione OGR (Cortile Sud). Estrai i primi materiali e consegnali alla Stazione di Raffinazione!",
+			"Fase 3 Avviata: Miniera Alpina & Polo Estrattivo!",
+			"L'Ing. Andrea Viale e l'Ing. Dario Ferrero ti hanno aperto la Miniera Alpina Val di Susa (oltre Parco Valentino Nord). Estrai i primi materiali e consegnali alla Raffineria!",
 			"contract"
 		)
 		EventBus.tech_ops_updated.emit()
@@ -597,16 +603,16 @@ func get_post_ogr_objective_text() -> String:
 	var st := get_post_ogr_stage()
 	match st:
 		"talk_viale":
-			return "OGR Tech Hub: parla con l'Ing. Andrea Viale o l'Ing. Dario Ferrero per avviare il Polo Materiali & Robotica."
+			return "OGR Tech Hub: parla con l'Ing. Andrea Viale o con l'Ing. Dario Ferrero alla Miniera Alpina per avviare il Polo Materiali & Robotica."
 		"gather_materials":
 			var carried := get_carried_total()
 			if carried > 0:
-				return "Polo Estrazione OGR: consegna i %d materiali trasportati alla Stazione di Raffinazione per ottenere 🔬 Crediti di Ricerca (%d/6 consegnati)." % [carried, total_materials_delivered]
-			return "Polo Estrazione OGR (Cortile Sud): estrai Rame, Silicio e Alluminio dai depositi e consegnali alla Stazione di Raffinazione (%d/6)." % total_materials_delivered
+				return "Miniera Alpina: consegna i %d materiali trasportati alla Raffineria di Cava per ottenere 🔬 Crediti di Ricerca (%d/6 consegnati)." % [carried, total_materials_delivered]
+			return "Miniera Alpina Val di Susa (Nord Parco Valentino): estrai Rame, Silicio e Alluminio dai filoni e consegnali alla Raffineria (%d/6)." % total_materials_delivered
 		"unlock_robot_tech":
 			return "Apri 'Conoscenza R&D' su TO-OS e sblocca 'Automazione & Robotica Lv.1' (12 🔬 RC, attuali: %d RC)." % research_credits
 		"build_robot_mk1":
-			return "Polo Estrazione OGR: assembla fisicamente il 'Mining Robot MK1' sulla Piazzola Robot 1 (4 Rame, 3 Silicio, 2 Circuiti, € 450)."
+			return "Miniera Alpina: assembla fisicamente il 'Mining Robot MK1' sulla Piazzola Robot 1 (4 Rame, 3 Silicio, 2 Circuiti, € 450)."
 		"unlock_drone_tech":
 			return "Raccogli risorse dal Mining Robot MK1 e sblocca 'Hardware & Avionica Droni Lv.1' (15 🔬 RC, attuali: %d RC) su TO-OS." % research_credits
 		"assemble_drone":
@@ -711,7 +717,7 @@ func extract_from_node(node_id: String) -> Dictionary:
 		SoundManager.play_ui_error()
 		EventBus.notification_posted.emit(
 			"Cassa di Trasporto Piena (%d/%d)" % [cur_carried, cap],
-			"Consegna i materiali alla Stazione di Raffinazione OGR qui accanto prima di estrarre ancora!",
+			"Consegna i materiali alla Raffineria Miniera Alpina prima di estrarre ancora!",
 			"warning"
 		)
 		return {"ok": false, "reason": "full"}
@@ -753,7 +759,7 @@ func extract_from_node(node_id: String) -> Dictionary:
 	SoundManager.play_ui_success()
 	EventBus.notification_posted.emit(
 		"Materiali Estratti (%d/%d in Cassa)" % [get_carried_total(), cap],
-		"%s — Trasportali alla Stazione di Raffinazione OGR per ottenere 🔬 Crediti di Ricerca o €!" % ", ".join(summary_parts),
+		"%s — Trasportali alla Raffineria Miniera Alpina per ottenere 🔬 Crediti di Ricerca o €!" % ", ".join(summary_parts),
 		"info"
 	)
 	EventBus.materials_changed.emit()
@@ -786,7 +792,7 @@ func deliver_carried_for_research() -> Dictionary:
 		SoundManager.play_ui_error()
 		EventBus.notification_posted.emit(
 			"Nessun Materiale in Cassa",
-			"Estrai prima i materiali dai 3 depositi del Polo Estrazione OGR e portali qui!",
+			"Estrai prima i materiali dai 3 filoni della Miniera Alpina e portali qui!",
 			"warning"
 		)
 		return {"ok": false, "units": 0, "rc_gained": 0}
@@ -806,7 +812,7 @@ func deliver_carried_for_research() -> Dictionary:
 	var mult := 1.0 + 0.15 * float(get_tech_rank("tech_extraction"))
 	var rc_gain := maxi(1, int(roundf(raw_rc * mult)))
 	total_materials_delivered += tot
-	add_research_credits(rc_gain, "Raffinazione Materiali OGR")
+	add_research_credits(rc_gain, "Raffinazione Materiali Miniera Alpina")
 	GameManager.reputation_points += maxi(1, tot / 2)
 
 	SoundManager.play_ui_success()
@@ -912,7 +918,7 @@ func can_unlock_tech(branch_id: String) -> Dictionary:
 	if research_credits < cost_rc:
 		return {
 			"allowed": false,
-			"reason": "Crediti di Ricerca insufficienti: servono %d 🔬 RC (hai %d RC). Consegna materiali al Polo OGR!" % [cost_rc, research_credits],
+			"reason": "Crediti di Ricerca insufficienti: servono %d 🔬 RC (hai %d RC). Consegna materiali alla Raffineria!" % [cost_rc, research_credits],
 			"cost_rc": cost_rc
 		}
 	return {"allowed": true, "reason": "", "cost_rc": cost_rc}
@@ -1026,7 +1032,7 @@ func can_build_mining_robot(slot: int = 1) -> Dictionary:
 	if not missing.is_empty():
 		return {
 			"allowed": false,
-			"reason": "Materiali in magazzino insufficienti: %s. Consegna materiali alla Stazione di Raffinazione OGR!" % ", ".join(missing)
+			"reason": "Materiali in magazzino insufficienti: %s. Consegna materiali alla Raffineria Miniera Alpina!" % ", ".join(missing)
 		}
 	var cost_eur := float(rec.get("cost_eur", 450.0))
 	if not EconomyManager.can_afford(cost_eur):
@@ -1063,7 +1069,7 @@ func build_mining_robot(slot: int = 1) -> bool:
 	SoundManager.play_ui_success()
 	EventBus.notification_posted.emit(
 		"%s Operativo!" % str(rec["name"]),
-		"Il robot ha iniziato l'estrazione autonoma al Polo OGR! Raccogli periodicamente i materiali dal suo deposito.",
+		"Il robot ha iniziato l'estrazione autonoma alla Miniera Alpina! Raccogli periodicamente i materiali dal suo deposito.",
 		"success"
 	)
 	EventBus.tech_ops_updated.emit()

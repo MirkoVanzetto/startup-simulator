@@ -135,12 +135,12 @@ func _on_choice_clicked(action: String) -> void:
 			_show_next_line()
 		"details_post_ogr":
 			lines_queue = [
-				"Ecco la roadmap industriale Post-OGR: 1) Nel cortile Sud qui fuori trovi l'Ing. Dario Ferrero e 3 depositi d'estrazione (Rame, Silicio, Alluminio/Terre Rare). Estrai i materiali e consegnali alla Stazione di Raffinazione per ottenere 🔬 Crediti di Ricerca!",
-				"2) Usa i Crediti 🔬 RC nell'app 'Conoscenza R&D' su TO-OS per sbloccare 'Automazione & Robotica Lv.1' e costruisci fisicamente il Mining Robot MK1 sulla piazzola OGR per automatizzare la produzione.",
+				"Ecco la roadmap industriale Post-OGR: 1) Oltre l'arco Nord di Parco Valentino, ai piedi delle Alpi, trovi la Miniera Alpina Val di Susa con l'Ing. Dario Ferrero, la Galleria 01 su rotaia e 3 filoni minerari (Rame, Silicio, Terre Rare). Estrai i materiali e portali alla Raffineria per generare 🔬 Crediti di Ricerca!",
+				"2) Usa i Crediti 🔬 RC nell'app 'Conoscenza R&D' su TO-OS per sbloccare 'Automazione & Robotica Lv.1' e monta fisicamente il Mining Robot MK1 nella miniera per automatizzare l'estrazione.",
 				"3) Sblocca 'Hardware & Avionica Droni Lv.1' e raggiungi la Dr.ssa Chiara Conti al Lab Droni di Borgo Po per assemblare pezzo per pezzo in 7 fasi il tuo TO-Drone MK1 3D e fondare i Dipartimenti Aziendali all'Incubatore Startup Torino!"
 			]
 			active_choices = [
-				{"text": "Fantastico Ing. Viale! Vado subito al Polo Estrazione OGR.", "action": "close"}
+				{"text": "Fantastico Ing. Viale! Parto verso la Miniera Alpina.", "action": "close"}
 			]
 			_show_next_line()
 		"techops_build_conveyor":
@@ -222,6 +222,10 @@ func _on_choice_clicked(action: String) -> void:
 			_close_dialogue()
 			if is_instance_valid(TechOpsManager):
 				TechOpsManager.fast_travel_to_bus_stop("bus_borgopo")
+		"bus_travel_bus_miniera":
+			_close_dialogue()
+			if is_instance_valid(TechOpsManager):
+				TechOpsManager.fast_travel_to_bus_stop("bus_miniera")
 		"close", _:
 			_close_dialogue()
 

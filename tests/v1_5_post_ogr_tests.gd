@@ -9,6 +9,9 @@ extends Node
 ## 6. Phase 4 CEO Departments (Incubatore) & Dynamic Incidents Resolution
 ## 7. Autonomous Employee Freelance Hub Work, Employee Skill Upgrades, Shop Hours, Living City, Vehicles & Save/Load
 
+const MineOpsAnimatorScript := preload("res://scripts/world/mine_ops_animator.gd")
+const CityLifeManagerScript := preload("res://scripts/world/city_life_manager.gd")
+
 var passed: int = 0
 var failed: int = 0
 
@@ -43,6 +46,7 @@ func _ready() -> void:
 	_test_suite_6_departments_and_incidents()
 	_test_suite_7_autonomous_employees_shop_hours_vehicles_and_saveload(main_inst)
 	await _test_suite_8_toos_and_inventory_ui(main_inst)
+	await _test_suite_9_miniera_alpina_and_animations(main_inst)
 
 	print("======================================================================")
 	print("  ✔ PASSED: %d" % passed)
@@ -83,18 +87,33 @@ func _test_suite_1_incubatore_and_3d_world(main_inst: Node) -> void:
 	_assert(str(inc_poi.get("name", "")) == "Incubatore Startup Torino", "POI name is 'Incubatore Startup Torino'")
 	_assert(not ("I3P" in str(inc_poi.get("name", ""))), "Zero 'I3P' in POI name")
 
+	var miniera_poi: Dictionary = map_data.get_poi("miniera_alpina")
+	_assert(not miniera_poi.is_empty() and (miniera_poi["pos"] as Vector3).x < -25.0 and (miniera_poi["pos"] as Vector3).z < -5.0,
+		"WorldMapData exposes dedicated NW Miniera Alpina POI (%s)" % str(miniera_poi.get("pos", Vector3.ZERO)))
+
 	var sj_spot: Dictionary = SideJobManager.DEFAULT_SPOTS.get("mailbox_borgopo_i3p", {})
 	_assert("Incubatore" in str(sj_spot.get("label", "")) and not ("I3P" in str(sj_spot.get("label", ""))), "SideJob spot label uses generic 'Incubatore'")
 
 	var yard := main_inst.find_child("OGRTechOpsYard", true, false)
-	_assert(yard != null, "OGRTechOpsYard spawned in 3D world")
-	_assert(main_inst.find_child("FerreroNPC", true, false) != null, "FerreroNPC spawned in OGRTechOpsYard")
-	_assert(main_inst.find_child("ExtractionNode_Copper", true, false) != null, "ExtractionNode_Copper spawned")
-	_assert(main_inst.find_child("ExtractionNode_Silicon", true, false) != null, "ExtractionNode_Silicon spawned")
-	_assert(main_inst.find_child("ExtractionNode_Alloy", true, false) != null, "ExtractionNode_Alloy spawned")
-	_assert(main_inst.find_child("ProcessingStation_OGR", true, false) != null, "ProcessingStation_OGR spawned")
-	_assert(main_inst.find_child("MiningRobotPad_1", true, false) != null, "MiningRobotPad_1 spawned")
-	_assert(main_inst.find_child("MiningRobotPad_2", true, false) != null, "MiningRobotPad_2 spawned")
+	var ferrero := main_inst.find_child("FerreroNPC", true, false) as Node3D
+	var copper_n := main_inst.find_child("ExtractionNode_Copper", true, false) as Node3D
+	var silicon_n := main_inst.find_child("ExtractionNode_Silicon", true, false) as Node3D
+	var alloy_n := main_inst.find_child("ExtractionNode_Alloy", true, false) as Node3D
+	var ref_n := main_inst.find_child("ProcessingStation_OGR", true, false) as Node3D
+	var pad1_n := main_inst.find_child("MiningRobotPad_1", true, false) as Node3D
+	var pad2_n := main_inst.find_child("MiningRobotPad_2", true, false) as Node3D
+
+	_assert(yard != null and yard.get_script() == MineOpsAnimatorScript, "OGRTechOpsYard spawned with MineOpsAnimator")
+	_assert(ferrero != null and ferrero.global_position.x < -25.0 and ferrero.global_position.z < -5.0,
+		"FerreroNPC placed in NW Miniera Alpina (%s)" % str(ferrero.global_position if ferrero else Vector3.ZERO))
+	_assert(copper_n != null and copper_n.global_position.x < -25.0 and copper_n.global_position.z < -5.0, "ExtractionNode_Copper in NW Miniera Alpina")
+	_assert(silicon_n != null and silicon_n.global_position.x < -25.0 and silicon_n.global_position.z < -5.0, "ExtractionNode_Silicon in NW Miniera Alpina")
+	_assert(alloy_n != null and alloy_n.global_position.x < -25.0 and alloy_n.global_position.z < -5.0, "ExtractionNode_Alloy in NW Miniera Alpina")
+	_assert(ref_n != null and ref_n.global_position.x < -25.0 and ref_n.global_position.z < -5.0, "ProcessingStation_OGR in NW Miniera Alpina")
+	_assert(pad1_n != null and pad1_n.global_position.x < -25.0 and pad1_n.global_position.z < -5.0, "MiningRobotPad_1 in NW Miniera Alpina")
+	_assert(pad2_n != null and pad2_n.global_position.x < -25.0 and pad2_n.global_position.z < -5.0, "MiningRobotPad_2 in NW Miniera Alpina")
+	_assert(yard.get_node_or_null("MineCart/Wheel_0") != null and yard.get_node_or_null("RefineryAnim/CrusherWheel") != null and yard.get_node_or_null("QuarryCrane/JibPivot") != null and yard.get_node_or_null("ConveyorBeltRoot/ConveyorOre_0") != null,
+		"Miniera Alpina animated machinery nodes (MineCart, CrusherWheel, QuarryCrane/JibPivot, ConveyorOre) present")
 
 	var drone_ops := main_inst.find_child("DroneLabOps", true, false)
 	_assert(drone_ops != null, "DroneLabOps spawned in Borgo Po")
@@ -102,11 +121,12 @@ func _test_suite_1_incubatore_and_3d_world(main_inst: Node) -> void:
 	_assert(main_inst.find_child("DroneAssemblyBench", true, false) != null, "DroneAssemblyBench 3D spawned")
 	_assert(main_inst.find_child("DroneHelipadStation", true, false) != null, "DroneHelipadStation 3D spawned")
 	_assert(main_inst.find_child("IncubatorTerminal", true, false) != null, "IncubatorTerminal 3D spawned at Incubatore Startup Torino")
+	_assert(main_inst.find_child("BusStop_Miniera", true, false) != null, "5th GTT Bus Stop 'BusStop_Miniera' spawned at Miniera Alpina road")
 
 	var city_life := main_inst.find_child("CityLifeManager", true, false)
 	_assert(city_life != null, "CityLifeManager active in Street")
-	_assert(city_life.get("_pedestrians").size() >= 5, "At least 5 walking pedestrians spawned in Torino")
-	_assert(city_life.get("_moving_cars").size() >= 3, "At least 3 moving street cars spawned in Torino")
+	_assert(city_life.get("_pedestrians").size() >= 7, "All 7 walking pedestrians spawned incl. Parco & Miniera Alpina (%d)" % city_life.get("_pedestrians").size())
+	_assert(city_life.get("_moving_cars").size() >= 4, "All 4 moving street cars spawned incl. MovingCar_Miniera_Haul (%d)" % city_life.get("_moving_cars").size())
 
 
 func _test_suite_2_extraction_and_refinery(main_inst: Node) -> void:
@@ -133,7 +153,7 @@ func _test_suite_2_extraction_and_refinery(main_inst: Node) -> void:
 	refinery.interact(null)
 	_assert(TechOpsManager.get_carried_total() == 0, "Refinery interaction emptied player's carry crate")
 	_assert(TechOpsManager.research_credits > rc_before, "Refinery awarded Research Credits (🔬 RC: %d -> %d)" % [rc_before, TechOpsManager.research_credits])
-	_assert(TechOpsManager.get_warehouse_total() > wh_before, "Refinery stocked OGR Warehouse (%d -> %d)" % [wh_before, TechOpsManager.get_warehouse_total()])
+	_assert(TechOpsManager.get_warehouse_total() > wh_before, "Refinery stocked Warehouse (%d -> %d)" % [wh_before, TechOpsManager.get_warehouse_total()])
 
 	# Verify direct sell for Euros as well
 	TechOpsManager.extract_from_node("node_copper")
@@ -185,7 +205,7 @@ func _test_suite_4_mining_robots_and_sleep_simulation(main_inst: Node) -> void:
 
 	var wh_before_collect := TechOpsManager.get_warehouse_total()
 	var collected := TechOpsManager.collect_from_robot(1)
-	_assert(collected > 0 and TechOpsManager.get_warehouse_total() > wh_before_collect, "Collected %d materials from Mining Robot MK1 into OGR Warehouse" % collected)
+	_assert(collected > 0 and TechOpsManager.get_warehouse_total() > wh_before_collect, "Collected %d materials from Mining Robot MK1 into Warehouse" % collected)
 
 	# Upgrade to MK2 (requires tech_automation Lv.3) + Conveyor (tech_automation Lv.2)
 	TechOpsManager.research_branch("tech_automation") # Lv.2
@@ -194,7 +214,7 @@ func _test_suite_4_mining_robots_and_sleep_simulation(main_inst: Node) -> void:
 	_assert(TechOpsManager.unlock_conveyor(), "Conveyor belt automation unlocked")
 	var wh_before := TechOpsManager.get_warehouse_total()
 	TechOpsManager.simulate_sleep_hours(6.0)
-	_assert(TechOpsManager.get_warehouse_total() > wh_before, "With Conveyor active, sleep production flows directly into OGR Warehouse")
+	_assert(TechOpsManager.get_warehouse_total() > wh_before, "With Conveyor active, sleep production flows directly into Warehouse")
 
 
 func _test_suite_5_drone_7_step_assembly_and_missions(main_inst: Node) -> void:
@@ -285,12 +305,14 @@ func _test_suite_7_autonomous_employees_shop_hours_vehicles_and_saveload(main_in
 	CalendarSystem.current_hour = 11 # 11:00 AM -> open
 	_assert(ShopManager.is_shop_open("panificio"), "Forno Bruno is open at 11:00 AM")
 
-	# Mobility progression check
+	# Mobility progression check (incl. 5th Bus Stop Miniera Alpina!)
 	_assert(TechOpsManager.unlock_and_toggle_vehicle("bike"), "Unlocked & mounted Bici Tech Elettrica")
 	_assert(TechOpsManager.get_vehicle_speed_mult() > 1.3, "Bici Tech boosts player movement speed (%.2fx)" % TechOpsManager.get_vehicle_speed_mult())
 	_assert(TechOpsManager.unlock_and_toggle_vehicle("company_ev"), "Unlocked & mounted Auto Elettrica Aziendale")
 	_assert(TechOpsManager.get_vehicle_speed_mult() > 1.7, "Auto Elettrica boosts player movement speed (%.2fx)" % TechOpsManager.get_vehicle_speed_mult())
-	_assert(TechOpsManager.travel_by_bus("bus_ogr"), "GTT Bus Stop fast-travels player to Mercato Nord & Polo OGR")
+	_assert(TechOpsManager.travel_by_bus("bus_ogr"), "GTT Bus Stop fast-travels player to Mercato Nord & OGR Hub")
+	_assert(TechOpsManager.travel_by_bus("bus_miniera") and GameManager.player_node.global_position.x < -30.0 and GameManager.player_node.global_position.z < 10.0,
+		"5th GTT Bus Stop 'bus_miniera' fast-travels player to Miniera Alpina approach")
 
 	# Save/Load round-trip
 	var rc_saved := TechOpsManager.research_credits
@@ -326,5 +348,109 @@ func _test_suite_8_toos_and_inventory_ui(main_inst: Node) -> void:
 		inv.call("_refresh_stats")
 		inv.call("_select_category", "gear")
 		await get_tree().process_frame
-		_assert(true, "InventoryMenu renders OGR Materials & Urban Mobility gear without runtime errors")
+		_assert(true, "InventoryMenu renders Miniera Alpina Materials & Urban Mobility gear without runtime errors")
+
+
+func _test_suite_9_miniera_alpina_and_animations(main_inst: Node) -> void:
+	print("\n[Suite 9] Parco->Miniera Physics Corridor, Walking Pedestrians (Walk/Idle/No-Slide) & 3D Machinery Animations")
+	var world := main_inst.get_node_or_null("GameWorld") as Node3D
+	_assert(world != null and world.get_world_3d() != null, "GameWorld physics world accessible")
+	var space := world.get_world_3d().direct_space_state
+
+	# 1. Parco -> Miniera Alpina archway & quarry gate raycast clear (mask 1)
+	var p_arch := PhysicsRayQueryParameters3D.create(Vector3(-41.5, 1.0, 16.0), Vector3(-41.5, 1.0, -4.0), 1)
+	var arch_hit := space.intersect_ray(p_arch)
+	_assert(arch_hit.is_empty(),
+		"Parco Valentino -> Miniera Alpina archway corridor clear (hit: %s)" % (str(arch_hit["collider"].name) if not arch_hit.is_empty() else "none"))
+
+	# 2. FerreroNPC interaction raycast in Miniera Alpina (mask 3)
+	var ferrero := main_inst.find_child("FerreroNPC", true, false) as StaticBody3D
+	var p_fer := PhysicsRayQueryParameters3D.create(Vector3(-49.2, 1.4, -12.8), Vector3(-51.5, 1.0, -12.8), 3)
+	var fer_hit := space.intersect_ray(p_fer)
+	_assert(ferrero != null and fer_hit.get("collider", null) == ferrero,
+		"FerreroNPC in Miniera Alpina reachable cleanly via interaction raycast")
+
+	# 3. Verify all 7 pedestrians have skeletal "Walk" & "Idle" & "Interact", start grounded Y=0, move along heading without sideways slide
+	var city_life := main_inst.find_child("CityLifeManager", true, false) as Node3D
+	var peds: Array = city_life.get("_pedestrians") if city_life else []
+	var ped_rigs_ok := peds.size() == 7
+	for p in peds:
+		var anim: AnimationPlayer = p.get("anim") as AnimationPlayer
+		var n: Node3D = p.get("node") as Node3D
+		if anim == null or not anim.has_animation("Walk") or not anim.has_animation("Idle") or not anim.has_animation("Interact") or n == null or absf(n.position.y) > 0.05:
+			ped_rigs_ok = false
+			break
+	_assert(ped_rigs_ok, "All 7 pedestrians have skeletal Walk/Idle/Interact animations and are grounded at Y=0.0")
+
+	# Capture initial transforms before stepping gameplay state
+	var yard := main_inst.find_child("OGRTechOpsYard", true, false) as Node3D
+	var minecart := yard.get_node_or_null("MineCart") as Node3D if yard else null
+	var mc_w0 := minecart.get_node_or_null("Wheel_0") as Node3D if minecart else null
+	var crusher := yard.get_node_or_null("RefineryAnim/CrusherWheel") as Node3D if yard else null
+	var crane_jib := yard.get_node_or_null("QuarryCrane/JibPivot") as Node3D if yard else null
+	var yield_cu := yard.get_node_or_null("ExtractionNode_Copper/YieldIcon") as Node3D if yard else null
+	var conv_ore := yard.get_node_or_null("ConveyorBeltRoot/ConveyorOre_0") as Node3D if yard else null
+	var pad1 := main_inst.find_child("MiningRobotPad_1", true, false)
+	var r1_drill := pad1.get_node_or_null("VisualRoot/DrillHead") as Node3D if pad1 else null
+	var r1_boom := pad1.get_node_or_null("VisualRoot/BoomArm") as Node3D if pad1 else null
+	var heli := main_inst.find_child("DroneHelipadStation", true, false)
+	var heli_vis := heli.get_node_or_null("VisualRoot") as Node3D if heli else null
+	var heli_r0 := heli_vis.get_node_or_null("Part2/Rotor_0") as Node3D if heli_vis else null
+	var cars: Array = city_life.get("_moving_cars") if city_life else []
+	var car0_node: Node3D = cars[0]["node"] as Node3D if cars.size() > 0 else null
+	var car0_w0: Node3D = (cars[0]["wheels"] as Array)[0] as Node3D if cars.size() > 0 else null
+
+	# Ensure robot & drone flight active so we verify their animations too!
+	GameManager.change_state(GameManager.GameState.FIRST_PERSON)
+	TechOpsManager.start_drone_mission("drone_lidar_survey")
+	var ped0 := peds[0]["node"] as Node3D
+	var ped0_start := ped0.position
+	var cart_z0 := minecart.position.z
+	var mc_wrot0 := mc_w0.rotation.x
+	var crush_z0 := crusher.rotation.z
+	var crane_y0 := crane_jib.rotation.y
+	var ore_pos0 := conv_ore.position
+	var drill_y0 := r1_drill.rotation.y
+	var rotor_y0 := heli_r0.rotation.y
+	var car0_pos0 := car0_node.position
+	var car0_wrot0 := car0_w0.rotation.x
+
+	# Advance simulation 20 frames (wait 20 physics/process steps at simulated delta via real process ticks)
+	for _i in range(20):
+		city_life._process(0.05)
+		yard._process(0.05)
+		pad1._process(0.05)
+		heli._process(0.05)
+		await get_tree().process_frame
+
+	# Check Pedestrian Walk state & forward orientation (zero sideways slide)
+	var ped0_move := ped0.position - ped0_start
+	ped0_move.y = 0.0
+	var ped0_fwd := Vector3(sin(ped0.rotation.y), 0.0, cos(ped0.rotation.y))
+	var ped0_anim := peds[0]["anim"] as AnimationPlayer
+	_assert(ped0_move.length() > 0.35 and ped0_fwd.dot(ped0_move.normalized()) > 0.90 and absf(ped0.position.y) <= 0.05 and ped0_anim.current_animation == "Walk",
+		"Pedestrian walks forward along heading (dot=%.2f, dist=%.2fm, anim='%s', Y=%.2f)" % [
+			ped0_fwd.dot(ped0_move.normalized()), ped0_move.length(), ped0_anim.current_animation, ped0.position.y
+		])
+
+	# Verify moving car position & spinning wheel
+	_assert(car0_node.position.distance_to(car0_pos0) > 1.0 and absf(car0_w0.rotation.x - car0_wrot0) > 1.0,
+		"Street car moves cleanly and spins Wheel_0 (dpos=%.2fm, dw=%.2frad)" % [
+			car0_node.position.distance_to(car0_pos0), absf(car0_w0.rotation.x - car0_wrot0)
+		])
+
+	# Verify MineOpsAnimator machinery
+	_assert(absf(minecart.position.z - cart_z0) > 0.2 and absf(mc_w0.rotation.x - mc_wrot0) > 0.5,
+		"MineCart travels on tunnel rail & spins Wheel_0 (dz=%.2fm)" % absf(minecart.position.z - cart_z0))
+	_assert(absf(crusher.rotation.z - crush_z0) > 1.0 and absf(crane_jib.rotation.y - crane_y0) > 0.05 and yield_cu.rotation.y > 0.5,
+		"Refinery CrusherWheel, QuarryCrane JibPivot & ore YieldIcon actively animate")
+	_assert(yard.get_node("ConveyorBeltRoot").visible and conv_ore.position.distance_to(ore_pos0) > 0.3,
+		"Installed ConveyorBeltRoot moves ConveyorOre chunks toward Refinery")
+
+	# Verify Robot & Drone flight animations
+	_assert(absf(r1_drill.rotation.y - drill_y0) > 2.0 and r1_boom.rotation.x != 0.0,
+		"Mining Robot MK1 spins DrillHead & articulates BoomArm")
+	_assert(heli_vis.position.y > 1.5 and absf(heli_r0.rotation.y - rotor_y0) > 5.0,
+		"TO-Drone MK1 takes off (Y=%.2fm) and spins rotors on active mission" % heli_vis.position.y)
+
 

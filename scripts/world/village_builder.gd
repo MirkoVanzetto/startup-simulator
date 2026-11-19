@@ -16,6 +16,7 @@ const OGR_GATE_SYNC_SCRIPT = preload("res://scripts/world/ogr_gate_sync.gd")
 const OGR_VIALE_SCRIPT = preload("res://scripts/world/ogr_viale_interactable.gd")
 const TECH_OPS_SCRIPT = preload("res://scripts/world/tech_ops_interactable.gd")
 const CITY_LIFE_SCRIPT = preload("res://scripts/world/city_life_manager.gd")
+const MINE_OPS_ANIM_SCRIPT = preload("res://scripts/world/mine_ops_animator.gd")
 
 
 # ------------------------------------------------------------------ STUDIO
@@ -124,9 +125,9 @@ static func build_village(street: Node3D) -> void:
 
 	# 1. Terreno e pavimentazioni a strati non sovrapposti (tutti top a Y=0.0, spessore sotto Y=0)
 	var terrain_sm := StyleMesh.new()
-	# Prato di base esteso da Parco Valentino Ovest (-68) a OGR Est (+132), diviso attorno al letto del Fiume Po (Z=65.8..77.2)
-	terrain_sm.box("grass", Vector3(32.0, -0.24, 21.9), Vector3(200.0, 0.40, 87.8), {"col": true, "surface": "grass"})
-	terrain_sm.box("grass", Vector3(32.0, -0.24, 87.6), Vector3(200.0, 0.40, 20.8), {"col": true, "surface": "grass"})
+	# Prato di base esteso da Miniera Alpina & Parco (-78) a OGR Est (+134), diviso attorno al letto del Fiume Po (Z=65.8..77.2)
+	terrain_sm.box("grass", Vector3(28.0, -0.24, 1.9), Vector3(212.0, 0.40, 127.8), {"col": true, "surface": "grass"})
+	terrain_sm.box("grass", Vector3(28.0, -0.24, 87.6), Vector3(212.0, 0.40, 20.8), {"col": true, "surface": "grass"})
 	# Via del Borgo (Z: 2.5 .. 13.5, X: -4.2 .. 4.2) top Y=0.0
 	terrain_sm.box("cobble", Vector3(0, -0.05, 8.0), Vector3(8.4, 0.10, 11.2), {"col": true, "surface": "stone"})
 	# Piazzetta San Carlo (Z: 13.5 .. 27.5, X: -10.5 .. 10.5) top Y=0.0
@@ -138,13 +139,15 @@ static func build_village(street: Node3D) -> void:
 	# Piazzole parcheggio in asfalto libere dagli edifici
 	terrain_sm.box("asphalt", Vector3(-15.2, -0.045, 11.8), Vector3(7.6, 0.09, 5.4), {"col": true, "surface": "asphalt"})
 	terrain_sm.box("asphalt", Vector3(15.2, -0.045, 11.8), Vector3(7.6, 0.09, 5.4), {"col": true, "surface": "asphalt"})
-	# Sentieri parchetto San Carlo & Raccordo Parco Valentino Ovest (varco ovest Z=36.8!)
+	# Sentieri parchetto San Carlo & Raccordo Parco Valentino Ovest (varco ovest Z=36.8 + raccordo Nord Miniera X=-41.5!)
 	terrain_sm.box("gravel", Vector3(-7.5, -0.04, 30.0), Vector3(4.2, 0.08, 6.0), {"col": true, "surface": "stone"})
 	terrain_sm.box("gravel", Vector3(-11.8, -0.04, 35.8), Vector3(4.8, 0.08, 4.4), {"col": true, "surface": "stone"})
 	terrain_sm.box("gravel", Vector3(-31.0, -0.04, 36.8), Vector3(38.0, 0.08, 4.4), {"col": true, "surface": "stone"})
 	terrain_sm.box("gravel", Vector3(-37.5, -0.04, 27.0), Vector3(4.2, 0.08, 19.6), {"col": true, "surface": "stone"})
 	terrain_sm.box("gravel", Vector3(-42.5, -0.04, 21.2), Vector3(9.0, 0.08, 3.2), {"col": true, "surface": "stone"})
 	terrain_sm.box("gravel", Vector3(-42.5, -0.04, 32.5), Vector3(9.0, 0.08, 3.2), {"col": true, "surface": "stone"})
+	terrain_sm.box("gravel", Vector3(-41.5, -0.04, 16.5), Vector3(4.2, 0.08, 9.6), {"col": true, "surface": "stone"})
+	terrain_sm.box("gravel", Vector3(-41.5, -0.04, 1.5), Vector3(5.0, 0.08, 21.5), {"col": true, "surface": "stone"})
 
 	# Raccordo in acciottolato + Strada Asfaltata Est verso Borgo Valdocco (asse Z=28.0)
 	terrain_sm.box("cobble", Vector3(8.25, -0.05, 29.1), Vector3(4.5, 0.10, 3.2), {"col": true, "surface": "stone"})
@@ -227,8 +230,9 @@ static func build_village(street: Node3D) -> void:
 	_add_garden_wall(terrain_sm, Vector3(-24.0, 0.65, 54.0), Vector3(0.5, 1.3, 24.0))
 	_add_garden_wall(terrain_sm, Vector3(56.0, 0.65, 54.0), Vector3(0.5, 1.3, 24.0))
 
-	# Muretti Parco Valentino Ovest (X: -56 .. -24, Z: 12 .. 42)
-	_add_garden_wall(terrain_sm, Vector3(-40.0, 0.65, 12.0), Vector3(32.0, 1.3, 0.5))
+	# Muretti Parco Valentino Ovest (X: -56 .. -24, Z: 12 .. 42, muro Nord aperto X=-44.5..-38.5 per Miniera Alpina!)
+	_add_garden_wall(terrain_sm, Vector3(-50.25, 0.65, 12.0), Vector3(11.5, 1.3, 0.5))
+	_add_garden_wall(terrain_sm, Vector3(-31.25, 0.65, 12.0), Vector3(14.5, 1.3, 0.5))
 	_add_garden_wall(terrain_sm, Vector3(-40.0, 0.65, 42.0), Vector3(32.0, 1.3, 0.5))
 	_add_garden_wall(terrain_sm, Vector3(-56.0, 0.65, 27.0), Vector3(0.5, 1.3, 30.0))
 
@@ -252,11 +256,13 @@ static func build_village(street: Node3D) -> void:
 	# Archi stradali & parchi + cartelli + pozzo storico
 	VillageProps.add_archway_gate(terrain_sm, Vector3(24.0, 0.0, 28.0), 6.4, 3.7, PI * 0.5)
 	VillageProps.add_archway_gate(terrain_sm, Vector3(-24.0, 0.0, 36.8), 6.4, 3.7, PI * 0.5)
+	VillageProps.add_archway_gate(terrain_sm, Vector3(-41.5, 0.0, 12.0), 6.0, 3.7, 0.0)
 	VillageProps.add_archway_gate(terrain_sm, Vector3(79.0, 0.0, 14.0), 6.4, 3.7, 0.0)
 	VillageProps.add_archway_gate(terrain_sm, Vector3(8.2, 0.0, 42.0), 6.4, 3.7, 0.0)
 	VillageProps.add_road_sign(terrain_sm, Vector3(21.8, 0.0, 24.0), -PI * 0.5)
 	VillageProps.add_road_sign(terrain_sm, Vector3(61.5, 0.0, 24.4), -PI * 0.5)
 	VillageProps.add_road_sign(terrain_sm, Vector3(-21.2, 0.0, 32.8), PI * 0.5)
+	VillageProps.add_road_sign(terrain_sm, Vector3(-44.8, 0.0, 14.5), 0.0)
 	VillageProps.add_road_sign(terrain_sm, Vector3(74.4, 0.0, 15.8), 0.0)
 	VillageProps.add_road_sign(terrain_sm, Vector3(4.5, 0.0, 39.8), 0.0)
 	VillageProps.add_well(terrain_sm, Vector3(68.5, 0.0, 22.8))
@@ -269,8 +275,8 @@ static func build_village(street: Node3D) -> void:
 		VillageProps.add_tree(terrain_sm, Vector3(tx_po, 0.0, 80.2), int(absf(tx_po)) + 150, 1.45)
 	for tx2 in [-16.0, -4.0, 8.0, 20.0]:
 		VillageProps.add_tree(terrain_sm, Vector3(tx2, 0.0, -12.5), int(absf(tx2)) + 60, 1.35)
-	for px in [-52.0, -39.0, -29.0]:
-		VillageProps.add_tree(terrain_sm, Vector3(px, 0.0, 9.0), int(absf(px)) + 88, 1.35)
+	for px in [-59.5, -26.5]:
+		VillageProps.add_pine_tree(terrain_sm, Vector3(px, 0.0, 6.5), int(absf(px)) + 88, 1.25)
 	for pz in [15.5, 27.5, 39.5]:
 		VillageProps.add_tree(terrain_sm, Vector3(-59.5, 0.0, pz), int(pz) + 120, 1.45)
 	for vx in [32.0, 44.0, 56.0]:
@@ -286,6 +292,8 @@ static func build_village(street: Node3D) -> void:
 	_add_sign(street, "BORGO SAN CARLO ➔", Vector3(24.28, 3.52, 28.0), PI * 0.5, 24, Color(1.0, 0.90, 0.52))
 	_add_sign(street, "← PARCO VALENTINO · VILLE", Vector3(-23.72, 3.52, 36.8), PI * 0.5, 24, Color(0.74, 0.96, 0.72))
 	_add_sign(street, "BORGO SAN CARLO ➔", Vector3(-24.28, 3.52, 36.8), -PI * 0.5, 24, Color(1.0, 0.90, 0.52))
+	_add_sign(street, "▲ MINIERA ALPINA · VAL DI SUSA", Vector3(-41.5, 3.52, 12.28), 0.0, 22, Color(1.0, 0.88, 0.45))
+	_add_sign(street, "▼ PARCO VALENTINO · BORGO SAN CARLO", Vector3(-41.5, 3.52, 11.72), PI, 21, Color(0.74, 0.96, 0.72))
 	_add_sign(street, "▲ MERCATO NORD · POSTE · OGR", Vector3(79.0, 3.52, 14.28), 0.0, 22, Color(0.84, 0.94, 1.0))
 	_add_sign(street, "▼ BORGO VALDOCCO · OFFICINA", Vector3(79.0, 3.52, 13.72), PI, 22, Color(1.0, 0.90, 0.52))
 	_add_sign(street, "▼ BORGO PO · LUNGO PO · INCUBATORE", Vector3(8.2, 3.52, 41.72), PI, 22, Color(0.68, 0.94, 1.0))
@@ -293,6 +301,7 @@ static func build_village(street: Node3D) -> void:
 	_add_sign(street, "BORGO VALDOCCO ➔\nOfficina Bellini (40m)", Vector3(21.70, 2.05, 24.0), -PI * 0.5, 20, Color(1.0, 0.95, 0.80))
 	_add_sign(street, "★ BORGO VALDOCCO ★\nOfficina Bellini", Vector3(61.40, 2.05, 24.4), -PI * 0.5, 20, Color(1.0, 0.95, 0.72))
 	_add_sign(street, "← PARCO VALENTINO\nLaghetto & Ville", Vector3(-21.10, 2.05, 32.8), PI * 0.5, 20, Color(0.82, 0.98, 0.78))
+	_add_sign(street, "▲ MINIERA ALPINA\nEstrazione & Robot", Vector3(-44.8, 2.05, 14.62), 0.0, 20, Color(1.0, 0.90, 0.52))
 	_add_sign(street, "MERCATO & OGR ➔\nUfficio Postale", Vector3(74.4, 2.05, 15.92), 0.0, 20, Color(0.88, 0.96, 1.0))
 	_add_sign(street, "BORGO PO & FIUME PO ▼\nIncubatore · Lab Droni · Molo", Vector3(4.5, 2.05, 39.68), PI, 19, Color(0.76, 0.95, 1.0))
 	_add_sign(street, "★ MOLO SUL PO ★", Vector3(16.0, 1.15, 65.80), PI, 22, Color(0.84, 0.95, 1.0))
@@ -631,7 +640,7 @@ static func build_village(street: Node3D) -> void:
 	VillageProps.add_gazebo(houses_sm, Vector3(-47.5, 0, 17.0), 2.4)
 	VillageProps.add_house(houses_sm, Vector3(-34.0, 0, 16.0), 6.8, 5.6, 2, {"wall": "plaster_cream", "roof": "roof_terracotta", "shutter": "fabric_green"})
 	VillageProps.add_house(houses_sm, Vector3(-28.0, 0, 26.5), 6.2, 5.2, 2, {"wall": "plaster_rose", "roof": "roof_slate", "shutter": "fabric_blue", "rot": -PI * 0.5})
-	for p_tab in [Vector3(-42.5, 0, 15.0), Vector3(-40.2, 0, 14.8), Vector3(-42.8, 0, 17.2)]:
+	for p_tab in [Vector3(-52.8, 0, 14.8), Vector3(-52.8, 0, 17.8), Vector3(-50.2, 0, 13.8)]:
 		VillageProps.add_table_set(houses_sm, p_tab, "fabric_cream")
 		VillageProps.add_parasol(houses_sm, p_tab, "fabric_cream")
 
@@ -754,7 +763,7 @@ static func build_village(street: Node3D) -> void:
 		Vector3(23.0, 0, 24.6), Vector3(32.0, 0, 24.6), Vector3(43.0, 0, 31.4),
 		Vector3(54.0, 0, 24.6), Vector3(63.5, 0, 24.6), Vector3(63.5, 0, 31.4),
 		Vector3(77.5, 0, 23.0), Vector3(77.5, 0, 32.5),
-		Vector3(-35.2, 0, 34.2), Vector3(-43.0, 0, 22.8), Vector3(-40.5, 0, 18.2), Vector3(-52.5, 0, 32.8),
+		Vector3(-35.2, 0, 34.2), Vector3(-43.0, 0, 22.8), Vector3(-38.2, 0, 14.2), Vector3(-52.5, 0, 32.8),
 		Vector3(70.5, 0, 12.2), Vector3(85.2, 0, 12.2), Vector3(71.5, 0, -1.5), Vector3(85.5, 0, -1.5),
 		Vector3(2.6, 0, 44.5), Vector3(13.8, 0, 44.5),
 		Vector3(-18.0, 0, 60.9), Vector3(-5.0, 0, 60.9), Vector3(5.0, 0, 60.9),
@@ -784,7 +793,7 @@ static func build_village(street: Node3D) -> void:
 		[Vector3(84.5, 0, 38.5), 28, 1.20],
 		[Vector3(-52.8, 0, 20.5), 31, 1.25],
 		[Vector3(-52.8, 0, 33.5), 32, 1.30],
-		[Vector3(-41.5, 0, 14.8), 33, 1.15],
+		[Vector3(-53.2, 0, 24.5), 33, 1.15],
 		[Vector3(-33.5, 0, 23.5), 34, 1.10],
 		[Vector3(-41.5, 0, 39.8), 35, 1.25],
 		[Vector3(-28.0, 0, 39.8), 36, 1.18],
@@ -805,7 +814,7 @@ static func build_village(street: Node3D) -> void:
 		Vector3(-11.2, 0, 15.6), Vector3(11.2, 0, 15.6),
 		Vector3(27.0, 0, 32.4), Vector3(51.5, 0, 24.0),
 		Vector3(64.5, 0, 33.5),
-		Vector3(-42.5, 0, 18.8), Vector3(-34.2, 0, 32.8),
+		Vector3(-51.5, 0, 21.5), Vector3(-34.2, 0, 32.8),
 		Vector3(68.2, 0, -1.8), Vector3(87.0, 0, -6.2),
 		Vector3(-18.5, 0, 64.5), Vector3(12.2, 0, 64.5), Vector3(19.8, 0, 64.5), Vector3(48.5, 0, 64.5)
 	]:
@@ -1076,9 +1085,10 @@ static func _scatter_grass_tufts(sm: StyleMesh) -> void:
 	var rnd := RandomNumberGenerator.new()
 	rnd.seed = 202611
 
-	# 1. Parco Valentino: lungo muretti, alberi, laghetto e sentieri in ghiaia (come Rif 1)
+	# 1. Parco Valentino: lungo muretti, alberi, laghetto e sentieri in ghiaia (esclude varco Miniera Nord X=-44.5..-38.5)
 	for px in range(-54, -25, 3):
-		sm.grass_tuft("grass_tuft", Vector3(float(px) + rnd.randf_range(-0.4, 0.4), 0.0, 12.45), rnd.randf_range(0.75, 1.15), rnd.randf() * TAU)
+		if px < -45 or px > -38:
+			sm.grass_tuft("grass_tuft", Vector3(float(px) + rnd.randf_range(-0.4, 0.4), 0.0, 12.45), rnd.randf_range(0.75, 1.15), rnd.randf() * TAU)
 		sm.grass_tuft("grass_tuft", Vector3(float(px) + rnd.randf_range(-0.4, 0.4), 0.0, 41.50), rnd.randf_range(0.75, 1.15), rnd.randf() * TAU)
 	for pz in range(14, 41, 3):
 		sm.grass_tuft("grass_tuft", Vector3(-55.52, 0.0, float(pz) + rnd.randf_range(-0.4, 0.4)), rnd.randf_range(0.80, 1.18), rnd.randf() * TAU)
@@ -1126,139 +1136,344 @@ static func _scatter_grass_tufts(sm: StyleMesh) -> void:
 
 
 static func _build_post_ogr_and_city_life(street: Node3D) -> void:
-	# 1. POLO MATERIALI & AUTOMAZIONE OGR (Cortile Sud OGR: X=88.2..95.4, Z=6.4..13.4)
-	# Totalmente fuori dai corridoi raycast (Z=2.75 e X>=96.15).
+	# 1. MINIERA ALPINA · POLO ESTRATTIVO VAL DI SUSA (Nord-Ovest verso le Alpi: X=-67..-27, Z=-39..-5)
+	# Accessibile dal nuovo arco Nord di Parco Valentino (X=-41.5, Z=12.0), fuori dai corridoi San Carlo/Valdocco/OGR.
 	var yard := Node3D.new()
 	yard.name = "OGRTechOpsYard"
-	street.add_child(yard)
 
 	var ysm := StyleMesh.new()
-	# Piazzale industriale cemento + cordolo giallo/nero sicurezza
-	ysm.box("concrete", Vector3(91.8, 0.02, 10.2), Vector3(7.6, 0.04, 6.6))
-	ysm.box("safety_yellow", Vector3(91.8, 0.05, 6.95), Vector3(7.5, 0.03, 0.14))
-	ysm.box("safety_yellow", Vector3(91.8, 0.05, 13.45), Vector3(7.5, 0.03, 0.14))
-	# Tettoia in acciaio industriale sopra i banchi di estrazione (Z=12.2)
-	for px in [88.3, 95.3]:
-		ysm.box("iron_dark", Vector3(px, 1.85, 12.2), Vector3(0.18, 3.7, 0.18), {"col": true, "surface": "metal"})
-	ysm.box("factory_roof", Vector3(91.8, 3.68, 12.2), Vector3(7.4, 0.18, 2.2))
-	ysm.box("orange_accent", Vector3(91.8, 3.60, 11.12), Vector3(7.35, 0.08, 0.06))
+	# Terreno cava in terra battuta & ghiaia compatta + area di manovra davanti alla raffineria e alle robot pads
+	ysm.box("quarry_dirt", Vector3(-47.0, -0.028, -22.0), Vector3(40.0, 0.05, 34.0), {"col": true, "surface": "stone"})
+	ysm.box("gravel", Vector3(-41.5, -0.022, -7.0), Vector3(6.2, 0.05, 5.2))
 
-	# Strutture fisse dei 3 banchi di estrazione (Z=12.2)
-	var vein_positions := [
-		{"pos": Vector3(89.2, 0.0, 12.2), "mat": "terracotta", "core": "orange_accent"},
-		{"pos": Vector3(91.8, 0.0, 12.2), "mat": "server_glow", "core": "cyan_accent"},
-		{"pos": Vector3(94.4, 0.0, 12.2), "mat": "purple_accent", "core": "safety_yellow"}
+	# Barriere di sicurezza e muretti di cava sul lato Sud (lasciano aperto il varco carraio X=-44.5..-38.5!)
+	for seg_x in [[-55.75, 22.5], [-32.75, 11.5]]:
+		var sx := float(seg_x[0])
+		var sw := float(seg_x[1])
+		ysm.box("stone_dark", Vector3(sx, 0.55, -5.0), Vector3(sw, 1.10, 0.52), {"col": true, "surface": "stone"})
+		ysm.box("safety_yellow", Vector3(sx, 1.14, -5.0), Vector3(sw, 0.08, 0.56))
+	for pz_fence in [-22.0]:
+		ysm.box("stone_dark", Vector3(-67.0, 0.55, pz_fence), Vector3(0.55, 1.10, 34.0), {"col": true, "surface": "stone"})
+		ysm.box("stone_dark", Vector3(-27.0, 0.55, pz_fence), Vector3(0.55, 1.10, 34.0), {"col": true, "surface": "stone"})
+
+	# Massicci alpini e scarpate rocciose scolpite dietro e ai lati della cava (niente muri a mattoni rettangolari!)
+	ysm.mountain_peak("quarry_rock", Vector3(-60.5, -0.2, -46.0), 28.0, 16.0, 9.8, 401)
+	ysm.mountain_peak("alpine_peak", Vector3(-46.0, -0.2, -48.5), 26.0, 17.5, 11.8, 402)
+	ysm.mountain_peak("quarry_rock", Vector3(-31.5, -0.2, -46.0), 27.0, 16.0, 9.4, 403)
+	ysm.mountain_peak("quarry_slate", Vector3(-70.0, -0.2, -29.5), 11.5, 29.0, 7.8, 404)
+	ysm.mountain_peak("quarry_slate", Vector3(-23.5, -0.2, -31.5), 10.5, 23.0, 6.8, 405)
+	# Gradoni rocciosi irregolari + contrafforti naturali lungo i bordi (lasciano libera la bocca X=-48.5..-43.5)
+	for rb in [
+		[Vector3(-62.5, 1.1, -40.2), Vector3(6.2, 2.2, 2.6), "quarry_rock", 41],
+		[Vector3(-54.2, 1.3, -40.4), Vector3(5.6, 2.6, 2.8), "quarry_slate", 42],
+		[Vector3(-37.8, 1.2, -40.4), Vector3(5.8, 2.4, 2.8), "quarry_slate", 43],
+		[Vector3(-30.0, 1.0, -40.0), Vector3(6.0, 2.0, 2.6), "quarry_rock", 44],
+		[Vector3(-66.5, 1.2, -34.0), Vector3(3.2, 2.4, 5.4), "quarry_slate", 45],
+		[Vector3(-66.8, 1.0, -24.0), Vector3(2.8, 2.0, 4.8), "quarry_rock", 46],
+		[Vector3(-27.2, 1.1, -33.0), Vector3(3.0, 2.2, 5.2), "quarry_slate", 47],
+	]:
+		ysm.blob(rb[2], rb[0], rb[1] * 0.62, 5, 8, 0.28, int(rb[3]))
+	# Collider perimetrali puliti dietro le pareti della cava (lasciano accessibile la bocca fino Z=-39.0)
+	ysm.add_collider_box(Vector3(-57.5, 3.0, -40.6), Vector3(19.0, 6.0, 2.4))
+	ysm.add_collider_box(Vector3(-34.5, 3.0, -40.6), Vector3(17.5, 6.0, 2.4))
+	ysm.add_collider_box(Vector3(-46.0, 3.0, -44.2), Vector3(14.0, 6.0, 2.4))
+	ysm.add_collider_box(Vector3(-68.2, 3.0, -23.0), Vector3(2.6, 6.0, 34.0))
+	ysm.add_collider_box(Vector3(-25.8, 3.0, -23.0), Vector3(2.6, 6.0, 34.0))
+
+	# Rocce scolpite naturali lungo il piede delle scarpate della cava
+	var rock_outcrops := [
+		[Vector3(-64.0, 0.7, -37.2), Vector3(2.4, 1.4, 1.8), "quarry_rock", 3],
+		[Vector3(-53.2, 0.8, -38.8), Vector3(2.1, 1.5, 1.6), "quarry_slate", 9],
+		[Vector3(-33.0, 0.8, -38.6), Vector3(2.2, 1.5, 1.7), "quarry_rock", 14],
+		[Vector3(-28.4, 0.7, -34.0), Vector3(1.8, 1.4, 2.0), "quarry_slate", 21],
+		[Vector3(-64.8, 0.7, -21.0), Vector3(1.9, 1.2, 2.2), "quarry_rock", 27],
 	]
-	for vp in vein_positions:
-		var p: Vector3 = vp["pos"]
-		ysm.box("iron_dark", p + Vector3(0, 0.42, 0), Vector3(1.55, 0.84, 1.15), {"col": true, "surface": "metal"})
-		ysm.box("metal", p + Vector3(0, 0.86, 0), Vector3(1.62, 0.06, 1.22))
-		ysm.cyl(vp["mat"], p + Vector3(-0.35, 1.08, 0.05), 0.18, 0.24, 0.38, 8)
-		ysm.cyl(vp["core"], p + Vector3(0.32, 1.12, -0.08), 0.16, 0.22, 0.44, 8)
+	for ro in rock_outcrops:
+		ysm.blob(ro[2], ro[0], ro[1], 5, 8, 0.25, int(ro[3]))
 
-	# Stazione Raffineria & Smistamento OGR (X=89.2, Z=8.4)
-	var ref_p := Vector3(89.2, 0.0, 8.4)
-	ysm.box("server_body", ref_p + Vector3(0, 0.65, 0), Vector3(1.55, 1.30, 1.10), {"col": true, "surface": "metal"})
-	ysm.box("orange_accent", ref_p + Vector3(0, 1.32, 0), Vector3(1.60, 0.08, 1.14))
-	ysm.cyl("metal", ref_p + Vector3(-0.42, 1.68, -0.15), 0.20, 0.24, 0.65, 10)
-	ysm.box("cyan_accent", ref_p + Vector3(0.30, 1.05, -0.56), Vector3(0.55, 0.34, 0.04))
+	# 16 Pini alpini lungo i versanti della cava e il viale d'accesso verso Parco Valentino
+	var pine_spots := [
+		[Vector3(-64.2, 1.2, -39.6), 201, 1.25],
+		[Vector3(-56.2, 1.4, -40.4), 202, 1.32],
+		[Vector3(-37.2, 1.4, -40.4), 203, 1.28],
+		[Vector3(-29.2, 1.2, -39.6), 204, 1.22],
+		[Vector3(-68.2, 0.4, -34.0), 205, 1.32],
+		[Vector3(-68.5, 0.2, -23.0), 206, 1.26],
+		[Vector3(-68.2, 0.0, -12.0), 207, 1.22],
+		[Vector3(-63.5, 0.0, -7.2), 208, 1.08],
+		[Vector3(-25.4, 0.3, -30.0), 209, 1.28],
+		[Vector3(-25.2, 0.0, -18.5), 210, 1.22],
+		[Vector3(-25.2, 0.0, -7.5), 211, 1.15],
+		[Vector3(-51.5, 0.0, -3.2), 212, 1.18],
+		[Vector3(-46.8, 0.0, 2.5), 213, 1.15],
+		[Vector3(-36.2, 0.0, 1.5), 214, 1.22],
+		[Vector3(-33.5, 0.0, -4.0), 215, 1.12],
+		[Vector3(-48.5, 0.0, 8.8), 216, 1.10],
+	]
+	for ps in pine_spots:
+		VillageProps.add_pine_tree(ysm, ps[0], int(ps[1]), float(ps[2]))
 
-	# Basamenti per Mining Robot MK1 (X=92.0, Z=8.4) e MK2 (X=94.4, Z=8.4)
-	for rx in [92.0, 94.4]:
-		ysm.box("iron_dark", Vector3(rx, 0.08, 8.4), Vector3(1.45, 0.16, 1.45), {"col": true, "surface": "metal"})
-		ysm.cyl("safety_yellow", Vector3(rx, 0.17, 8.4), 0.56, 0.58, 0.03, 14)
+	# Portale galleria mineraria, binari ferroviari, portale insegna in legno & respingente di fine corsa
+	VillageProps.add_mine_tunnel_portal(ysm, Vector3(-46.0, 0.0, -38.8), 0.0)
+	VillageProps.add_mine_tracks(ysm, Vector3(-46.0, 0.0, -39.6), Vector3(-46.0, 0.0, -25.8), 0.65)
+	ysm.box("mine_timber", Vector3(-46.0, 0.26, -25.6), Vector3(1.38, 0.52, 0.24), {"col": true})
+	ysm.box("safety_yellow", Vector3(-46.0, 0.42, -25.46), Vector3(1.24, 0.14, 0.04))
+	# Tabellone in legno sopra l'ingresso della Galleria 01 + portale d'intestazione Miniera Alpina
+	ysm.box("iron_dark", Vector3(-46.0, 3.08, -37.68), Vector3(3.15, 0.44, 0.10))
+	ysm.box("safety_yellow", Vector3(-46.0, 3.32, -37.68), Vector3(3.20, 0.06, 0.12))
+	for gx_p in [-49.8, -42.2]:
+		ysm.box("mine_timber", Vector3(gx_p, 2.25, -37.05), Vector3(0.24, 4.5, 0.24), {"col": true})
+	ysm.box("mine_timber", Vector3(-46.0, 4.42, -37.05), Vector3(7.9, 0.48, 0.24))
 
-	VillageProps.spawn_mesh_and_collisions(yard, "OGRYardStaticMesh", ysm, "metal")
-	_add_sign(yard, "★ POLO MATERIALI & AUTOMAZIONE OGR ★", Vector3(91.8, 3.92, 11.02), PI, 20, Color(1.0, 0.86, 0.38))
-	_add_sign(yard, "RAFFINERIA RC & MAGAZZINO", Vector3(89.2, 1.88, 7.80), PI, 14, Color(0.45, 0.95, 1.0))
-	_add_omni(yard, Vector3(91.8, 3.3, 10.2), Color(1.0, 0.88, 0.68), 0.95, 11.0)
+	# Gru di cava gialla (torre statica + collider; sbraccio rotante aggiunto come child animato sotto)
+	VillageProps.add_quarry_crane_base(ysm, Vector3(-53.5, 0.0, -32.5))
 
-	# Capotecnico Ferrero NPC
-	_spawn_npc(yard, "FerreroNPC", Vector3(88.8, 0.04, 6.4), PI, TECH_OPS_SCRIPT, {
-		"shirt": "orange_accent", "pants": "npc_pants_navy", "hair": "hair_gray", "apron": "iron_dark", "glasses": true
-	}, "Ing. Dario Ferrero\n[E] Polo Materiali OGR", Color(1.0, 0.82, 0.38), {
+	# 3 Filoni rocciosi cristallini di estrazione
+	var extraction_defs := [
+		{"name": "ExtractionNode_Copper", "id": "node_copper", "title": "Filone Rame & Circuiti", "pos": Vector3(-60.2, 0.0, -30.5), "rot": 0.65, "ore": "ore_copper", "spark": Color(1.0, 0.62, 0.20)},
+		{"name": "ExtractionNode_Silicon", "id": "node_silicon", "title": "Filone Quarzo Silicio & Alluminio", "pos": Vector3(-38.8, 0.0, -36.8), "rot": -0.25, "ore": "ore_silicon", "spark": Color(0.32, 0.92, 1.0)},
+		{"name": "ExtractionNode_Alloy", "id": "node_alloy", "title": "Filone Terre Rare & Compositi", "pos": Vector3(-31.8, 0.0, -28.0), "rot": -1.15, "ore": "ore_rare", "spark": Color(0.82, 0.44, 1.0)}
+	]
+	for ed in extraction_defs:
+		VillageProps.add_ore_vein_outcrop(ysm, ed["pos"], ed["ore"], ed["rot"])
+
+	# Stazione Raffineria & Frantoio Industriale (X=-35.0, Z=-17.5) + tabellone frontale leggibile
+	var ref_p := Vector3(-35.0, 0.0, -17.5)
+	VillageProps.add_ore_refinery_static(ysm, ref_p, 0.0)
+	ysm.box("iron_dark", ref_p + Vector3(0.35, 2.26, 0.72), Vector3(2.25, 0.36, 0.08))
+
+	# Piazzole di cemento + cornici gialle per Mining Robot MK1 (X=-51.0, Z=-21.5) & MK2 (X=-44.0, Z=-21.5)
+	for rx_pad in [-51.0, -44.0]:
+		ysm.box("concrete", Vector3(rx_pad, 0.08, -21.5), Vector3(1.85, 0.16, 1.85), {"col": true, "surface": "metal"})
+		ysm.box("iron_dark", Vector3(rx_pad, 0.17, -21.5), Vector3(1.52, 0.04, 1.52))
+		ysm.cyl("safety_yellow", Vector3(rx_pad, 0.18, -21.5), 0.62, 0.64, 0.03, 14)
+
+	# Container ufficio geologico + Autocarro cava parcheggiato
+	VillageProps.add_quarry_cabin(ysm, Vector3(-56.5, 0.0, -14.5), 0.35)
+	VillageProps.add_quarry_truck(ysm, Vector3(-34.2, 0.0, -10.5), -0.55)
+
+	# 4 Torri faro industriali da cava (gruppo "day_night_lamp" così si accendono automaticamente la sera)
+	for fl in [
+		[Vector3(-63.5, 0.0, -24.5), 0.55],
+		[Vector3(-51.5, 0.0, -6.6), -0.35],
+		[Vector3(-33.5, 0.0, -34.5), -2.4],
+		[Vector3(-29.2, 0.0, -19.5), -1.5]
+	]:
+		var fp: Vector3 = fl[0]
+		ysm.box("concrete", fp + Vector3(0, 0.16, 0), Vector3(0.68, 0.32, 0.68), {"col": true})
+		ysm.cyl("safety_yellow", fp + Vector3(0, 0.32, 0), 0.09, 0.07, 4.10, 8)
+		ysm.box("iron_dark", fp + Vector3(0, 4.46, 0), Vector3(0.72, 0.30, 0.24), {"rot": float(fl[1])})
+		ysm.box("lamp_glow", fp + Vector3(0, 4.42, 0), Vector3(0.58, 0.20, 0.28), {"rot": float(fl[1])})
+		_add_omni(yard, fp + Vector3(0, 4.2, 0), Color(1.0, 0.90, 0.68), 0.0, 14.0, "day_night_lamp")
+
+	VillageProps.spawn_mesh_and_collisions(yard, "OGRYardStaticMesh", ysm, "stone")
+
+	# Insegne e luci ambientali della Miniera Alpina (ben staccate e leggibili!)
+	_add_sign(yard, "★ MINIERA ALPINA · VAL DI SUSA ★", Vector3(-46.0, 4.42, -36.91), 0.0, 22, Color(1.0, 0.90, 0.45))
+	_add_sign(yard, "GALLERIA ESTRATTIVA 01", Vector3(-46.0, 3.08, -37.60), 0.0, 18, Color(1.0, 0.94, 0.62))
+	_add_sign(yard, "RAFFINERIA & FRANTOIO", ref_p + Vector3(0.35, 2.26, 0.78), 0.0, 16, Color(0.45, 0.95, 1.0))
+	_add_sign(yard, "UFFICIO GEOLOGICO", Vector3(-56.5, 3.25, -13.0), 0.35, 14, Color(0.85, 0.96, 1.0))
+	_add_omni(yard, Vector3(-46.0, 2.30, -38.1), Color(1.0, 0.78, 0.42), 1.35, 9.5)
+	_add_omni(yard, ref_p + Vector3(0.35, 0.90, 1.45), Color(1.0, 0.62, 0.24), 1.05, 7.5)
+
+	# Capocava Ing. Dario Ferrero (camicia celeste, jeans, gilet ad alta visibilità arancio e caschetto giallo)
+	_spawn_npc(yard, "FerreroNPC", Vector3(-51.5, 0.04, -12.8), 0.45, TECH_OPS_SCRIPT, {
+		"shirt": "shirt_sky", "pants": "denim", "shoes": "shoe_black",
+		"skin": "skin_warm", "hair": "hair_salt", "iris": "iris_brown",
+		"vest": "vest_safety", "hat": "hardhat", "glasses": true
+	}, "Ing. Dario Ferrero\n[E] Capo Cava Miniera Alpina", Color(1.0, 0.84, 0.40), {
 		"station_type": "npc_ferrero",
-		"station_title": "Ing. Dario Ferrero (Polo Materiali OGR)"
+		"station_title": "Ing. Dario Ferrero (Miniera Alpina)"
 	})
 
-	# 3 Nodi di Estrazione Interattivi
-	var extraction_defs := [
-		{"name": "ExtractionNode_Copper", "id": "node_copper", "title": "Banco Rame & Circuiti", "pos": Vector3(89.2, 0.0, 12.2), "mat": "orange_accent"},
-		{"name": "ExtractionNode_Silicon", "id": "node_silicon", "title": "Cristalli Silicio & Alluminio", "pos": Vector3(91.8, 0.0, 12.2), "mat": "cyan_accent"},
-		{"name": "ExtractionNode_Alloy", "id": "node_alloy", "title": "Selettore Terre Rare & Compositi", "pos": Vector3(94.4, 0.0, 12.2), "mat": "purple_accent"}
+	# Nodi animati per MineOpsAnimator:
+	# a) Carrello minerario animato su rotaia
+	var cart := Node3D.new()
+	cart.name = "MineCart"
+	cart.position = Vector3(-46.0, 0.0, -33.0)
+	var cart_sm := StyleMesh.new()
+	VillageProps.add_minecart_body(cart_sm, "ore_copper")
+	var cart_mi := MeshInstance3D.new()
+	cart_mi.name = "Body"
+	cart_mi.mesh = cart_sm.to_mesh(Callable(VillageMaterials, "mat"))
+	cart_mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	cart.add_child(cart_mi)
+	var mc_wheel_mesh := VillageProps.add_minecart_wheel_mesh()
+	var mc_offsets: Array[Vector3] = [
+		Vector3(-0.43, 0.15, -0.45),
+		Vector3(0.43, 0.15, -0.45),
+		Vector3(-0.43, 0.15, 0.45),
+		Vector3(0.43, 0.15, 0.45)
 	]
+	for wi in range(mc_offsets.size()):
+		var wmi := MeshInstance3D.new()
+		wmi.name = "Wheel_%d" % wi
+		wmi.mesh = mc_wheel_mesh
+		wmi.position = mc_offsets[wi]
+		wmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+		cart.add_child(wmi)
+	yard.add_child(cart)
+
+	# b) Sbraccio rotante Gru di Cava
+	var crane_root := Node3D.new()
+	crane_root.name = "QuarryCrane"
+	crane_root.position = Vector3(-53.5, 0.0, -32.5)
+	var jib_pivot := Node3D.new()
+	jib_pivot.name = "JibPivot"
+	jib_pivot.position = Vector3(0.0, 6.10, 0.0)
+	var jib_mi := MeshInstance3D.new()
+	jib_mi.name = "JibMesh"
+	jib_mi.mesh = VillageProps.add_quarry_crane_jib_mesh()
+	jib_mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	jib_pivot.add_child(jib_mi)
+	crane_root.add_child(jib_pivot)
+	yard.add_child(crane_root)
+
+	# c) 3 Nodi di Estrazione Interattivi con cristallo fluttuante YieldIcon + scintille MiningSparks
 	for ed in extraction_defs:
 		var sb := _spawn_tech_ops_interactable(yard, ed["name"], ed["pos"] + Vector3(0, 0.9, 0), {
 			"station_type": "extraction_node",
 			"node_id": ed["id"],
 			"station_title": ed["title"]
-		}, Vector3(1.65, 1.8, 1.45), true)
+		}, Vector3(2.4, 1.9, 2.2), true)
 		var y_icon := Node3D.new()
 		y_icon.name = "YieldIcon"
-		y_icon.position = Vector3(0, 0.52, 0)
+		y_icon.position = Vector3(0, 0.56, 0)
 		var ism := StyleMesh.new()
-		ism.ellipsoid(ed["mat"], Vector3.ZERO, Vector3(0.24, 0.30, 0.24), 7, 10)
+		ism.ellipsoid(ed["ore"], Vector3.ZERO, Vector3(0.24, 0.30, 0.24), 7, 10)
 		var imi := MeshInstance3D.new()
 		imi.mesh = ism.to_mesh(Callable(VillageMaterials, "mat"))
 		y_icon.add_child(imi)
 		sb.add_child(y_icon)
 		sb.set("visual_root_path", NodePath("YieldIcon"))
+		VillageProps.add_spark_particles(sb, "MiningSparks", Vector3(0, 0.25, 0), ed["spark"], true)
 
-	# Raffineria Interattiva
+	# d) Stazione Raffineria Interattiva + sotto-albero animato RefineryAnim
 	_spawn_tech_ops_interactable(yard, "ProcessingStation_OGR", ref_p + Vector3(0, 0.9, 0), {
 		"station_type": "processing_station",
-		"station_title": "Raffineria & Smistamento OGR"
-	}, Vector3(1.75, 1.8, 1.45), true)
+		"station_title": "Raffineria & Frantoio Miniera Alpina"
+	}, Vector3(3.8, 2.1, 2.8), true)
 
-	# Mining Robot Pads (MK1 & MK2)
+	var ref_anim := Node3D.new()
+	ref_anim.name = "RefineryAnim"
+	ref_anim.position = ref_p
+	var crusher := Node3D.new()
+	crusher.name = "CrusherWheel"
+	crusher.position = Vector3(-1.45, 1.05, 0.85)
+	var cr_sm := StyleMesh.new()
+	cr_sm.cyl("safety_yellow", Vector3(0, -0.05, 0), 0.44, 0.44, 0.10, 14)
+	cr_sm.cyl("iron_dark", Vector3(0, -0.06, 0), 0.28, 0.28, 0.12, 12)
+	cr_sm.box("metal", Vector3(0, 0, 0), Vector3(0.84, 0.13, 0.10))
+	cr_sm.box("metal", Vector3(0, 0, 0), Vector3(0.10, 0.13, 0.84))
+	for s_key in cr_sm._surf:
+		var sd: Dictionary = cr_sm._surf[s_key]
+		var va: PackedVector3Array = sd["v"]
+		var na: PackedVector3Array = sd["n"]
+		for vi in range(va.size()):
+			va[vi] = va[vi].rotated(Vector3.RIGHT, PI * 0.5)
+			na[vi] = na[vi].rotated(Vector3.RIGHT, PI * 0.5)
+	var cr_mi := MeshInstance3D.new()
+	cr_mi.mesh = cr_sm.to_mesh(Callable(VillageMaterials, "mat"))
+	cr_mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	crusher.add_child(cr_mi)
+	ref_anim.add_child(crusher)
+
+	var furnace := MeshInstance3D.new()
+	furnace.name = "FurnaceCore"
+	furnace.position = Vector3(0.35, 0.62, 0.865)
+	var f_box := BoxMesh.new()
+	f_box.size = Vector3(0.58, 0.44, 0.04)
+	var f_mat := VillageMaterials.mat("furnace_core").duplicate()
+	f_box.material = f_mat
+	furnace.mesh = f_box
+	ref_anim.add_child(furnace)
+
+	VillageProps.add_oven_smoke_particles(ref_anim, Vector3(0.78, 4.02, -0.35))
+	yard.add_child(ref_anim)
+
+	# e) Mining Robot Pads (MK1 X=-51.0, MK2 X=-44.0, Z=-21.5) con cingoli a filo suolo, BoomArm, DrillHead & DrillSparks
 	for idx in [1, 2]:
-		var rx := 92.0 if idx == 1 else 94.4
-		var pad_sb := _spawn_tech_ops_interactable(yard, "MiningRobotPad_%d" % idx, Vector3(rx, 0.9, 8.4), {
+		var rx := -51.0 if idx == 1 else -44.0
+		var pad_sb := _spawn_tech_ops_interactable(yard, "MiningRobotPad_%d" % idx, Vector3(rx, 0.9, -21.5), {
 			"station_type": "robot_pad",
 			"robot_slot": idx,
 			"station_title": "Mining Robot MK%d" % idx
-		}, Vector3(1.6, 1.8, 1.6), true)
-		# GhostRoot (visibile prima del montaggio)
+		}, Vector3(1.9, 1.9, 1.9), true)
 		var ghost := Node3D.new()
 		ghost.name = "GhostRoot"
 		var gsm := StyleMesh.new()
-		gsm.cyl("ghost_pad", Vector3(0, -0.55, 0), 0.45, 0.48, 0.35, 12)
-		gsm.box("ghost_ready", Vector3(0, -0.15, 0), Vector3(0.68, 0.55, 0.68))
+		gsm.cyl("ghost_pad", Vector3(0, -0.58, 0), 0.52, 0.56, 0.22, 12)
+		gsm.box("ghost_ready", Vector3(0, -0.15, 0), Vector3(0.76, 0.60, 0.76))
 		var gmi := MeshInstance3D.new()
 		gmi.mesh = gsm.to_mesh(Callable(VillageMaterials, "mat"))
 		ghost.add_child(gmi)
 		pad_sb.add_child(ghost)
 		pad_sb.set("ghost_root_path", NodePath("GhostRoot"))
 
-		# VisualRoot (il vero Robot 3D autonomo con testa rotante DrillHead)
 		var vroot := Node3D.new()
 		vroot.name = "VisualRoot"
 		var rsm := StyleMesh.new()
 		var body_mat := "orange_accent" if idx == 1 else "cyan_accent"
-		rsm.cyl("iron_dark", Vector3(0, -0.60, 0), 0.50, 0.54, 0.28, 12)
-		rsm.box(body_mat, Vector3(0, -0.22, 0), Vector3(0.76, 0.52, 0.76))
-		rsm.box("server_body", Vector3(0, 0.14, 0), Vector3(0.56, 0.24, 0.56))
-		if idx == 2:
-			# Nastro trasportatore / ponte collegamento verso la raffineria
-			rsm.box("iron_dark", Vector3(-2.6, -0.52, 0.0), Vector3(4.6, 0.12, 0.42))
+		# Cingoli ben appoggiati sul plinto (-0.60 - 0.12 = -0.72 -> Y=0.18!) & torretta
+		rsm.box("iron_dark", Vector3(-0.40, -0.60, 0.0), Vector3(0.22, 0.24, 1.05))
+		rsm.box("iron_dark", Vector3(0.40, -0.60, 0.0), Vector3(0.22, 0.24, 1.05))
+		rsm.cyl("iron_dark", Vector3(0, -0.52, 0), 0.42, 0.46, 0.18, 12)
+		rsm.box(body_mat, Vector3(0, -0.16, 0), Vector3(0.84, 0.52, 0.84))
+		rsm.box("server_body", Vector3(0, 0.24, -0.05), Vector3(0.58, 0.28, 0.58))
 		var rmi := MeshInstance3D.new()
 		rmi.mesh = rsm.to_mesh(Callable(VillageMaterials, "mat"))
 		vroot.add_child(rmi)
 
+		var boom := Node3D.new()
+		boom.name = "BoomArm"
+		boom.position = Vector3(0, 0.08, 0.28)
+		var b_arm_sm := StyleMesh.new()
+		b_arm_sm.box("safety_yellow", Vector3(0, 0.10, 0.30), Vector3(0.16, 0.16, 0.65))
+		b_arm_sm.box("rail_steel", Vector3(0, 0.02, 0.64), Vector3(0.22, 0.28, 0.22))
+		var bmi_arm := MeshInstance3D.new()
+		bmi_arm.mesh = b_arm_sm.to_mesh(Callable(VillageMaterials, "mat"))
+		boom.add_child(bmi_arm)
+		vroot.add_child(boom)
+
 		var drill := Node3D.new()
 		drill.name = "DrillHead"
-		drill.position = Vector3(0, 0.38, 0)
+		drill.position = Vector3(0, 0.56, 0)
 		var dsm := StyleMesh.new()
-		dsm.box("metal", Vector3(0, 0.06, 0), Vector3(0.65, 0.10, 0.18))
-		dsm.cyl("safety_yellow", Vector3(-0.26, 0.16, 0), 0.08, 0.12, 0.22, 8)
-		dsm.cyl("cyan_accent", Vector3(0.26, 0.16, 0), 0.08, 0.12, 0.22, 8)
+		dsm.box("metal", Vector3(0, 0.05, 0), Vector3(0.72, 0.10, 0.18))
+		dsm.cyl("safety_yellow", Vector3(-0.30, 0.15, 0), 0.08, 0.12, 0.22, 8)
+		dsm.cyl("cyan_accent", Vector3(0.30, 0.15, 0), 0.08, 0.12, 0.22, 8)
 		var dmi := MeshInstance3D.new()
 		dmi.mesh = dsm.to_mesh(Callable(VillageMaterials, "mat"))
 		drill.add_child(dmi)
 		vroot.add_child(drill)
+
+		VillageProps.add_spark_particles(vroot, "DrillSparks", Vector3(0, 0.22, 0.42), Color(0.45, 0.95, 1.0), false)
 		vroot.visible = false
 		pad_sb.add_child(vroot)
 		pad_sb.set("visual_root_path", NodePath("VisualRoot"))
+
+	# f) Nastro Trasportatore Automatico (ConveyorBeltRoot + blocchi animati ConveyorOre_0..4)
+	var conv_root := Node3D.new()
+	conv_root.name = "ConveyorBeltRoot"
+	conv_root.visible = false
+	var csm := StyleMesh.new()
+	VillageProps.add_conveyor_structure(csm, Vector3(-51.0, 0.0, -19.2), Vector3(-44.0, 0.0, -19.2))
+	VillageProps.add_conveyor_structure(csm, Vector3(-44.0, 0.0, -19.2), Vector3(-36.2, 0.0, -17.6))
+	VillageProps.spawn_mesh_and_collisions(conv_root, "ConveyorFrameMesh", csm, "metal")
+	var ore_mats := ["ore_copper", "ore_silicon", "ore_rare", "ore_copper", "quarry_rock"]
+	for oi in range(5):
+		var ore_sm := StyleMesh.new()
+		ore_sm.blob(ore_mats[oi], Vector3.ZERO, Vector3(0.18, 0.14, 0.16), 4, 6, 0.25, 40 + oi * 7)
+		var ore_mi := MeshInstance3D.new()
+		ore_mi.name = "ConveyorOre_%d" % oi
+		ore_mi.mesh = ore_sm.to_mesh(Callable(VillageMaterials, "mat"))
+		ore_mi.position = Vector3(-51.0, 0.69, -19.2)
+		conv_root.add_child(ore_mi)
+	yard.add_child(conv_root)
+
+	# Attacca MineOpsAnimator solo dopo che tutti i sotto-nodi sono stati creati, poi aggiunge alla scena!
+	yard.set_script(MINE_OPS_ANIM_SCRIPT)
+	street.add_child(yard)
 
 	# 2. LAB DRONI TORINO (Borgo Po: X=21..27, Z=52..53.5)
 	var drone_ops := Node3D.new()
@@ -1274,7 +1489,9 @@ static func _build_post_ogr_and_city_life(street: Node3D) -> void:
 	_add_sign(drone_ops, "BANCO ASSEMBLAGGIO TO-DRONE MK1", bench_pos + Vector3(0, 1.82, -0.45), 0.0, 15, Color(0.45, 0.95, 1.0))
 
 	_spawn_npc(drone_ops, "ChiaraNPC", Vector3(21.2, 0.04, 52.0), 0.0, TECH_OPS_SCRIPT, {
-		"shirt": "cyan_accent", "pants": "npc_pants_dark", "hair": "hair_brown", "glasses": true
+		"female": true, "shirt": "shirt_sky", "pants": "pants_charcoal", "shoes": "shoe_black",
+		"hair": "hair_brown", "iris": "iris_green", "hair_style": "bob",
+		"vest": "vest_charcoal", "glasses": true
 	}, "Dr.ssa Chiara Conti\n[E] Lab Droni & Avionica", Color(0.45, 0.95, 1.0), {
 		"station_type": "npc_chiara",
 		"station_title": "Dr.ssa Chiara Conti (Lab Droni Torino)"
@@ -1324,7 +1541,7 @@ static func _build_post_ogr_and_city_life(street: Node3D) -> void:
 		"station_title": "Terminale Direzionale Incubatore Startup"
 	}, Vector3(1.5, 1.8, 1.5), true)
 
-	# 4. MOBILITÀ URBANA (Bici Tech, Auto EV, 4 Fermate GTT Bus)
+	# 4. MOBILITÀ URBANA (Bici Tech, Auto EV, 5 Fermate GTT Bus incl. Miniera Alpina)
 	var mob_holder := Node3D.new()
 	mob_holder.name = "UrbanMobilityWorld"
 	street.add_child(mob_holder)
@@ -1375,19 +1592,21 @@ static func _build_post_ogr_and_city_life(street: Node3D) -> void:
 	ev_sb.set("visual_root_path", NodePath("VisualRoot"))
 	_add_sign(mob_holder, "⚡ AUTO ELETTRICA STARTUP", ev_pos + Vector3(0, 2.05, 0), 0.0, 15, Color(0.45, 0.95, 1.0))
 
-	# 4c. 4 Fermate GTT Bus (Fast Travel Urbano)
+	# 4c. 5 Fermate GTT Bus (Fast Travel Urbano incl. Miniera Alpina)
 	var bus_stops := [
 		{"name": "BusStop_SanCarlo", "id": "bus_sancarlo", "title": "Fermata GTT — Piazza San Carlo", "pos": Vector3(10.8, 0.0, 14.5), "rot": PI},
 		{"name": "BusStop_Valdocco", "id": "bus_valdocco", "title": "Fermata GTT — Borgo Valdocco", "pos": Vector3(38.0, 0.0, 24.3), "rot": 0.0},
 		{"name": "BusStop_OGR", "id": "bus_ogr", "title": "Fermata GTT — OGR & Mercato Est", "pos": Vector3(82.5, 0.0, 14.5), "rot": PI},
-		{"name": "BusStop_BorgoPo", "id": "bus_borgopo", "title": "Fermata GTT — Lungo Po & Incubatore", "pos": Vector3(13.5, 0.0, 55.2), "rot": 0.0}
+		{"name": "BusStop_BorgoPo", "id": "bus_borgopo", "title": "Fermata GTT — Lungo Po & Incubatore", "pos": Vector3(13.5, 0.0, 55.2), "rot": 0.0},
+		{"name": "BusStop_Miniera", "id": "bus_miniera", "title": "Fermata GTT — Miniera Alpina", "pos": Vector3(-45.2, 0.0, 6.2), "rot": PI * 0.5}
 	]
 	var bus_sm := StyleMesh.new()
 	for bs in bus_stops:
 		var bp: Vector3 = bs["pos"]
-		bus_sm.cyl("iron_dark", bp + Vector3(0, 1.25, 0), 0.06, 0.06, 2.50, 8)
-		bus_sm.box("safety_yellow", bp + Vector3(0, 2.25, 0), Vector3(0.68, 0.42, 0.08))
-		bus_sm.box("cyan_accent", bp + Vector3(0, 1.82, 0), Vector3(0.56, 0.28, 0.06))
+		bus_sm.box("concrete", bp + Vector3(0, 0.05, 0), Vector3(0.58, 0.10, 0.58), {"col": true})
+		bus_sm.cyl("iron_dark", bp + Vector3(0, 0.10, 0), 0.08, 0.07, 2.45, 8)
+		bus_sm.box("safety_yellow", bp + Vector3(0, 2.25, 0), Vector3(0.72, 0.44, 0.09))
+		bus_sm.box("cyan_accent", bp + Vector3(0, 1.82, 0), Vector3(0.58, 0.30, 0.07))
 		_add_sign(mob_holder, "🚌 GTT BUS\n" + str(bs["title"]).replace("Fermata GTT — ", ""), bp + Vector3(0, 2.68, 0), float(bs["rot"]), 14, Color(1.0, 0.90, 0.35))
 		_spawn_tech_ops_interactable(mob_holder, bs["name"], bp + Vector3(0, 1.0, 0), {
 			"station_type": "bus_stop",
@@ -1411,7 +1630,7 @@ static func _build_post_ogr_and_city_life(street: Node3D) -> void:
 	# Fioriere sabaude in Borgo San Carlo e Lungo Po (lontane dai corridoi raycast)
 	for fp in [Vector3(-6.2, 0.0, 14.5), Vector3(6.2, 0.0, 14.5), Vector3(-6.2, 0.0, 55.2), Vector3(32.0, 0.0, 55.2)]:
 		scenic.box("stone_trim", fp + Vector3(0, 0.26, 0), Vector3(1.15, 0.52, 0.65), {"col": true, "surface": "stone"})
-		scenic.box("grass_Rich", fp + Vector3(0, 0.54, 0), Vector3(1.02, 0.08, 0.52))
+		scenic.box("grass", fp + Vector3(0, 0.54, 0), Vector3(1.02, 0.08, 0.52))
 		scenic.ellipsoid("flower_red", fp + Vector3(-0.25, 0.65, 0), Vector3(0.18, 0.16, 0.18), 6, 8)
 		scenic.ellipsoid("flower_yellow", fp + Vector3(0.25, 0.65, 0), Vector3(0.18, 0.16, 0.18), 6, 8)
 	VillageProps.spawn_mesh_and_collisions(street, "BorgoAndRiverEnhancements", scenic, "stone")
@@ -1455,24 +1674,44 @@ static func _spawn_tech_ops_interactable(parent: Node3D, node_name: String, pos:
 
 static func _build_segmented_drone_visual() -> Node3D:
 	var root := Node3D.new()
-	# Part1: Telaio X in carbonio/alluminio
+	# Part1: Telaio X in carbonio/alluminio (usa "rot" su StyleMesh.box!)
 	var p1 := MeshInstance3D.new()
 	p1.name = "Part1"
 	var sm1 := StyleMesh.new()
-	sm1.box("iron_dark", Vector3(0, 0.04, 0), Vector3(0.85, 0.04, 0.12), {"rot_y": PI * 0.25})
-	sm1.box("iron_dark", Vector3(0, 0.04, 0), Vector3(0.85, 0.04, 0.12), {"rot_y": -PI * 0.25})
+	sm1.box("iron_dark", Vector3(0, 0.04, 0), Vector3(0.88, 0.04, 0.12), {"rot": PI * 0.25})
+	sm1.box("iron_dark", Vector3(0, 0.04, 0), Vector3(0.88, 0.04, 0.12), {"rot": -PI * 0.25})
 	p1.mesh = sm1.to_mesh(Callable(VillageMaterials, "mat"))
 	p1.visible = false
 	root.add_child(p1)
 
-	# Part2: 4 Motori Brushless + Eliche
-	var p2 := MeshInstance3D.new()
+	# Part2: 4 Motori Brushless + 4 Eliche rotanti indipendenti (Rotor_0..3)
+	var p2 := Node3D.new()
 	p2.name = "Part2"
-	var sm2 := StyleMesh.new()
-	for arm in [Vector3(-0.28, 0.08, -0.28), Vector3(0.28, 0.08, -0.28), Vector3(-0.28, 0.08, 0.28), Vector3(0.28, 0.08, 0.28)]:
-		sm2.cyl("metal", arm, 0.06, 0.06, 0.08, 10)
-		sm2.box("cyan_accent", arm + Vector3(0, 0.05, 0), Vector3(0.28, 0.015, 0.04))
-	p2.mesh = sm2.to_mesh(Callable(VillageMaterials, "mat"))
+	var stat_sm := StyleMesh.new()
+	var arm_coords := [
+		Vector3(-0.28, 0.08, -0.28),
+		Vector3(0.28, 0.08, -0.28),
+		Vector3(-0.28, 0.08, 0.28),
+		Vector3(0.28, 0.08, 0.28)
+	]
+	for arm in arm_coords:
+		stat_sm.cyl("metal", arm, 0.06, 0.06, 0.08, 10)
+	var stat_mi := MeshInstance3D.new()
+	stat_mi.name = "Stators"
+	stat_mi.mesh = stat_sm.to_mesh(Callable(VillageMaterials, "mat"))
+	p2.add_child(stat_mi)
+
+	var blade_sm := StyleMesh.new()
+	blade_sm.box("cyan_accent", Vector3.ZERO, Vector3(0.30, 0.015, 0.045))
+	blade_sm.box("safety_yellow", Vector3.ZERO, Vector3(0.045, 0.016, 0.30))
+	var blade_mesh := blade_sm.to_mesh(Callable(VillageMaterials, "mat"))
+	for ri in range(arm_coords.size()):
+		var rot_n := MeshInstance3D.new()
+		rot_n.name = "Rotor_%d" % ri
+		rot_n.mesh = blade_mesh
+		rot_n.position = arm_coords[ri] + Vector3(0, 0.055, 0)
+		rot_n.rotation.y = float(ri) * 0.6
+		p2.add_child(rot_n)
 	p2.visible = false
 	root.add_child(p2)
 
@@ -1480,8 +1719,8 @@ static func _build_segmented_drone_visual() -> Node3D:
 	var p3 := MeshInstance3D.new()
 	p3.name = "Part3"
 	var sm3 := StyleMesh.new()
-	sm3.box("orange_accent", Vector3(0, 0.065, 0), Vector3(0.52, 0.025, 0.06), {"rot_y": PI * 0.25})
-	sm3.box("orange_accent", Vector3(0, 0.065, 0), Vector3(0.52, 0.025, 0.06), {"rot_y": -PI * 0.25})
+	sm3.box("orange_accent", Vector3(0, 0.065, 0), Vector3(0.54, 0.025, 0.06), {"rot": PI * 0.25})
+	sm3.box("orange_accent", Vector3(0, 0.065, 0), Vector3(0.54, 0.025, 0.06), {"rot": -PI * 0.25})
 	p3.mesh = sm3.to_mesh(Callable(VillageMaterials, "mat"))
 	p3.visible = false
 	root.add_child(p3)

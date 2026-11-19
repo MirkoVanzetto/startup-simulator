@@ -53,24 +53,179 @@ static func build(parent: Node3D, opts: Dictionary = {}) -> Node3D:
 	var is_seated := bool(opts.get("seated", false))
 	var ap := model.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	if ap != null:
+		if ap.has_animation_library(""):
+			var src_lib := ap.get_animation_library("")
+			if src_lib != null:
+				var dup_lib := src_lib.duplicate(true) as AnimationLibrary
+				ap.remove_animation_library("")
+				ap.add_animation_library("", dup_lib)
 		for loop_anim in ["Idle", "Sit_Chair_Idle"]:
 			if ap.has_animation(loop_anim):
 				var anim_res := ap.get_animation(loop_anim)
 				if anim_res != null:
 					anim_res.loop_mode = Animation.LOOP_LINEAR
+		if skel != null and not is_seated:
+			_ensure_walk_animation(ap, skel)
 		var default_anim := "Sit_Chair_Idle" if is_seated else "Idle"
+		ap.set_meta("base_loop_anim", default_anim)
 		if ap.has_animation(default_anim):
 			ap.assigned_animation = default_anim
 			ap.play(default_anim)
 			ap.advance(0.0)
-			if not ap.animation_finished.is_connected(_on_anim_finished.bind(ap, default_anim)):
-				ap.animation_finished.connect(_on_anim_finished.bind(ap, default_anim))
+			var cb := _on_anim_finished.bind(ap, default_anim)
+			if not ap.animation_finished.is_connected(cb):
+				ap.animation_finished.connect(cb)
 
 	return model
 
-static func _on_anim_finished(finished_name: StringName, ap: AnimationPlayer, default_anim: String) -> void:
-	if str(finished_name) != default_anim and is_instance_valid(ap) and ap.has_animation(default_anim):
-		ap.play(default_anim)
+static func play_interact(npc: Node) -> void:
+	if npc == null or not is_instance_valid(npc):
+		return
+	var ap := npc.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	if ap == null:
+		return
+	if ap.has_animation("Interact"):
+		ap.play("Interact")
+	elif ap.has_animation("Cheer"):
+		ap.play("Cheer")
+
+static func _on_anim_finished(finished_name: StringName, ap: AnimationPlayer, fallback_anim: String) -> void:
+	if not is_instance_valid(ap):
+		return
+	var target_anim := str(ap.get_meta("base_loop_anim", fallback_anim))
+	if str(finished_name) != target_anim and ap.has_animation(target_anim):
+		ap.play(target_anim)
+
+static func _ensure_walk_animation(ap: AnimationPlayer, skel: Skeleton3D) -> void:
+	var lib := ap.get_animation_library("")
+	if lib == null:
+		return
+	var anim := Animation.new()
+	anim.length = 0.85
+	anim.loop_mode = Animation.LOOP_LINEAR
+
+	var root_node := ap.get_node_or_null(ap.root_node)
+	var skel_rel := String(root_node.get_path_to(skel)) if root_node != null else "CharacterRoot/Skeleton3D"
+
+	var pelvis_rest := Vector3(0.0, 0.90, 0.0)
+	var pelvis_idx := skel.find_bone("pelvis")
+	if pelvis_idx >= 0:
+		pelvis_rest = skel.get_bone_rest(pelvis_idx).origin
+
+	# Ciclo camminata a 5 keyframe (T=0.85s): appoggio/spinta -> passaggio -> opposto -> passaggio -> chiusura
+	var times: Array[float] = [0.0, 0.2125, 0.425, 0.6375, 0.85]
+	var pelvis_pos := anim.add_track(Animation.TYPE_POSITION_3D)
+	anim.track_set_path(pelvis_pos, "%s:pelvis" % skel_rel)
+	var p_dy: Array[float] = [-0.022, 0.012, -0.022, 0.012, -0.022]
+	for i in range(times.size()):
+		anim.position_track_insert_key(pelvis_pos, times[i], pelvis_rest + Vector3(0.0, p_dy[i], 0.0))
+
+	var bone_eulers: Dictionary = {
+		"pelvis": [
+			Vector3(0.03, -0.05, 0.025),
+			Vector3(0.02, 0.0, -0.02),
+			Vector3(0.03, 0.05, -0.025),
+			Vector3(0.02, 0.0, 0.02),
+			Vector3(0.03, -0.05, 0.025),
+		],
+		"spine_01": [
+			Vector3(0.04, 0.05, 0.0),
+			Vector3(0.03, 0.0, 0.0),
+			Vector3(0.04, -0.05, 0.0),
+			Vector3(0.03, 0.0, 0.0),
+			Vector3(0.04, 0.05, 0.0),
+		],
+		"spine_02": [
+			Vector3(0.03, 0.04, 0.0),
+			Vector3(0.02, 0.0, 0.0),
+			Vector3(0.03, -0.04, 0.0),
+			Vector3(0.02, 0.0, 0.0),
+			Vector3(0.03, 0.04, 0.0),
+		],
+		"thigh_l": [
+			Vector3(-0.46, 0.0, -0.04),
+			Vector3(-0.04, 0.0, -0.04),
+			Vector3(0.42, 0.0, -0.04),
+			Vector3(-0.28, 0.0, -0.04),
+			Vector3(-0.46, 0.0, -0.04),
+		],
+		"thigh_r": [
+			Vector3(0.42, 0.0, 0.04),
+			Vector3(-0.28, 0.0, 0.04),
+			Vector3(-0.46, 0.0, 0.04),
+			Vector3(-0.04, 0.0, 0.04),
+			Vector3(0.42, 0.0, 0.04),
+		],
+		"calf_l": [
+			Vector3(0.08, 0.0, 0.0),
+			Vector3(0.14, 0.0, 0.0),
+			Vector3(0.28, 0.0, 0.0),
+			Vector3(0.62, 0.0, 0.0),
+			Vector3(0.08, 0.0, 0.0),
+		],
+		"calf_r": [
+			Vector3(0.28, 0.0, 0.0),
+			Vector3(0.62, 0.0, 0.0),
+			Vector3(0.08, 0.0, 0.0),
+			Vector3(0.14, 0.0, 0.0),
+			Vector3(0.28, 0.0, 0.0),
+		],
+		"foot_l": [
+			Vector3(-0.14, 0.0, 0.0),
+			Vector3(0.02, 0.0, 0.0),
+			Vector3(0.18, 0.0, 0.0),
+			Vector3(0.04, 0.0, 0.0),
+			Vector3(-0.14, 0.0, 0.0),
+		],
+		"foot_r": [
+			Vector3(0.18, 0.0, 0.0),
+			Vector3(0.04, 0.0, 0.0),
+			Vector3(-0.14, 0.0, 0.0),
+			Vector3(0.02, 0.0, 0.0),
+			Vector3(0.18, 0.0, 0.0),
+		],
+		"upperarm_l": [
+			Vector3(0.32, 0.0, -0.54),
+			Vector3(0.02, 0.0, -0.54),
+			Vector3(-0.34, 0.0, -0.54),
+			Vector3(0.02, 0.0, -0.54),
+			Vector3(0.32, 0.0, -0.54),
+		],
+		"upperarm_r": [
+			Vector3(-0.34, 0.0, 0.54),
+			Vector3(0.02, 0.0, 0.54),
+			Vector3(0.32, 0.0, 0.54),
+			Vector3(0.02, 0.0, 0.54),
+			Vector3(-0.34, 0.0, 0.54),
+		],
+		"lowerarm_l": [
+			Vector3(-0.22, 0.0, 0.0),
+			Vector3(-0.30, 0.0, 0.0),
+			Vector3(-0.46, 0.0, 0.0),
+			Vector3(-0.28, 0.0, 0.0),
+			Vector3(-0.22, 0.0, 0.0),
+		],
+		"lowerarm_r": [
+			Vector3(-0.46, 0.0, 0.0),
+			Vector3(-0.28, 0.0, 0.0),
+			Vector3(-0.22, 0.0, 0.0),
+			Vector3(-0.30, 0.0, 0.0),
+			Vector3(-0.46, 0.0, 0.0),
+		],
+	}
+	for bone_name in bone_eulers:
+		if skel.find_bone(bone_name) < 0:
+			continue
+		var tr := anim.add_track(Animation.TYPE_ROTATION_3D)
+		anim.track_set_path(tr, "%s:%s" % [skel_rel, bone_name])
+		var arr: Array = bone_eulers[bone_name]
+		for i in range(times.size()):
+			var q := Basis.from_euler(arr[i], EULER_ORDER_ZYX).get_rotation_quaternion()
+			anim.rotation_track_insert_key(tr, times[i], q)
+
+	if lib.has_animation(&"Walk"):
+		lib.remove_animation(&"Walk")
+	lib.add_animation(&"Walk", anim)
 
 static func _load_archetype_scene(path: String) -> PackedScene:
 	if not _scene_cache.has(path):

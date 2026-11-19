@@ -322,7 +322,7 @@ func _collect_entries() -> Array[Dictionary]:
 				"item": hw
 			})
 
-	# 2b. Polo Materiali OGR (Rame, Silicio, Alluminio, Circuiti, Terre Rare, Compositi)
+	# 2b. Miniera Alpina Val di Susa (Rame, Silicio, Alluminio, Circuiti, Terre Rare, Compositi)
 	if is_instance_valid(TechOpsManager):
 		for mid in TechOpsManager.MATERIAL_ORDER:
 			var mdef: Dictionary = TechOpsManager.MATERIALS[mid]
@@ -335,9 +335,9 @@ func _collect_entries() -> Array[Dictionary]:
 					"name": "%s %s" % [str(mdef["icon"]), str(mdef["name"])],
 					"qty": w_qty + c_qty,
 					"required": 0,
-					"badge": "RISORSA TECNOLOGICA OGR",
+					"badge": "RISORSA MINIERA ALPINA",
 					"color": Color(1.0, 0.84, 0.36),
-					"subtitle": "In cassa trasporto: x%d · In magazzino OGR: x%d · Valore: € %0.0f / +%d RC" % [
+					"subtitle": "In cassa trasporto: x%d · In magazzino: x%d · Valore: € %0.0f / +%d RC" % [
 						c_qty, w_qty, float(mdef["sell_price"]), int(mdef["rc_value"])
 					],
 					"item": {"desc": str(mdef["desc"])}

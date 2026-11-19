@@ -2,14 +2,14 @@
 
 [![Engine: Godot 4.3](https://img.shields.io/badge/Engine-Godot_4.3-478cbf?logo=godotengine&logoColor=white)](https://godotengine.org)
 [![Platform: Windows Desktop](https://img.shields.io/badge/Platform-Windows_x86__64-0078d7?logo=windows&logoColor=white)](https://github.com/MirkoVanzetto/startup-simulator/tree/main/build)
-[![Version: v1.5.0 Post-OGR Evolution](https://img.shields.io/badge/Version-v1.5.0_Post--OGR_Evolution-success)](https://github.com/MirkoVanzetto/startup-simulator/blob/main/ROADMAP.md)
+[![Version: v1.6.0 Miniera Alpina & Animations](https://img.shields.io/badge/Version-v1.6.0_Miniera_Alpina-success)](https://github.com/MirkoVanzetto/startup-simulator/blob/main/ROADMAP.md)
 
 **Startup Simulator** è un simulatore gestionale in prima persona in 3D ambientato in una versione contemporanea e stilizzata di **Torino, Italia**.  
 Interpreti un neo-laureato in Informatica con 110 e Lode che parte dal proprio garage con **120 €** fino a costruire una vera impresa tecnologica industriale.
 
 ---
 
-## ⬇️ DOWNLOAD PLAYABLE DEMO (WINDOWS .EXE — v1.5.0)
+## ⬇️ DOWNLOAD PLAYABLE DEMO (WINDOWS .EXE — v1.6.0)
 
 Puoi scaricare l'eseguibile giocabile aggiornato direttamente da GitHub ai seguenti link:
 
@@ -25,9 +25,9 @@ Puoi scaricare l'eseguibile giocabile aggiornato direttamente da GitHub ai segue
 
 ## 📸 SCREENSHOT & ANTEPRIMA GRAFICA 3D
 
-| Scena Prologo & Laurea | Studio & Setup Iniziale | Polo Estrazione & Robot OGR | Lab Droni & Incubatore Torino | WebForge IDE & TO-OS 26.4 |
+| Scena Prologo & Laurea | Studio & Setup Iniziale | Miniera Alpina · Val di Susa | Lab Droni & Incubatore Torino | WebForge IDE & TO-OS 26.4 |
 | :---: | :---: | :---: | :---: | :---: |
-| Prologo narrativo interattivo | Scrivania, laptop, letto, frigo e server rack | Banchi materiali, Raffineria e Mining Robot MK1/MK2 | Banco 3D 7 fasi TO-Drone MK1, Piazzola H e Terminale CEO | IDE visuale, Albero R&D 6 rami e gestione azienda |
+| Prologo narrativo interattivo | Scrivania, laptop, letto, frigo e server rack | Galleria 01, carrello su rotaia, Raffineria, Gru & Robot MK1/MK2 | Banco 3D 7 fasi TO-Drone MK1, Piazzola H e Terminale CEO | IDE visuale, Albero R&D 6 rami e gestione azienda |
 
 ---
 
@@ -40,37 +40,33 @@ Puoi scaricare l'eseguibile giocabile aggiornato direttamente da GitHub ai segue
 | **E / Click Sinistro** | Interazione tattile (Laptop, NPC, Estrazione, Robot, Drone, Negozi, Fermate GTT) |
 | **Spazio** | Salto |
 | **Shift Sinistro** | Scatto / Corsa rapida |
-| **TAB** | Zaino, Materiali Tecnologici OGR & Mobilità Urbana |
-| **CAPS LOCK / M** | Mappa Interattiva di Torino (19 POI) & Segnavia GPS 3D |
+| **TAB** | Zaino, Materiali Tecnologici & Mobilità Urbana |
+| **CAPS LOCK / M** | Mappa Interattiva di Torino (20 POI · Tab Miniera) & Segnavia GPS 3D |
 | **B** | Modalità Arredo libero in Studio |
 | **ESC** | Menu di Pausa (Salva, Carica, Opzioni, Riprendi) / Chiudi TO-OS |
 
 ---
 
-## 🚀 NOVITÀ v1.5.0 — EVOLUZIONE POST-OGR, AUTOMAZIONE, DRONI & CEO
+## 🚀 NOVITÀ v1.6.0 — MINIERA ALPINA VAL DI SUSA & ANIMAZIONI TORINO VIVA
 
-1. **Fase 3 Post-OGR — Polo Materiali & Raffineria (`Ing. Andrea Viale` & `Ing. Dario Ferrero`):**
-   - Cortile Sud OGR apribile dopo i primi 4 incarichi principali: estrai fisicamente **Rame, Silicio, Alluminio, Circuiti, Terre Rare e Compositi**, trasportali alla Stazione di Raffinazione e convertili in **🔬 Crediti di Ricerca (RC)**, Stock Magazzino o liquidità immediata (€).
-2. **Albero di Ricerca Tecnologica a 6 Rami (`Conoscenza R&D` su TO-OS):**
-   - Sblocca e potenzia fino al Livello 3 **Estrazione & Raffinazione**, **Automazione & Robotica**, **Hardware & Avionica Droni**, **Software & AI Operativa**, **Networking & Cloud Cluster** e **Sicurezza & AI Predittiva** con impatti cross-sistema su WebForge, Server Rack, NetShield e Team.
-3. **Automazione Fisica 3D — Mining Robot MK1/MK2 & Nastro Trasportatore:**
-   - Assembla fisicamente i Mining Robot sulle piazzole OGR: estraggono risorse nel tempo reale e durante il sonno nel letto dello studio, si usurano e possono essere riparati, potenziati o collegati via Nastro Trasportatore.
-4. **Progetto Fisico 3D — Costruzione & Volo `TO-Drone MK1` (Lab Droni Borgo Po):**
-   - Con la `Dr.ssa Chiara Conti` assembla pezzo per pezzo in **7 fasi fisiche 3D** il quadricottero industriale sulla postazione di laboratorio (Telaio, 4 Motori Brushless, Cablaggi HV, Flight Controller PCB, Batteria LiPo + LiDAR, Firmware e Collaudo sulla Piazzola H) per avviare missioni di volo LiDAR, ispezioni termografiche e logistica aerea automatica.
-5. **Fase 4 CEO — Dipartimenti Aziendali (`Incubatore Startup Torino`) & Imprevisti Dinamici:**
-   - Fonda 3 Dipartimenti direzionali al Terminale CEO dell'Incubatore o su TO-OS, genera rendite quotidiane e gestisci imprevisti dinamici (inceppamenti robot, cali di tensione, attacchi DDoS, escalation clienti, nebbia sul Po).
-6. **Dipendenti Autonomi su Freelance Hub & Torino Viva:**
-   - I collaboratori (`Luca Vianello`, `Sara Bellini`, `Marco Ferri`) accettano e completano autonomamente contratti da Freelance Hub in tempo reale e durante il sonno, e sono potenziabili su 3 abilità (`Velocità`, `Valore`, `Qualità`).
-   - Aggiunti orari apertura/chiusura negozi (`CHIUSO`), commessi reattivi, passanti e auto in movimento (`CityLifeManager`), miglioramento scenari di San Carlo/Lungo Po e trasporti urbani (`A Piedi`, `Bicicletta Tech Elettrica`, `4 Fermate Bus GTT`, `Auto Elettrica TO-EV`).
+1. **Nuova Area Dedicata — Miniera Alpina · Polo Estrattivo Val di Susa (Nord-Ovest oltre Parco Valentino):**
+   - Raggiungibile dall'arco nord di Parco Valentino Ovest e dalla nuova 5ª fermata bus GTT (`BusStop_Miniera`): cava alpina circondata dalle Alpi, **Galleria Estrattiva 01** con carrello minerario animato su rotaie, **3 filoni cristallini** (`Rame`, `Silicio`, `Terre Rare`, ecc.), **Gru di cava rotante**, **Ufficio di cava**, **Raffineria** con ruota frantumatrice e fornace accesa, e `Capocava Ing. Dario Ferrero` (gilet alta visibilità + elmetto).
+2. **Animazioni Complete su Pedoni, NPC, Veicoli, Macchinari & Droni (`v1.6.0`):**
+   - **Pedoni 3D MakeHuman reali**: passo sincronizzato (`"Walk"`/`"Idle"`), contatto a terra (`Y = 0.0`) e rotazione verso il waypoint prima di muoversi (zero effetto slittamento).
+   - **NPC, Veicoli & Macchinari Industriali**: animazioni `"Interact"` su NPC/commercianti, 4 ruote rotanti + curve fluide sui veicoli, animazioni continue `MineOpsAnimator` su `MineCart`, `ConveyorBelt`, `QuarryCrane`, `CrusherWheel`, trapani dei Mining Robot MK1/MK2 con scintille e volo autonomo del `TO-Drone MK1` con 4 rotori indipendenti.
+3. **Albero R&D a 6 Rami, Droni, Fase 4 CEO & Dipendenti Autonomi (`v1.5.0+`):**
+   - Ricerca Tecnologica a 6 rami con `🔬 Crediti di Ricerca (RC)`, assemblaggio fisico 3D in 7 fasi del `TO-Drone MK1` al Lab Droni di Borgo Po, Dipartimenti direzionali all'`Incubatore Startup Torino`, imprevisti dinamici, collaboratori autonomi su Freelance Hub, Mappa Interattiva estesa a **20 POI** (con filtro **Miniera**) e **5 Fermate Bus GTT**.
 
 ---
 
 ## 🛠️ ARCHITETTURA TECNICA & TEST
 
-- **Test Automatizzati:**
-  - `godot --headless scenes/v1_5_post_ogr_runner.tscn` (91/91 test Post-OGR, Droni, Robot, R&D, CEO, Mobilità & UI)
-  - `godot --headless scenes/v1_4_overhaul_runner.tscn` (174/174 test OGR Gate, PBR, Mappa, TO-OS 4-Res & Knowledge)
-  - `godot --headless scenes/v1_2_overhaul_runner.tscn` (163/163 test WebForge 5.0, Parco Valentino, Mercato Nord & UI)
+- **Test Automatizzati (945/945 PASS — 0 FAIL across 7 suites):**
+  - `godot --headless scenes/v1_5_post_ogr_runner.tscn` (106/106 test Post-OGR, Miniera Alpina, Animazioni, Droni, Robot, R&D, CEO & UI)
+  - `godot --headless scenes/v1_4_overhaul_runner.tscn` (179/179 test OGR Gate, PBR, Mappa 20 POI, TO-OS 4-Res & Knowledge)
+  - `godot --headless scenes/v1_2_overhaul_runner.tscn` (167/167 test WebForge 5.0, Parco Valentino, Mercato Nord & UI)
+  - `godot --headless scenes/v1_1_gameplay_runner.tscn` (184/184 test Footsteps, Zaino [TAB], Mappa [CAPS] 20 POI & HUD)
   - `godot --headless scenes/v1_expansion_runner.tscn` (131/131 test Borgo Valdocco & Officina Bellini)
   - `godot --headless scenes/needs_runner.tscn` (72/72 test Needs, Shops & Fame)
+  - `godot --headless scenes/test_runner.tscn` (106/106 Core Foundation & End-to-End tests)
 

@@ -181,13 +181,14 @@ func _build_ui() -> void:
 
 	# Row 2: District Filter Bar (ButtonGroup + FOCUS_NONE so resize/zoom never locks)
 	var filter_row := HBoxContainer.new()
-	filter_row.add_theme_constant_override("separation", 6)
+	filter_row.add_theme_constant_override("separation", 4)
 	root.add_child(filter_row)
 
 	_view_group = ButtonGroup.new()
 	_view_group.allow_unpress = false
 	var views := [
 		["all", "Tutto"],
+		["miniera", "Miniera"],
 		["parco", "Parco"],
 		["sancarlo", "S.Carlo"],
 		["valdocco", "Valdocco"],
@@ -203,7 +204,7 @@ func _build_ui() -> void:
 		vb.focus_mode = Control.FOCUS_NONE
 		vb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		vb.custom_minimum_size = Vector2(0, 24)
-		vb.add_theme_font_size_override("font_size", 11)
+		vb.add_theme_font_size_override("font_size", 10)
 		vb.pressed.connect(func():
 			_set_view(vid)
 			vb.release_focus()

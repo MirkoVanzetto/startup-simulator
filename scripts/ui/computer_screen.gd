@@ -1513,7 +1513,7 @@ func _append_ogr_tech_ops_cards() -> void:
 	mat_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	ov.add_child(mat_lbl)
 
-	var r1_txt := "Da installare nel Cortile Sud OGR"
+	var r1_txt := "Da installare alla Miniera Alpina"
 	if TechOpsManager.is_robot_built(1):
 		var st1 := TechOpsManager.get_robot_state(1)
 		r1_txt = "Attivo Lv.%d (Cond. %d%% · Cassa %d/%d)" % [

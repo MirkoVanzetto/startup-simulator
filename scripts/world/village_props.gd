@@ -456,12 +456,13 @@ static func _merge_rotated_x_cyl(sm: StyleMesh, center: Vector3, radius: float, 
 		for idx in si:
 			s_dst["i"].append(base + idx)
 
-static func add_car(sm: StyleMesh, pos: Vector3, rot: float = 0.0, color_key: String = "car_red") -> void:
+static func add_car_wheel_mesh(tire_key: String = "tire", rim_key: String = "steel", radius: float = 0.30, width: float = 0.22) -> ArrayMesh:
 	var m := StyleMesh.new()
-	var wr := 0.30
-	for wx in [-0.76, 0.76]:
-		for wz in [-1.06, 1.06]:
-			_merge_rotated_x_cyl(m, Vector3(wx, wr, wz), wr, 0.22, 16, "tire", "steel")
+	_merge_rotated_x_cyl(m, Vector3.ZERO, radius, width, 16, tire_key, rim_key)
+	return m.to_mesh(Callable(VillageMaterials, "mat"))
+
+static func add_car_body(sm: StyleMesh, pos: Vector3, rot: float = 0.0, color_key: String = "car_red") -> void:
+	var m := StyleMesh.new()
 	# Scocca scolpita + passaruota + paraurti + cofano inclinato e abitacolo vetrato
 	m.box(color_key, Vector3(0, 0.54, 0), Vector3(1.62, 0.46, 3.40))
 	m.add_collider_box(Vector3(0, 0.66, 0), Vector3(1.62, 1.15, 3.40))
@@ -487,6 +488,15 @@ static func add_car(sm: StyleMesh, pos: Vector3, rot: float = 0.0, color_key: St
 	m.box("iron", Vector3(0, 0.32, -1.72), Vector3(1.62, 0.16, 0.12))
 	m.box("lamp_glow", Vector3(-0.58, 0.56, 1.71), Vector3(0.24, 0.14, 0.04))
 	m.box("lamp_glow", Vector3(0.58, 0.56, 1.71), Vector3(0.24, 0.14, 0.04))
+	_merge_transformed(sm, m, pos, rot)
+
+static func add_car(sm: StyleMesh, pos: Vector3, rot: float = 0.0, color_key: String = "car_red") -> void:
+	var m := StyleMesh.new()
+	var wr := 0.30
+	for wx in [-0.76, 0.76]:
+		for wz in [-1.06, 1.06]:
+			_merge_rotated_x_cyl(m, Vector3(wx, wr, wz), wr, 0.22, 16, "tire", "steel")
+	add_car_body(m, Vector3.ZERO, 0.0, color_key)
 	_merge_transformed(sm, m, pos, rot)
 
 static func add_delivery_van(sm: StyleMesh, pos: Vector3, rot: float = 0.0, color_key: String = "car_cream") -> void:
@@ -1299,14 +1309,6 @@ static func add_drone_lab(sm: StyleMesh, center: Vector3, rot: float = 0.0) -> v
 	m.box("safety_yellow", Vector3(-0.36, 0.056, pad_z), Vector3(0.14, 0.015, 0.92))
 	m.box("safety_yellow", Vector3(0.36, 0.056, pad_z), Vector3(0.14, 0.015, 0.92))
 	m.box("safety_yellow", Vector3(0.0, 0.056, pad_z), Vector3(0.76, 0.015, 0.14))
-	# Quadricottero parcheggiato sulla piazzola H
-	m.box("gaming_black", Vector3(0, 0.24, pad_z), Vector3(0.36, 0.14, 0.28))
-	m.box("cyan_accent", Vector3(0, 0.26, pad_z + 0.15), Vector3(0.14, 0.08, 0.04))
-	for ax in [-0.36, 0.36]:
-		for az in [-0.32, 0.32]:
-			m.capsule_seg("steel", Vector3(0, 0.24, pad_z), Vector3(ax, 0.28, pad_z + az), 0.025, 0.02, 6)
-			m.cyl("safety_yellow", Vector3(ax, 0.30, pad_z + az), 0.16, 0.16, 0.018, 10)
-			m.cyl("iron", Vector3(ax, 0.05, pad_z + az * 0.72), 0.022, 0.018, 0.20, 6)
 	_merge_transformed(sm, m, center, rot)
 
 static func add_riverside_rowboat(sm: StyleMesh, pos: Vector3, rot: float = 0.0) -> void:
@@ -1346,6 +1348,271 @@ static func add_alpine_backdrop(sm: StyleMesh) -> void:
 # ------------------------------------------------------------------ NPC stilizzati unificati (scolpiti)
 static func add_npc_model(parent: Node3D, opts: Dictionary = {}) -> Node3D:
 	return VillageCharacters.build(parent, opts)
+
+# ------------------------------------------------------------------ Miniera Alpina Val di Susa (v1.6)
+static func add_pine_tree(sm: StyleMesh, pos: Vector3, seed_val: int = 1, s: float = 1.0) -> void:
+	var rnd := RandomNumberGenerator.new()
+	rnd.seed = seed_val
+	var h_scale := s * rnd.randf_range(0.92, 1.14)
+	# Tronco slanciato alpino + 4 palchi conici sempreverdi
+	sm.cyl("bark", pos + Vector3(0, -0.05, 0), 0.22 * s, 0.08 * s, 3.8 * h_scale, 8)
+	var tiers := [
+		[1.45, 1.42, 1.35, "leaves_canopy_dark"],
+		[2.35, 1.18, 1.25, "leaves_pine"],
+		[3.15, 0.90, 1.15, "leaves_pine"],
+		[3.88, 0.62, 1.05, "leaves_pine"],
+		[4.55, 0.34, 0.85, "leaves_pine"],
+	]
+	for t in tiers:
+		var ty: float = pos.y + float(t[0]) * h_scale
+		var tr_b: float = float(t[1]) * s
+		var th: float = float(t[2]) * h_scale
+		var tmat: String = str(t[3])
+		if tmat == "leaves_canopy_dark":
+			sm.cyl("leaves_pine", Vector3(pos.x, ty, pos.z), tr_b, tr_b * 0.16, th, 9, {"smooth": false})
+		else:
+			sm.cyl(tmat, Vector3(pos.x, ty, pos.z), tr_b, tr_b * 0.12, th, 9, {"smooth": false})
+	sm.add_collider_cyl(pos + Vector3(0, 1.3 * h_scale, 0), 0.32 * s, 2.6 * h_scale)
+
+static func add_mine_tunnel_portal(sm: StyleMesh, pos: Vector3, rot: float = 0.0) -> void:
+	var m := StyleMesh.new()
+	# Parete buia profonda all'interno della galleria + colliders di blocco oltre la bocca
+	m.box("iron_dark", Vector3(0, 1.45, -2.1), Vector3(3.1, 2.9, 4.2))
+	m.box("quarry_rock", Vector3(0, 3.35, -1.8), Vector3(5.6, 1.4, 4.4), {"col": true})
+	for sx in [-2.05, 2.05]:
+		m.box("quarry_rock", Vector3(sx, 1.75, -1.3), Vector3(1.5, 3.5, 3.6), {"col": true})
+	m.add_collider_box(Vector3(0, 1.45, -2.5), Vector3(2.8, 2.8, 0.8))
+
+	# Armatura pesante in travi di larice (portali lungo la galleria + saette)
+	for tz in [0.25, -0.75, -1.75]:
+		for sx in [-1.28, 1.28]:
+			m.box("mine_timber", Vector3(sx, 1.32, tz), Vector3(0.24, 2.64, 0.24), {"col": true})
+			m.box("mine_timber", Vector3(sx - signf(sx) * 0.28, 2.26, tz), Vector3(0.16, 0.72, 0.18), {"rot": signf(sx) * 0.68})
+		m.box("mine_timber", Vector3(0, 2.70, tz), Vector3(3.26, 0.28, 0.28))
+	m.box("mine_timber", Vector3(0, 2.90, -0.75), Vector3(3.38, 0.14, 2.55))
+
+	# Massi & contrafforti laterali dell'ingresso + lampada industriale da galleria
+	m.blob("quarry_rock", Vector3(-2.35, 0.75, 0.55), Vector3(0.85, 0.78, 0.72), 4, 7, 0.22, 11)
+	m.blob("quarry_rock", Vector3(2.35, 0.75, 0.55), Vector3(0.85, 0.78, 0.72), 4, 7, 0.22, 17)
+	m.blob("quarry_rock", Vector3(0.0, 3.45, 0.25), Vector3(2.6, 0.85, 0.75), 4, 8, 0.25, 23)
+	m.box("iron_dark", Vector3(0, 2.48, 0.44), Vector3(0.42, 0.16, 0.24))
+	m.box("lamp_glow", Vector3(0, 2.42, 0.50), Vector3(0.32, 0.14, 0.12))
+	_merge_transformed(sm, m, pos, rot)
+
+static func add_mine_tracks(sm: StyleMesh, start_pos: Vector3, end_pos: Vector3, tie_step: float = 0.65) -> void:
+	var delta := end_pos - start_pos
+	delta.y = 0.0
+	var length := delta.length()
+	if length < 0.2:
+		return
+	var mid := (start_pos + end_pos) * 0.5
+	var yaw := atan2(delta.x, delta.z)
+	var m := StyleMesh.new()
+	var n_ties := maxi(2, int(floor(length / tie_step)))
+	for i in range(n_ties + 1):
+		var z := -length * 0.5 + (float(i) / float(n_ties)) * length
+		m.box("mine_timber", Vector3(0, 0.025, z), Vector3(1.22, 0.05, 0.14))
+	for rx in [-0.43, 0.43]:
+		m.box("rail_steel", Vector3(rx, 0.075, 0), Vector3(0.06, 0.06, length))
+	_merge_transformed(sm, m, Vector3(mid.x, 0.0, mid.z), yaw)
+
+static func add_minecart_wheel_mesh() -> ArrayMesh:
+	var m := StyleMesh.new()
+	_merge_rotated_x_cyl(m, Vector3.ZERO, 0.15, 0.08, 12, "rail_steel", "iron_dark")
+	return m.to_mesh(Callable(VillageMaterials, "mat"))
+
+static func add_minecart_body(sm: StyleMesh, ore_mat: String = "ore_copper") -> void:
+	# Carrello minerario su rotaia (scartamento 0.86m, ruote Y=0.16)
+	sm.box("iron_dark", Vector3(0, 0.28, 0), Vector3(0.82, 0.12, 1.38))
+	sm.hexa("metal", [
+		Vector3(-0.36, 0.34, -0.62), Vector3(0.36, 0.34, -0.62), Vector3(0.36, 0.34, 0.62), Vector3(-0.36, 0.34, 0.62),
+		Vector3(-0.50, 0.86, -0.74), Vector3(0.50, 0.86, -0.74), Vector3(0.50, 0.86, 0.74), Vector3(-0.50, 0.86, 0.74),
+	])
+	sm.box("safety_yellow", Vector3(0, 0.88, 0.74), Vector3(1.02, 0.06, 0.05))
+	sm.box("safety_yellow", Vector3(0, 0.88, -0.74), Vector3(1.02, 0.06, 0.05))
+	sm.box("iron_dark", Vector3(0, 0.28, 0.73), Vector3(0.24, 0.14, 0.10))
+	sm.box("iron_dark", Vector3(0, 0.28, -0.73), Vector3(0.24, 0.14, 0.10))
+	# Cumulo di minerale grezzo e cristalli dentro il cassone
+	sm.blob("quarry_rock", Vector3(0, 0.86, 0), Vector3(0.42, 0.18, 0.56), 4, 8, 0.20, 7)
+	sm.blob(ore_mat, Vector3(-0.14, 0.98, 0.12), Vector3(0.16, 0.14, 0.16), 4, 6, 0.26, 13)
+	sm.blob("ore_silicon", Vector3(0.16, 0.96, -0.14), Vector3(0.14, 0.16, 0.14), 4, 6, 0.26, 19)
+
+static func add_ore_vein_outcrop(sm: StyleMesh, pos: Vector3, ore_mat: String = "ore_copper", rot: float = 0.0) -> void:
+	var m := StyleMesh.new()
+	# Massiccio roccioso di cava con filoni cristallini incastonati e piccone appoggiato
+	m.blob("quarry_rock", Vector3(0, 0.45, 0), Vector3(1.15, 0.56, 0.95), 5, 9, 0.24, 31)
+	m.blob("quarry_rock", Vector3(-0.58, 0.68, -0.18), Vector3(0.68, 0.66, 0.62), 4, 8, 0.22, 41)
+	m.blob("quarry_rock", Vector3(0.62, 0.34, 0.26), Vector3(0.54, 0.38, 0.48), 4, 7, 0.22, 53)
+	m.add_collider_box(Vector3(0, 0.60, 0), Vector3(2.05, 1.20, 1.65))
+
+	# Cristalli di minerale grezzo emergenti dalla matrice rocciosa
+	var crystals := [
+		[Vector3(-0.32, 0.92, 0.08), 0.14, 0.05, 0.58, Vector3(0.24, 0.2, 0.30)],
+		[Vector3(0.05, 0.96, -0.10), 0.16, 0.04, 0.72, Vector3(-0.18, 0.5, -0.22)],
+		[Vector3(0.36, 0.78, 0.18), 0.13, 0.04, 0.52, Vector3(0.32, -0.3, -0.18)],
+		[Vector3(-0.08, 0.72, 0.42), 0.11, 0.04, 0.44, Vector3(0.45, 0.1, 0.12)],
+	]
+	for cr in crystals:
+		var cp: Vector3 = cr[0]
+		var tilt: Vector3 = cr[4]
+		m.capsule_seg(ore_mat, cp - Vector3(0, 0.18, 0), cp + Vector3(tilt.z * 0.4, float(cr[3]), tilt.x * 0.4), float(cr[1]), float(cr[2]), 6)
+
+	# Cassetta attrezzature + faretto da lavoro giallo accanto al filone
+	m.box("mine_timber", Vector3(-1.12, 0.22, 0.52), Vector3(0.56, 0.40, 0.40), {"col": true})
+	m.box("safety_yellow", Vector3(-1.12, 0.43, 0.52), Vector3(0.58, 0.04, 0.42))
+	m.capsule_seg("wood_mid", Vector3(1.05, 0.04, 0.55), Vector3(0.78, 0.94, 0.28), 0.025, 0.025, 6)
+	m.box("rail_steel", Vector3(0.78, 0.92, 0.28), Vector3(0.42, 0.07, 0.07), {"rot": 0.4})
+	m.cyl("iron_dark", Vector3(1.18, 0.0, -0.45), 0.26, 0.05, 1.32, 6)
+	m.box("safety_yellow", Vector3(1.18, 1.34, -0.45), Vector3(0.26, 0.20, 0.20), {"rot": -0.5})
+	m.box("lamp_glow", Vector3(1.10, 1.34, -0.37), Vector3(0.20, 0.16, 0.05), {"rot": -0.5})
+	_merge_transformed(sm, m, pos, rot)
+
+static func add_ore_refinery_static(sm: StyleMesh, pos: Vector3, rot: float = 0.0) -> void:
+	var m := StyleMesh.new()
+	# Basamento calcestruzzo industriale
+	m.box("concrete", Vector3(0, 0.10, 0), Vector3(3.6, 0.20, 2.5), {"col": true, "surface": "metal"})
+	m.box("safety_yellow", Vector3(0, 0.21, 1.20), Vector3(3.55, 0.03, 0.10))
+	# Tramoggia carico minerale a sinistra
+	m.box("iron_dark", Vector3(-1.05, 0.72, 0), Vector3(1.25, 1.05, 1.45), {"col": true, "surface": "metal"})
+	m.hexa("metal", [
+		Vector3(-1.58, 1.24, -0.62), Vector3(-0.52, 1.24, -0.62), Vector3(-0.52, 1.24, 0.62), Vector3(-1.58, 1.24, 0.62),
+		Vector3(-1.82, 1.88, -0.82), Vector3(-0.28, 1.88, -0.82), Vector3(-0.28, 1.88, 0.82), Vector3(-1.82, 1.88, 0.82),
+	])
+	# Camera di fusione & frantumazione centrale (mattoni refrattari + acciaio)
+	m.box("server_body", Vector3(0.35, 1.02, 0), Vector3(1.55, 1.65, 1.55), {"col": true, "surface": "metal"})
+	m.box("ashlar", Vector3(0.35, 0.62, 0.79), Vector3(0.95, 0.88, 0.06))
+	m.box("iron_dark", Vector3(0.35, 0.62, 0.83), Vector3(0.76, 0.66, 0.05))
+	m.box("orange_accent", Vector3(0.35, 1.86, 0), Vector3(1.62, 0.12, 1.62))
+	# Camino alto fumi industriali sul retro-destra
+	m.cyl("iron_dark", Vector3(0.78, 1.88, -0.35), 0.28, 0.22, 2.35, 12)
+	m.cyl("orange_accent", Vector3(0.78, 3.88, -0.35), 0.24, 0.24, 0.24, 12)
+	# Quadro SCADA & controllo flusso laterale destro
+	m.box("server_body", Vector3(1.42, 0.78, 0.42), Vector3(0.48, 1.15, 0.54), {"col": true})
+	m.box("cyan_accent", Vector3(1.67, 1.04, 0.42), Vector3(0.04, 0.34, 0.38))
+	_merge_transformed(sm, m, pos, rot)
+
+static func add_quarry_crane_base(sm: StyleMesh, pos: Vector3) -> void:
+	sm.box("concrete", pos + Vector3(0, 0.18, 0), Vector3(2.2, 0.36, 2.2), {"col": true, "surface": "stone"})
+	sm.box("safety_yellow", pos + Vector3(0, 0.42, 0), Vector3(1.35, 0.22, 1.35), {"col": true})
+	for cx in [-0.42, 0.42]:
+		for cz in [-0.42, 0.42]:
+			sm.box("safety_yellow", pos + Vector3(cx, 3.25, cz), Vector3(0.14, 5.5, 0.14), {"col": true})
+	for hy in [1.2, 2.4, 3.6, 4.8]:
+		sm.box("safety_yellow", pos + Vector3(0, hy, -0.42), Vector3(0.92, 0.10, 0.08))
+		sm.box("safety_yellow", pos + Vector3(0, hy, 0.42), Vector3(0.92, 0.10, 0.08))
+		sm.box("safety_yellow", pos + Vector3(-0.42, hy, 0), Vector3(0.08, 0.10, 0.92))
+		sm.box("safety_yellow", pos + Vector3(0.42, hy, 0), Vector3(0.08, 0.10, 0.92))
+	sm.cyl("iron_dark", pos + Vector3(0, 5.95, 0), 0.54, 0.54, 0.28, 12)
+
+static func add_quarry_crane_jib_mesh() -> ArrayMesh:
+	var m := StyleMesh.new()
+	# Braccio orizzontale (+Z braccio carico 5.2m, -Z contrappeso 2.1m) + cabina operatore + gancio sospeso
+	m.box("safety_yellow", Vector3(0, 0.22, 1.55), Vector3(0.68, 0.42, 7.2))
+	m.box("safety_yellow", Vector3(0, 0.72, 0.0), Vector3(0.54, 0.95, 0.54))
+	m.capsule_seg("rail_steel", Vector3(0, 1.15, 0.0), Vector3(0, 0.44, 4.95), 0.025, 0.025, 6)
+	m.capsule_seg("rail_steel", Vector3(0, 1.15, 0.0), Vector3(0, 0.44, -1.95), 0.025, 0.025, 6)
+	m.box("concrete", Vector3(0, 0.18, -1.85), Vector3(0.96, 0.72, 1.05))
+	m.box("iron_dark", Vector3(0.55, -0.18, 0.45), Vector3(0.62, 0.88, 0.84))
+	m.box("glass_cool", Vector3(0.55, -0.05, 0.88), Vector3(0.50, 0.48, 0.04))
+	# Carrello e gancio di sollevamento verso il basso
+	m.box("iron_dark", Vector3(0, -0.06, 4.25), Vector3(0.52, 0.18, 0.62))
+	m.cyl("rail_steel", Vector3(0, -2.15, 4.25), 0.022, 0.022, 2.05, 6)
+	m.box("safety_yellow", Vector3(0, -2.26, 4.25), Vector3(0.28, 0.24, 0.22))
+	return m.to_mesh(Callable(VillageMaterials, "mat"))
+
+static func add_conveyor_structure(sm: StyleMesh, start_pos: Vector3, end_pos: Vector3) -> void:
+	var delta := end_pos - start_pos
+	delta.y = 0.0
+	var length := delta.length()
+	if length < 0.2:
+		return
+	var mid := (start_pos + end_pos) * 0.5
+	var yaw := atan2(delta.x, delta.z)
+	var m := StyleMesh.new()
+	m.box("metal", Vector3(0, 0.56, 0), Vector3(0.72, 0.10, length), {"col": true, "surface": "metal"})
+	m.box("iron_dark", Vector3(0, 0.62, 0), Vector3(0.52, 0.03, length - 0.08))
+	m.box("safety_yellow", Vector3(-0.34, 0.68, 0), Vector3(0.05, 0.16, length))
+	m.box("safety_yellow", Vector3(0.34, 0.68, 0), Vector3(0.05, 0.16, length))
+	var legs := maxi(2, int(floor(length / 2.2)) + 1)
+	for li in range(legs):
+		var z := -length * 0.44 + (float(li) / float(maxi(1, legs - 1))) * (length * 0.88)
+		m.box("iron_dark", Vector3(-0.28, 0.28, z), Vector3(0.08, 0.56, 0.08))
+		m.box("iron_dark", Vector3(0.28, 0.28, z), Vector3(0.08, 0.56, 0.08))
+	_merge_transformed(sm, m, Vector3(mid.x, 0.0, mid.z), yaw)
+
+static func add_quarry_cabin(sm: StyleMesh, pos: Vector3, rot: float = 0.0) -> void:
+	var m := StyleMesh.new()
+	# Container ufficio geologico & controllo sicurezza (4.4 x 3.2 m)
+	m.box("concrete", Vector3(0, 0.12, 0), Vector3(4.5, 0.24, 3.3), {"col": true, "surface": "stone"})
+	m.box("corrugated_metal", Vector3(0, 1.54, 0), Vector3(4.2, 2.60, 3.0), {"col": true})
+	m.box("safety_yellow", Vector3(0, 2.74, 0), Vector3(4.28, 0.18, 3.08))
+	m.box("iron_dark", Vector3(0, 2.90, 0), Vector3(4.36, 0.14, 3.16))
+	# Porta d'ingresso + finestre frontali (+Z) + gradino acciaio
+	m.box("iron_dark", Vector3(-1.05, 1.28, 1.52), Vector3(0.98, 2.04, 0.08))
+	m.box("glass_cool", Vector3(-1.05, 1.65, 1.57), Vector3(0.54, 0.62, 0.04))
+	m.box("metal", Vector3(-1.05, 0.16, 1.84), Vector3(1.10, 0.18, 0.62), {"col": true, "surface": "metal"})
+	m.box("iron_dark", Vector3(0.85, 1.55, 1.52), Vector3(1.48, 0.96, 0.08))
+	m.box("glass_studio_day", Vector3(0.85, 1.55, 1.56), Vector3(1.34, 0.82, 0.04))
+	m.box("cyan_accent", Vector3(0.85, 2.26, 1.54), Vector3(1.8, 0.22, 0.04))
+	m.cyl("safety_yellow", Vector3(1.75, 3.12, 1.25), 0.10, 0.10, 0.22, 8)
+	_merge_transformed(sm, m, pos, rot)
+
+static func add_quarry_truck(sm: StyleMesh, pos: Vector3, rot: float = 0.0) -> void:
+	var m := StyleMesh.new()
+	var wr := 0.36
+	for wx in [-0.88, 0.88]:
+		for wz in [-1.25, 1.25]:
+			_merge_rotated_x_cyl(m, Vector3(wx, wr, wz), wr, 0.28, 16, "tire", "safety_yellow")
+	m.box("iron_dark", Vector3(0, 0.44, 0), Vector3(1.74, 0.20, 3.80), {"col": true})
+	# Cabina anteriore (+Z)
+	m.box("car_cream", Vector3(0, 0.96, 1.25), Vector3(1.82, 0.88, 1.28), {"col": true})
+	m.box("car_cream", Vector3(0, 1.62, 1.08), Vector3(1.70, 0.64, 1.02))
+	m.box("glass_exterior", Vector3(0, 1.64, 1.58), Vector3(1.54, 0.52, 0.06))
+	m.box("iron_dark", Vector3(0, 0.72, 1.94), Vector3(1.86, 0.26, 0.14))
+	m.box("lamp_glow", Vector3(-0.62, 0.96, 1.90), Vector3(0.24, 0.16, 0.04))
+	m.box("lamp_glow", Vector3(0.62, 0.96, 1.90), Vector3(0.24, 0.16, 0.04))
+	m.box("safety_yellow", Vector3(0, 1.98, 1.15), Vector3(0.95, 0.10, 0.18))
+	# Cassone ribaltabile posteriore pieno di roccia & rame
+	m.box("safety_yellow", Vector3(0, 1.02, -0.78), Vector3(1.92, 0.92, 2.32), {"col": true})
+	m.blob("quarry_rock", Vector3(0, 1.50, -0.78), Vector3(0.84, 0.28, 0.95), 4, 8, 0.22, 71)
+	m.blob("ore_copper", Vector3(0.28, 1.62, -0.58), Vector3(0.26, 0.20, 0.26), 4, 6, 0.24, 79)
+	_merge_transformed(sm, m, pos, rot)
+
+static func add_spark_particles(parent: Node3D, node_name: String, pos: Vector3, spark_col: Color = Color(1.0, 0.78, 0.25), one_shot: bool = true) -> CPUParticles3D:
+	var p := CPUParticles3D.new()
+	p.name = node_name
+	p.position = pos
+	p.amount = 20 if one_shot else 12
+	p.lifetime = 0.55 if one_shot else 0.45
+	p.one_shot = one_shot
+	p.explosiveness = 0.88 if one_shot else 0.18
+	p.randomness = 0.55
+	p.emitting = not one_shot
+	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
+	p.emission_sphere_radius = 0.16
+	p.direction = Vector3(0.0, 1.0, 0.0)
+	p.spread = 72.0
+	p.gravity = Vector3(0.0, -7.8, 0.0)
+	p.initial_velocity_min = 1.8
+	p.initial_velocity_max = 3.8
+	p.scale_amount_min = 0.5
+	p.scale_amount_max = 1.1
+
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	mat.albedo_color = spark_col
+	mat.emission_enabled = true
+	mat.emission = spark_col
+	mat.emission_energy_multiplier = 2.4
+
+	var qm := QuadMesh.new()
+	qm.size = Vector2(0.075, 0.075)
+	qm.material = mat
+	p.mesh = qm
+	parent.add_child(p)
+	return p
 
 # ------------------------------------------------------------------ Helper transform merge
 static func _merge_transformed(dst: StyleMesh, src: StyleMesh, pos: Vector3, rot: float) -> void:
